@@ -1900,7 +1900,7 @@ const App = () => {
                   바꿀 수 없는 유전적{" "}
                   <span className="text-slate-200">기질(Temperament)</span>을
                   하드웨어로 인정하고, 살아오면서 형성된{" "}
-                  <span className="text-slate-200">성격(Character)</span>라는
+                  <span className="text-slate-200">성격(Character)</span>이라는
                   소프트웨어에 최적화된 긍정심리학의{" "}
                   <span className="text-slate-200">BPS(최고의 미래 자아)</span>
                   라는 값을 입력합니다. 하드웨어 최적화와 소프트웨어
