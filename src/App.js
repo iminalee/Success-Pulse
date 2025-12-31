@@ -2312,43 +2312,43 @@ const App = () => {
         )}
       </div>
 
-      {/* 하단 네비게이션 */}
-      <footer className="space-y-6 max-w-4xl mx-auto w-full relative z-[100] mt-auto shrink-0 px-4 md:px-0 font-sans">
-        <nav className="flex justify-around items-center bg-[#0A0F1E]/95 backdrop-blur-3xl rounded-full py-6 px-4 md:px-10 border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.5)] overflow-x-auto no-scrollbar gap-6 md:gap-12">
+{/* 하단 네비게이션 */}
+      <footer className="space-y-6 max-w-4xl mx-auto w-full relative z-[100] mt-auto shrink-0 px-2 md:px-0 font-sans">
+        <nav className="flex justify-between md:justify-around items-center bg-[#0A0F1E]/95 backdrop-blur-3xl rounded-full py-3 md:py-6 px-3 md:px-10 border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.5)] overflow-x-auto no-scrollbar gap-1 md:gap-12">
           <NavBtn
             active={currentView === "lab"}
             onClick={() => setCurrentView("lab")}
-            icon={<Settings size={24} />}
+            icon={<Settings size={20} className="md:w-6 md:h-6" />}
             label="My Lab"
           />
           <NavBtn
             active={currentView === "contract"}
             onClick={() => setCurrentView("contract")}
-            icon={<PenTool size={24} />}
-            label="Agreement"
+            icon={<PenTool size={20} className="md:w-6 md:h-6" />}
+            label="Contract"
           />
           <NavBtn
             active={currentView === "hub"}
             onClick={() => setCurrentView("hub")}
-            icon={<Home size={28} />}
+            icon={<Home size={24} className="md:w-7 md:h-7" />}
             label="Ledger"
           />
           <NavBtn
             active={currentView === "analysis"}
             onClick={() => setCurrentView("analysis")}
-            icon={<BarChart2 size={24} />}
+            icon={<BarChart2 size={20} className="md:w-6 md:h-6" />}
             label="Stream"
           />
           <NavBtn
             active={currentView === "archive"}
             onClick={() => setCurrentView("archive")}
-            icon={<Trophy size={24} />}
+            icon={<Trophy size={20} className="md:w-6 md:h-6" />}
             label="Milestone"
           />
           <NavBtn
             active={currentView === "philosophy"}
             onClick={() => setCurrentView("philosophy")}
-            icon={<BookOpen size={24} />}
+            icon={<BookOpen size={20} className="md:w-6 md:h-6" />}
             label="Philosophy"
           />
         </nav>
