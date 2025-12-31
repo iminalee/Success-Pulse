@@ -122,14 +122,14 @@ const App = () => {
   const [currency, setCurrency] = useState("₩");
   const [userName, setUserName] = useState("");
   const [targetDate, setTargetDate] = useState("2026-12-31");
-  const [annualIncome, setAnnualIncome] = useState(130000000);
-  const [currentAsset, setCurrentAsset] = useState(130000000);
+  const [annualIncome, setAnnualIncome] = useState(0);
+  const [currentAsset, setCurrentAsset] = useState(0);
   const [ledger, setLedger] = useState([]);
   const [signature, setSignature] = useState("");
   const [signedDate, setSignedDate] = useState(null);
   const [bpsTraits, setBpsTraits] = useState(["", "", "", "", ""]);
 
-  const initialLvAsset = 130000000 / 5;
+  const initialLvAsset = 0 / 5;
   const [visions, setVisions] = useState({
     6: {
       title: "Apex Identity 확립",
