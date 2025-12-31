@@ -716,16 +716,16 @@ const App = () => {
                     onChange={(e) =>
                       updateVision(activeLevel, { emoji: e.target.value })
                     }
-                    className="w-24 bg-slate-900 border border-white/5 rounded-3xl p-4 text-4xl text-center outline-none"
-                    placeholder="🏥"
+                    className="w-20 bg-slate-900 border border-white/5 rounded-3xl p-3 text-3xl text-center outline-none shrink-0"
+      placeholder="🏥"
                   />
                   <input
                     value={visions[activeLevel].title}
                     onChange={(e) =>
                       updateVision(activeLevel, { title: e.target.value })
                     }
-                    className="flex-grow bg-slate-900 border border-white/5 rounded-3xl p-6 text-xl font-black text-white outline-none"
-                    placeholder="Enter Vision Title"
+                    className="flex-1 min-w-0 bg-slate-900 border border-white/5 rounded-3xl p-4 text-lg font-black text-white outline-none"
+      placeholder="Enter Vision Title"
                   />
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
