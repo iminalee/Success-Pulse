@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "dependencies": {
+    "typescript": "latest",
     "@supabase/supabase-js": "^2.39.0",
     "ajv": "^8.12.0",
     "ajv-keywords": "^5.1.0",
