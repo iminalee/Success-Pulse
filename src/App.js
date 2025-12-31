@@ -1691,20 +1691,19 @@ const App = () => {
   
   <div className="space-y-6 md:space-y-10 text-slate-300 leading-[1.8] md:leading-[2.2] text-base md:text-xl font-normal tracking-tight text-center md:text-left px-0 md:px-10">
     <p className="border-l-2 border-amber-500/30 pl-4 md:pl-8 font-sans">
-      Apex BP인 미래의 나,{" "}
+      {" "}
       <span className="text-white font-bold px-1 md:px-2 underline decoration-amber-500/40 italic">
-        BP {userName}
+        Apex BP {userName}
       </span>
       는 현 시점 자아인{" "}
       <span className="text-white font-bold">{userName} ver.0</span>이
-      본질적 자아로 도약할 가능성을 선택하였으며, 양자는 아래와 같이
-      서약한다.
-    </p>
+      본질적 자아로 도약할 가능성을 선택하였다.
+          </p>
             <p className="border-l-2 border-amber-500/30 pl-8 font-sans">
-              {" "}
+              이에 {" "}
               <span className="text-white font-bold">
                 {userName} ver.0
-              </span>가{" "}
+              </span>는{" "}
               <input
                 type="date"
                 value={targetDate}
@@ -1716,24 +1715,24 @@ const App = () => {
                     : "bg-slate-900 text-amber-500 border-white/5 focus:border-amber-500"
                 }`}
               />{" "}
-              까지 Apex BP의 특징을 상징하는 최대 5개의 목표를 달성하면 BP{" "}
-              {userName}는 현재 보유하고 있는 멘탈뱅크 잔액{" "}
+              까지 Apex BP를 이루는 최대 5개의 목표를 달성한다.{" "} 이 댓가로 BP
+              {userName}는 현 멘탈뱅크 잔액{" "}
               <span className="text-white font-black">Mental Bank Balance</span>{" "}
               (
               <span className="text-white border-b border-white/30">
                 {currency}
                 {fNum(mbBalance)}
               </span>
-              )의 <span className="text-amber-500 font-bold">25%</span>에 달하는
+              )의 <span className="text-amber-500 font-bold">25%</span> 
               금액인{" "}
               <span className="text-white font-bold mx-2 bg-white/5 px-3 py-1 rounded-lg">
                 {currency}
                 {fNum(livingAllowance)}
               </span>
-              을 지급하기로 한다.
+              을 지급하되, 
             </p>
             <p className="border-l-2 border-amber-500/30 pl-8 font-sans">
-              단, Apex BP 는 이 금액을 목표달성 활동으로 매시간의 실천 가치를
+              목표달성 활동으로 매시간의 실천 가치를
               증명할 때마다 시간당{" "}
               <span className="text-emerald-400 font-bold px-3 py-1 bg-white/5 rounded-lg border border-white/10">
                 {currency}
@@ -1743,7 +1742,7 @@ const App = () => {
               <span className="text-xs uppercase opacity-60 font-bold tracking-widest">
                 Value Award
               </span>
-              를 지급한다.
+              으로 지급한다.
             </p>
             <p className="border-l-2 border-rose-500/50 pl-8 bg-rose-500/5 py-4 rounded-r-xl font-sans">
               단,{" "}
