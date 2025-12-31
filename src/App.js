@@ -724,7 +724,7 @@ const App = () => {
                     onChange={(e) =>
                       updateVision(activeLevel, { title: e.target.value })
                     }
-                    className="flex-1 min-w-0 bg-slate-900 border border-white/5 rounded-3xl p-4 text-lg font-black text-white outline-none"
+                    className="flex-1 min-w-0 bg-slate-900 border border-white/5 rounded-3xl p-4 text-md font-black text-white outline-none"
       placeholder="Enter Vision Title"
                   />
                 </div>
