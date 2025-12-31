@@ -1669,35 +1669,37 @@ const App = () => {
             </div>
           )}
         </div>
-        <div
-          className={`bg-[#0A0F1E] border-2 rounded-[3.5rem] p-16 relative overflow-hidden shadow-2xl transition-all duration-500 ${
-            isLocked
-              ? "border-emerald-500/30 shadow-[0_0_50px_rgba(16,185,129,0.1)]"
-              : "border-white/10"
-          }`}
-        >
-          <div className="absolute top-0 right-0 p-16 opacity-5 pointer-events-none">
-            <ShieldCheck size={280} className="text-white" />
-          </div>
-          <div className="flex flex-col items-center mb-16 text-center">
-            <h3 className="text-4xl font-light text-white tracking-[0.3em] uppercase border-b border-white/10 pb-8 mb-6 font-serif">
-              存在 的 契約
-            </h3>
-            <p className="text-[10px] text-slate-500 font-bold tracking-[0.6em] uppercase">
-              The Bond of Essential Identity
-            </p>
-          </div>
-          <div className="space-y-10 text-slate-300 leading-[2.2] text-lg md:text-xl font-normal tracking-tight text-center md:text-left px-10">
-            <p className="border-l-2 border-amber-500/30 pl-8 font-sans">
-              Apex BP인 미래의 나,{" "}
-              <span className="text-white font-bold px-2 underline decoration-amber-500/40 italic">
-                BP {userName}
-              </span>
-              는 현 시점 자아인{" "}
-              <span className="text-white font-bold">{userName} ver.0</span>이
-              본질적 자아로 도약할 가능성을 선택하였으며, 양자는 아래와 같이
-              서약한다.
-            </p>
+<div
+  className={`bg-[#0A0F1E] border-2 rounded-[2rem] md:rounded-[3.5rem] p-6 md:p-16 relative overflow-hidden shadow-2xl transition-all duration-500 ${
+    isLocked
+      ? "border-emerald-500/30 shadow-[0_0_50px_rgba(16,185,129,0.1)]"
+      : "border-white/10"
+  }`}
+>
+  <div className="absolute top-0 right-0 p-4 md:p-16 opacity-5 pointer-events-none">
+    <ShieldCheck size={280} className="text-white" />
+  </div>
+  
+  <div className="flex flex-col items-center mb-8 md:mb-16 text-center">
+    <h3 className="text-2xl md:text-4xl font-light text-white tracking-[0.3em] uppercase border-b border-white/10 pb-4 md:pb-8 mb-4 md:mb-6 font-serif">
+      存在 的 契約
+    </h3>
+    <p className="text-[10px] text-slate-500 font-bold tracking-[0.6em] uppercase">
+      The Bond of Essential Identity
+    </p>
+  </div>
+  
+  <div className="space-y-6 md:space-y-10 text-slate-300 leading-[1.8] md:leading-[2.2] text-base md:text-xl font-normal tracking-tight text-center md:text-left px-0 md:px-10">
+    <p className="border-l-2 border-amber-500/30 pl-4 md:pl-8 font-sans">
+      Apex BP인 미래의 나,{" "}
+      <span className="text-white font-bold px-1 md:px-2 underline decoration-amber-500/40 italic">
+        BP {userName}
+      </span>
+      는 현 시점 자아인{" "}
+      <span className="text-white font-bold">{userName} ver.0</span>이
+      본질적 자아로 도약할 가능성을 선택하였으며, 양자는 아래와 같이
+      서약한다.
+    </p>
             <p className="border-l-2 border-amber-500/30 pl-8 font-sans">
               {" "}
               <span className="text-white font-bold">
