@@ -1337,9 +1337,9 @@ const renderHub = () => {
                         className={`absolute font-black text-white tracking-tighter text-center whitespace-nowrap left-1/2 -translate-x-1/2 ${
                           isActive ? "scale-110" : ""
                         } ${
-                          lv === 5 
+                          lv === 5
                             // lv 5(자아실현)일 때: 밑에서 10px(PC는 16px) 위로 띄움 -> 넓은 공간 확보!
-                            ? "bottom-[10px] md:bottom-[16px] text-[10px] md:text-[13px]" 
+                            ? "bottom-[10px] md:bottom-[16px] text-[10px] md:text-[13px]"
                             // 나머지 단계: 정중앙 배치
                             : "top-1/2 -translate-y-1/2 text-[10px] md:text-[13px]"
                         }`}
