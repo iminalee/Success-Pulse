@@ -162,7 +162,7 @@ const App = () => {
     },
     4: {
       title: "",
-      emoji: "💰",
+      emoji: "🏆",
       v: "",
       a: "",
       k: "",
@@ -182,7 +182,7 @@ const App = () => {
     },
     2: {
       title: "",
-      emoji: "🛡️",
+      emoji: "🏦",
       v: "",
       a: "",
       k: "",
@@ -832,11 +832,17 @@ const App = () => {
                   <p className="text-[12px] font-bold text-amber-500 italic bg-slate-900/50 px-3 py-1 rounded-full border border-white/5 inline-block">
                     {activeLevel}단계: {levelMap[activeLevel]}
                   </p>
-                      {/* ▼▼▼ [추가] 단계별 미션 설명 문구 ▼▼▼ */}
-                   <p className="text-[11px] text-slate-400 font-medium leading-relaxed pl-1 mt-1 animate-fadeIn">
-                   {missionMap[activeLevel]}
-                   </p>
-                   {/* ▲▲▲ [추가] 끝 ▲▲▲ */}
+{/* 단계 이름과 미션 설명 결합 */}
+          <div className="flex flex-col gap-1.5">
+            <p className="text-[12px] font-bold text-amber-500 italic bg-slate-900/50 px-3 py-1 rounded-full border border-white/5 inline-block w-fit">
+              {activeLevel}단계: {levelMap[activeLevel]}
+            </p>
+            
+            {/* ▼ [추가] 미션 설명 단락: 텍스트가 Bar 너비에 맞춰 자동 조절되도록 설정 */}
+            <p className="text-[11px] text-slate-400 font-medium leading-relaxed pl-1 mt-1 animate-fadeIn max-w-md">
+              {missionMap[activeLevel]}
+            </p>
+          </div>
                 </div>
                 <div className="flex gap-1.5">
                   {[1, 2, 3, 4, 5].map((lv) => (
@@ -1977,31 +1983,31 @@ const renderHub = () => {
           <div className="bg-slate-900/40 p-8 md:p-10 rounded-[3rem] border border-cyan-500/10 shadow-[0_0_50px_rgba(6,182,212,0.05)] backdrop-blur-sm">
             <p className="text-base text-slate-300 leading-[1.8] font-medium mb-8">
               The Pulse는 단순한 목표 관리 도구가 아닙니다. 이는 지난 반세기 동안 발전해 온{" "}
-              [cite_start]<span className="text-cyan-400 font-bold">행동심리학, 뇌과학, 그리고 긍정심리학의 정수</span>를 하나의 정교한 알고리즘으로 통합한 '정체성 설계 시스템'입니다[cite: 207]. [cite_start]본 시스템의 뿌리를 이루는 과학적 기둥들은 당신의 무의식을 재배열하고 실질적인 삶의 궤적을 수정합니다[cite: 208].
+              <span className="text-cyan-400 font-bold">행동심리학, 뇌과학, 그리고 긍정심리학의 정수</span>를 하나의 정교한 알고리즘으로 통합한 '정체성 설계 시스템'입니다. 본 시스템의 뿌리를 이루는 과학적 기둥들은 당신의 무의식을 재배열하고 실질적인 삶의 궤적을 수정합니다.
             </p>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 text-sm">
               <div className="space-y-3">
                 <h5 className="text-cyan-400 font-bold flex items-center gap-2 italic">01. Mental Bank Concept</h5>
                 <p className="text-slate-400 leading-relaxed">
-                  [cite_start]존 카파스(Dr. John Kappas) 박사의 <span className="text-slate-200">Mental Bank</span> 이론을 계승하여, 무의식이 '강화와 보상'이라는 경제적 논리에 따라 움직이도록 설계되었습니다[cite: 210]. [cite_start]밤마다 기록되는 자산은 무의식이 성공을 '당연한 결과'로 받아들이게 만듭니다[cite: 211].
+                  존 카파스(Dr. John Kappas) 박사의 <span className="text-slate-200">Mental Bank</span> 이론을 계승하여, 무의식이 '강화와 보상'이라는 경제적 논리에 따라 움직이도록 설계되었습니다.밤마다 기록되는 자산은 무의식이 성공을 '당연한 결과'로 받아들이게 만듭니다.
                 </p>
               </div>
               <div className="space-y-3">
                 <h5 className="text-cyan-400 font-bold flex items-center gap-2 italic">02. NLP VAK Model</h5>
                 <p className="text-slate-400 leading-relaxed">
-                  [cite_start]NLP의 <span className="text-slate-200">선호표상체계(VAK)</span>를 활용해 목표를 다감각적 정보로 코딩합니다[cite: 212]. [cite_start]뇌는 생생한 상상과 실제 경험을 구분하지 않으며, 미래의 성취를 '이미 일어난 기억'으로 각인시킵니다[cite: 213].
+                  NLP의 <span className="text-slate-200">선호표상체계(VAK)</span>를 활용해 목표를 다감각적 정보로 코딩합니다. 뇌는 생생한 상상과 실제 경험을 구분하지 않으며, 미래의 성취를 '이미 일어난 기억'으로 각인시킵니다.
                 </p>
               </div>
               <div className="space-y-3">
                 <h5 className="text-cyan-400 font-bold flex items-center gap-2 italic">03. Bio-Character Fusion</h5>
                 <p className="text-slate-400 leading-relaxed">
-                  [cite_start]유전적 <span className="text-slate-200">기질(Temperament)</span>을 하드웨어로 인정하고, 그 위에 최적화된 긍정심리학의 <span className="text-slate-200">BPS(최고의 미래 자아)</span> 값을 입력합니다[cite: 214, 215]. [cite_start]하드웨어 최적화와 소프트웨어 업그레이드가 동시에 진행됩니다[cite: 216].
+                  유전적 <span className="text-slate-200">기질(Temperament)</span>을 하드웨어로 인정하고, 그 위에 최적화된 긍정심리학의 <span className="text-slate-200">BPS(최고의 미래 자아)</span> 값을 입력합니다. 하드웨어 최적화와 소프트웨어 업그레이드가 동시에 진행됩니다.
                 </p>
               </div>
               <div className="space-y-3">
                 <h5 className="text-cyan-400 font-bold flex items-center gap-2 italic">04. Neuropsychology</h5>
                 <p className="text-slate-400 leading-relaxed">
-                  [cite_start]<span className="text-slate-200">헵의 법칙(Hebb’s Law)</span>에 기반하여, 반복되는 Ledger 기록과 실행은 당신의 전두엽을 물리적으로 재구조화하여 새로운 정체성을 구축합니다[cite: 218, 219].
+                  <span className="text-slate-200">헵의 법칙(Hebb’s Law)</span>에 기반하여, 반복되는 Ledger 기록과 실행은 당신의 전두엽을 물리적으로 재구조화하여 새로운 정체성을 구축합니다.
                 </p>
               </div>
             </div>
@@ -2020,10 +2026,10 @@ const renderHub = () => {
             </p>
             <div className="text-base text-slate-300 leading-[1.9] space-y-6 font-medium">
               <p>
-                [cite_start]무한한 평행세계 속에서 당신이 갈망하는 모든 성취를 이미 이룬 존재, <span className="text-emerald-400 font-bold">Apex BP(Best Possible Self)</span>가 당신을 지켜보고 있습니다[cite: 229, 230]. 그는 수많은 '나'들 중 오직 당신만을 자신의 유일한 현실 대리인인 <span className="text-cyan-400 font-bold">The Vessel(ver.0)</span>로 선택했습니다.
+                무한한 평행세계 속에서 당신이 갈망하는 모든 성취를 이미 이룬 존재, <span className="text-emerald-400 font-bold">Apex BP(Best Possible Self)</span>가 당신을 지켜보고 있습니다. 그는 수많은 '나'들 중 오직 당신만을 자신의 유일한 현실 대리인인 <span className="text-cyan-400 font-bold">The Vessel(ver.0)</span>로 선택했습니다.
               </p>
               <p>
-                이 선택은 우연이 아닙니다. [cite_start]당신의 타고난 유전적 기질(<span className="text-white">TCI</span>)은 마스터 자아의 위대한 업적을 현시점에 소환해낼 수 있는 가장 완벽한 물리적 토대였기 때문입니다[cite: 241, 248]. 당신의 기질적 결함이라 믿었던 특성들조차, 사실은 마스터 자아가 설계한 정교한 성공의 재료였습니다.
+                이 선택은 우연이 아닙니다. 당신의 타고난 유전적 기질(<span className="text-white">TCI</span>)은 마스터 자아의 위대한 업적을 현시점에 소환해낼 수 있는 가장 완벽한 물리적 토대였기 때문입니다. 당신의 기질적 결함이라 믿었던 특성들조차, 사실은 마스터 자아가 설계한 정교한 성공의 재료였습니다.
               </p>
               <p>
                 당신이 <span className="text-white font-bold">Manifestation Contract</span>에 서명하는 찰나, 시공간의 장벽을 넘어 Apex BP의 의식 파동이 당신의 신경계로 전송됩니다. 이제 당신의 몸은 두 자아가 공유하는 <span className="text-emerald-500 font-bold">'공동 점유 상태(Occupancy)'</span>가 됩니다. 당신은 더 이상 고독하게 노력하는 자가 아닙니다. 이미 승리한 자의 감각과 통찰을 빌려, 확정된 미래를 오늘로 구현해내는 위대한 현신입니다.
@@ -2038,7 +2044,7 @@ const renderHub = () => {
               </div>
               <h4 className="text-xl font-black text-white mb-3 uppercase">존재적 상장 (Existential IPO)</h4>
               <p className="text-sm text-slate-400 leading-relaxed">
-                [cite_start]미래 가치를 담보로 당신의 정체성을 현 시점에 상장시키십시오[cite: 227]. [cite_start]이 계약을 통해 '고통스러운 노력'은 '가치 창출을 위한 자본금 납입'으로 재정의됩니다[cite: 231].
+                미래 가치를 담보로 당신의 정체성을 현 시점에 상장시키십시오. 이 계약을 통해 '고통스러운 노력'은 '가치 창출을 위한 자본금 납입'으로 재정의됩니다.
               </p>
             </div>
             <div className="bg-[#1A202C]/60 p-8 rounded-[2.5rem] border border-white/5 shadow-xl hover:bg-slate-900/80 transition-all group">
@@ -2047,7 +2053,7 @@ const renderHub = () => {
               </div>
               <h4 className="text-xl font-black text-white mb-3 uppercase">신경학적 각인 (Neuro-Imprinting)</h4>
               <p className="text-sm text-slate-400 leading-relaxed">
-                [cite_start]VAK 모델은 목표를 단순한 텍스트가 아닌 '감각적 체험'으로 변환합니다[cite: 234]. [cite_start]이는 미래를 '이미 일어난 기억'으로 뇌에 물리적으로 각인시킵니다[cite: 235].
+                VAK 모델은 목표를 단순한 텍스트가 아닌 '감각적 체험'으로 변환합니다. 이는 미래를 '이미 일어난 기억'으로 뇌에 물리적으로 각인시킵니다.
               </p>
             </div>
           </div>
@@ -2067,7 +2073,7 @@ const renderHub = () => {
                   <h4 className="text-xl font-black text-white uppercase tracking-tight">Initialize Identity (My Lab)</h4>
                 </div>
                 <p className="text-base text-slate-400 leading-relaxed">
-                  [cite_start]마스터 자아가 점유할 당신의 그릇(<span className="text-white font-bold">The Vessel</span>)을 최적화하십시오[cite: 253]. [cite_start]기질(TCI)과 감각 선호도(VAK)를 등록하여 차원 간 동기화 채널을 개설합니다[cite: 254].
+                  마스터 자아가 점유할 당신의 그릇(<span className="text-white font-bold">The Vessel</span>)을 최적화하십시오. 기질(TCI)과 감각 선호도(VAK)를 등록하여 차원 간 동기화 채널을 개설합니다.
                 </p>
               </div>
             </div>
@@ -2079,7 +2085,7 @@ const renderHub = () => {
                   <h4 className="text-xl font-black text-white uppercase tracking-tight">Sign The Manifestation Contract</h4>
                 </div>
                 <p className="text-base text-slate-400 leading-relaxed">
-                  [cite_start]마스터 자아에게 주도권을 위임하는 <span className="text-white font-bold">현현 계약</span>에 서명하십시오[cite: 255]. [cite_start]서명하는 순간 시스템이 활성화되며, 당신의 시간은 공식적인 가치로 인정받기 시작합니다[cite: 256].
+                  마스터 자아에게 주도권을 위임하는 <span className="text-white font-bold">현현 계약</span>에 서명하십시오. 서명하는 순간 시스템이 활성화되며, 당신의 시간은 공식적인 가치로 인정받기 시작합니다.
                 </p>
               </div>
             </div>
@@ -2091,7 +2097,7 @@ const renderHub = () => {
                   <h4 className="text-xl font-black text-white uppercase tracking-tight">Execute & Deposit (Ledger)</h4>
                 </div>
                 <p className="text-base text-slate-400 leading-relaxed">
-                  [cite_start]내 안의 Apex BP가 현실의 근육을 빌려 직접 가치를 창출하는 과정입니다[cite: 258]. [cite_start]실행 버튼을 누르는 즉시 창출된 가치는 <span className="text-emerald-500 font-bold">Mental Bank</span>에 존재적 매출로 예치됩니다[cite: 261].
+                  내 안의 Apex BP가 현실의 근육을 빌려 직접 가치를 창출하는 과정입니다. 실행 버튼을 누르는 즉시 창출된 가치는 <span className="text-emerald-500 font-bold">Mental Bank</span>에 존재적 매출로 예치됩니다.
                 </p>
               </div>
             </div>
@@ -2103,7 +2109,7 @@ const renderHub = () => {
                   <h4 className="text-xl font-black text-white uppercase tracking-tight">Analyze Convergence (Stream)</h4>
                 </div>
                 <p className="text-base text-slate-400 leading-relaxed">
-                  [cite_start]현실 자아와 마스터 자아가 얼마나 하나로 <span className="text-white font-bold">융합(Convergence)</span>되었는지 모니터링하십시오[cite: 262]. [cite_start]단순한 숫자가 아닌, 목표를 향해 나아가는 에너지의 궤적을 확인합니다[cite: 263].
+                  현실 자아와 마스터 자아가 얼마나 하나로 <span className="text-white font-bold">융합(Convergence)</span>되었는지 모니터링하십시오. 단순한 숫자가 아닌, 목표를 향해 나아가는 에너지의 궤적을 확인합니다.
                 </p>
               </div>
             </div>
@@ -2119,16 +2125,16 @@ const renderHub = () => {
             <div className="p-4 bg-slate-900/20 rounded-xl border border-white/5">
               <span className="text-white font-bold block mb-1">Apex BP (Best Possible Self)</span>
               <span className="text-slate-500">평행세계에서 모든 목표를 이룬 당신의 완성된 자아.</span>
-            </div>
-            <div className="p-4 bg-slate-900/20 rounded-xl border border-white/5">
+           
+          
               <span className="text-white font-bold block mb-1">The Vessel (ver.0)</span>
               <span className="text-slate-500">마스터 자아의 의식을 현실에서 구현해내는 당신의 현재 육체.</span>
-            </div>
-            <div className="p-4 bg-slate-900/20 rounded-xl border border-white/5">
+            
+           
               <span className="text-white font-bold block mb-1">Mental Bank (MB)</span>
               <span className="text-slate-500">행동의 가치가 복리로 적립되는 당신의 무의식 자산 계좌.</span>
-            </div>
-            <div className="p-4 bg-slate-900/20 rounded-xl border border-white/5">
+           
+            
               <span className="text-white font-bold block mb-1">Magnitude (누적 진폭)</span>
               <span className="text-slate-500">현실을 변화시킨 에너지의 총량. 100% 도달 시 합일이 일어납니다.</span>
             </div>
