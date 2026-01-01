@@ -711,7 +711,7 @@ const App = () => {
                         <p className="text-xs text-center text-slate-400">
                           메일함에 도착한{" "}
                           <span className="text-amber-500 font-bold">
-                            숫자 6자리
+                            숫자 8자리
                           </span>
                           를 입력해주세요.
                         </p>
@@ -719,9 +719,9 @@ const App = () => {
                           type="text"
                           value={otp}
                           onChange={(e) => setOtp(e.target.value)}
-                          placeholder="123456"
+                          placeholder="12345678"
                           className="w-full bg-slate-900/80 border border-amber-500/50 rounded-2xl p-4 text-center text-2xl font-black text-amber-500 tracking-widest outline-none focus:ring-2 focus:ring-amber-500"
-                          maxLength={6}
+                          maxLength={8}
                         />
                         <button
                           onClick={handleVerifyOtp}
