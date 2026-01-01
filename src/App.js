@@ -832,8 +832,7 @@ const App = () => {
                   <p className="text-[12px] font-bold text-amber-500 italic bg-slate-900/50 px-3 py-1 rounded-full border border-white/5 inline-block">
                     {activeLevel}단계: {levelMap[activeLevel]}
                   </p>
-{/* 단계 이름과 미션 설명 결합 */}
-          <div className="flex flex-col gap-1.5">
+        
             <p className="text-[12px] font-bold text-amber-500 italic bg-slate-900/50 px-3 py-1 rounded-full border border-white/5 inline-block w-fit">
               {activeLevel}단계: {levelMap[activeLevel]}
             </p>
@@ -842,7 +841,7 @@ const App = () => {
             <p className="text-[11px] text-slate-400 font-medium leading-relaxed pl-1 mt-1 animate-fadeIn max-w-md">
               {missionMap[activeLevel]}
             </p>
-          </div>
+       
                 </div>
                 <div className="flex gap-1.5">
                   {[1, 2, 3, 4, 5].map((lv) => (
