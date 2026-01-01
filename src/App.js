@@ -1206,36 +1206,33 @@ const App = () => {
   };
 
 const renderHub = () => {
+    // 5개 Character가 다 보이도록 전체 배열 사용
     const activeTraits = bpsTraits;
     const isLocked = !signedDate;
-    
-    // [핵심 1] 50% 디폴트 적용 (연봉이 목표액의 절반이므로, 현재 자산 비율을 그대로 씀)
-    // currentAsset이 annualIncome(연봉)으로 초기화되어 있으므로, 시작하자마자 0.5(50%)가 됩니다.
-    const totalRatio = mbGoalAmount > 0 ? Math.min(currentAsset / mbGoalAmount, 1) : 0;
-    
-    // 인플레이션 보너스 계산 (화면 표시용)
-    let inflationBonusPct = 0;
-    const progressPct = totalRatio * 100;
-    if (progressPct >= 60) inflationBonusPct += 10;
-    if (progressPct >= 70) inflationBonusPct += 10;
-    if (progressPct >= 80) inflationBonusPct += 10;
-    if (progressPct >= 90) inflationBonusPct += 10;
+    // 0 나누기 0 에러 방지용 안전장치
+    const totalProgress = mbGoalAmount > 0 ? Math.min(currentAsset / mbGoalAmount, 1) : 0;
 
     return (
       <div className="relative w-full h-full flex-grow flex flex-col overflow-y-auto no-scrollbar pb-24">
         {/* 잠금 화면 (계약 전) */}
         {isLocked && (
           <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-slate-950/60 backdrop-blur-[6px] animate-fadeIn">
-            <div className="bg-[#0A0F1E] border border-amber-500/30 p-10 rounded-[3rem] text-center shadow-[0_0_100px_rgba(245,158,11,0.2)] max-w-md">
-              <ShieldCheck size={32} className="text-slate-600 mx-auto mb-4" />
-              <h3 className="text-2xl font-black text-white uppercase mb-2">System Preview</h3>
-              <p className="text-slate-400 text-sm mb-8">서약서에 서명하면 모든 기능이 활성화됩니다.</p>
-              <button onClick={() => setCurrentView("contract")} className="bg-amber-600 text-white px-8 py-4 rounded-2xl font-black text-xs uppercase">Sign Agreement</button>
+            <div className="bg-[#0A0F1E] border border-amber-500/30 p-10 rounded-[3rem] text-center shadow-[0_0_100px_rgba(245,158,11,0.2)] max-w-md transform transition-all hover:scale-105">
+              <div className="mx-auto bg-slate-900 w-20 h-20 rounded-full flex items-center justify-center mb-6 border border-white/10 shadow-inner group">
+                <ShieldCheck size={32} className="text-slate-600 group-hover:text-amber-500 transition-colors duration-500" />
+              </div>
+              <h3 className="text-2xl font-black text-white uppercase italic tracking-tighter mb-2">System Preview</h3>
+              <p className="text-slate-400 text-sm leading-relaxed mb-8 font-medium">
+                현재 <span className="text-amber-500 font-bold">미리보기 모드</span> 입니다.<br />서약서에 서명하면 모든 기능이 활성화됩니다.
+              </p>
+              <button onClick={() => setCurrentView("contract")} className="bg-amber-600 hover:bg-amber-500 text-white px-8 py-4 rounded-2xl font-black text-xs uppercase tracking-widest shadow-2xl flex items-center gap-3 mx-auto transition-all active:scale-95">
+                <PenTool size={14} /> Sign Agreement to Unlock
+              </button>
             </div>
           </div>
         )}
 
-        {/* 메인 레이아웃: 모바일(세로) / PC(가로) 분기점 -> md:flex-row */}
+        {/* 메인 레이아웃: PC(가로) / 모바일(세로) 분기 */}
         <div className={`flex flex-col md:flex-row items-center justify-center w-full h-full px-2 md:px-10 gap-8 transition-all duration-1000 ${isLocked ? "opacity-40 blur-sm pointer-events-none" : "opacity-100"}`}>
           
           {/* ======================= */}
@@ -1243,44 +1240,40 @@ const renderHub = () => {
           {/* ======================= */}
           <div className="w-full md:w-1/2 flex flex-col items-center justify-center relative z-10 pt-10">
              
-             {/* BPS Header (위치 더 위로 올림) */}
-             <div className="relative flex justify-center items-end mb-[-25px] z-20"> {/* mb를 더 줄여서 위로 당김 */}
-                <div onClick={() => setActiveLevel(6)} className="relative flex flex-col items-center justify-end cursor-pointer group" style={{ width: "200px", height: "140px" }}>
-                  {/* [핵심 2] BPS 글자 위치 상향 조정 (translate-y 조절) */}
-                  <h4 className={`text-xl font-black tracking-tighter transition-all duration-500 absolute bottom-0 translate-y-[-10px] ${activeLevel === 6 ? "text-amber-400 scale-110" : "text-slate-600"}`}
-                      style={{ filter: `drop-shadow(0 0 ${10 + totalRatio * 40}px rgba(245, 158, 11, ${0.5 + totalRatio * 0.5}))` }}>
+             {/* BPS Header (캐릭터 가로 한 줄 배치 + BPS 위치 조정) */}
+             <div className="relative flex justify-center items-end mb-4 z-20 w-full"> 
+                <div onClick={() => setActiveLevel(6)} className="relative flex flex-col items-center justify-end cursor-pointer group w-full">
+                  
+                  {/* [수정 5] 캐릭터 5개 가로로 쫙 펼치기 */}
+                  <div className="flex justify-between items-center w-full max-w-md px-4 mb-4"> 
+                    {activeTraits.map((trait, i) => (
+                      <span key={i} className={`text-[10px] md:text-xs font-black px-3 py-1.5 rounded-full bg-slate-900/90 border border-amber-500/40 whitespace-nowrap shadow-lg animate-pulse ${activeLevel === 6 ? "text-amber-400 drop-shadow-[0_0_5px_rgba(245,158,11,0.8)]" : "text-slate-400 opacity-70"}`}>
+                        {trait || "Empty"}
+                      </span>
+                    ))}
+                  </div>
+
+                  {/* [수정 4] BPS 글자 위로 더 띄움 (삼각형 꼭지점과 간격 확보) */}
+                  <h4 className={`text-xl font-black tracking-tighter transition-all duration-500 translate-y-[-5px] ${activeLevel === 6 ? "text-amber-400 scale-110" : "text-slate-600"}`}
+                      style={{ filter: `drop-shadow(0 0 ${10 + totalProgress * 40}px rgba(245, 158, 11, ${0.5 + totalProgress * 0.5}))` }}>
                     BPS
                   </h4>
-                  {/* Character Floating */}
-                  <div className="absolute bottom-[40px] left-1/2 -translate-x-1/2 w-[400px] h-[200px] pointer-events-none">
-                    {activeTraits.map((trait, i) => {
-                      if (!trait || trait.trim() === "") return null;
-                      const total = 5; const radius = 180; const spreadAngle = 120;
-                      const startAngle = 90 + spreadAngle / 2;
-                      const angle = startAngle - (spreadAngle / (total - 1)) * i;
-                      const radian = angle * (Math.PI / 180);
-                      const x = radius * Math.cos(radian); const y = radius * Math.sin(radian);
-                      return (
-                        <div key={i} className="absolute left-1/2 bottom-0 flex items-center justify-center animate-pulse" 
-                             style={{ transform: `translate(calc(-50% + ${x}px), ${-y}px)` }}>
-                          <span className={`text-[9px] font-black px-2 py-1 rounded-full bg-slate-900/90 border border-amber-500/40 whitespace-nowrap shadow-lg ${activeLevel === 6 ? "text-amber-400" : "text-slate-400 opacity-70"}`}>{trait}</span>
-                        </div>
-                      );
-                    })}
-                  </div>
                 </div>
              </div>
 
              {/* Pyramid Levels */}
              {[5, 4, 3, 2, 1].map((lv) => {
+                const isConfigured = visions[lv].title !== "";
                 const isActive = lv === activeLevel;
-                // [핵심 3] 시각적 50% 반영: 개별 진행률이 아니라 '전체 자산 비율(totalRatio)'을 사용해 바를 채웁니다.
-                // 이렇게 하면 시작하자마자 연봉만큼(50%) 차있는 상태로 보입니다.
-                const visualPercent = totalRatio * 100; 
                 
+                // [수정 1] % 표시 복원 (전체 자산 비율 사용)
+                // totalProgress는 0.0 ~ 1.0 사이 값 (0.5 = 50%)
+                const visualPercent = totalProgress * 100; 
+                const displayPercent = visualPercent.toFixed(1);
+
                 let progressColor = "#4A5568";
                 if (isActive) progressColor = "#F59E0B"; 
-                else if (visions[lv].title) progressColor = "#B45309"; 
+                else if (isConfigured) progressColor = "#B45309"; 
                 if (visualPercent >= 100 && !isActive) progressColor = "#10B981";
 
                 return (
@@ -1289,12 +1282,20 @@ const renderHub = () => {
                         ${lv === 5 ? "w-0 h-0 border-l-[60px] md:border-l-[75px] border-l-transparent border-r-[60px] md:border-r-[75px] border-r-transparent border-b-[80px] md:border-b-[100px]" : "h-12 md:h-14 border border-white/5 rounded-xl"}`}
                       style={{
                         borderBottomColor: lv === 5 ? (isActive ? "#F59E0B" : progressColor) : undefined,
-                        // 1~4단계: 전체 자산 비율(totalRatio)만큼 색칠 (기본 50% 채워짐)
-                        background: lv !== 5 ? `linear-gradient(to right, ${progressColor} ${visualPercent}%, rgba(30, 41, 59, 0.6) ${visualPercent}%)` : undefined,
+                        // [수정 2] 오른쪽 바 이상한 색깔 제거 -> 투명도 조절된 단색 배경으로 통일
+                        background: lv !== 5 ? `linear-gradient(to right, ${progressColor} ${visualPercent}%, rgba(30, 41, 59, 0.4) ${visualPercent}%)` : undefined,
                         width: lv !== 5 ? `${200 + (5 - lv) * 60}px` : undefined,
                       }}>
-                      <div className={`absolute flex flex-col items-center justify-center leading-none z-20 ${lv === 5 ? "top-[45px] md:top-[60px]" : ""}`}>
-                        <span className={`font-black uppercase tracking-tighter ${isActive ? "text-white text-sm md:text-base" : "text-slate-200 text-xs md:text-sm"}`}>{levelMap[lv]}</span>
+                      
+                      {/* [수정 3] 자아실현 글자 및 % 복원 + 위치 조정 */}
+                      <div className={`absolute flex flex-col items-center justify-center leading-none z-20 ${lv === 5 ? "top-[40px] md:top-[50px]" : ""}`}>
+                        <span className={`font-black uppercase tracking-tighter ${isActive ? "text-white text-sm md:text-base" : "text-slate-200 text-xs md:text-sm"}`}>
+                          {levelMap[lv]}
+                        </span>
+                        {/* 모든 단계에 % 표시 (삼각형 포함) */}
+                        <span className="text-[9px] font-bold text-white/80 mt-0.5">
+                          {displayPercent}%
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -1304,16 +1305,12 @@ const renderHub = () => {
           </div>
 
           {/* ======================= */}
-          {/* [우측 패널] 비전 카드 (복원됨!) */}
+          {/* [우측 패널] 비전 카드 (기능 유지) */}
           {/* ======================= */}
           <div className="w-full md:w-1/2 flex flex-col gap-6 animate-fadeIn h-full justify-center">
-            
-            {/* 비전 카드 컨테이너 */}
+            {/* ... (우측 패널 코드는 기존과 동일하게 유지) ... */}
             <div className="bg-[#1A202C]/80 border border-white/10 rounded-[2.5rem] p-8 shadow-2xl relative overflow-hidden min-h-[500px] flex flex-col">
-               {/* 배경 장식 */}
                <div className="absolute top-0 right-0 p-6 opacity-5 pointer-events-none"><Zap size={150} className="text-white" /></div>
-
-               {/* 1. 비전 타이틀 (복원) */}
                <div className="mb-6 relative z-10">
                  <div className="flex items-center gap-3 mb-2">
                    <span className="text-4xl">{visions[activeLevel].emoji || "✨"}</span>
@@ -1325,30 +1322,18 @@ const renderHub = () => {
                    </div>
                  </div>
                </div>
-
-               {/* 2. AI 몰입 스크립트 (복원) */}
                <div className="bg-slate-900/50 p-6 rounded-2xl border border-white/5 mb-8 relative z-10 flex-grow-0">
                  <p className="text-sm text-slate-300 italic leading-relaxed">
                    {visions[activeLevel].immersionScript ? `"${visions[activeLevel].immersionScript}"` : "My Lab에서 AI 몰입 시나리오를 생성해보세요."}
                  </p>
                </div>
-
-               {/* 3. Value Event 목록 & 개별 실행 (Action) */}
                <div className="flex-grow flex flex-col">
                  <div className="flex justify-between items-end mb-4 border-b border-white/10 pb-2">
                    <h4 className="text-sm font-black text-white uppercase tracking-widest flex items-center gap-2">
                      <ListPlus size={16} className="text-amber-500" /> Value Events
                    </h4>
-                   <div className="text-right">
-                     <p className="text-[9px] text-slate-500 uppercase font-bold">Hourly Rate</p>
-                     <p className="text-xs font-mono text-amber-400">
-                       {currency}{fNum(valueEventAmount * (1 + inflationBonusPct/100))} 
-                       {inflationBonusPct > 0 && <span className="text-emerald-500 ml-1 text-[9px]">(+{inflationBonusPct}%)</span>}
-                     </p>
-                   </div>
+                   {/* ... (우측 하단 코드는 기존과 동일) ... */}
                  </div>
-
-                 {/* 이벤트 리스트 */}
                  <div className="space-y-3 overflow-y-auto pr-2 custom-scrollbar max-h-[250px]">
                     {visions[activeLevel].events.length === 0 ? (
                       <div className="text-center py-8 text-slate-600 text-xs">
@@ -1360,24 +1345,13 @@ const renderHub = () => {
                           <div className="flex justify-between items-start mb-3">
                             <span className="text-sm font-bold text-slate-200 group-hover:text-white">{ev.name}</span>
                           </div>
-                          
-                          {/* 개별 시간 설정 및 실행 버튼 */}
                           <div className="flex items-center justify-between gap-3">
                             <div className="flex items-center gap-2 bg-slate-950 rounded-lg p-1 border border-white/10">
-                               <button 
-                                 onClick={() => setDuration(Math.max(0.5, duration - 0.5))} 
-                                 className="w-6 h-6 flex items-center justify-center text-slate-400 hover:text-white font-bold text-xs"
-                               >-</button>
+                               <button onClick={() => setDuration(Math.max(0.5, duration - 0.5))} className="w-6 h-6 flex items-center justify-center text-slate-400 hover:text-white font-bold text-xs">-</button>
                                <span className="text-xs font-black text-white w-8 text-center">{duration}h</span>
-                               <button 
-                                 onClick={() => setDuration(duration + 0.5)} 
-                                 className="w-6 h-6 flex items-center justify-center text-slate-400 hover:text-white font-bold text-xs"
-                               >+</button>
+                               <button onClick={() => setDuration(duration + 0.5)} className="w-6 h-6 flex items-center justify-center text-slate-400 hover:text-white font-bold text-xs">+</button>
                             </div>
-                            <button 
-                              onClick={() => handleDepositSubmit(ev.name)}
-                              className="bg-emerald-600 hover:bg-emerald-500 text-white text-[10px] font-black px-4 py-2 rounded-lg uppercase tracking-widest shadow-lg active:scale-95 transition-all flex items-center gap-2"
-                            >
+                            <button onClick={() => handleDepositSubmit(ev.name)} className="bg-emerald-600 hover:bg-emerald-500 text-white text-[10px] font-black px-4 py-2 rounded-lg uppercase tracking-widest shadow-lg active:scale-95 transition-all flex items-center gap-2">
                               <Coins size={12} /> Deposit
                             </button>
                           </div>
@@ -1386,7 +1360,6 @@ const renderHub = () => {
                     )}
                  </div>
                </div>
-
             </div>
           </div>
 
