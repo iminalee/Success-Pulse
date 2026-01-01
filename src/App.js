@@ -2266,7 +2266,7 @@ const renderHub = () => {
       <header className="flex justify-between items-start md:items-center mb-8 px-4 max-w-7xl mx-auto w-full shrink-0 pt-4">
         {/* ▼▼▼ 여기를 수정했습니다 (클릭하면 홈으로 이동) ▼▼▼ */}
         <div 
-          onClick={() => setCurrentView("hub")} 
+          onClick={() => setCurrentView("Hub")} 
           className="cursor-pointer group"
         >
           <h1 className="text-3xl md:text-4xl font-black text-white tracking-tighter italic uppercase leading-none group-hover:opacity-80 transition-opacity">
