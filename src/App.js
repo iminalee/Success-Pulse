@@ -2262,16 +2262,21 @@ const renderHub = () => {
     <div className="min-h-screen bg-slate-950 text-slate-200 p-4 md:p-10 font-sans overflow-hidden flex flex-col selection:bg-amber-500/30">
       <style>{`@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css'); * { font-family: 'Pretendard', sans-serif; letter-spacing: -0.02em; } .animate-fadeIn { animation: fadeIn 0.8s ease-out; } .animate-spin-slow { animation: spin 20s linear infinite; } @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } } @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }`}</style>
 
-      {/* 헤더 */}
+{/* 헤더 */}
       <header className="flex justify-between items-start md:items-center mb-8 px-4 max-w-7xl mx-auto w-full shrink-0 pt-4">
-        <div>
-          <h1 className="text-3xl md:text-4xl font-black text-white tracking-tighter italic uppercase leading-none">
+        {/* ▼▼▼ 여기를 수정했습니다 (클릭하면 홈으로 이동) ▼▼▼ */}
+        <div 
+          onClick={() => setCurrentView("hub")} 
+          className="cursor-pointer group"
+        >
+          <h1 className="text-3xl md:text-4xl font-black text-white tracking-tighter italic uppercase leading-none group-hover:opacity-80 transition-opacity">
             THE <span className="text-amber-500">PULSE</span>
           </h1>
           <p className="text-[10px] text-slate-600 font-bold mt-2 uppercase tracking-[0.4em]">
             milestones.today
           </p>
         </div>
+        {/* ▲▲▲ 여기까지 수정했습니다 ▲▲▲ */}
 
         {currentView !== "philosophy" && (
           <div className="text-right flex flex-col items-end gap-2 animate-fadeIn">
