@@ -2112,25 +2112,26 @@ const renderHub = () => {
           <h3 className="text-xl font-black text-slate-500 uppercase tracking-widest mb-8 flex items-center gap-2">
             <Book size={18} /> Glossary | 용어집
           </h3>
-<div className="flex flex-col gap-4 text-sm">
-    <div className="p-6 bg-slate-900/20 rounded-[2rem] border border-white/5 hover:bg-slate-900/40 transition-all">
-      <span className="text-white font-bold text-lg block mb-2">Apex BP (Best Possible Self)</span>
-      <span className="text-slate-400 leading-relaxed">평행세계에서 모든 목표를 이룬 당신의 완성된 자아.</span>
+<div className="flex flex-col gap-3 w-full">
+    {/* 각 아이템: flex-row와 items-baseline을 사용하여 용어와 설명을 한 줄에 배치 */}
+    <div className="p-4 bg-slate-900/20 rounded-2xl border border-white/5 hover:bg-slate-900/40 transition-all flex flex-wrap items-baseline gap-x-3">
+      <span className="text-white font-bold text-base min-w-fit">Apex BP (Best Possible Self) :</span>
+      <span className="text-slate-400 font-light text-sm">평행세계에서 모든 목표를 이룬 당신의 완성된 자아.</span>
     </div>
     
-    <div className="p-6 bg-slate-900/20 rounded-[2rem] border border-white/5 hover:bg-slate-900/40 transition-all">
-      <span className="text-white font-bold text-lg block mb-2">The Vessel (ver.0)</span>
-      <span className="text-slate-400 leading-relaxed">마스터 자아의 의식을 현실에서 구현해내는 당신의 현재 육체.</span>
+    <div className="p-4 bg-slate-900/20 rounded-2xl border border-white/5 hover:bg-slate-900/40 transition-all flex flex-wrap items-baseline gap-x-3">
+      <span className="text-white font-bold text-base min-w-fit">The Vessel (ver.0) :</span>
+      <span className="text-slate-400 font-light text-sm">마스터 자아의 의식을 현실에서 구현해내는 당신의 현재 육체.</span>
     </div>
     
-    <div className="p-6 bg-slate-900/20 rounded-[2rem] border border-white/5 hover:bg-slate-900/40 transition-all">
-      <span className="text-white font-bold text-lg block mb-2">Mental Bank (MB)</span>
-      <span className="text-slate-400 leading-relaxed">행동의 가치가 복리로 적립되는 당신의 무의식 자산 계좌.</span>
+    <div className="p-4 bg-slate-900/20 rounded-2xl border border-white/5 hover:bg-slate-900/40 transition-all flex flex-wrap items-baseline gap-x-3">
+      <span className="text-white font-bold text-base min-w-fit">Mental Bank (MB) :</span>
+      <span className="text-slate-400 font-light text-sm">행동의 가치가 복리로 적립되는 당신의 무의식 자산 계좌.</span>
     </div>
     
-    <div className="p-6 bg-slate-900/20 rounded-[2rem] border border-white/5 hover:bg-slate-900/40 transition-all">
-      <span className="text-white font-bold text-lg block mb-2">Magnitude (누적 진폭)</span>
-      <span className="text-slate-400 leading-relaxed">현실을 변화시킨 에너지의 총량. 100% 도달 시 합일이 일어납니다.</span>
+    <div className="p-4 bg-slate-900/20 rounded-2xl border border-white/5 hover:bg-slate-900/40 transition-all flex flex-wrap items-baseline gap-x-3">
+      <span className="text-white font-bold text-base min-w-fit">Magnitude (누적 진폭) :</span>
+      <span className="text-slate-400 font-light text-sm">현실을 변화시킨 에너지의 총량. 100% 도달 시 합일이 일어납니다.</span>
     </div>
   </div>
           </div>
