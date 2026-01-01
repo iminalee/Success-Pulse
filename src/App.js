@@ -1338,8 +1338,8 @@ const renderHub = () => {
                           isActive ? "scale-110" : ""
                         } ${
                           lv === 5
-                            // lv 5(자아실현)일 때: 밑에서 10px(PC는 16px) 위로 띄움 -> 넓은 공간 확보!
-                            ? "bottom-[10px] md:bottom-[16px] text-[10px] md:text-[13px]"
+                            // lv 5(자아실현)일 때: 밑에서 2px(PC는 5px) 위로 띄움 -> 넓은 공간 확보!
+                            ? "bottom-[2px] md:bottom-[5px] text-[2px] md:text-[4px]"
                             // 나머지 단계: 정중앙 배치
                             : "top-1/2 -translate-y-1/2 text-[10px] md:text-[13px]"
                         }`}
@@ -1380,6 +1380,12 @@ const renderHub = () => {
                   </div>
                 );
               })}
+
+{/* [수정 3] "5단계 미션" 글자 추가 */}
+              <p className="text-slate-500 text-[10px] font-bold mt-4 uppercase tracking-[0.2em] opacity-60">
+                5단계 미션
+              </p>
+                
             </div>
           </div>
           <div className="w-full md:w-1/2 h-full flex flex-col">
