@@ -1339,7 +1339,7 @@ const renderHub = () => {
                         } ${
                           lv === 5
                             // lv 5(자아실현)일 때: 밑에서 2px(PC는 5px) 위로 띄움 -> 넓은 공간 확보!
-                            ? "bottom-[2px] md:bottom-[5px] text-[2px] md:text-[4px]"
+                            ? "bottom-[2px] md:bottom-[5px] text-[10px] md:text-[16px]"
                             // 나머지 단계: 정중앙 배치
                             : "top-1/2 -translate-y-1/2 text-[10px] md:text-[13px]"
                         }`}
