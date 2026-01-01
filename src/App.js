@@ -2456,6 +2456,12 @@ const renderHub = () => {
       <footer className="fixed bottom-6 left-0 right-0 z-[1000] px-4 animate-fadeIn">
         <nav className="max-w-xl mx-auto flex justify-between md:justify-around items-center bg-[#0A0F1E]/90 backdrop-blur-xl rounded-full py-3 px-3 border border-white/10 shadow-[0_10px_40px_rgba(0,0,0,0.8)] overflow-x-auto no-scrollbar gap-1">
           <NavBtn
+            active={currentView === "hub"}
+            onClick={() => setCurrentView("hub")}
+            icon={<Home size={24} className="md:w-7 md:h-7" />}
+            label="Ledger"
+          /> 
+         <NavBtn
             active={currentView === "lab"}
             onClick={() => setCurrentView("lab")}
             icon={<Settings size={20} className="md:w-6 md:h-6" />}
@@ -2466,12 +2472,6 @@ const renderHub = () => {
             onClick={() => setCurrentView("contract")}
             icon={<PenTool size={20} className="md:w-6 md:h-6" />}
             label="Contract"
-          />
-          <NavBtn
-            active={currentView === "hub"}
-            onClick={() => setCurrentView("hub")}
-            icon={<Home size={24} className="md:w-7 md:h-7" />}
-            label="Ledger"
           />
           <NavBtn
             active={currentView === "analysis"}
