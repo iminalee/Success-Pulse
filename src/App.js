@@ -1214,10 +1214,10 @@ const renderHub = () => {
 
     // [Fix] 피라미드 모양 유지를 위한 각 레벨별 너비 설정
     const widthMap = {
-      5: "w-[160px]", // 5단계 (제일 좁음)
-      4: "w-[200px]",
-      3: "w-[240px]",
-      2: "w-[280px]",
+      5: "w-[130px]", // 5단계 (제일 좁음)
+      4: "w-[170px]",
+      3: "w-[225px]",
+      2: "w-[270px]",
       1: "w-[320px]", // 1단계 (제일 넓음)
     };
 
@@ -1291,32 +1291,52 @@ const renderHub = () => {
                 const visualPercent = totalProgress * 100; 
                 const displayPercent = visualPercent.toFixed(1);
 
+               // [색상 로직] 
+                // 1. 설정됨: 고급스러운 골드 그라데이션
+                // 2. 미설정: 어두운 회색 (Slate-700)
+                const barGradient = isConfigured 
+                    ? "from-amber-600 via-amber-500 to-yellow-500" // Luxury Gold
+                    : "from-slate-700 to-slate-800"; // Dark Grey (Inactive)
+
+                // [텍스트 스타일]
+                // 설정 안됨 -> 어두운 글씨
+                // 설정 됨 -> 흰 글씨 + 그림자 (가독성 확보)
+                const textStyle = isConfigured
+                    ? "text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]" // 그림자로 가독성 UP
+                    : "text-slate-500";
+
                 return (
-                  <div 
+         <div 
                     key={lv} 
                     onClick={() => setActiveLevel(lv)} 
-                    // [Fix] 너비는 widthMap을 사용해 피라미드 형태 유지
                     className={`
                       cursor-pointer relative flex items-center justify-center h-[50px] rounded-2xl mb-2 overflow-hidden transition-all duration-300 
-                      border border-slate-700/50 bg-slate-800/80
+                      border ${isConfigured ? "border-amber-500/30 bg-slate-800/80" : "border-slate-800 bg-slate-900/50"}
                       ${widthMap[lv]}
-                      ${isActive ? "ring-2 ring-amber-500 scale-105 z-10 brightness-110 shadow-[0_0_15px_rgba(245,158,11,0.3)]" : "opacity-90 hover:opacity-100 hover:border-slate-500"}
+                      ${isActive ? "ring-2 ring-amber-400 scale-105 z-10 brightness-110 shadow-[0_0_20px_rgba(245,158,11,0.4)]" : "opacity-90 hover:opacity-100"}
                     `}
                   >
-                    {/* 1. 배경 게이지 (앰버그라데이션) */}
+                    {/* 게이지 (설정된 경우에만 표시하거나, 미설정 시 회색으로 채움) */}
                     <div 
-                      className="absolute left-0 top-0 h-full bg-gradient-to-r from-amber-600 to-amber-400 opacity-90 transition-all duration-1000" 
-                      style={{ width: `${displayPercent}%` }} 
+                      className={`absolute left-0 top-0 h-full bg-gradient-to-r transition-all duration-1000 ${barGradient} ${isConfigured ? "opacity-100" : "opacity-30"}`}
+                      style={{ width: isConfigured ? `${displayPercent}%` : "100%" }} // 미설정 시 배경처럼 꽉 채우되 어둡게
                     />
 
-                    {/* 2. 텍스트 정보 (항상 중앙 정렬, 삼각형 문제 해결됨) */}
+                    {/* 텍스트 정보 */}
                     <div className="relative z-10 flex flex-col items-center justify-center leading-none">
-                      <span className={`font-bold uppercase text-sm ${isActive ? "text-white" : "text-slate-300"}`}>
+                      <span className={`font-bold uppercase text-sm ${textStyle}`}>
                         {levelMap[lv]}
                       </span>
-                      <span className="text-[10px] text-white-300 font-bold mt-0.5">
-                        {displayPercent}%
-                      </span>
+                      {isConfigured && (
+                          <span className={`text-[10px] font-bold mt-0.5 ${textStyle} opacity-90`}>
+                            {displayPercent}%
+                          </span>
+                      )}
+                      {!isConfigured && (
+                          <span className="text-[9px] text-slate-600 font-medium mt-0.5 uppercase tracking-wider">
+                            Locked
+                          </span>
+                      )}
                     </div>
                   </div>
                 );
