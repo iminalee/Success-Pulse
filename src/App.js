@@ -1317,10 +1317,15 @@ const App = () => {
                     >
                       <span
                         className={`absolute ${
-                          lv === 5 ? "top-14 md:top-16" : ""
+                          lv === 5 ? "-top-2 md:top-16" : ""
                         } text-[10px] md:text-[13px] font-black text-white tracking-tighter ${
                           isActive ? "scale-110" : ""
                         }`}
+style={{
+    width: lv === 5 ? "100px" : "auto", // 자아실현 글자가 옆으로 퍼지지 않게 폭 제한
+    left: lv === 5 ? "50%" : "auto",
+    transform: lv === 5 ? "translateX(-50%)" : "none" // 중앙 정렬 보정
+  }}
                       >
                         {levelMap[lv]}
                       </span>
