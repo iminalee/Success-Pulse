@@ -485,6 +485,34 @@ const App = () => {
     }
   };
 
+// 회원 탈퇴 함수
+  const handleDeleteAccount = async () => {
+    if (
+      window.confirm(
+        "정말로 탈퇴하시겠습니까?\n\n모든 데이터가 영구적으로 삭제되며 복구할 수 없습니다."
+      )
+    ) {
+      try {
+        setLoading(true);
+        // 1. 데이터 삭제
+        await supabase.from("pulse_data").delete().eq("id", user.id);
+        
+        // 2. 계정 삭제 (아까 만든 SQL 함수 실행)
+        const { error } = await supabase.rpc("delete_user");
+        
+        if (error) throw error;
+
+        alert("탈퇴가 완료되었습니다. 이용해 주셔서 감사합니다.");
+        await supabase.auth.signOut();
+        window.location.reload();
+      } catch (error) {
+        alert("탈퇴 실패: " + error.message);
+      } finally {
+        setLoading(false);
+      }
+    }
+  };
+  
   const showToast = (msg) => {
     const toast = document.createElement("div");
     toast.className =
@@ -678,6 +706,13 @@ const App = () => {
                     >
                       로그아웃
                     </button>
+                        <span className="text-slate-700 text-[10px]">|</span>
+                      <button
+                        onClick={handleDeleteAccount}
+                        className="text-[10px] text-rose-500/60 hover:text-rose-500 underline decoration-rose-900/30 underline-offset-4"
+                      >
+                        회원 탈퇴
+                      </button>
                   </div>
                 ) : (
                   <div className="flex flex-col gap-3 w-full animate-fadeIn">
@@ -2395,9 +2430,9 @@ const App = () => {
         )}
       </div>
 
-{/* 하단 네비게이션 */}
-      <footer className="space-y-6 max-w-4xl mx-auto w-full relative z-[100] mt-auto shrink-0 px-2 md:px-0 font-sans">
-        <nav className="flex justify-between md:justify-around items-center bg-[#0A0F1E]/95 backdrop-blur-3xl rounded-full py-3 md:py-6 px-3 md:px-10 border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.5)] overflow-x-auto no-scrollbar gap-1 md:gap-12">
+{/* 하단 네비게이션 (Floating 적용 완료) */}
+      <footer className="fixed bottom-6 left-0 right-0 z-[1000] px-4 animate-fadeIn">
+        <nav className="max-w-xl mx-auto flex justify-between md:justify-around items-center bg-[#0A0F1E]/90 backdrop-blur-xl rounded-full py-3 px-3 border border-white/10 shadow-[0_10px_40px_rgba(0,0,0,0.8)] overflow-x-auto no-scrollbar gap-1">
           <NavBtn
             active={currentView === "lab"}
             onClick={() => setCurrentView("lab")}
