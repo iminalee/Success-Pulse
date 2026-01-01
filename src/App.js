@@ -708,7 +708,7 @@ const App = () => {
                     </p>
                     <p className="text-white text-xl font-bold mb-4">
                       {userName || "User"}{" "}
-                      <span className="text-emerald-400 text-md">ver.0</span>{" "}
+                      <span className="text-emerald-400 text-xs">ver.0</span>{" "}
                       <span className="text-slate-500 text-xs">
                         ({user.email})
                       </span>
