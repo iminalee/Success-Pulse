@@ -114,6 +114,11 @@ const SensoryItem = ({ label, color, val }) => (
 
 // 3. 메인 앱
 const App = () => {
+
+  // 기존 코드들 아래에 추가하세요
+  const [otp, setOtp] = useState(""); // 인증번호 저장할 곳
+  const [isOtpSent, setIsOtpSent] = useState(false); // 메일 보냈는지 확인하는 스위치
+  
   // 상태 관리 (DB 동기화용)
   const [user, setUser] = useState(null);
   const [email, setEmail] = useState("");
@@ -405,15 +410,45 @@ const App = () => {
     }
   };
 
+  // 1. 메일 보내기 함수
   const handleLogin = async (email) => {
     if (!email) return alert("이메일을 입력해 주세요!");
+    setLoading(true);
     const { error } = await supabase.auth.signInWithOtp({
       email: email,
-      options: { emailRedirectTo: window.location.href },
+      // 링크도 되고 코드도 되게 설정
     });
-    if (error) alert("에러: " + error.message);
-    else alert("매직 링크가 발송되었습니다! 메일함을 확인해주세요.");
+    setLoading(false);
+    if (error) {
+      alert("에러: " + error.message);
+    } else {
+      setIsOtpSent(true); // "메일 보냈음!" 상태로 변경
+      alert("인증번호가 발송되었습니다! 메일의 숫자 6자리를 확인하세요.");
+    }
   };
+
+  // 2. 인증번호 확인 함수 (새로 추가됨!)
+  const handleVerifyOtp = async () => {
+    if (!otp) return alert("인증번호 6자리를 입력해주세요!");
+    setLoading(true);
+    const {
+      data: { session },
+      error,
+    } = await supabase.auth.verifyOtp({
+      email: email,
+      token: otp,
+      type: "email",
+    });
+    setLoading(false);
+
+    if (error) {
+      alert("인증번호가 틀렸거나 만료되었습니다. 다시 시도해주세요.");
+    } else {
+      // 성공하면 알아서 로그인 됨 (useEffect가 감지함)
+      setIsOtpSent(false); // 입력창 닫기
+    }
+  };
+  
 
   const fNum = (n) => Math.floor(n).toLocaleString();
   const mbGoalAmount = annualIncome * 2;
@@ -612,7 +647,8 @@ const App = () => {
                     </span>
                   </div>
                 </div>
-                {user ? (
+
+{user ? (
                   <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-2xl p-6 text-center animate-fadeIn">
                     <p className="text-emerald-500 font-black text-xl mb-2">
                       🎉 Identity Confirmed!
@@ -624,11 +660,6 @@ const App = () => {
                         ({user.email})
                       </span>
                     </p>
-                    {loading && (
-                      <p className="text-amber-500 text-xs animate-pulse mb-2">
-                        서버에서 데이터 불러오는 중...
-                      </p>
-                    )}
                     <button
                       onClick={() => supabase.auth.signOut()}
                       className="text-[10px] text-slate-500 hover:text-white underline decoration-slate-700 underline-offset-4"
@@ -638,27 +669,68 @@ const App = () => {
                   </div>
                 ) : (
                   <div className="flex flex-col gap-3 w-full animate-fadeIn">
-                    <input
-                      value={userName}
-                      onChange={(e) => setUserName(e.target.value)}
-                      placeholder="이름(닉네임)을 입력하세요"
-                      className="w-full bg-slate-900/80 border border-white/10 rounded-2xl p-4 text-white outline-none focus:ring-2 focus:ring-amber-500/50"
-                    />
-                    <input
-                      type="email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      placeholder="로그인할 이메일을 입력하세요"
-                      className="w-full bg-slate-900/80 border border-white/10 rounded-2xl p-4 text-white outline-none focus:ring-2 focus:ring-blue-500/50"
-                    />
-                    <button
-                      onClick={() => handleLogin(email)}
-                      className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-4 rounded-2xl transition-all shadow-lg shadow-blue-500/20"
-                    >
-                      로그인 링크 받기
-                    </button>
+                    {/* 1단계: 이메일 입력 */}
+                    {!isOtpSent ? (
+                      <>
+                        <input
+                          value={userName}
+                          onChange={(e) => setUserName(e.target.value)}
+                          placeholder="이름(닉네임)을 입력하세요"
+                          className="w-full bg-slate-900/80 border border-white/10 rounded-2xl p-4 text-white outline-none focus:ring-2 focus:ring-amber-500/50"
+                        />
+                        <input
+                          type="email"
+                          value={email}
+                          onChange={(e) => setEmail(e.target.value)}
+                          placeholder="이메일을 입력하세요"
+                          className="w-full bg-slate-900/80 border border-white/10 rounded-2xl p-4 text-white outline-none focus:ring-2 focus:ring-blue-500/50"
+                        />
+                        <button
+                          onClick={() => handleLogin(email)}
+                          disabled={loading}
+                          className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-4 rounded-2xl transition-all shadow-lg shadow-blue-500/20 disabled:opacity-50"
+                        >
+                          {loading ? "전송 중..." : "인증번호 받기"}
+                        </button>
+                      </>
+                    ) : (
+                      /* 2단계: 인증번호 입력 (메일 보내고 나면 이 화면이 뜸) */
+                      <div className="space-y-3 animate-fadeIn">
+                        <p className="text-xs text-center text-slate-400">
+                          메일함에 도착한{" "}
+                          <span className="text-amber-500 font-bold">
+                            숫자 6자리
+                          </span>
+                          를 입력해주세요.
+                        </p>
+                        <input
+                          type="text"
+                          value={otp}
+                          onChange={(e) => setOtp(e.target.value)}
+                          placeholder="123456"
+                          className="w-full bg-slate-900/80 border border-amber-500/50 rounded-2xl p-4 text-center text-2xl font-black text-amber-500 tracking-widest outline-none focus:ring-2 focus:ring-amber-500"
+                          maxLength={6}
+                        />
+                        <button
+                          onClick={handleVerifyOtp}
+                          disabled={loading}
+                          className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-4 rounded-2xl transition-all shadow-lg shadow-emerald-500/20 disabled:opacity-50"
+                        >
+                          {loading ? "확인 중..." : "로그인 완료"}
+                        </button>
+                        <button
+                          onClick={() => setIsOtpSent(false)}
+                          className="w-full text-xs text-slate-500 hover:text-white py-2"
+                        >
+                          이메일 다시 입력하기
+                        </button>
+                      </div>
+                    )}
                   </div>
                 )}
+
+
+              
               </div>
             </div>
             <div className="bg-[#2D3748]/30 p-10 rounded-[3rem] border border-white/5 shadow-xl border-t-4 border-amber-500/50">
