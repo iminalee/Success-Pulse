@@ -1212,20 +1212,18 @@ const renderHub = () => {
     // 0 나누기 0 에러 방지용 안전장치
     const totalProgress = mbGoalAmount > 0 ? Math.min(currentAsset / mbGoalAmount, 1) : 0;
 
-    // [Fix] 피라미드 모양 유지를 위한 각 레벨별 너비 설정
+    // 피라미드 너비 설정
     const widthMap = {
-      5: "w-[130px]", // 5단계 (제일 좁음)
-      4: "w-[170px]",
-      3: "w-[225px]",
-      2: "w-[270px]",
-      1: "w-[320px]", // 1단계 (제일 넓음)
+      5: "w-[160px]",
+      4: "w-[200px]",
+      3: "w-[240px]",
+      2: "w-[280px]",
+      1: "w-[320px]",
     };
 
     return (
       <div className="relative w-full h-full flex-grow flex flex-col overflow-y-auto no-scrollbar pb-24">
-        {/* ======================= */}
-        {/* 1. 잠금 화면 (계약 전) - 유지 */}
-        {/* ======================= */}
+        {/* 잠금 화면 (계약 전) - 기존 유지 */}
         {isLocked && (
           <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-slate-950/60 backdrop-blur-[6px] animate-fadeIn">
             <div className="bg-[#0A0F1E] border border-amber-500/30 p-10 rounded-[3rem] text-center shadow-[0_0_100px_rgba(245,158,11,0.2)] max-w-md transform transition-all hover:scale-105">
@@ -1243,19 +1241,15 @@ const renderHub = () => {
           </div>
         )}
 
-        {/* 메인 레이아웃: PC(가로) / 모바일(세로) 분기 */}
+        {/* 메인 레이아웃 */}
         <div className={`flex flex-col md:flex-row items-center justify-center w-full h-full px-2 md:px-10 gap-8 transition-all duration-1000 ${isLocked ? "opacity-40 blur-sm pointer-events-none" : "opacity-100"}`}>
           
-          {/* ======================= */}
           {/* [좌측 패널] 피라미드 */}
-          {/* ======================= */}
           <div className="w-full md:w-1/2 flex flex-col items-center justify-center relative z-10 pt-10">
               
-             {/* BPS Header (캐릭터 가로 한 줄 배치 + BPS 위치 조정) */}
+             {/* BPS Header */}
              <div className="relative flex justify-center items-end mb-4 z-20 w-full"> 
                 <div onClick={() => setActiveLevel(6)} className="relative flex flex-col items-center justify-end cursor-pointer group w-full">
-                  
-                  {/* 캐릭터 5개 가로로 쫙 펼치기 */}
                   <div className="flex justify-between items-center w-full max-w-md px-4 mb-4"> 
                     {activeTraits.map((trait, i) => (
                       <span key={i} className={`text-[10px] md:text-xs font-black px-3 py-1.5 rounded-full bg-slate-900/90 border border-amber-500/40 whitespace-nowrap shadow-lg animate-pulse ${activeLevel === 6 ? "text-amber-400 drop-shadow-[0_0_5px_rgba(245,158,11,0.8)]" : "text-slate-400 opacity-70"}`}>
@@ -1263,8 +1257,6 @@ const renderHub = () => {
                       </span>
                     ))}
                   </div>
-
-                  {/* BPS 글자 */}
                   <h4 className={`text-xl font-black tracking-tighter transition-all duration-500 translate-y-[-5px] ${activeLevel === 6 ? "text-amber-400 scale-110" : "text-slate-600"}`}
                       style={{ filter: `drop-shadow(0 0 ${10 + totalProgress * 40}px rgba(245, 158, 11, ${0.5 + totalProgress * 0.5}))` }}>
                     BPS
@@ -1272,7 +1264,7 @@ const renderHub = () => {
                 </div>
              </div>
 
-             {/* [수정 포인트] 장식용 노란 삼각형 (반복문 밖으로 분리됨!) */}
+             {/* 장식용 노란 삼각형 (최상단) */}
              <div className="flex justify-center mb-1 animate-pulse">
                <div className="w-0 h-0 
                  border-l-[30px] border-l-transparent 
@@ -1282,74 +1274,78 @@ const renderHub = () => {
                </div>
              </div>
 
-             {/* [수정 포인트] Pyramid Levels (모두 Bar 형태로 통일) */}
+             {/* Pyramid Levels (1/5 균등 분배 시각화) */}
              {[5, 4, 3, 2, 1].map((lv) => {
                 const isConfigured = visions[lv].title !== "";
                 const isActive = lv === activeLevel;
                 
-                // 퍼센트 계산 (기존 로직 유지)
+                // [수정] 모든 단계가 전체 진행률(totalProgress)을 공유합니다.
+                // 기본적으로 50%에서 시작하여 점점 차오르게 됩니다.
                 const visualPercent = totalProgress * 100; 
                 const displayPercent = visualPercent.toFixed(1);
 
-               // [색상 로직] 
-                // 1. 설정됨: 고급스러운 골드 그라데이션
-                // 2. 미설정: 어두운 회색 (Slate-700)
-                const barGradient = isConfigured 
-                    ? "from-amber-600 via-amber-500 to-yellow-500" // Luxury Gold
-                    : "from-slate-700 to-slate-800"; // Dark Grey (Inactive)
+                // [색상 및 스타일 로직]
+                // 활성(Configured): 화려한 Gold Gradient
+                // 비활성(!Configured): 차분한 Solid Gray (회색 Bar)
+                const barBackground = isConfigured 
+                    ? "bg-gradient-to-r from-amber-600 via-yellow-400 to-amber-600" 
+                    : "bg-slate-600"; // 회색 Bar 채우기
 
-                // [텍스트 스타일]
-                // 설정 안됨 -> 어두운 글씨
-                // 설정 됨 -> 흰 글씨 + 그림자 (가독성 확보)
+                // 테두리 및 그림자 효과
+                const containerStyle = isActive
+                    ? "border-amber-400 ring-2 ring-amber-500/50 shadow-[0_0_30px_rgba(245,158,11,0.6)] z-10 scale-105 brightness-110"
+                    : isConfigured 
+                        ? "border-amber-600/30 opacity-90 hover:brightness-110"
+                        : "border-slate-700/50 opacity-60 hover:opacity-80"; // 비활성은 약간 투명하게
+
+                // 텍스트 스타일: 활성은 흰색+그림자, 비활성은 밝은 회색
                 const textStyle = isConfigured
-                    ? "text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]" // 그림자로 가독성 UP
-                    : "text-slate-500";
+                    ? "text-white drop-shadow-[0_2px_2px_rgba(0,0,0,0.9)]" 
+                    : "text-slate-300 drop-shadow-md"; 
 
                 return (
-         <div 
+                  <div 
                     key={lv} 
                     onClick={() => setActiveLevel(lv)} 
                     className={`
                       cursor-pointer relative flex items-center justify-center h-[50px] rounded-2xl mb-2 overflow-hidden transition-all duration-300 
-                      border ${isConfigured ? "border-amber-500/30 bg-slate-800/80" : "border-slate-800 bg-slate-900/50"}
+                      border bg-slate-900/50
                       ${widthMap[lv]}
-                      ${isActive ? "ring-2 ring-amber-400 scale-105 z-10 brightness-110 shadow-[0_0_20px_rgba(245,158,11,0.4)]" : "opacity-90 hover:opacity-100"}
+                      ${containerStyle}
                     `}
                   >
-                    {/* 게이지 (설정된 경우에만 표시하거나, 미설정 시 회색으로 채움) */}
+                    {/* [Bar 게이지] 비활성 단계도 회색으로 채워짐 (width는 동일하게 displayPercent 적용) */}
                     <div 
-                      className={`absolute left-0 top-0 h-full bg-gradient-to-r transition-all duration-1000 ${barGradient} ${isConfigured ? "opacity-100" : "opacity-30"}`}
-                      style={{ width: isConfigured ? `${displayPercent}%` : "100%" }} // 미설정 시 배경처럼 꽉 채우되 어둡게
+                      className={`absolute left-0 top-0 h-full transition-all duration-1000 ${barBackground}`}
+                      style={{ width: `${displayPercent}%` }} 
                     />
+
+                    {/* [가속 구간 표시] 60% 이상일 때 미세한 광택 효과 추가 (가속 암시) */}
+                    {visualPercent >= 60 && isConfigured && (
+                      <div className="absolute inset-0 bg-white/10 animate-pulse pointer-events-none" />
+                    )}
 
                     {/* 텍스트 정보 */}
                     <div className="relative z-10 flex flex-col items-center justify-center leading-none">
-                      <span className={`font-bold uppercase text-sm ${textStyle}`}>
+                      <span className={`font-black uppercase text-sm tracking-tight ${textStyle}`}>
                         {levelMap[lv]}
                       </span>
-                      {isConfigured && (
-                          <span className={`text-[10px] font-bold mt-0.5 ${textStyle} opacity-90`}>
-                            {displayPercent}%
-                          </span>
-                      )}
-                      {!isConfigured && (
-                          <span className="text-[9px] text-slate-600 font-medium mt-0.5 uppercase tracking-wider">
-                            Locked
-                          </span>
-                      )}
+                      
+                      {/* 비활성 단계도 이제 %를 보여줍니다 */}
+                      <span className={`text-[11px] font-black mt-0.5 ${textStyle} opacity-90`}>
+                        {displayPercent}%
+                      </span>
                     </div>
                   </div>
                 );
              })}
              
-             <p className="text-slate-500 text-[10px] font-bold mt-4 uppercase tracking-[0.2em] opacity-60">5단계 미션</p>
+             <p className="text-slate-600 text-[10px] font-bold mt-4 uppercase tracking-[0.2em] opacity-40">5단계 미션</p>
           </div>
 
-          {/* ======================= */}
-          {/* [우측 패널] 비전 카드 (기능 유지) */}
-          {/* ======================= */}
+          {/* [우측 패널] 비전 카드 (기존 유지) */}
           <div className="w-full md:w-1/2 flex flex-col gap-6 animate-fadeIn h-full justify-center">
-            
+            {/* ... 기존 우측 패널 코드는 그대로 두시면 됩니다 ... */}
             <div className="bg-[#1A202C]/80 border border-white/10 rounded-[2.5rem] p-8 shadow-2xl relative overflow-hidden min-h-[500px] flex flex-col">
                <div className="absolute top-0 right-0 p-6 opacity-5 pointer-events-none"><Zap size={150} className="text-white" /></div>
                <div className="mb-6 relative z-10">
