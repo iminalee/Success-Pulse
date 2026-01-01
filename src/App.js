@@ -2302,7 +2302,7 @@ const renderHub = () => {
                 >
                   {((currentAsset / mbGoalAmount) * 100).toFixed(1)}%
                 </span>
-                <span className="text-[8px] text-slate-600 font-bold uppercase tracking-tighter">
+                <span className="text-[8px] text-amber-600 font-bold uppercase tracking-tighter">
                   GOAL: {currency}
                   {fNum(mbGoalAmount)}
                 </span>
