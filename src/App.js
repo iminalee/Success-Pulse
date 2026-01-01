@@ -410,20 +410,32 @@ const App = () => {
     }
   };
 
-  // 1. 메일 보내기 함수
+// 1. 메일 보내기 함수 (수정버전)
   const handleLogin = async (email) => {
     if (!email) return alert("이메일을 입력해 주세요!");
     setLoading(true);
-    const { error } = await supabase.auth.signInWithOtp({
-      email: email,
-      // 링크도 되고 코드도 되게 설정
-    });
-    setLoading(false);
-    if (error) {
-      alert("에러: " + error.message);
-    } else {
-      setIsOtpSent(true); // "메일 보냈음!" 상태로 변경
-      alert("인증번호가 발송되었습니다! 메일의 숫자 6자리를 확인하세요.");
+
+    try {
+      const { error } = await supabase.auth.signInWithOtp({
+        email: email,
+        options: {
+          shouldCreateUser: true, // 신규 유저면 회원가입 허용
+        },
+      });
+
+      if (error) {
+        // 에러가 나면 여기서 멈춤 -> 입력칸 안 생김
+        console.error("로그인 에러:", error);
+        alert("❌ 메일 전송 실패: " + error.message);
+      } else {
+        // 성공해야만 이 줄이 실행됨 -> 입력칸 생김!
+        setIsOtpSent(true); 
+        alert("✅ 인증번호가 발송되었습니다! 메일함의 숫자 6자리를 확인하세요.");
+      }
+    } catch (err) {
+      alert("시스템 에러: " + err.message);
+    } finally {
+      setLoading(false);
     }
   };
 
