@@ -1262,6 +1262,15 @@ const renderHub = () => {
              </div>
 
              {/* Pyramid Levels */}
+{/* [추가] BPS 상징 노란 삼각형 (장식용) */}
+<div className="flex justify-center mb-1">
+  <div className="w-0 h-0 
+    border-l-[30px] border-l-transparent 
+    border-r-[30px] border-r-transparent 
+    border-b-[40px] border-b-yellow-500 
+    drop-shadow-lg">
+  </div>
+</div>
              {[5, 4, 3, 2, 1].map((lv) => {
                 const isConfigured = visions[lv].title !== "";
                 const isActive = lv === activeLevel;
@@ -1286,16 +1295,6 @@ const renderHub = () => {
                         background: lv !== 5 ? `linear-gradient(to right, ${progressColor} ${visualPercent}%, rgba(30, 41, 59, 0.4) ${visualPercent}%)` : undefined,
                         width: lv !== 5 ? `${200 + (5 - lv) * 60}px` : undefined,
                       }}>
-{/* [추가] BPS 상징 노란 삼각형 (장식용) */}
-<div className="flex justify-center mb-1">
-  <div className="w-0 h-0 
-    border-l-[30px] border-l-transparent 
-    border-r-[30px] border-r-transparent 
-    border-b-[40px] border-b-yellow-500 
-    drop-shadow-lg">
-  </div>
-</div>
-
 
 
 {/* [수정] 레벨 5도 이제 평범한 '바(Bar)'입니다. (삼각형 아님) */}
@@ -1312,12 +1311,7 @@ const renderHub = () => {
       {displayPercent}%
     </span>
   </div>
-      {/* 배경 게이지 (필요하다면 유지) */}
-  <div 
-    className="absolute left-0 top-0 h-full rounded-2xl bg-gradient-to-r from-blue-600 to-blue-400 opacity-50" 
-    style={{ width: `${displayPercent}%` }} 
-  />
-</div>
+      
                     </div>
                   </div>
                 );
