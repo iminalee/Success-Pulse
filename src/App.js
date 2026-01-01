@@ -666,7 +666,7 @@ const App = () => {
   2: "위협으로부터의 보호. 재정적 자립과 안전망을 구축하여 심리적 평온을 확보합니다.",
   3: "사회적 연결. 건강한 관계 속에서 소속감과 사랑을 주고받으며 정서적 지지대를 만듭니다.",
   4: "사회적 성취와 자부심. 전문성을 인정받고 스스로 당당한 사회적 자아를 확립합니다.",
-  5: "존재의 완성. 외부의 자극에 흔들리지 않는 내면의 평온을 얻고, 타고난 잠재력을 완전히 꽃피우는 최종 단계입니다."
+  5: "존재의 완성. 타고난 잠재력을 100% 발현하여 최고의 자아(Apex BP)로 거듭납니다."
 };
     const greenGroup = ["ns", "ha", "rd", "p"];
     const sdCValue =
@@ -829,10 +829,9 @@ const App = () => {
                   <p className="text-[12px] font-black text-emerald-500 uppercase tracking-widest flex items-center gap-2">
                     <Zap size={14} /> Goal Architect
                   </p>
-                  <p className="text-[12px] font-bold text-amber-500 italic bg-slate-900/50 px-3 py-1 rounded-full border border-white/5 inline-block">
-                    {activeLevel}단계: {levelMap[activeLevel]}
-                  </p>
-        
+
+{/* 단계 이름과 미션 설명 결합 */}
+          <div className="flex flex-col gap-1.5">
             <p className="text-[12px] font-bold text-amber-500 italic bg-slate-900/50 px-3 py-1 rounded-full border border-white/5 inline-block w-fit">
               {activeLevel}단계: {levelMap[activeLevel]}
             </p>
@@ -841,7 +840,7 @@ const App = () => {
             <p className="text-[11px] text-slate-400 font-medium leading-relaxed pl-1 mt-1 animate-fadeIn max-w-md">
               {missionMap[activeLevel]}
             </p>
-       
+          </div>
                 </div>
                 <div className="flex gap-1.5">
                   {[1, 2, 3, 4, 5].map((lv) => (
@@ -1770,38 +1769,191 @@ const renderHub = () => {
     };
 
     return (
-      <div className="flex-grow w-full max-w-4xl mx-auto overflow-y-auto no-scrollbar pb-24 px-4 animate-fadeIn">
+      <div className="flex-grow w-full max-w-4xl mx-auto overflow-y-auto no-scrollbar pb-24 px-4 animate-fadeIn font-sans">
         <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center gap-3"><PenTool className={isLocked ? "text-emerald-500" : "text-amber-500"} size={32} /><h2 className="text-3xl font-black text-white uppercase italic tracking-tighter">Manifestation Contract</h2></div>
+          <div className="flex items-center gap-3">
+            <PenTool
+              className={isLocked ? "text-emerald-500" : "text-amber-500"}
+              size={32}
+            />
+            <h2 className="text-3xl font-black text-white uppercase italic tracking-tighter">
+              Manifestation Contract
+            </h2>
+          </div>
+          {isLocked && (
+            <div className="bg-emerald-500/10 border border-emerald-500/50 px-4 py-2 rounded-full flex items-center gap-2">
+              <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
+              <span className="text-[10px] font-black text-emerald-500 uppercase tracking-widest">
+                Contract Active
+              </span>
+            </div>
+          )}
         </div>
-        <div className={`bg-[#0A0F1E] border-2 rounded-[3.5rem] p-8 md:p-16 relative overflow-hidden shadow-2xl ${isLocked ? "border-emerald-500/30" : "border-white/10"}`}>
-          <div className="absolute top-0 right-0 p-16 opacity-5 pointer-events-none"><ShieldCheck size={280} className="text-white" /></div>
-          {/* [수정 완료] 계약서 서사 반영 */}
-          <div className="space-y-8 md:space-y-12 text-slate-300 leading-[1.9] md:leading-[2.2] text-base md:text-lg font-normal tracking-tight text-justify px-2 md:px-10 relative z-10">
-            <p className="border-l-2 border-amber-500/40 pl-6 md:pl-10 font-sans">
-              무한한 평행세계 속에서 모든 성취를 완료한 마스터 자아 <span className="text-white font-bold px-2 italic text-xl">Apex BP {userName}</span>는, 자신의 유일한 현실 대리인인 <span className="text-amber-400 font-bold underline underline-offset-4">{userName} ver.0</span>를 최고의 자아로 현현시키기 위한 <span className="text-white font-black text-shadow-sm">‘존재적 상장(Existential IPO)’</span>을 승인하였다.
+<div
+  className={`bg-[#0A0F1E] border-2 rounded-[2rem] md:rounded-[3.5rem] p-6 md:p-16 relative overflow-hidden shadow-2xl transition-all duration-500 ${
+    isLocked
+      ? "border-emerald-500/30 shadow-[0_0_50px_rgba(16,185,129,0.1)]"
+      : "border-white/10"
+  }`}
+>
+  <div className="absolute top-0 right-0 p-4 md:p-16 opacity-5 pointer-events-none">
+    <ShieldCheck size={280} className="text-white" />
+  </div>
+  
+  <div className="flex flex-col items-center mb-8 md:mb-16 text-center">
+    <h3 className="text-2xl md:text-4xl font-light text-white tracking-[0.3em] uppercase border-b border-white/10 pb-4 md:pb-8 mb-4 md:mb-6 font-serif">
+      存在 的 契約
+    </h3>
+    <p className="text-[10px] text-slate-500 font-bold tracking-[0.6em] uppercase">
+      The Bond of Essential Identity
+    </p>
+  </div>
+  
+  <div className="space-y-6 md:space-y-10 text-slate-300 leading-[1.8] md:leading-[2.2] text-base md:text-xl font-normal tracking-tight text-center md:text-left px-0 md:px-10">
+    <p className="border-l-2 border-amber-500/30 pl-4 md:pl-8 font-sans">
+      {" "}
+      <span className="text-white font-bold px-1 md:px-2 underline decoration-amber-500/40 italic">
+        Apex BP {userName}
+      </span>
+      는 현 시점 자아인{" "}
+      <span className="text-white font-bold">{userName} ver.0</span>이
+      본질적 자아로 도약할 가능성을 선택하였다.
+          </p>
+            <p className="border-l-2 border-amber-500/30 pl-8 font-sans">
+              이에 {" "}
+              <span className="text-white font-bold">
+                {userName} ver.0
+              </span>는{" "}
+              <input
+                type="date"
+                value={targetDate}
+                disabled={isLocked}
+                onChange={(e) => setTargetDate(e.target.value)}
+                className={`mx-2 px-4 py-2 rounded-xl text-xl font-bold border outline-none shadow-inner transition-all ${
+                  isLocked
+                    ? "bg-emerald-900/20 text-emerald-400 border-emerald-500/30 cursor-not-allowed"
+                    : "bg-slate-900 text-amber-500 border-white/5 focus:border-amber-500"
+                }`}
+              />{" "}
+              까지 Apex BP를 이루는 최대 5개의 목표를 달성한다.{" "} 이 댓가로 BP
+              {userName}는 현 멘탈뱅크 잔액{" "}
+              <span className="text-white font-black">Mental Bank Balance</span>{" "}
+              (
+              <span className="text-white border-b border-white/30">
+                {currency}
+                {fNum(mbBalance)}
+              </span>
+              )의 <span className="text-amber-500 font-bold">25%</span> 
+              금액인{" "}
+              <span className="text-white font-bold mx-2 bg-white/5 px-3 py-1 rounded-lg">
+                {currency}
+                {fNum(livingAllowance)}
+              </span>
+              을 지급하되, 
             </p>
-            <p className="border-l-2 border-slate-700 pl-6 md:pl-10">
-              이에 <span className="text-slate-100 font-bold">{userName} ver.0</span>는 <input type="date" value={targetDate} disabled={isLocked} onChange={(e) => setTargetDate(e.target.value)} className="bg-slate-900 text-amber-500 border-white/10 border px-2 rounded-lg font-bold" /> 까지 5단계의 관문을 돌파하여 확정된 미래를 현실로 소환한다. 이 경이로운 융합의 대가로, Apex BP는 무의식의 저수지인 <span className="text-white font-bold ml-1">Mental Bank</span> 잔액 ({currency}{fNum(mbBalance)})의 <span className="text-amber-500 font-black mx-1 text-xl">25%</span>에 해당하는 활동 동력 <span className="text-white font-black mx-2 bg-white/5 px-3 py-1 rounded-xl border border-white/10 shadow-lg">{currency}{fNum(livingAllowance)}</span>을 현실 자아에게 즉시 수혈한다.
+            <p className="border-l-2 border-amber-500/30 pl-8 font-sans">
+              목표달성 활동으로 매시간의 실천 가치를
+              증명할 때마다 시간당{" "}
+              <span className="text-emerald-400 font-bold px-3 py-1 bg-white/5 rounded-lg border border-white/10">
+                {currency}
+                {fNum(valueEventAmount)}
+              </span>
+              의{" "}
+              <span className="text-xs uppercase opacity-60 font-bold tracking-widest">
+                Value Award
+              </span>
+              으로 지급한다.
             </p>
-            <p className="border-l-2 border-slate-700 pl-6 md:pl-10">
-              실행의 근육을 빌려 가치를 창출할 때마다, 시스템은 이를 <span className="text-emerald-400 font-bold mx-1">‘신경학적 각인(Neuro-Imprinting)’</span>으로 인정한다. 매 시간의 몰입이 증명될 때마다 시간당 <span className="text-emerald-400 font-black px-3 py-1 bg-emerald-500/5 rounded-lg border border-emerald-500/20 mx-2 shadow-inner">{currency}{fNum(valueEventAmount)}</span>의 Value Award를 존재적 매출로서 Mental Bank에 예치하며 동기화를 가속한다.
-            </p>
-            <p className="border-l-2 border-rose-500/50 pl-6 md:pl-10 bg-rose-500/5 py-6 rounded-r-3xl font-sans italic">
-              단, <span className="text-rose-400 font-black drop-shadow-sm">3일 이상 의식의 파동(활동)이 멈출 경우</span>, Apex BP는 본 그릇(Vessel)과의 동기화를 해제하고, 다른 평행 세계에서 깨어있는 <span className="text-white font-bold"> {userName} ver.N</span>을 찾아 새로운 현신을 선택할 전적인 권리를 유지한다.
+            <p className="border-l-2 border-rose-500/50 pl-8 bg-rose-500/5 py-4 rounded-r-xl font-sans">
+              단,{" "}
+              <span className="text-rose-400 font-black">
+                3일 이상 무활동 시
+              </span>
+              , BP {userName}는 계약을 파기하고 다른 평행 세계의{" "}
+              <span className="italic opacity-80">{userName} ver.N</span>을 찾아
+              선택할 권리를 가진다.
             </p>
           </div>
-          <div className="mt-12 flex flex-col md:flex-row justify-between items-end gap-8">
-            <div className="flex flex-col gap-4">
-              <input value={signature} onChange={(e) => setSignature(e.target.value)} disabled={isLocked} placeholder="Sign Here" className="text-3xl bg-transparent border-b-2 font-serif italic text-white outline-none w-64" />
-              {!isLocked && <button onClick={() => {if(signature===userName) setSignedDate(new Date()); else showToast("서명 불일치");}} className="bg-amber-600 hover:bg-amber-500 px-8 py-3 rounded-xl font-black text-xs uppercase text-white shadow-lg transition-all active:scale-95">Execute</button>}
+          <div className="mt-20 border-t border-white/10 pt-12 px-4 md:px-12 pb-8">
+            <div className="flex flex-col md:flex-row justify-between items-end gap-16 md:gap-0">
+              <div className="flex flex-col items-center md:items-start gap-4 w-full md:w-auto">
+                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">
+                  SIGNED BY THE VESSEL(CURRENT SELF)
+                </p>
+                <div className="relative group flex flex-col gap-4">
+                  <input
+                    value={signature}
+                    onChange={(e) => setSignature(e.target.value)}
+                    disabled={isLocked}
+                    placeholder="Sign Here (Name)"
+                    className={`text-3xl md:text-3xl bg-transparent border-b-2 font-serif italic w-64 pb-2 focus:outline-none transition-colors text-center md:text-left ${
+                      isLocked
+                        ? "text-emerald-400 border-emerald-500/50 cursor-not-allowed opacity-80"
+                        : "text-white border-slate-700 focus:border-amber-500 placeholder:text-slate-700"
+                    }`}
+                  />
+                  {!isLocked ? (
+                    <button
+                      onClick={handleExecuteContract}
+                      className="bg-amber-600 hover:bg-amber-500 text-white py-3 rounded-xl font-black text-xs uppercase tracking-widest shadow-lg transition-all active:scale-95 flex items-center justify-center gap-2"
+                    >
+                      <PenTool size={14} /> 서약 체결 (Execute)
+                    </button>
+                  ) : (
+                    <button
+                      onClick={handleVoidContract}
+                      className="text-[10px] font-bold text-rose-500 hover:text-rose-400 uppercase tracking-widest flex items-center gap-2 border border-rose-500/30 px-4 py-2 rounded-lg hover:bg-rose-500/10 transition-all cursor-pointer"
+                    >
+                      <Trash2 size={12} /> Void Contract
+                    </button>
+                  )}
+                </div>
+                <p className="text-[11px] font-mono text-slate-500 mt-1">
+                  Date:{" "}
+                  <span
+                    className={`transition-colors duration-500 ${
+                      signedDate ? "text-amber-500 font-bold" : "text-slate-500"
+                    }`}
+                  >
+                    {signedDate
+                      ? new Date(signedDate).toLocaleDateString()
+                      : new Date().toLocaleDateString()}
+                  </span>
+                </p>
+              </div>
+              <div className="flex flex-col items-center md:items-end gap-4 w-full md:w-auto relative">
+                <p className="text-[10px] font-bold text-amber-700/60 uppercase tracking-widest mb-2">
+                  AUTHORIZED BY APEX BP{userName}(FUTURE SELF)
+                </p>
+                <div className="relative inline-block mt-2">
+                  <div
+                    className="text-4xl md:text-5xl font-black text-amber-800 select-none opacity-30 font-serif italic pr-6"
+                    style={{ textShadow: "-1px -1px 0 rgba(0,0,0,0.5)" }}
+                  >
+                    BP {userName}
+                  </div>
+                  <div className="absolute top-1 -right-6 w-32 h-32 border-4 border-rose-600/80 rounded-full flex flex-col items-center justify-center -rotate-12 animate-pulse opacity-90 mix-blend-screen pointer-events-none shadow-[0_0_15px_rgba(225,29,72,0.5)] bg-rose-500/10 backdrop-blur-[1px]">
+                    <div className="w-28 h-28 border border-rose-600/50 rounded-full flex flex-col items-center justify-center p-2 text-rose-600">
+                      <span className="text-[10px] font-black uppercase tracking-widest">
+                        APEX IDENTITY
+                      </span>
+                      <span className="text-xl font-black font-serif italic my-1">
+                        Approved
+                      </span>
+                      <span className="text-[8px] font-bold tracking-widest border-t border-rose-600/50 pt-1 w-full text-center">
+                        OFFICIAL SEAL
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
-            <div className="text-right text-amber-800/40 font-serif italic text-4xl select-none">BP {userName} Authorized</div>
           </div>
         </div>
       </div>
     );
   };
+
  const renderPhilosophy = () => (
     <div className="flex-grow w-full max-w-5xl mx-auto overflow-y-auto no-scrollbar pb-24 px-6 animate-fadeIn font-sans text-left">
       {/* Header Section */}
@@ -1967,28 +2119,23 @@ const renderHub = () => {
           <h3 className="text-xl font-black text-slate-500 uppercase tracking-widest mb-8 flex items-center gap-2">
             <Book size={18} /> Glossary | 용어집
           </h3>
-<div className="flex flex-col gap-3 w-full">
-    {/* 각 아이템: flex-row와 items-baseline을 사용하여 용어와 설명을 한 줄에 배치 */}
-    <div className="p-4 bg-slate-900/20 rounded-2xl border border-white/5 hover:bg-slate-900/40 transition-all flex flex-wrap items-baseline gap-x-3">
-      <span className="text-white font-bold text-base min-w-fit">Apex BP (Best Possible Self) :</span>
-      <span className="text-slate-400 font-light text-sm">평행세계에서 모든 목표를 이룬 당신의 완성된 자아.</span>
-    </div>
-    
-    <div className="p-4 bg-slate-900/20 rounded-2xl border border-white/5 hover:bg-slate-900/40 transition-all flex flex-wrap items-baseline gap-x-3">
-      <span className="text-white font-bold text-base min-w-fit">The Vessel (ver.0) :</span>
-      <span className="text-slate-400 font-light text-sm">마스터 자아의 의식을 현실에서 구현해내는 당신의 현재 육체.</span>
-    </div>
-    
-    <div className="p-4 bg-slate-900/20 rounded-2xl border border-white/5 hover:bg-slate-900/40 transition-all flex flex-wrap items-baseline gap-x-3">
-      <span className="text-white font-bold text-base min-w-fit">Mental Bank (MB) :</span>
-      <span className="text-slate-400 font-light text-sm">행동의 가치가 복리로 적립되는 당신의 무의식 자산 계좌.</span>
-    </div>
-    
-    <div className="p-4 bg-slate-900/20 rounded-2xl border border-white/5 hover:bg-slate-900/40 transition-all flex flex-wrap items-baseline gap-x-3">
-      <span className="text-white font-bold text-base min-w-fit">Magnitude (누적 진폭) :</span>
-      <span className="text-slate-400 font-light text-sm">현실을 변화시킨 에너지의 총량. 100% 도달 시 합일이 일어납니다.</span>
-    </div>
-  </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+            <div className="p-4 bg-slate-900/20 rounded-xl border border-white/5">
+              <span className="text-white font-bold block mb-1">Apex BP (Best Possible Self)</span>
+              <span className="text-slate-500">평행세계에서 모든 목표를 이룬 당신의 완성된 자아.</span>
+           
+          
+              <span className="text-white font-bold block mb-1">The Vessel (ver.0)</span>
+              <span className="text-slate-500">마스터 자아의 의식을 현실에서 구현해내는 당신의 현재 육체.</span>
+            
+           
+              <span className="text-white font-bold block mb-1">Mental Bank (MB)</span>
+              <span className="text-slate-500">행동의 가치가 복리로 적립되는 당신의 무의식 자산 계좌.</span>
+           
+            
+              <span className="text-white font-bold block mb-1">Magnitude (누적 진폭)</span>
+              <span className="text-slate-500">현실을 변화시킨 에너지의 총량. 100% 도달 시 합일이 일어납니다.</span>
+            </div>
           </div>
         </section>
       </div>
