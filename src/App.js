@@ -1222,7 +1222,7 @@ const renderHub = () => {
                 onClick={() => setCurrentView("contract")}
                 className="bg-amber-600 hover:bg-amber-500 text-white px-8 py-4 rounded-2xl font-black text-xs uppercase tracking-widest shadow-2xl flex items-center gap-3 mx-auto transition-all active:scale-95"
               >
-                <PenTool size={14} /> Sign Agreement to Unlock
+                <PenTool size={14} /> Sign Contract to Unlock
               </button>
             </div>
           </div>
@@ -1799,7 +1799,7 @@ const renderHub = () => {
               size={32}
             />
             <h2 className="text-3xl font-black text-white uppercase italic tracking-tighter">
-              Manifestation Agreement
+              Manifestation Contract
             </h2>
           </div>
           {isLocked && (
@@ -2183,11 +2183,11 @@ const renderHub = () => {
                 <div className="flex items-center gap-3 mb-2">
                   <PenTool size={18} className="text-amber-500" />
                   <h4 className="text-lg font-black text-white uppercase">
-                    Sign The Covenant (Agreement)
+                    Sign The Covenant (contract)
                   </h4>
                 </div>
                 <p className="text-xs text-slate-400 leading-relaxed">
-                  <span className="text-white font-bold">Agreement</span> 탭으로
+                  <span className="text-white font-bold">Contract</span> 탭으로
                   이동하여 서약서에 서명하십시오. 이는 시스템을 활성화하는
                   유일한 열쇠(Key)입니다. 서명하는 순간, 당신의 시간과 노력은
                   공식적인 가치로 인정받기 시작합니다.
