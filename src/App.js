@@ -1332,17 +1332,17 @@ const renderHub = () => {
                             : "none"
                       }}
                     >
-                      {/* 텍스트 위치 보정: absolute + translate 기법으로 정중앙 고정 */}
+{/* 텍스트 위치 수정: '자아실현'은 밑변(존중감)을 기준으로 살짝 위로 띄움 */}
                       <span
-                        className={`absolute text-[10px] md:text-[13px] font-black text-white tracking-tighter text-center whitespace-nowrap ${
-                          lv === 5 ? "-bottom-[30px] md:-bottom-[40px]" : "top-1/2 -translate-y-1/2"
-                        } left-1/2 -translate-x-1/2 ${
+                        className={`absolute font-black text-white tracking-tighter text-center whitespace-nowrap left-1/2 -translate-x-1/2 ${
                           isActive ? "scale-110" : ""
+                        } ${
+                          lv === 5 
+                            // lv 5(자아실현)일 때: 밑에서 10px(PC는 16px) 위로 띄움 -> 넓은 공간 확보!
+                            ? "bottom-[10px] md:bottom-[16px] text-[10px] md:text-[13px]" 
+                            // 나머지 단계: 정중앙 배치
+                            : "top-1/2 -translate-y-1/2 text-[10px] md:text-[13px]"
                         }`}
-                        style={{
-                           // 자아실현(5단계)은 삼각형 모양 때문에 위치를 미세 조정
-                           marginTop: lv === 5 ? "20px" : "0"
-                        }}
                       >
                         {levelMap[lv]}
                       </span>
