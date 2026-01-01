@@ -661,6 +661,13 @@ const App = () => {
   }, [chartData, currentView, annualIncome]);
 
   const renderLab = () => {
+    const missionMap = {
+  1: "생존의 기초. 신체적 활력과 생물학적 균형을 유지하여 엔진을 가동합니다.",
+  2: "위협으로부터의 보호. 재정적 자립과 안전망을 구축하여 심리적 평온을 확보합니다.",
+  3: "사회적 연결. 건강한 관계 속에서 소속감과 사랑을 주고받으며 정서적 지지대를 만듭니다.",
+  4: "사회적 성취와 자부심. 전문성을 인정받고 스스로 당당한 사회적 자아를 확립합니다.",
+  5: "존재의 완성. 타고난 잠재력을 100% 발현하여 최고의 자아(Apex BP)로 거듭납니다."
+};
     const greenGroup = ["ns", "ha", "rd", "p"];
     const sdCValue =
       tciProfile.sd_c?.score ??
@@ -825,6 +832,11 @@ const App = () => {
                   <p className="text-[12px] font-bold text-amber-500 italic bg-slate-900/50 px-3 py-1 rounded-full border border-white/5 inline-block">
                     {activeLevel}단계: {levelMap[activeLevel]}
                   </p>
+                      {/* ▼▼▼ [추가] 단계별 미션 설명 문구 ▼▼▼ */}
+                   <p className="text-[11px] text-slate-400 font-medium leading-relaxed pl-1 mt-1 animate-fadeIn">
+                   {missionMap[activeLevel]}
+                   </p>
+                   {/* ▲▲▲ [추가] 끝 ▲▲▲ */}
                 </div>
                 <div className="flex gap-1.5">
                   {[1, 2, 3, 4, 5].map((lv) => (
@@ -840,6 +852,7 @@ const App = () => {
                       {lv}
                     </button>
                   ))}
+
                 </div>
               </div>
               <div className="space-y-6 mb-10">
