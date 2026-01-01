@@ -1195,8 +1195,6 @@ const App = () => {
 const renderHub = () => {
     const activeTraits = bpsTraits.filter((t) => t.trim() !== "");
     const isLocked = !signedDate;
-
-    // [핵심 해결 1] 블랙 화면 방지 (0원일 때 나누기 에러 막기)
     const totalProgress = mbGoalAmount > 0 ? Math.min(currentAsset / mbGoalAmount, 1) : 0;
 
     return (
@@ -1239,11 +1237,12 @@ const renderHub = () => {
           <div className="w-full md:w-1/2 flex flex-col items-center p-6 md:p-8 bg-[#2D3748]/30 rounded-[3rem] border border-white/5 shadow-2xl h-[550px] justify-center relative overflow-visible mt-8 md:mt-0">
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 rounded-full bg-amber-500/5 blur-3xl -z-10 animate-pulse"></div>
             <div className="flex flex-col items-center w-full relative z-10 gap-1">
-              <div className="flex items-end gap-4 md:gap-10 w-full justify-center mt-6 mb-1">
-                {/* BPS 텍스트: 전체 달성률에 따라 빛나는 효과 */}
+              
+              {/* [수정] BPS 섹션: 삼각형 위에 딱 붙이고, 캐릭터들을 위로 띄움 */}
+              <div className="flex items-end gap-4 md:gap-10 w-full justify-center mt-6">
                 <div
                   onClick={() => setActiveLevel(6)}
-                  className="w-[120px] md:w-[150px] h-[50px] flex items-end justify-center relative z-20 cursor-pointer group"
+                  className="w-[120px] md:w-[150px] h-auto flex flex-col items-center justify-end relative z-20 cursor-pointer group pb-2"
                 >
                   <h4
                     className={`text-xl font-black tracking-tighter transition-all duration-500 ${
@@ -1252,29 +1251,29 @@ const renderHub = () => {
                         : "text-slate-600 group-hover:text-slate-400"
                     }`}
                     style={{
-                      // 진행률에 따라 그림자(빛)가 커짐 (NaN 에러 방지)
                       filter: `drop-shadow(0 0 ${10 + (isNaN(totalProgress) ? 0 : totalProgress) * 40}px rgba(245, 158, 11, ${0.5 + (isNaN(totalProgress) ? 0 : totalProgress) * 0.5}))`
                     }}
                   >
                     BPS
                   </h4>
-                  <div className="absolute bottom-1 left-1/2 w-full h-full pointer-events-none flex items-center justify-center">
+                  {/* 5개 Character: 삼각형 위에서 빛나며 떠다님 */}
+                  <div className="absolute top-[-50px] left-1/2 w-full h-full pointer-events-none flex items-center justify-center">
                     {activeTraits.map((trait, i) => {
                       const total = activeTraits.length;
                       const angle = -75 + (i / (total - 1)) * 150;
                       const radian = angle * (Math.PI / 180);
-                      const x = 42 * Math.sin(radian);
-                      const y = 42 * Math.cos(radian);
+                      const x = 50 * Math.sin(radian);
+                      const y = 50 * Math.cos(radian);
                       return (
                         <div
                           key={i}
-                          className="absolute flex items-center justify-center transition-all duration-700"
+                          className="absolute flex items-center justify-center transition-all duration-700 animate-pulse"
                           style={{ transform: `translate(${x}px, -${y}px)` }}
                         >
                           <span
                             className={`text-[10px] font-black px-2 py-0.5 rounded-full transition-all duration-500 ${
                               activeLevel === 6
-                                ? "text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.9)] animate-pulse"
+                                ? "text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.9)]"
                                 : "text-slate-600 opacity-30"
                             }`}
                           >
@@ -1286,12 +1285,12 @@ const renderHub = () => {
                   </div>
                 </div>
               </div>
+
               {[5, 4, 3, 2, 1].map((lv) => {
                 const isConfigured = visions[lv].title !== "";
                 const isActive = lv === activeLevel;
                 const lvGoal = mbGoalAmount / 5;
                 const progress = visions[lv].progressAsset;
-                // [핵심 해결 1] 0 나누기 0 에러 방지
                 const rateVal = mbGoalAmount > 0 ? Math.min(progress / lvGoal, 1) : 0;
                 const ratePercent = (rateVal * 100).toFixed(1);
                 const isGoalMet = progress >= lvGoal && mbGoalAmount > 0;
@@ -1325,7 +1324,6 @@ const renderHub = () => {
                         width: lv === 5 ? "0" : `${160 + (5 - lv) * 50}px`,
                         backgroundColor: lv === 5 ? "transparent" : colorMain,
                         borderBottomColor: lv === 5 ? colorMain : "",
-                        // ✨ 각 단계별 빛나는 효과
                         filter: isActive 
                           ? "drop-shadow(0 0 30px rgba(245,158,11,0.8))"
                           : isConfigured 
@@ -1333,10 +1331,6 @@ const renderHub = () => {
                             : "none"
                       }}
                     >
-                      {/* [핵심 해결 2] 글자 위치 강력 고정! 
-                          top-[60px] (모바일), top-[75px] (PC) 
-                          삼각형 꼭대기(0px)에서 밑으로 이만큼 내려오게 강제했습니다. 
-                          이 위치면 무조건 삼각형 안쪽 넓은 곳에 들어옵니다. */}
                       <span
                         className={`absolute font-black text-white tracking-tighter text-center whitespace-nowrap left-1/2 -translate-x-1/2 ${
                           isActive ? "scale-110" : ""
@@ -1383,7 +1377,6 @@ const renderHub = () => {
                 );
               })}
               
-              {/* [요청하신 부분] 5단계 미션 글자 */}
               <p className="text-slate-500 text-[10px] font-bold mt-4 uppercase tracking-[0.2em] opacity-60">
                 5단계 미션
               </p>
