@@ -703,12 +703,12 @@ const App = () => {
 
 {user ? (
                   <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-2xl p-6 text-center animate-fadeIn">
-                    <p className="text-emerald-500 font-black text-xl mb-2">
+                    <p className="text-emerald-500 font-black text-md mb-2">
                       🎉 Identity Confirmed!
                     </p>
-                    <p className="text-white text-sm font-bold mb-4">
+                    <p className="text-white text-xl font-bold mb-4">
                       {userName || "User"}{" "}
-                      <span className="text-emerald-400 text-xs">ver.0</span>{" "}
+                      <span className="text-emerald-400 text-md">ver.0</span>{" "}
                       <span className="text-slate-500 text-xs">
                         ({user.email})
                       </span>
