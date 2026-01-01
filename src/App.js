@@ -1303,9 +1303,9 @@ const renderHub = () => {
                       ${isActive ? "ring-2 ring-amber-500 scale-105 z-10 brightness-110 shadow-[0_0_15px_rgba(245,158,11,0.3)]" : "opacity-90 hover:opacity-100 hover:border-slate-500"}
                     `}
                   >
-                    {/* 1. 배경 게이지 (파란색 그라데이션) */}
+                    {/* 1. 배경 게이지 (앰버그라데이션) */}
                     <div 
-                      className="absolute left-0 top-0 h-full bg-gradient-to-r from-blue-600 to-blue-400 opacity-90 transition-all duration-1000" 
+                      className="absolute left-0 top-0 h-full bg-gradient-to-r from-amber-600 to-amber-400 opacity-90 transition-all duration-1000" 
                       style={{ width: `${displayPercent}%` }} 
                     />
 
@@ -1314,7 +1314,7 @@ const renderHub = () => {
                       <span className={`font-bold uppercase text-sm ${isActive ? "text-white" : "text-slate-300"}`}>
                         {levelMap[lv]}
                       </span>
-                      <span className="text-[10px] text-yellow-300 font-bold mt-0.5">
+                      <span className="text-[10px] text-white-300 font-bold mt-0.5">
                         {displayPercent}%
                       </span>
                     </div>
