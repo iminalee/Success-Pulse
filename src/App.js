@@ -1196,9 +1196,9 @@ const renderHub = () => {
     const activeTraits = bpsTraits.filter((t) => t.trim() !== "");
     const isLocked = !signedDate;
 
-    // 전체 목표 달성률 계산 (BPS 빛 효과용)
-    const totalProgress = Math.min(currentAsset / mbGoalAmount, 1);
-    
+    // [핵심 해결 1] 블랙 화면 방지 (0원일 때 나누기 에러 막기)
+    const totalProgress = mbGoalAmount > 0 ? Math.min(currentAsset / mbGoalAmount, 1) : 0;
+
     return (
       <div className="relative w-full h-full flex-grow flex flex-col">
         {isLocked && (
@@ -1252,8 +1252,8 @@ const renderHub = () => {
                         : "text-slate-600 group-hover:text-slate-400"
                     }`}
                     style={{
-                      // 진행률에 따라 그림자(빛)가 커짐 (기본 0 ~ 최대 50px)
-                      filter: `drop-shadow(0 0 ${10 + totalProgress * 40}px rgba(245, 158, 11, ${0.5 + totalProgress * 0.5}))`
+                      // 진행률에 따라 그림자(빛)가 커짐 (NaN 에러 방지)
+                      filter: `drop-shadow(0 0 ${10 + (isNaN(totalProgress) ? 0 : totalProgress) * 40}px rgba(245, 158, 11, ${0.5 + (isNaN(totalProgress) ? 0 : totalProgress) * 0.5}))`
                     }}
                   >
                     BPS
@@ -1291,9 +1291,10 @@ const renderHub = () => {
                 const isActive = lv === activeLevel;
                 const lvGoal = mbGoalAmount / 5;
                 const progress = visions[lv].progressAsset;
-                const rateVal = Math.min(progress / lvGoal, 1); // 0.0 ~ 1.0
+                // [핵심 해결 1] 0 나누기 0 에러 방지
+                const rateVal = mbGoalAmount > 0 ? Math.min(progress / lvGoal, 1) : 0;
                 const ratePercent = (rateVal * 100).toFixed(1);
-                const isGoalMet = progress >= lvGoal;
+                const isGoalMet = progress >= lvGoal && mbGoalAmount > 0;
                 const colorMain = isActive
                   ? "#F59E0B"
                   : isConfigured
@@ -1324,23 +1325,24 @@ const renderHub = () => {
                         width: lv === 5 ? "0" : `${160 + (5 - lv) * 50}px`,
                         backgroundColor: lv === 5 ? "transparent" : colorMain,
                         borderBottomColor: lv === 5 ? colorMain : "",
-                        // ✨ 각 단계별 빛나는 효과 (달성률에 비례)
+                        // ✨ 각 단계별 빛나는 효과
                         filter: isActive 
-                          ? "drop-shadow(0 0 30px rgba(245,158,11,0.8))" // 선택됐을 땐 최대로 빛남
+                          ? "drop-shadow(0 0 30px rgba(245,158,11,0.8))"
                           : isConfigured 
                             ? `drop-shadow(0 0 ${rateVal * 30}px ${isGoalMet ? "rgba(16,185,129,0.6)" : "rgba(245,158,11," + (rateVal * 0.8) + ")"})`
                             : "none"
                       }}
                     >
-{/* 텍스트 위치 수정: '자아실현'은 밑변(존중감)을 기준으로 살짝 위로 띄움 */}
+                      {/* [핵심 해결 2] 글자 위치 강력 고정! 
+                          top-[60px] (모바일), top-[75px] (PC) 
+                          삼각형 꼭대기(0px)에서 밑으로 이만큼 내려오게 강제했습니다. 
+                          이 위치면 무조건 삼각형 안쪽 넓은 곳에 들어옵니다. */}
                       <span
                         className={`absolute font-black text-white tracking-tighter text-center whitespace-nowrap left-1/2 -translate-x-1/2 ${
                           isActive ? "scale-110" : ""
                         } ${
-                          lv === 5
-                            // lv 5(자아실현)일 때: 밑에서 2px(PC는 5px) 위로 띄움 -> 넓은 공간 확보!
-                            ? "bottom-[2px] md:bottom-[5px] text-[10px] md:text-[16px]"
-                            // 나머지 단계: 정중앙 배치
+                          lv === 5 
+                            ? "top-[60px] md:top-[75px] text-[10px] md:text-[13px]" 
                             : "top-1/2 -translate-y-1/2 text-[10px] md:text-[13px]"
                         }`}
                       >
@@ -1380,12 +1382,12 @@ const renderHub = () => {
                   </div>
                 );
               })}
-
-{/* [수정 3] "5단계 미션" 글자 추가 */}
+              
+              {/* [요청하신 부분] 5단계 미션 글자 */}
               <p className="text-slate-500 text-[10px] font-bold mt-4 uppercase tracking-[0.2em] opacity-60">
                 5단계 미션
               </p>
-                
+
             </div>
           </div>
           <div className="w-full md:w-1/2 h-full flex flex-col">
