@@ -219,7 +219,7 @@ const App = () => {
 
   // UI 상태
   const [activeLevel, setActiveLevel] = useState(5);
-  const [currentView, setCurrentView] = useState("Hub");
+  const [currentView, setCurrentView] = useState("hub");
   const [chartData, setChartData] = useState([]);
   const [isAiModalOpen, setIsAiModalOpen] = useState(false);
   const [isSensoryModalOpen, setIsSensoryModalOpen] = useState(false);
@@ -608,7 +608,7 @@ const App = () => {
   useEffect(() => {
     if (
       chartRef.current &&
-      (currentView === "Hub" || currentView === "analysis")
+      (currentView === "hub" || currentView === "analysis")
     ) {
       if (chartInstance.current) chartInstance.current.destroy();
       const ctx = chartRef.current.getContext("2d");
@@ -2266,7 +2266,7 @@ const renderHub = () => {
       <header className="flex justify-between items-start md:items-center mb-8 px-4 max-w-7xl mx-auto w-full shrink-0 pt-4">
         {/* ▼▼▼ 여기를 수정했습니다 (클릭하면 홈으로 이동) ▼▼▼ */}
         <div 
-          onClick={() => setCurrentView("Hub")} 
+          onClick={() => setCurrentView("hub")} 
           className="cursor-pointer group"
         >
           <h1 className="text-3xl md:text-4xl font-black text-white tracking-tighter italic uppercase leading-none group-hover:opacity-80 transition-opacity">
