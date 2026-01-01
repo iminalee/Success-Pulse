@@ -5,6 +5,8 @@ import {
   Plus,
   Activity,
   Brain,
+  Book,
+  BookOpen,
   Edit3,
   Save,
   Trash2,
@@ -30,7 +32,6 @@ import {
   ShieldCheck,
   Info,
   TrendingUp,
-  BookOpen,
   Star,
 } from "lucide-react";
 import { createClient } from "@supabase/supabase-js";
@@ -2123,6 +2124,8 @@ const renderHub = () => {
       </div>
     </div>
   );
+
+
   return (
     <div className="min-h-screen bg-slate-950 text-slate-200 p-4 md:p-10 font-sans overflow-hidden flex flex-col selection:bg-amber-500/30">
       <style>{`@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css'); * { font-family: 'Pretendard', sans-serif; letter-spacing: -0.02em; } .animate-fadeIn { animation: fadeIn 0.8s ease-out; } .animate-spin-slow { animation: spin 20s linear infinite; } @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } } @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }`}</style>
