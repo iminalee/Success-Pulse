@@ -1287,13 +1287,12 @@ const renderHub = () => {
                         width: lv !== 5 ? `${200 + (5 - lv) * 60}px` : undefined,
                       }}>
                       
-{/* [수정 3] 자아실현 글자 및 % 복원 + 위치 조정 (픽셀 대신 중앙 정렬 적용) */}
-<div className={`absolute left-0 right-0 flex flex-col items-center justify-center leading-none z-30 ${lv === 5 ? "top-[55%] -translate-y-1/2" : "inset-0"}`}>
+{/* [수정] Level 5(자아실현) 위치 강제 조정: 삼각형 무게중심에 맞춤 */}
+<div className={`absolute left-0 right-0 flex flex-col items-center justify-center leading-none z-20 ${lv === 5 ? "top-[60%] -translate-y-1/2" : "inset-0"}`}>
   <span className={`font-black uppercase tracking-tighter ${isActive ? "text-white text-sm md:text-base" : "text-slate-200 text-xs md:text-sm"}`}>
     {levelMap[lv]}
   </span>
-  
-  {/* 모든 단계에 % 표시 (삼각형 포함) */}
+  {/* 모든 단계에 % 표시 */}
   <span className="text-[9px] font-bold text-white/80 mt-0.5">
     {displayPercent}%
   </span>
