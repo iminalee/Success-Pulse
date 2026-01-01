@@ -219,7 +219,7 @@ const App = () => {
 
   // UI 상태
   const [activeLevel, setActiveLevel] = useState(5);
-  const [currentView, setCurrentView] = useState("lab");
+  const [currentView, setCurrentView] = useState("Hub");
   const [chartData, setChartData] = useState([]);
   const [isAiModalOpen, setIsAiModalOpen] = useState(false);
   const [isSensoryModalOpen, setIsSensoryModalOpen] = useState(false);
@@ -1192,9 +1192,13 @@ const App = () => {
     );
   };
 
-  const renderHub = () => {
+const renderHub = () => {
     const activeTraits = bpsTraits.filter((t) => t.trim() !== "");
     const isLocked = !signedDate;
+
+    // 전체 목표 달성률 계산 (BPS 빛 효과용)
+    const totalProgress = Math.min(currentAsset / mbGoalAmount, 1);
+    
     return (
       <div className="relative w-full h-full flex-grow flex flex-col">
         {isLocked && (
@@ -1236,6 +1240,7 @@ const App = () => {
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 rounded-full bg-amber-500/5 blur-3xl -z-10 animate-pulse"></div>
             <div className="flex flex-col items-center w-full relative z-10 gap-1">
               <div className="flex items-end gap-4 md:gap-10 w-full justify-center mt-6 mb-1">
+                {/* BPS 텍스트: 전체 달성률에 따라 빛나는 효과 */}
                 <div
                   onClick={() => setActiveLevel(6)}
                   className="w-[120px] md:w-[150px] h-[50px] flex items-end justify-center relative z-20 cursor-pointer group"
@@ -1243,9 +1248,13 @@ const App = () => {
                   <h4
                     className={`text-xl font-black tracking-tighter transition-all duration-500 ${
                       activeLevel === 6
-                        ? "text-amber-400 drop-shadow-[0_0_25px_rgba(245,158,11,1)] scale-110"
+                        ? "text-amber-400 scale-110"
                         : "text-slate-600 group-hover:text-slate-400"
                     }`}
+                    style={{
+                      // 진행률에 따라 그림자(빛)가 커짐 (기본 0 ~ 최대 50px)
+                      filter: `drop-shadow(0 0 ${10 + totalProgress * 40}px rgba(245, 158, 11, ${0.5 + totalProgress * 0.5}))`
+                    }}
                   >
                     BPS
                   </h4>
@@ -1282,7 +1291,8 @@ const App = () => {
                 const isActive = lv === activeLevel;
                 const lvGoal = mbGoalAmount / 5;
                 const progress = visions[lv].progressAsset;
-                const rate = ((progress / lvGoal) * 100).toFixed(1);
+                const rateVal = Math.min(progress / lvGoal, 1); // 0.0 ~ 1.0
+                const ratePercent = (rateVal * 100).toFixed(1);
                 const isGoalMet = progress >= lvGoal;
                 const colorMain = isActive
                   ? "#F59E0B"
@@ -1291,6 +1301,7 @@ const App = () => {
                     ? "#10B981"
                     : "#B45309"
                   : "#4A5568";
+                
                 return (
                   <div
                     key={lv}
@@ -1304,7 +1315,7 @@ const App = () => {
                           : "h-10 md:h-12 border-l-[15px] border-l-transparent border-r-[15px] border-r-transparent"
                       } ${
                         isActive
-                          ? "scale-110 drop-shadow-[0_0_30px_rgba(245,158,11,0.8)] z-10"
+                          ? "scale-110 z-10"
                           : ""
                       } ${
                         isConfigured ? "opacity-100" : "opacity-20 grayscale"
@@ -1313,19 +1324,25 @@ const App = () => {
                         width: lv === 5 ? "0" : `${160 + (5 - lv) * 50}px`,
                         backgroundColor: lv === 5 ? "transparent" : colorMain,
                         borderBottomColor: lv === 5 ? colorMain : "",
+                        // ✨ 각 단계별 빛나는 효과 (달성률에 비례)
+                        filter: isActive 
+                          ? "drop-shadow(0 0 30px rgba(245,158,11,0.8))" // 선택됐을 땐 최대로 빛남
+                          : isConfigured 
+                            ? `drop-shadow(0 0 ${rateVal * 30}px ${isGoalMet ? "rgba(16,185,129,0.6)" : "rgba(245,158,11," + (rateVal * 0.8) + ")"})`
+                            : "none"
                       }}
                     >
+                      {/* 텍스트 위치 보정: absolute + translate 기법으로 정중앙 고정 */}
                       <span
-                        className={`absolute ${
-                          lv === 5 ? "-top-2 md:top-16" : ""
-                        } text-[10px] md:text-[13px] font-black text-white tracking-tighter ${
+                        className={`absolute text-[10px] md:text-[13px] font-black text-white tracking-tighter text-center whitespace-nowrap ${
+                          lv === 5 ? "-bottom-[30px] md:-bottom-[40px]" : "top-1/2 -translate-y-1/2"
+                        } left-1/2 -translate-x-1/2 ${
                           isActive ? "scale-110" : ""
                         }`}
-style={{
-    width: lv === 5 ? "100px" : "auto", // 자아실현 글자가 옆으로 퍼지지 않게 폭 제한
-    left: lv === 5 ? "50%" : "auto",
-    transform: lv === 5 ? "translateX(-50%)" : "none" // 중앙 정렬 보정
-  }}
+                        style={{
+                           // 자아실현(5단계)은 삼각형 모양 때문에 위치를 미세 조정
+                           marginTop: lv === 5 ? "20px" : "0"
+                        }}
                       >
                         {levelMap[lv]}
                       </span>
@@ -1345,7 +1362,7 @@ style={{
                             : "text-slate-600"
                         }`}
                       >
-                        <span>{isConfigured ? `${rate}%` : "0.0%"}</span>
+                        <span>{isConfigured ? `${ratePercent}%` : "0.0%"}</span>
                       </div>
                       <div className="w-full h-1.5 bg-slate-800 rounded-full border border-white/5 overflow-hidden">
                         <div
@@ -1356,7 +1373,7 @@ style={{
                               ? "bg-amber-400"
                               : "bg-amber-900/50"
                           }`}
-                          style={{ width: `${Math.min(rate, 100)}%` }}
+                          style={{ width: `${Math.min(rateVal * 100, 100)}%` }}
                         />
                       </div>
                     </div>
