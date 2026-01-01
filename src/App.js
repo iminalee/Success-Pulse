@@ -1936,8 +1936,9 @@ const renderHub = () => {
     );
   };
 
-  const renderPhilosophy = () => (
+ const renderPhilosophy = () => (
     <div className="flex-grow w-full max-w-5xl mx-auto overflow-y-auto no-scrollbar pb-24 px-6 animate-fadeIn font-sans text-left">
+      {/* Header Section */}
       <div className="flex items-center gap-4 mb-12 border-b border-white/10 pb-8 mt-4">
         <div className="bg-amber-500/10 p-4 rounded-2xl border border-amber-500/20 text-amber-500 shadow-[0_0_30px_rgba(245,158,11,0.2)]">
           <BookOpen size={36} />
@@ -1951,7 +1952,9 @@ const renderHub = () => {
           </p>
         </div>
       </div>
+
       <div className="space-y-16">
+        {/* Scientific Foundation Section */}
         <section className="relative">
           <div className="absolute -left-4 top-0 bottom-0 w-1 bg-gradient-to-b from-cyan-500/50 via-transparent to-transparent hidden md:block" />
           <h3 className="text-xl font-black text-cyan-500 uppercase tracking-widest mb-8 flex items-center gap-2">
@@ -2005,7 +2008,7 @@ const renderHub = () => {
                   소프트웨어에 최적화된 긍정심리학의{" "}
                   <span className="text-slate-200">BPS(최고의 미래 자아)</span>
                   라는 값을 입력합니다. 하드웨어 최적화와 소프트웨어
-                  업그레이드가 동시에 진행되면서 최선의 방향이 설정됩니다.
+                  업그레이드가 동시에 진행됩니다.
                 </p>
               </div>
               <div className="space-y-3">
@@ -2022,10 +2025,23 @@ const renderHub = () => {
             </div>
           </div>
         </section>
+
+        {/* The Worldview Section */}
         <section>
           <h3 className="text-xl font-black text-emerald-500 uppercase tracking-widest mb-8 flex items-center gap-2">
             <Sparkles size={18} /> I. The Worldview
           </h3>
+          
+          {/* New Narrative Intro */}
+          <div className="mb-10 bg-gradient-to-br from-emerald-500/10 to-transparent p-8 rounded-[2.5rem] border border-emerald-500/20 backdrop-blur-md">
+            <p className="text-lg text-slate-200 leading-[1.8] font-semibold italic mb-4">
+              "미래는 찾아가는 것이 아니라, 지금 이 순간으로 초대하는 것입니다."
+            </p>
+            <p className="text-sm text-slate-400 leading-[1.8]">
+              당신이 <span className="text-white">Manifestation Contract</span>에 서명하는 찰나, 시공간을 넘어 완성된 자아인 <span className="text-emerald-400 font-bold">Apex BP</span>의 의식 파동이 당신의 신경계(<span className="text-cyan-400 font-medium">The Vessel</span>)로 전송됩니다. 이제 당신의 몸은 두 자아가 공유하는 <span className="text-white font-bold">'공동 점유 상태'</span>가 되어, 이미 승리한 자의 감각과 통찰을 빌려 오늘을 살아내게 됩니다.
+            </p>
+          </div>
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="bg-[#1A202C]/60 p-8 rounded-[2.5rem] border border-white/5 shadow-xl hover:bg-slate-900/80 transition-all group">
               <div className="mb-6 bg-amber-500/10 w-14 h-14 rounded-full flex items-center justify-center border border-amber-500/30 group-hover:scale-110 transition-transform">
@@ -2035,17 +2051,9 @@ const renderHub = () => {
                 존재적 상장 (Existential IPO)
               </h4>
               <p className="text-sm text-slate-400 leading-relaxed font-medium">
-                "미래의 완성된 자아(Apex BP)가 현재의 나(The Vessel)를
-                고용하다."
-                <br />
-                <br />
-                기업이 미래 가치를 담보로 상장하듯, 당신은{" "}
-                <span className="text-amber-500 font-bold">
-                  최고의 미래 자아(Best Possible Self)
-                </span>
-                를 현 시점에 실현시킵니다. 이 계약을 통해 당신의 무의식은
-                '고통스러운 노력'을 '가치 창출을 위한 자본금 납입'으로
-                재정의하게 됩니다.
+                "미래의 완성된 자아(Apex BP)가 현재의 나(The Vessel)를 고용하다."
+                <br /><br />
+                당신은 <span className="text-amber-500 font-bold">최고의 미래 자아(BPS)</span>를 현 시점에 실현시킵니다. 이 계약을 통해 당신의 무의식은 '고통스러운 노력'을 '가치 창출을 위한 자본금 납입'으로 재정의하게 됩니다.
               </p>
             </div>
             <div className="bg-[#1A202C]/60 p-8 rounded-[2.5rem] border border-white/5 shadow-xl hover:bg-slate-900/80 transition-all group">
@@ -2057,15 +2065,8 @@ const renderHub = () => {
               </h4>
               <p className="text-sm text-slate-400 leading-relaxed font-medium">
                 "뇌는 생생한 상상과 실제 경험을 구분하지 않습니다."
-                <br />
-                <br />
-                NLP의{" "}
-                <span className="text-emerald-500 font-bold">
-                  VAK(시각, 청각, 신체감각)
-                </span>{" "}
-                모델은 목표를 단순한 텍스트가 아닌 '감각적 체험'으로 변환합니다.
-                AI가 설계한 몰입 시나리오는 미래를 '이미 일어난 기억(Future
-                Memory)'으로 뇌에 물리적으로 각인시킵니다.
+                <br /><br />
+                NLP의 <span className="text-emerald-500 font-bold">VAK(시각, 청각, 신체감각)</span> 모델은 목표를 '감각적 체험'으로 변환합니다. 이는 미래를 '이미 일어난 기억(Future Memory)'으로 뇌에 물리적으로 각인시킵니다.
               </p>
             </div>
             <div className="bg-[#1A202C]/60 p-8 rounded-[2.5rem] border border-white/5 shadow-xl hover:bg-slate-900/80 transition-all group">
@@ -2076,17 +2077,9 @@ const renderHub = () => {
                 에너지의 등가교환 (Energy Ledger)
               </h4>
               <p className="text-sm text-slate-400 leading-relaxed font-medium">
-                이곳의 숫자는 단순한 화폐가 아닙니다. 그것은 당신이 세상에
-                투입한{" "}
-                <span className="text-rose-500 font-bold">
-                  에너지의 총량(Magnitude)
-                </span>
-                입니다.
-                <br />
-                <br />
-                물리학 법칙처럼, 투입된 에너지는 사라지지 않고 당신의 자아
-                자산(Identity Asset)으로 보존됩니다. Ledger는 그 불멸의
-                기록입니다.
+                이곳의 숫자는 당신이 세상에 투입한 <span className="text-rose-500 font-bold">에너지의 총량(Magnitude)</span>입니다.
+                <br /><br />
+                물리학 법칙처럼, 투입된 에너지는 사라지지 않고 당신의 자아 자산(Identity Asset)으로 보존됩니다. Ledger는 그 불멸의 기록입니다.
               </p>
             </div>
             <div className="bg-[#1A202C]/60 p-8 rounded-[2.5rem] border border-white/5 shadow-xl hover:bg-slate-900/80 transition-all group">
@@ -2097,20 +2090,15 @@ const renderHub = () => {
                 기질과 성품의 조화 (Bio-Character)
               </h4>
               <p className="text-sm text-slate-400 leading-relaxed font-medium">
-                타고난 기질(Temperament)은 잘 바뀌지 않지만, 성품(Character)은
-                조각할 수 있습니다.
-                <br />
-                <br />
-                자신의 타고난 재료와 지금까지 성취한 자신(기질-Temperament와
-                성격-Character)를 정확히 파악하고, 그 위에 BPS 성품을 덧입혀{" "}
-                <span className="text-purple-500 font-bold">
-                  대체 불가능한 정체성
-                </span>
-                을 건축하십시오.
+                타고난 기질은 바뀌지 않지만, 성품은 조각할 수 있습니다.
+                <br /><br />
+                기질(Temperament)과 성격(Character)을 정확히 파악하고, 그 위에 BPS 성품을 덧입혀 <span className="text-purple-500 font-bold">대체 불가능한 정체성</span>을 건축하십시오.
               </p>
             </div>
           </div>
         </section>
+
+        {/* Operational Protocol Section */}
         <section>
           <h3 className="text-xl font-black text-amber-500 uppercase tracking-widest mb-8 flex items-center gap-2">
             <Zap size={18} /> II. Operational Protocol
@@ -2128,34 +2116,30 @@ const renderHub = () => {
                   </h4>
                 </div>
                 <p className="text-xs text-slate-400 leading-relaxed">
-                  <span className="text-white font-bold">My Lab</span> 탭에서
-                  시작하십시오. 당신의 이름(Vessel), 타고난 기질(TCI), 감각
-                  선호도(VAK), 그리고 미래 자아의 성품(BPS Traits)을 정의하여
-                  시스템의 기초 데이터를 입력합니다.
+                  Apex BP가 점유할 당신의 그릇(<span className="text-white font-bold">The Vessel</span>)을 최적화하십시오. 
+                  기질(TCI)과 감각 주파수(VAK)를 등록하여 동기화 채널을 개설합니다.
                 </p>
               </div>
             </div>
             <div className="relative pl-12">
-              <div className="absolute -left-[17px] top-0 w-9 h-9 bg-[#0A0F1E] border-2 border-slate-600 rounded-full flex items-center justify-center text-[10px] font-black text-slate-400">
+              <div className="absolute -left-[17px] top-0 w-9 h-9 bg-[#0A0F1E] border-2 border-amber-500/50 rounded-full flex items-center justify-center text-[10px] font-black text-amber-500">
                 02
               </div>
-              <div className="bg-[#1A202C]/40 p-6 rounded-3xl border border-white/5">
+              <div className="bg-amber-500/5 p-6 rounded-3xl border border-amber-500/20">
                 <div className="flex items-center gap-3 mb-2">
                   <PenTool size={18} className="text-amber-500" />
                   <h4 className="text-lg font-black text-white uppercase">
-                    Sign The Covenant (contract)
+                    Sign The Manifestation Contract
                   </h4>
                 </div>
                 <p className="text-xs text-slate-400 leading-relaxed">
-                  <span className="text-white font-bold">Contract</span> 탭으로
-                  이동하여 서약서에 서명하십시오. 이는 시스템을 활성화하는
-                  유일한 열쇠(Key)입니다. 서명하는 순간, 당신의 시간과 노력은
-                  공식적인 가치로 인정받기 시작합니다.
+                  마스터 자아에게 주도권을 위임하는 <span className="text-white font-bold">현현 계약</span>을 체결하십시오. 
+                  서명하는 찰나 동기화가 시작되며, 당신의 시간은 존재적 자본금으로 인정받기 시작합니다.
                 </p>
               </div>
             </div>
             <div className="relative pl-12">
-              <div className="absolute -left-[17px] top-0 w-9 h-9 bg-[#0A0F1E] border-2 border-slate-600 rounded-full flex items-center justify-center text-[10px] font-black text-slate-400">
+              <div className="absolute -left-[17px] top-0 w-9 h-9 bg-[#0A0F1E] border-2 border-emerald-500/50 rounded-full flex items-center justify-center text-[10px] font-black text-emerald-500">
                 03
               </div>
               <div className="bg-[#1A202C]/40 p-6 rounded-3xl border border-white/5">
@@ -2166,36 +2150,30 @@ const renderHub = () => {
                   </h4>
                 </div>
                 <p className="text-xs text-slate-400 leading-relaxed">
-                  메인 화면인{" "}
-                  <span className="text-white font-bold">Ledger</span>에서 5단계
-                  피라미드 목표를 설정하고, 매일의 실행을 체크하십시오.{" "}
-                  <span className="text-emerald-500 font-bold">[Execute]</span>{" "}
-                  버튼을 누르면 그 행동의 가치가 즉시 당신의 자산으로
-                  입금됩니다.
+                  내 안의 Apex BP가 현실의 근육을 빌려 직접 가치를 창출하는 과정입니다. 
+                  실행 버튼을 누르는 즉시 창출된 가치는 <span className="text-emerald-500 font-bold">Mental Bank</span>에 존재적 매출로 예치됩니다.
                 </p>
               </div>
             </div>
             <div className="relative pl-12">
-              <div className="absolute -left-[17px] top-0 w-9 h-9 bg-[#0A0F1E] border-2 border-slate-600 rounded-full flex items-center justify-center text-[10px] font-black text-slate-400">
+              <div className="absolute -left-[17px] top-0 w-9 h-9 bg-[#0A0F1E] border-2 border-rose-500/50 rounded-full flex items-center justify-center text-[10px] font-black text-rose-500">
                 04
               </div>
               <div className="bg-[#1A202C]/40 p-6 rounded-3xl border border-white/5">
                 <div className="flex items-center gap-3 mb-2">
                   <BarChart2 size={18} className="text-rose-500" />
                   <h4 className="text-lg font-black text-white uppercase">
-                    Analyze Trajectory (Stream)
+                    Analyze Convergence (Stream)
                   </h4>
                 </div>
                 <p className="text-xs text-slate-400 leading-relaxed">
-                  <span className="text-white font-bold">Stream</span> 탭에서
-                  당신의 성장이 만들어내는 곡선을 확인하십시오. 단순한 숫자가
-                  아닌, 목표를 향해 나아가는 에너지의 궤적(Trajectory)을
-                  시각적으로 모니터링할 수 있습니다.
+                  현실 자아와 마스터 자아가 얼마나 하나로 <span className="text-white font-bold">융합(Convergence)</span>되었는지 확인하십시오. 
+                  에너지 궤적을 통해 동기화 상태를 모니터링합니다.
                 </p>
               </div>
             </div>
             <div className="relative pl-12">
-              <div className="absolute -left-[17px] top-0 w-9 h-9 bg-[#0A0F1E] border-2 border-slate-600 rounded-full flex items-center justify-center text-[10px] font-black text-slate-400">
+              <div className="absolute -left-[17px] top-0 w-9 h-9 bg-[#0A0F1E] border-2 border-amber-400/50 rounded-full flex items-center justify-center text-[10px] font-black text-amber-400">
                 05
               </div>
               <div className="bg-[#1A202C]/40 p-6 rounded-3xl border border-white/5">
@@ -2206,10 +2184,8 @@ const renderHub = () => {
                   </h4>
                 </div>
                 <p className="text-xs text-slate-400 leading-relaxed">
-                  목표 자산이 100% 충전되면 해당 비전은 현실이 됩니다.{" "}
-                  <span className="text-white font-bold">Milestone</span> 탭은
-                  당신이 현실로 소환해낸 업적들을 영원히 기록하는 명예의
-                  전당입니다.
+                  누적 진폭이 100%에 도달하면 두 세계는 합일(Singularity)됩니다. 
+                  <span className="text-white font-bold">Milestone</span> 탭은 당신이 현실로 소환해낸 업적들의 명예의 전당입니다.
                 </p>
               </div>
             </div>
