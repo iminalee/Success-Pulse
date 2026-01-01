@@ -152,7 +152,7 @@ const App = () => {
     },
     5: {
       title: "",
-      emoji: "🏥",
+      emoji: "🧘",
       v: "",
       a: "",
       k: "",
@@ -666,7 +666,7 @@ const App = () => {
   2: "위협으로부터의 보호. 재정적 자립과 안전망을 구축하여 심리적 평온을 확보합니다.",
   3: "사회적 연결. 건강한 관계 속에서 소속감과 사랑을 주고받으며 정서적 지지대를 만듭니다.",
   4: "사회적 성취와 자부심. 전문성을 인정받고 스스로 당당한 사회적 자아를 확립합니다.",
-  5: "존재의 완성. 타고난 잠재력을 100% 발현하여 최고의 자아(Apex BP)로 거듭납니다."
+  5: "존재의 완성. 외부의 자극에 흔들리지 않는 내면의 평온을 얻고, 타고난 잠재력을 완전히 꽃피우는 최종 단계입니다."
 };
     const greenGroup = ["ns", "ha", "rd", "p"];
     const sdCValue =
@@ -1811,71 +1811,63 @@ const renderHub = () => {
     </p>
   </div>
   
-  <div className="space-y-6 md:space-y-10 text-slate-300 leading-[1.8] md:leading-[2.2] text-base md:text-xl font-normal tracking-tight text-center md:text-left px-0 md:px-10">
-    <p className="border-l-2 border-amber-500/30 pl-4 md:pl-8 font-sans">
-      {" "}
-      <span className="text-white font-bold px-1 md:px-2 underline decoration-amber-500/40 italic">
-        Apex BP {userName}
-      </span>
-      는 현 시점 자아인{" "}
-      <span className="text-white font-bold">{userName} ver.0</span>이
-      본질적 자아로 도약할 가능성을 선택하였다.
-          </p>
-            <p className="border-l-2 border-amber-500/30 pl-8 font-sans">
-              이에 {" "}
-              <span className="text-white font-bold">
-                {userName} ver.0
-              </span>는{" "}
-              <input
-                type="date"
-                value={targetDate}
-                disabled={isLocked}
-                onChange={(e) => setTargetDate(e.target.value)}
-                className={`mx-2 px-4 py-2 rounded-xl text-xl font-bold border outline-none shadow-inner transition-all ${
-                  isLocked
-                    ? "bg-emerald-900/20 text-emerald-400 border-emerald-500/30 cursor-not-allowed"
-                    : "bg-slate-900 text-amber-500 border-white/5 focus:border-amber-500"
-                }`}
-              />{" "}
-              까지 Apex BP를 이루는 최대 5개의 목표를 달성한다.{" "} 이 댓가로 BP
-              {userName}는 현 멘탈뱅크 잔액{" "}
-              <span className="text-white font-black">Mental Bank Balance</span>{" "}
-              (
-              <span className="text-white border-b border-white/30">
-                {currency}
-                {fNum(mbBalance)}
-              </span>
-              )의 <span className="text-amber-500 font-bold">25%</span> 
-              금액인{" "}
-              <span className="text-white font-bold mx-2 bg-white/5 px-3 py-1 rounded-lg">
-                {currency}
-                {fNum(livingAllowance)}
-              </span>
-              을 지급하되, 
-            </p>
-            <p className="border-l-2 border-amber-500/30 pl-8 font-sans">
-              목표달성 활동으로 매시간의 실천 가치를
-              증명할 때마다 시간당{" "}
-              <span className="text-emerald-400 font-bold px-3 py-1 bg-white/5 rounded-lg border border-white/10">
-                {currency}
-                {fNum(valueEventAmount)}
-              </span>
-              의{" "}
-              <span className="text-xs uppercase opacity-60 font-bold tracking-widest">
-                Value Award
-              </span>
-              으로 지급한다.
-            </p>
-            <p className="border-l-2 border-rose-500/50 pl-8 bg-rose-500/5 py-4 rounded-r-xl font-sans">
-              단,{" "}
-              <span className="text-rose-400 font-black">
-                3일 이상 무활동 시
-              </span>
-              , BP {userName}는 계약을 파기하고 다른 평행 세계의{" "}
-              <span className="italic opacity-80">{userName} ver.N</span>을 찾아
-              선택할 권리를 가진다.
-            </p>
-          </div>
+  <div className="space-y-8 md:space-y-12 text-slate-300 leading-[1.9] md:leading-[2.2] text-base md:text-lg font-normal tracking-tight text-justify px-2 md:px-10">
+  
+  {/* [도입부] 존재적 선택과 상장 */}
+  <p className="border-l-2 border-amber-500/40 pl-6 md:pl-10 font-sans">
+    무한한 평행세계 속에서 모든 성취를 완료한 마스터 자아 
+    <span className="text-white font-bold px-2 italic text-xl">Apex BP {userName}</span>는, 
+    자신의 유일한 현실 대리인인 <span className="text-amber-400 font-bold underline underline-offset-4">{userName} ver.0</span>를 
+    최고의 자아로 현현시키기 위한 <span className="text-white font-black text-shadow-sm">‘존재적 상장(Existential IPO)’</span>을 승인하였다.
+  </p>
+
+  {/* [본문 1] 공동 점유와 자본 수혈 */}
+  <p className="border-l-2 border-slate-700 pl-6 md:pl-10">
+    이에 <span className="text-slate-100 font-bold">{userName} ver.0</span>는 
+    <input
+      type="date"
+      value={targetDate}
+      disabled={isLocked}
+      onChange={(e) => setTargetDate(e.target.value)}
+      className={`mx-1 px-2 py-1 rounded-lg font-bold border transition-all ${
+        isLocked
+          ? "bg-transparent text-emerald-400 border-none"
+          : "bg-slate-900 text-amber-500 border-white/10"
+      }`}
+    /> 
+    까지 5단계의 관문을 돌파하여 확정된 미래를 현실로 소환한다. 
+    이 경이로운 융합의 대가로, Apex BP는 무의식의 저수지인 
+    <span className="text-white font-bold ml-1">Mental Bank</span> 잔액 
+    (<span className="text-slate-400 tabular-nums">{currency}{fNum(mbBalance)}</span>)의 
+    <span className="text-amber-500 font-black mx-1 text-xl">25%</span>에 해당하는 활동 동력 
+    <span className="text-white font-black mx-2 bg-white/5 px-3 py-1 rounded-xl border border-white/10 shadow-lg">
+      {currency}{fNum(livingAllowance)}
+    </span>
+    을 현실 자아에게 즉시 수혈한다.
+  </p>
+
+  {/* [본문 2] 신경학적 각인과 보상 */}
+  <p className="border-l-2 border-slate-700 pl-6 md:pl-10">
+    실행의 근육을 빌려 가치를 창출할 때마다, 시스템은 이를 
+    <span className="text-emerald-400 font-bold mx-1">‘신경학적 각인(Neuro-Imprinting)’</span>으로 인정한다. 
+    매 시간의 몰입이 증명될 때마다 시간당 
+    <span className="text-emerald-400 font-black px-3 py-1 bg-emerald-500/5 rounded-lg border border-emerald-500/20 mx-2 shadow-inner">
+      {currency}{fNum(valueEventAmount)}
+    </span>
+    의 <span className="text-xs uppercase opacity-80 font-black tracking-widest text-emerald-500">Value Award</span>를 
+    존재적 매출로서 Mental Bank에 예치하며 동기화를 가속한다.
+  </p>
+
+  {/* [경고] 평행세계 선택권 */}
+  <p className="border-l-2 border-rose-500/50 pl-6 md:pl-10 bg-rose-500/5 py-6 rounded-r-3xl font-sans italic">
+    단, <span className="text-rose-400 font-black drop-shadow-sm">3일 이상 의식의 파동(활동)이 멈출 경우</span>, 
+    Apex BP는 본 그릇(Vessel)과의 동기화를 해제하고, 다른 평행 세계에서 깨어있는 
+    <span className="text-white font-bold"> {userName} ver.N</span>을 찾아 
+    새로운 현신을 선택할 전적인 권리를 유지한다.
+  </p>
+</div>
+
+                
           <div className="mt-20 border-t border-white/10 pt-12 px-4 md:px-12 pb-8">
             <div className="flex flex-col md:flex-row justify-between items-end gap-16 md:gap-0">
               <div className="flex flex-col items-center md:items-start gap-4 w-full md:w-auto">
@@ -2121,23 +2113,27 @@ const renderHub = () => {
           <h3 className="text-xl font-black text-slate-500 uppercase tracking-widest mb-8 flex items-center gap-2">
             <Book size={18} /> Glossary | 용어집
           </h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-            <div className="p-4 bg-slate-900/20 rounded-xl border border-white/5">
-              <span className="text-white font-bold block mb-1">Apex BP (Best Possible Self)</span>
-              <span className="text-slate-500">평행세계에서 모든 목표를 이룬 당신의 완성된 자아.</span>
-           
-          
-              <span className="text-white font-bold block mb-1">The Vessel (ver.0)</span>
-              <span className="text-slate-500">마스터 자아의 의식을 현실에서 구현해내는 당신의 현재 육체.</span>
-            
-           
-              <span className="text-white font-bold block mb-1">Mental Bank (MB)</span>
-              <span className="text-slate-500">행동의 가치가 복리로 적립되는 당신의 무의식 자산 계좌.</span>
-           
-            
-              <span className="text-white font-bold block mb-1">Magnitude (누적 진폭)</span>
-              <span className="text-slate-500">현실을 변화시킨 에너지의 총량. 100% 도달 시 합일이 일어납니다.</span>
-            </div>
+<div className="flex flex-col gap-4 text-sm">
+    <div className="p-6 bg-slate-900/20 rounded-[2rem] border border-white/5 hover:bg-slate-900/40 transition-all">
+      <span className="text-white font-bold text-lg block mb-2">Apex BP (Best Possible Self)</span>
+      <span className="text-slate-400 leading-relaxed">평행세계에서 모든 목표를 이룬 당신의 완성된 자아.</span>
+    </div>
+    
+    <div className="p-6 bg-slate-900/20 rounded-[2rem] border border-white/5 hover:bg-slate-900/40 transition-all">
+      <span className="text-white font-bold text-lg block mb-2">The Vessel (ver.0)</span>
+      <span className="text-slate-400 leading-relaxed">마스터 자아의 의식을 현실에서 구현해내는 당신의 현재 육체.</span>
+    </div>
+    
+    <div className="p-6 bg-slate-900/20 rounded-[2rem] border border-white/5 hover:bg-slate-900/40 transition-all">
+      <span className="text-white font-bold text-lg block mb-2">Mental Bank (MB)</span>
+      <span className="text-slate-400 leading-relaxed">행동의 가치가 복리로 적립되는 당신의 무의식 자산 계좌.</span>
+    </div>
+    
+    <div className="p-6 bg-slate-900/20 rounded-[2rem] border border-white/5 hover:bg-slate-900/40 transition-all">
+      <span className="text-white font-bold text-lg block mb-2">Magnitude (누적 진폭)</span>
+      <span className="text-slate-400 leading-relaxed">현실을 변화시킨 에너지의 총량. 100% 도달 시 합일이 일어납니다.</span>
+    </div>
+  </div>
           </div>
         </section>
       </div>
