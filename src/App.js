@@ -1193,7 +1193,8 @@ const App = () => {
   };
 
 const renderHub = () => {
-    const activeTraits = bpsTraits.filter((t) => t.trim() !== "");
+    // [유지] 빈칸이 있어도 5개 위치를 다 잡기 위해 전체 배열 사용
+    const activeTraits = bpsTraits;
     const isLocked = !signedDate;
     const totalProgress = mbGoalAmount > 0 ? Math.min(currentAsset / mbGoalAmount, 1) : 0;
 
@@ -1222,27 +1223,30 @@ const renderHub = () => {
                 onClick={() => setCurrentView("contract")}
                 className="bg-amber-600 hover:bg-amber-500 text-white px-8 py-4 rounded-2xl font-black text-xs uppercase tracking-widest shadow-2xl flex items-center gap-3 mx-auto transition-all active:scale-95"
               >
-                <PenTool size={14} /> Sign Contract to Unlock
+                <PenTool size={14} /> Sign Agreement to Unlock
               </button>
             </div>
           </div>
         )}
         <div
-          className={`flex-grow flex flex-col md:flex-row gap-6 md:gap-8 items-center justify-center w-full mb-6 overflow-hidden px-2 md:px-0 transition-all duration-1000 ${
+          // [유지] overflow-hidden 제거 (캐릭터 잘림 방지)
+          className={`flex-grow flex flex-col md:flex-row gap-6 md:gap-8 items-center justify-center w-full mb-6 px-2 md:px-0 transition-all duration-1000 ${
             isLocked
               ? "opacity-40 grayscale-[0.8] scale-95 pointer-events-none select-none"
               : "opacity-100 scale-100"
           }`}
         >
+          {/* [유지] 부모 박스에서도 overflow 제거 */}
           <div className="w-full md:w-1/2 flex flex-col items-center p-6 md:p-8 bg-[#2D3748]/30 rounded-[3rem] border border-white/5 shadow-2xl h-[550px] justify-center relative overflow-visible mt-8 md:mt-0">
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 rounded-full bg-amber-500/5 blur-3xl -z-10 animate-pulse"></div>
-            <div className="flex flex-col items-center w-full relative z-10 gap-1">
-              
-              {/* [수정] BPS 섹션: 삼각형 위에 딱 붙이고, 캐릭터들을 위로 띄움 */}
-              <div className="flex items-end gap-4 md:gap-10 w-full justify-center mt-6">
+            <div className="flex flex-col items-center w-full relative z-10 gap-0">
+
+              {/* BPS 텍스트 & 캐릭터 섹션 */}
+              <div className="flex items-end gap-4 md:gap-10 w-full justify-center mb-[-20px] z-20 relative"> {/* mb를 더 줄여서 피라미드와 밀착 */}
                 <div
                   onClick={() => setActiveLevel(6)}
-                  className="w-[120px] md:w-[150px] h-auto flex flex-col items-center justify-end relative z-20 cursor-pointer group pb-2"
+                  // [핵심 수정 1] BPS 위치를 삼각형 꼭지점에 딱 맞게 내림 (translate-y 추가)
+                  className="w-[120px] md:w-[150px] flex flex-col items-center justify-center relative cursor-pointer group translate-y-[18px] md:translate-y-[22px]"
                 >
                   <h4
                     className={`text-xl font-black tracking-tighter transition-all duration-500 ${
@@ -1256,25 +1260,41 @@ const renderHub = () => {
                   >
                     BPS
                   </h4>
-                  {/* 5개 Character: 삼각형 위에서 빛나며 떠다님 */}
-                  <div className="absolute top-[-50px] left-1/2 w-full h-full pointer-events-none flex items-center justify-center">
+                  {/* [핵심 수정 2] 캐릭터를 더 넓고 완만한 곡선으로 배치 */}
+                  {/* 컨테이너 너비를 넓히고(w-[360px]) 높이를 키움 */}
+                  <div className="absolute bottom-[130%] left-1/2 -translate-x-1/2 w-[360px] h-[180px] pointer-events-none">
                     {activeTraits.map((trait, i) => {
-                      const total = activeTraits.length;
-                      const angle = -75 + (i / (total - 1)) * 150;
+                      if (!trait || trait.trim() === "") return null;
+
+                      const total = 5;
+                      // [핵심 로직] 훨씬 큰 반지름의 원 일부분을 사용하여 완만한 곡선 구현
+                      const radius = 220; // 반지름을 크게 키움
+                      const spreadAngle = 100; // 100도 범위 내에서 펼침 (더 넓게)
+                      const startAngle = 90 + spreadAngle / 2; // 왼쪽부터 시작
+                      const angle = startAngle - (spreadAngle / (total - 1)) * i;
                       const radian = angle * (Math.PI / 180);
-                      const x = 50 * Math.sin(radian);
-                      const y = 50 * Math.cos(radian);
+
+                      const x = radius * Math.cos(radian);
+                      const y = radius * Math.sin(radian);
+
+                      // 곡선의 가장 낮은 부분이 BPS 글자 바로 위에 오도록 높이 보정
+                      const minY = radius * Math.sin((90 - spreadAngle / 2) * (Math.PI / 180));
+                      const yOffset = -minY + 15; // 15px 정도 띄움
+
                       return (
                         <div
                           key={i}
-                          className="absolute flex items-center justify-center transition-all duration-700 animate-pulse"
-                          style={{ transform: `translate(${x}px, -${y}px)` }}
+                          className="absolute left-1/2 bottom-0 flex items-center justify-center transition-all duration-700 animate-pulse"
+                          style={{
+                            // 계산된 x, y 좌표 적용
+                            transform: `translate(calc(-50% + ${x}px), ${-(y + yOffset)}px)`
+                          }}
                         >
                           <span
-                            className={`text-[10px] font-black px-2 py-0.5 rounded-full transition-all duration-500 ${
+                            className={`text-[9px] font-black px-2 py-1 rounded-full bg-slate-900/80 border border-amber-500/30 whitespace-nowrap shadow-[0_0_15px_rgba(245,158,11,0.3)] ${
                               activeLevel === 6
-                                ? "text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.9)]"
-                                : "text-slate-600 opacity-30"
+                                ? "text-amber-400 drop-shadow-[0_0_5px_rgba(245,158,11,0.8)]"
+                                : "text-slate-400 opacity-60"
                             }`}
                           >
                             {trait}
@@ -1286,6 +1306,7 @@ const renderHub = () => {
                 </div>
               </div>
 
+              {/* 피라미드 단계들 (기존 유지) */}
               {[5, 4, 3, 2, 1].map((lv) => {
                 const isConfigured = visions[lv].title !== "";
                 const isActive = lv === activeLevel;
@@ -1301,7 +1322,7 @@ const renderHub = () => {
                     ? "#10B981"
                     : "#B45309"
                   : "#4A5568";
-                
+
                 return (
                   <div
                     key={lv}
@@ -1324,9 +1345,9 @@ const renderHub = () => {
                         width: lv === 5 ? "0" : `${160 + (5 - lv) * 50}px`,
                         backgroundColor: lv === 5 ? "transparent" : colorMain,
                         borderBottomColor: lv === 5 ? colorMain : "",
-                        filter: isActive 
+                        filter: isActive
                           ? "drop-shadow(0 0 30px rgba(245,158,11,0.8))"
-                          : isConfigured 
+                          : isConfigured
                             ? `drop-shadow(0 0 ${rateVal * 30}px ${isGoalMet ? "rgba(16,185,129,0.6)" : "rgba(245,158,11," + (rateVal * 0.8) + ")"})`
                             : "none"
                       }}
@@ -1335,8 +1356,8 @@ const renderHub = () => {
                         className={`absolute font-black text-white tracking-tighter text-center whitespace-nowrap left-1/2 -translate-x-1/2 ${
                           isActive ? "scale-110" : ""
                         } ${
-                          lv === 5 
-                            ? "top-[60px] md:top-[75px] text-[10px] md:text-[13px]" 
+                          lv === 5
+                            ? "top-[60px] md:top-[75px] text-[10px] md:text-[13px]"
                             : "top-1/2 -translate-y-1/2 text-[10px] md:text-[13px]"
                         }`}
                       >
@@ -1376,13 +1397,14 @@ const renderHub = () => {
                   </div>
                 );
               })}
-              
+
               <p className="text-slate-500 text-[10px] font-bold mt-4 uppercase tracking-[0.2em] opacity-60">
                 5단계 미션
               </p>
 
             </div>
           </div>
+          {/* 오른쪽 패널 (유지) */}
           <div className="w-full md:w-1/2 h-full flex flex-col">
             <div
               onClick={() =>
