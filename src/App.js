@@ -118,6 +118,9 @@ const App = () => {
   // 기존 코드들 아래에 추가하세요
   const [otp, setOtp] = useState(""); // 인증번호 저장할 곳
   const [isOtpSent, setIsOtpSent] = useState(false); // 메일 보냈는지 확인하는 스위치
+
+  // ▼▼▼ [추가] 시간(Duration) 상태 관리 (기본값 1시간) ▼▼▼
+  const [duration, setDuration] = useState(1);
   
   // 상태 관리 (DB 동기화용)
   const [user, setUser] = useState(null);
@@ -522,27 +525,40 @@ const App = () => {
     setTimeout(() => toast.remove(), 2500);
   };
 
-  const handleDepositSubmit = (e) => {
-    e.preventDefault();
-    const manual = e.target.achievement.value.trim();
-    const checkedCount =
-      visions[activeLevel]?.events.filter((ev) => ev.checked).length || 0;
-    let totalItems = checkedCount + (manual ? 1 : 0);
-    if (totalItems === 0) return showToast("가치를 선택하거나 입력하세요.");
-    const amount = totalItems * valueEventAmount;
-    const newEntry = { date: new Date(), amount: amount };
+// [수정] 입금 로직 (시간 배수 + 인플레이션 적용)
+  const handleDepositSubmit = (checkedItems) => {
+    // 1. 현재 달성률 계산 (인플레이션 보너스 산정용)
+    const progressRate = mbGoalAmount > 0 ? (currentAsset / mbGoalAmount) * 100 : 0;
+    let inflationBonus = 1; // 기본 1배
+    
+    // 60% 이상부터 10%씩 할증 (60%->1.1배, 70%->1.2배...)
+    if (progressRate >= 60) inflationBonus += 0.1;
+    if (progressRate >= 70) inflationBonus += 0.1;
+    if (progressRate >= 80) inflationBonus += 0.1;
+    if (progressRate >= 90) inflationBonus += 0.1;
+
+    // 2. 최종 시간당 가치 계산
+    const finalHourlyValue = valueEventAmount * inflationBonus;
+
+    // 3. 총 입금액 = (체크한 개수) * (시간당 가치) * (수행 시간)
+    const totalAmount = checkedItems * finalHourlyValue * duration;
+
+    if (totalAmount === 0) return showToast("실천한 항목을 선택해주세요.");
+
+    const newEntry = { date: new Date(), amount: totalAmount };
     setLedger((prev) => [...prev, newEntry]);
-    const newProgress = visions[activeLevel].progressAsset + amount;
+    
+    // 해당 레벨 자산 업데이트
+    const newProgress = visions[activeLevel].progressAsset + totalAmount;
     updateVision(activeLevel, {
       progressAsset: newProgress,
-      events: visions[activeLevel].events.map((e) => ({
-        ...e,
-        checked: false,
-      })),
+      // 체크박스 초기화는 하지 않음 (연속 입력 편의성)
     });
-    e.target.reset();
-    showToast(`${currency}${fNum(amount)} 가치가 입금되었습니다.`);
+
+    showToast(`${duration}시간 수행! ${currency}${fNum(totalAmount)} 가치 입금 완료 (보너스 ${((inflationBonus-1)*100).toFixed(0)}%)`);
+    setDuration(1); // 시간 초기화
   };
+  
   const archiveVision = (lv) => {
     const lvGoal = mbGoalAmount / 5;
     const isOverTarget = visions[lv].progressAsset >= lvGoal;
@@ -1193,258 +1209,160 @@ const App = () => {
   };
 
 const renderHub = () => {
-    // [유지] 빈칸이 있어도 5개 위치를 다 잡기 위해 전체 배열 사용
     const activeTraits = bpsTraits;
     const isLocked = !signedDate;
-    // 전체 목표 달성률 (안전장치 포함)
-    const totalProgress = mbGoalAmount > 0 ? Math.min(currentAsset / mbGoalAmount, 1) : 0;
+    
+    // [중요] 전체 달성률 (연봉/목표액 = 50% 시작)
+    const totalRatio = mbGoalAmount > 0 ? currentAsset / mbGoalAmount : 0;
+    const totalPercent = (totalRatio * 100).toFixed(1);
+
+    // 인플레이션 보너스 미리보기
+    let inflationBonus = 0;
+    if (totalRatio * 100 >= 60) inflationBonus += 10;
+    if (totalRatio * 100 >= 70) inflationBonus += 10;
+    if (totalRatio * 100 >= 80) inflationBonus += 10;
+    if (totalRatio * 100 >= 90) inflationBonus += 10;
 
     return (
-      <div className="relative w-full h-full flex-grow flex flex-col">
+      <div className="relative w-full h-full flex-grow flex flex-col overflow-y-auto no-scrollbar pb-24">
         {isLocked && (
           <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-slate-950/60 backdrop-blur-[6px] animate-fadeIn">
-            <div className="bg-[#0A0F1E] border border-amber-500/30 p-10 rounded-[3rem] text-center shadow-[0_0_100px_rgba(245,158,11,0.2)] max-w-md transform transition-all hover:scale-105">
-              <div className="mx-auto bg-slate-900 w-20 h-20 rounded-full flex items-center justify-center mb-6 border border-white/10 shadow-inner group">
-                <ShieldCheck
-                  size={32}
-                  className="text-slate-600 group-hover:text-amber-500 transition-colors duration-500"
-                />
-              </div>
-              <h3 className="text-2xl font-black text-white uppercase italic tracking-tighter mb-2">
-                System Preview
-              </h3>
-              <p className="text-slate-400 text-sm leading-relaxed mb-8 font-medium">
-                현재{" "}
-                <span className="text-amber-500 font-bold">미리보기 모드</span>{" "}
-                입니다.
-                <br />
-                서약서에 서명하면 모든 기능이 활성화됩니다.
-              </p>
-              <button
-                onClick={() => setCurrentView("contract")}
-                className="bg-amber-600 hover:bg-amber-500 text-white px-8 py-4 rounded-2xl font-black text-xs uppercase tracking-widest shadow-2xl flex items-center gap-3 mx-auto transition-all active:scale-95"
-              >
-                <PenTool size={14} /> Sign Agreement to Unlock
-              </button>
-            </div>
+             {/* ... 잠금 화면 내용은 기존과 동일하므로 생략하거나 기존 코드 유지 ... */}
+             <div className="bg-[#0A0F1E] border border-amber-500/30 p-10 rounded-[3rem] text-center shadow-[0_0_100px_rgba(245,158,11,0.2)] max-w-md">
+                <ShieldCheck size={32} className="text-slate-600 mx-auto mb-4" />
+                <h3 className="text-2xl font-black text-white uppercase mb-2">System Preview</h3>
+                <p className="text-slate-400 text-sm mb-8">서약서에 서명하면 활성화됩니다.</p>
+                <button onClick={() => setCurrentView("contract")} className="bg-amber-600 text-white px-8 py-4 rounded-2xl font-black text-xs uppercase">Sign Agreement</button>
+             </div>
           </div>
         )}
-        <div
-          className={`flex-grow flex flex-col md:flex-row gap-6 md:gap-8 items-center justify-center w-full mb-6 px-2 md:px-0 transition-all duration-1000 ${
-            isLocked
-              ? "opacity-40 grayscale-[0.8] scale-95 pointer-events-none select-none"
-              : "opacity-100 scale-100"
-          }`}
-        >
-          {/* 왼쪽 패널: 피라미드 영역 (이제 통계바가 없어서 정중앙 정렬됨) */}
-          <div className="w-full md:w-1/2 flex flex-col items-center p-6 md:p-8 bg-[#2D3748]/30 rounded-[3rem] border border-white/5 shadow-2xl h-[550px] justify-center relative overflow-visible mt-8 md:mt-0">
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 rounded-full bg-amber-500/5 blur-3xl -z-10 animate-pulse"></div>
-            
-            {/* 컨텐츠 래퍼: 세로 정렬 */}
-            <div className="flex flex-col items-center justify-center w-full relative z-10">
 
-              {/* 1. BPS 텍스트 & 캐릭터 (피라미드 바로 위에 위치) */}
-              <div className="relative w-full flex justify-center mb-1">
-                <div
-                  onClick={() => setActiveLevel(6)}
-                  className="relative flex flex-col items-center justify-center cursor-pointer group"
-                  style={{ width: "200px", height: "100px" }} // 영역 확보
-                }
-                >
-                  {/* BPS 텍스트 */}
-                  <h4
-                    className={`text-xl font-black tracking-tighter transition-all duration-500 absolute bottom-0 ${
-                      activeLevel === 6
-                        ? "text-amber-400 scale-110"
-                        : "text-slate-600 group-hover:text-slate-400"
-                    }`}
-                    style={{
-                      filter: `drop-shadow(0 0 ${10 + (isNaN(totalProgress) ? 0 : totalProgress) * 40}px rgba(245, 158, 11, ${0.5 + (isNaN(totalProgress) ? 0 : totalProgress) * 0.5}))`
-                    }}
-                  >
+        <div className={`flex flex-col items-center w-full px-2 md:px-0 transition-all duration-1000 ${isLocked ? "opacity-40 blur-sm pointer-events-none" : "opacity-100"}`}>
+          
+          {/* 1. 피라미드 섹션 (BPS + Pyramid) */}
+          <div className="w-full max-w-2xl flex flex-col items-center pt-8 pb-4 relative z-10">
+             
+             {/* BPS Header & Characters */}
+             <div className="relative flex justify-center items-end mb-[-20px] z-20">
+                <div onClick={() => setActiveLevel(6)} className="relative flex flex-col items-center justify-end cursor-pointer group" style={{ width: "200px", height: "120px" }}>
+                  <h4 className={`text-xl font-black tracking-tighter transition-all duration-500 absolute bottom-0 ${activeLevel === 6 ? "text-amber-400 scale-110" : "text-slate-600"}`}
+                      style={{ filter: `drop-shadow(0 0 ${10 + totalRatio * 40}px rgba(245, 158, 11, ${0.5 + totalRatio * 0.5}))` }}>
                     BPS
                   </h4>
-
-                  {/* 5개 Character (BPS 위로 넓게 펼쳐짐) */}
                   <div className="absolute bottom-[25px] left-1/2 -translate-x-1/2 w-[300px] h-[150px] pointer-events-none">
                     {activeTraits.map((trait, i) => {
                       if (!trait || trait.trim() === "") return null;
-                      
-                      // 넓은 부채꼴 모양 계산
-                      const total = 5;
-                      const radius = 140; // 반지름
-                      const startAngle = 180; // 왼쪽 끝
-                      const endAngle = 0;   // 오른쪽 끝
-                      const angleStep = (startAngle - endAngle) / (total + 1);
-                      const angle = startAngle - angleStep * (i + 1);
+                      const total = 5; const radius = 140; const spreadAngle = 100;
+                      const startAngle = 90 + spreadAngle / 2;
+                      const angle = startAngle - (spreadAngle / (total - 1)) * i;
                       const radian = angle * (Math.PI / 180);
-
-                      const x = radius * Math.cos(radian);
-                      const y = radius * Math.sin(radian);
-
+                      const x = radius * Math.cos(radian); const y = radius * Math.sin(radian);
+                      const minY = radius * Math.sin((90 - spreadAngle / 2) * (Math.PI / 180));
                       return (
-                        <div
-                          key={i}
-                          className="absolute left-1/2 bottom-0 flex items-center justify-center transition-all duration-700 animate-pulse"
-                          style={{
-                            transform: `translate(calc(-50% + ${x}px), ${-y}px)`
-                          }}
-                        >
-                          <span
-                            className={`text-[9px] font-black px-2 py-1 rounded-full bg-slate-900/80 border border-amber-500/30 whitespace-nowrap shadow-[0_0_15px_rgba(245,158,11,0.3)] ${
-                              activeLevel === 6
-                                ? "text-amber-400 drop-shadow-[0_0_5px_rgba(245,158,11,0.8)]"
-                                : "text-slate-400 opacity-60"
-                            }`}
-                          >
-                            {trait}
-                          </span>
+                        <div key={i} className="absolute left-1/2 bottom-0 flex items-center justify-center animate-pulse" 
+                             style={{ transform: `translate(calc(-50% + ${x}px), ${-(y - minY + 10)}px)` }}>
+                          <span className={`text-[9px] font-black px-2 py-1 rounded-full bg-slate-900/80 border border-amber-500/30 whitespace-nowrap shadow-lg ${activeLevel === 6 ? "text-amber-400" : "text-slate-400"}`}>{trait}</span>
                         </div>
                       );
                     })}
                   </div>
                 </div>
-              </div>
+             </div>
 
-              {/* 2. 피라미드 단계들 (통계바 통합형 - 2번 방식) */}
-              {[5, 4, 3, 2, 1].map((lv) => {
+             {/* Pyramid Levels (Option 2: Gauge Style) */}
+             {[5, 4, 3, 2, 1].map((lv) => {
                 const isConfigured = visions[lv].title !== "";
                 const isActive = lv === activeLevel;
                 const lvGoal = mbGoalAmount / 5;
                 const progress = visions[lv].progressAsset;
+                // [복구] 각 단계별 진행률 계산
                 const rateVal = mbGoalAmount > 0 ? Math.min(progress / lvGoal, 1) : 0;
-                const ratePercent = (rateVal * 100).toFixed(0); // 소수점 제거하고 깔끔하게
+                const ratePercent = (rateVal * 100).toFixed(0);
                 
-                // 색상 결정
-                let progressColor = "#4A5568"; // 기본 회색
-                if (isActive) progressColor = "#F59E0B"; // 선택됨: 호박색
-                else if (isConfigured) progressColor = "#B45309"; // 설정됨: 어두운 주황
-                
-                // 완료되었을 때 초록색으로 변하게 하려면 아래 주석 해제
-                // if (rateVal >= 1) progressColor = "#10B981"; 
-
-                // 배경 그라데이션 스타일 (왼쪽 -> 오른쪽 채우기)
-                const backgroundStyle = {
-                  background: `linear-gradient(to right, ${progressColor} ${rateVal * 100}%, rgba(255,255,255,0.05) ${rateVal * 100}%)`,
-                  width: lv === 5 ? "0" : `${160 + (5 - lv) * 50}px`,
-                  borderBottomColor: isActive ? "#F59E0B" : "transparent" // 선택 시 테두리 강조
-                };
-
-                // 삼각형(Lv5)은 그라데이션 적용 방식이 다름 (border로 만들기 때문)
-                // 그래서 Lv5는 예외적으로 색상만 바꿈 (채워지는 효과는 사각형인 1~4단계에서만 확실히 보임)
+                let progressColor = "#4A5568";
+                if (isActive) progressColor = "#F59E0B"; 
+                else if (isConfigured) progressColor = "#B45309"; 
                 
                 return (
-                  <div
-                    key={lv}
-                    onClick={() => setActiveLevel(lv)}
-                    className={`cursor-pointer transition-all duration-700 flex items-center justify-center relative my-1 ${
-                      isActive ? "scale-105 z-10 brightness-110" : "opacity-90 hover:opacity-100"
-                    }`}
-                  >
-                    {/* 도형 그리기 */}
-                    <div
-                      className={`relative flex items-center justify-center overflow-hidden shadow-lg backdrop-blur-sm
-                        ${lv === 5 
-                          ? "w-0 h-0 border-l-[60px] md:border-l-[75px] border-l-transparent border-r-[60px] md:border-r-[75px] border-r-transparent border-b-[80px] md:border-b-[100px]" 
-                          : "h-10 md:h-12 border border-white/5" // 1~4단계는 사각형 바 형태
-                        }`}
+                  <div key={lv} onClick={() => setActiveLevel(lv)} className={`cursor-pointer transition-all duration-500 flex items-center justify-center relative my-1 ${isActive ? "scale-105 z-10 brightness-110" : "opacity-90 hover:opacity-100"}`}>
+                    <div className={`relative flex items-center justify-center overflow-hidden shadow-lg backdrop-blur-sm
+                        ${lv === 5 ? "w-0 h-0 border-l-[60px] md:border-l-[75px] border-l-transparent border-r-[60px] md:border-r-[75px] border-r-transparent border-b-[80px] md:border-b-[100px]" : "h-12 md:h-14 border border-white/5 rounded-xl"}`}
                       style={{
-                        // 5단계는 삼각형이라 border color로 색칠, 1~4단계는 gradient 배경
                         borderBottomColor: lv === 5 ? (isActive ? "#F59E0B" : rateVal >= 1 ? "#10B981" : "#B45309") : undefined,
-                        background: lv !== 5 ? `linear-gradient(to right, ${rateVal >= 1 ? "#10B981" : "#F59E0B"} ${rateVal * 100}%, rgba(30, 41, 59, 0.5) ${rateVal * 100}%)` : undefined,
-                        width: lv !== 5 ? `${160 + (5 - lv) * 60}px` : undefined, // 폭을 조금 더 넓힘
-                        borderRadius: lv !== 5 ? "0.5rem" : undefined
-                      }}
-                    >
-                      {/* 텍스트 (이름 + 퍼센트) */}
-                      <div className={`absolute flex flex-col items-center justify-center leading-none ${
-                         lv === 5 ? "top-[40px] md:top-[50px]" : "" // 삼각형일 때 위치 조정
-                      }`}>
-                        <span className={`font-black uppercase tracking-tighter ${
-                          isActive ? "text-white text-sm" : "text-slate-300 text-xs"
-                        }`}>
-                          {levelMap[lv]}
-                        </span>
-                        {/* 퍼센트 표시 (설정된 경우에만) */}
-                        {isConfigured && (
-                          <span className="text-[9px] font-bold text-white/80 mt-0.5">
-                            {ratePercent}%
-                          </span>
-                        )}
+                        background: lv !== 5 ? `linear-gradient(to right, ${rateVal >= 1 ? "#10B981" : "#F59E0B"} ${rateVal * 100}%, rgba(30, 41, 59, 0.6) ${rateVal * 100}%)` : undefined,
+                        width: lv !== 5 ? `${200 + (5 - lv) * 60}px` : undefined,
+                      }}>
+                      <div className={`absolute flex flex-col items-center justify-center leading-none z-20 ${lv === 5 ? "top-[45px] md:top-[60px]" : ""}`}>
+                        <span className={`font-black uppercase tracking-tighter ${isActive ? "text-white text-sm md:text-base" : "text-slate-200 text-xs md:text-sm"}`}>{levelMap[lv]}</span>
+                        {(isConfigured || lv !== 5) && <span className="text-[9px] font-bold text-white/70 mt-0.5">{ratePercent}%</span>}
                       </div>
                     </div>
                   </div>
                 );
-              })}
-              
-              <p className="text-slate-500 text-[10px] font-bold mt-6 uppercase tracking-[0.2em] opacity-60">
-                5단계 미션
-              </p>
+             })}
+             <p className="text-slate-500 text-[10px] font-bold mt-4 uppercase tracking-[0.2em] opacity-60">5단계 미션</p>
+          </div>
 
+          {/* 2. Action Panel (체크리스트 & 실행) - [기능 복구됨!] */}
+          <div className="w-full max-w-xl px-4 mt-6 mb-20 animate-fadeIn">
+            <div className="bg-[#1A202C]/80 border border-white/10 rounded-3xl p-6 shadow-2xl relative overflow-hidden">
+               {/* 배경 장식 */}
+               <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none"><Zap size={100} className="text-white" /></div>
+
+               <div className="flex justify-between items-center mb-6 relative z-10">
+                 <div>
+                   <h4 className="text-lg font-black text-white italic uppercase tracking-tighter flex items-center gap-2">
+                     <span className="text-emerald-400">{levelMap[activeLevel]}</span> Action
+                   </h4>
+                   <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">
+                     Current Value Award: <span className="text-amber-400">{currency}{fNum(valueEventAmount * (1 + inflationBonus/100))}</span> / hr
+                     {inflationBonus > 0 && <span className="text-emerald-400 ml-1">(+{inflationBonus}%)</span>}
+                   </p>
+                 </div>
+                 <div className="text-right">
+                    <span className="text-[9px] text-slate-500 font-black uppercase block">Duration</span>
+                    <div className="flex items-center gap-2 bg-slate-900 rounded-lg p-1 border border-white/10">
+                       <button onClick={() => setDuration(Math.max(0.5, duration - 0.5))} className="w-6 h-6 flex items-center justify-center text-slate-400 hover:text-white font-bold">-</button>
+                       <span className="text-sm font-black text-white w-8 text-center">{duration}h</span>
+                       <button onClick={() => setDuration(duration + 0.5)} className="w-6 h-6 flex items-center justify-center text-slate-400 hover:text-white font-bold">+</button>
+                    </div>
+                 </div>
+               </div>
+
+               {/* 체크리스트 */}
+               <div className="space-y-3 mb-6 relative z-10 max-h-40 overflow-y-auto pr-2 custom-scrollbar">
+                  {visions[activeLevel].events.length === 0 ? (
+                    <div className="text-center py-4 text-slate-600 text-xs italic">
+                      'My Lab'에서 실천 항목을 추가해주세요.
+                    </div>
+                  ) : (
+                    visions[activeLevel].events.map((ev) => (
+                      <div key={ev.id} 
+                           onClick={() => toggleEventCheck(activeLevel, ev.id)}
+                           className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all ${ev.checked ? "bg-emerald-500/20 border-emerald-500/50" : "bg-slate-900/50 border-white/5 hover:bg-slate-800"}`}>
+                        <div className={`w-5 h-5 rounded-md border-2 flex items-center justify-center ${ev.checked ? "bg-emerald-500 border-emerald-500" : "border-slate-600"}`}>
+                          {ev.checked && <CheckCircle size={12} className="text-white" />}
+                        </div>
+                        <span className={`text-sm font-bold ${ev.checked ? "text-emerald-400" : "text-slate-300"}`}>{ev.name}</span>
+                      </div>
+                    ))
+                  )}
+               </div>
+
+               {/* 실행 버튼 */}
+               <button 
+                 onClick={() => handleDepositSubmit(visions[activeLevel].events.filter(e => e.checked).length)}
+                 className="w-full bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-500 hover:to-amber-400 text-white font-black py-4 rounded-2xl shadow-lg active:scale-95 transition-all flex items-center justify-center gap-2 uppercase tracking-widest relative z-10"
+               >
+                 <Coins size={18} /> Execute & Deposit
+               </button>
             </div>
           </div>
 
-          {/* 오른쪽 패널 (유지) */}
-          <div className="w-full md:w-1/2 h-full flex flex-col">
-            <div
-              onClick={() =>
-                visions[activeLevel].title
-                  ? (setActiveSensory({
-                      ...visions[activeLevel],
-                      level: activeLevel,
-                    }),
-                    setIsSensoryModalOpen(true))
-                  : setIsAiModalOpen(true)
-              }
-              className={`flex-grow bg-[#2D3748]/50 rounded-[3rem] p-8 md:p-10 border-2 shadow-2xl flex flex-col items-center justify-center text-center cursor-pointer transition-all group relative h-[550px] ${
-                visions[activeLevel].progressAsset >= mbGoalAmount / 5
-                  ? "border-emerald-500/50 bg-emerald-500/5 shadow-[0_0_30px_rgba(16,185,129,0.1)]"
-                  : "border-amber-500/30 hover:border-amber-500"
-              }`}
-            >
-              {visions[activeLevel].title ? (
-                <>
-                  {visions[activeLevel].progressAsset >= mbGoalAmount / 5 && (
-                    <div className="absolute top-8 bg-emerald-600 text-white text-[10px] font-black px-4 py-1.5 rounded-full shadow-lg flex items-center gap-2 animate-bounce">
-                      <Trophy size={12} /> 가치 충전 완료
-                    </div>
-                  )}
-                  <div className="bg-amber-500/10 p-6 rounded-full mb-6 border border-amber-500/20 group-hover:scale-110 transition-transform duration-500 shadow-inner">
-                    <span className="text-6xl md:text-7xl drop-shadow-2xl">
-                      {visions[activeLevel].emoji}
-                    </span>
-                  </div>
-                  <h3 className="text-xl md:text-2xl font-black text-white mb-2 uppercase tracking-tighter leading-tight px-4">
-                    {visions[activeLevel].title}
-                  </h3>
-                  <p className="text-[10px] text-amber-500 font-black uppercase italic mb-4 tracking-widest">
-                    Focus VAK & Archive Result
-                  </p>
-                  {visions[activeLevel].immersionScript && (
-                    <div className="bg-slate-900/60 p-5 rounded-2xl border border-amber-500/20 max-w-xs mt-4 shadow-xl text-center">
-                      <p className="text-[10px] md:text-[11px] text-slate-300 italic line-clamp-3">
-                        "{visions[activeLevel].immersionScript}"
-                      </p>
-                    </div>
-                  )}
-                </>
-              ) : (
-                <div className="flex flex-col items-center opacity-30 text-white">
-                  <Plus size={48} className="mb-2" />
-                  <p className="text-xs font-bold uppercase tracking-widest text-center">
-                    Define Vision for
-                    <br />
-                    {activeLevel === 6 ? "Identity" : levelMap[activeLevel]}
-                  </p>
-                </div>
-              )}
-            </div>
-          </div>
         </div>
       </div>
     );
   };
-
   const renderAnalysis = () => {
     const startDate = signedDate ? new Date(signedDate) : new Date();
     const targetDateObj = new Date(targetDate);
