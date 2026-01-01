@@ -1287,8 +1287,13 @@ const renderHub = () => {
                         width: lv !== 5 ? `${200 + (5 - lv) * 60}px` : undefined,
                       }}>
                       
-                      {/* [수정 3] 자아실현 글자 및 % 복원 + 위치 조정 */}
-                      <div className={`absolute flex flex-col items-center justify-center leading-none z-20 ${lv === 5 ? "top-[40px] md:top-[50px]" : ""}`}>
+{/* [수정 3] 자아실현 글자 및 % 복원 + 위치 조정 (완벽 수정) */}
+                      <div 
+                        className={`absolute flex flex-col items-center justify-center leading-none z-20 left-1/2 -translate-x-1/2 ${
+                          // top 값을 조절하여 삼각형 내부 넓은 곳에 위치시킴
+                          lv === 5 ? "top-[45px] md:top-[60px]" : ""
+                        }`}
+                      >
                         <span className={`font-black uppercase tracking-tighter ${isActive ? "text-white text-sm md:text-base" : "text-slate-200 text-xs md:text-sm"}`}>
                           {levelMap[lv]}
                         </span>
