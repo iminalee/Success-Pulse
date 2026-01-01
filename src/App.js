@@ -1196,6 +1196,7 @@ const renderHub = () => {
     // [유지] 빈칸이 있어도 5개 위치를 다 잡기 위해 전체 배열 사용
     const activeTraits = bpsTraits;
     const isLocked = !signedDate;
+    // 전체 목표 달성률 (안전장치 포함)
     const totalProgress = mbGoalAmount > 0 ? Math.min(currentAsset / mbGoalAmount, 1) : 0;
 
     return (
@@ -1229,27 +1230,30 @@ const renderHub = () => {
           </div>
         )}
         <div
-          // [유지] overflow-hidden 제거 (캐릭터 잘림 방지)
           className={`flex-grow flex flex-col md:flex-row gap-6 md:gap-8 items-center justify-center w-full mb-6 px-2 md:px-0 transition-all duration-1000 ${
             isLocked
               ? "opacity-40 grayscale-[0.8] scale-95 pointer-events-none select-none"
               : "opacity-100 scale-100"
           }`}
         >
-          {/* [유지] 부모 박스에서도 overflow 제거 */}
+          {/* 왼쪽 패널: 피라미드 영역 (이제 통계바가 없어서 정중앙 정렬됨) */}
           <div className="w-full md:w-1/2 flex flex-col items-center p-6 md:p-8 bg-[#2D3748]/30 rounded-[3rem] border border-white/5 shadow-2xl h-[550px] justify-center relative overflow-visible mt-8 md:mt-0">
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 rounded-full bg-amber-500/5 blur-3xl -z-10 animate-pulse"></div>
-            <div className="flex flex-col items-center w-full relative z-10 gap-0">
+            
+            {/* 컨텐츠 래퍼: 세로 정렬 */}
+            <div className="flex flex-col items-center justify-center w-full relative z-10">
 
-              {/* BPS 텍스트 & 캐릭터 섹션 */}
-              <div className="flex items-end gap-4 md:gap-10 w-full justify-center mb-[-20px] z-20 relative"> {/* mb를 더 줄여서 피라미드와 밀착 */}
+              {/* 1. BPS 텍스트 & 캐릭터 (피라미드 바로 위에 위치) */}
+              <div className="relative w-full flex justify-center mb-1">
                 <div
                   onClick={() => setActiveLevel(6)}
-                  // [핵심 수정 1] BPS 위치를 삼각형 꼭지점에 딱 맞게 내림 (translate-y 추가)
-                  className="w-[120px] md:w-[150px] flex flex-col items-center justify-center relative cursor-pointer group translate-y-[18px] md:translate-y-[22px]"
+                  className="relative flex flex-col items-center justify-center cursor-pointer group"
+                  style={{ width: "200px", height: "100px" }} // 영역 확보
+                }
                 >
+                  {/* BPS 텍스트 */}
                   <h4
-                    className={`text-xl font-black tracking-tighter transition-all duration-500 ${
+                    className={`text-xl font-black tracking-tighter transition-all duration-500 absolute bottom-0 ${
                       activeLevel === 6
                         ? "text-amber-400 scale-110"
                         : "text-slate-600 group-hover:text-slate-400"
@@ -1260,34 +1264,30 @@ const renderHub = () => {
                   >
                     BPS
                   </h4>
-                  {/* [핵심 수정 2] 캐릭터를 더 넓고 완만한 곡선으로 배치 */}
-                  {/* 컨테이너 너비를 넓히고(w-[360px]) 높이를 키움 */}
-                  <div className="absolute bottom-[130%] left-1/2 -translate-x-1/2 w-[360px] h-[180px] pointer-events-none">
+
+                  {/* 5개 Character (BPS 위로 넓게 펼쳐짐) */}
+                  <div className="absolute bottom-[25px] left-1/2 -translate-x-1/2 w-[300px] h-[150px] pointer-events-none">
                     {activeTraits.map((trait, i) => {
                       if (!trait || trait.trim() === "") return null;
-
+                      
+                      // 넓은 부채꼴 모양 계산
                       const total = 5;
-                      // [핵심 로직] 훨씬 큰 반지름의 원 일부분을 사용하여 완만한 곡선 구현
-                      const radius = 220; // 반지름을 크게 키움
-                      const spreadAngle = 100; // 100도 범위 내에서 펼침 (더 넓게)
-                      const startAngle = 90 + spreadAngle / 2; // 왼쪽부터 시작
-                      const angle = startAngle - (spreadAngle / (total - 1)) * i;
+                      const radius = 140; // 반지름
+                      const startAngle = 180; // 왼쪽 끝
+                      const endAngle = 0;   // 오른쪽 끝
+                      const angleStep = (startAngle - endAngle) / (total + 1);
+                      const angle = startAngle - angleStep * (i + 1);
                       const radian = angle * (Math.PI / 180);
 
                       const x = radius * Math.cos(radian);
                       const y = radius * Math.sin(radian);
-
-                      // 곡선의 가장 낮은 부분이 BPS 글자 바로 위에 오도록 높이 보정
-                      const minY = radius * Math.sin((90 - spreadAngle / 2) * (Math.PI / 180));
-                      const yOffset = -minY + 15; // 15px 정도 띄움
 
                       return (
                         <div
                           key={i}
                           className="absolute left-1/2 bottom-0 flex items-center justify-center transition-all duration-700 animate-pulse"
                           style={{
-                            // 계산된 x, y 좌표 적용
-                            transform: `translate(calc(-50% + ${x}px), ${-(y + yOffset)}px)`
+                            transform: `translate(calc(-50% + ${x}px), ${-y}px)`
                           }}
                         >
                           <span
@@ -1306,104 +1306,84 @@ const renderHub = () => {
                 </div>
               </div>
 
-              {/* 피라미드 단계들 (기존 유지) */}
+              {/* 2. 피라미드 단계들 (통계바 통합형 - 2번 방식) */}
               {[5, 4, 3, 2, 1].map((lv) => {
                 const isConfigured = visions[lv].title !== "";
                 const isActive = lv === activeLevel;
                 const lvGoal = mbGoalAmount / 5;
                 const progress = visions[lv].progressAsset;
                 const rateVal = mbGoalAmount > 0 ? Math.min(progress / lvGoal, 1) : 0;
-                const ratePercent = (rateVal * 100).toFixed(1);
-                const isGoalMet = progress >= lvGoal && mbGoalAmount > 0;
-                const colorMain = isActive
-                  ? "#F59E0B"
-                  : isConfigured
-                  ? isGoalMet
-                    ? "#10B981"
-                    : "#B45309"
-                  : "#4A5568";
+                const ratePercent = (rateVal * 100).toFixed(0); // 소수점 제거하고 깔끔하게
+                
+                // 색상 결정
+                let progressColor = "#4A5568"; // 기본 회색
+                if (isActive) progressColor = "#F59E0B"; // 선택됨: 호박색
+                else if (isConfigured) progressColor = "#B45309"; // 설정됨: 어두운 주황
+                
+                // 완료되었을 때 초록색으로 변하게 하려면 아래 주석 해제
+                // if (rateVal >= 1) progressColor = "#10B981"; 
 
+                // 배경 그라데이션 스타일 (왼쪽 -> 오른쪽 채우기)
+                const backgroundStyle = {
+                  background: `linear-gradient(to right, ${progressColor} ${rateVal * 100}%, rgba(255,255,255,0.05) ${rateVal * 100}%)`,
+                  width: lv === 5 ? "0" : `${160 + (5 - lv) * 50}px`,
+                  borderBottomColor: isActive ? "#F59E0B" : "transparent" // 선택 시 테두리 강조
+                };
+
+                // 삼각형(Lv5)은 그라데이션 적용 방식이 다름 (border로 만들기 때문)
+                // 그래서 Lv5는 예외적으로 색상만 바꿈 (채워지는 효과는 사각형인 1~4단계에서만 확실히 보임)
+                
                 return (
                   <div
                     key={lv}
-                    className="flex items-center gap-4 md:gap-10 w-full justify-center group relative"
+                    onClick={() => setActiveLevel(lv)}
+                    className={`cursor-pointer transition-all duration-700 flex items-center justify-center relative my-1 ${
+                      isActive ? "scale-105 z-10 brightness-110" : "opacity-90 hover:opacity-100"
+                    }`}
                   >
+                    {/* 도형 그리기 */}
                     <div
-                      onClick={() => setActiveLevel(lv)}
-                      className={`cursor-pointer transition-all duration-700 flex items-center justify-center relative ${
-                        lv === 5
-                          ? "w-0 h-0 border-l-[60px] md:border-l-[75px] border-l-transparent border-r-[60px] md:border-r-[75px] border-r-transparent border-b-[80px] md:border-b-[100px]"
-                          : "h-10 md:h-12 border-l-[15px] border-l-transparent border-r-[15px] border-r-transparent"
-                      } ${
-                        isActive
-                          ? "scale-110 z-10"
-                          : ""
-                      } ${
-                        isConfigured ? "opacity-100" : "opacity-20 grayscale"
-                      } hover:opacity-100`}
+                      className={`relative flex items-center justify-center overflow-hidden shadow-lg backdrop-blur-sm
+                        ${lv === 5 
+                          ? "w-0 h-0 border-l-[60px] md:border-l-[75px] border-l-transparent border-r-[60px] md:border-r-[75px] border-r-transparent border-b-[80px] md:border-b-[100px]" 
+                          : "h-10 md:h-12 border border-white/5" // 1~4단계는 사각형 바 형태
+                        }`}
                       style={{
-                        width: lv === 5 ? "0" : `${160 + (5 - lv) * 50}px`,
-                        backgroundColor: lv === 5 ? "transparent" : colorMain,
-                        borderBottomColor: lv === 5 ? colorMain : "",
-                        filter: isActive
-                          ? "drop-shadow(0 0 30px rgba(245,158,11,0.8))"
-                          : isConfigured
-                            ? `drop-shadow(0 0 ${rateVal * 30}px ${isGoalMet ? "rgba(16,185,129,0.6)" : "rgba(245,158,11," + (rateVal * 0.8) + ")"})`
-                            : "none"
+                        // 5단계는 삼각형이라 border color로 색칠, 1~4단계는 gradient 배경
+                        borderBottomColor: lv === 5 ? (isActive ? "#F59E0B" : rateVal >= 1 ? "#10B981" : "#B45309") : undefined,
+                        background: lv !== 5 ? `linear-gradient(to right, ${rateVal >= 1 ? "#10B981" : "#F59E0B"} ${rateVal * 100}%, rgba(30, 41, 59, 0.5) ${rateVal * 100}%)` : undefined,
+                        width: lv !== 5 ? `${160 + (5 - lv) * 60}px` : undefined, // 폭을 조금 더 넓힘
+                        borderRadius: lv !== 5 ? "0.5rem" : undefined
                       }}
                     >
-                      <span
-                        className={`absolute font-black text-white tracking-tighter text-center whitespace-nowrap left-1/2 -translate-x-1/2 ${
-                          isActive ? "scale-110" : ""
-                        } ${
-                          lv === 5
-                            ? "top-[60px] md:top-[75px] text-[10px] md:text-[13px]"
-                            : "top-1/2 -translate-y-1/2 text-[10px] md:text-[13px]"
-                        }`}
-                      >
-                        {levelMap[lv]}
-                      </span>
-                      {isGoalMet && (
-                        <div className="absolute -top-3 -right-3 bg-emerald-500 rounded-full p-1.5 shadow-lg border border-white/20">
-                          <CheckCircle size={14} className="text-white" />
-                        </div>
-                      )}
-                    </div>
-                    <div className="w-16 md:w-24">
-                      <div
-                        className={`text-[10px] font-black mb-1 flex justify-between ${
-                          isActive
-                            ? "text-amber-400"
-                            : isGoalMet
-                            ? "text-emerald-400"
-                            : "text-slate-600"
-                        }`}
-                      >
-                        <span>{isConfigured ? `${ratePercent}%` : "0.0%"}</span>
-                      </div>
-                      <div className="w-full h-1.5 bg-slate-800 rounded-full border border-white/5 overflow-hidden">
-                        <div
-                          className={`h-full transition-all duration-1000 ${
-                            isGoalMet
-                              ? "bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.5)]"
-                              : isActive
-                              ? "bg-amber-400"
-                              : "bg-amber-900/50"
-                          }`}
-                          style={{ width: `${Math.min(rateVal * 100, 100)}%` }}
-                        />
+                      {/* 텍스트 (이름 + 퍼센트) */}
+                      <div className={`absolute flex flex-col items-center justify-center leading-none ${
+                         lv === 5 ? "top-[40px] md:top-[50px]" : "" // 삼각형일 때 위치 조정
+                      }`}>
+                        <span className={`font-black uppercase tracking-tighter ${
+                          isActive ? "text-white text-sm" : "text-slate-300 text-xs"
+                        }`}>
+                          {levelMap[lv]}
+                        </span>
+                        {/* 퍼센트 표시 (설정된 경우에만) */}
+                        {isConfigured && (
+                          <span className="text-[9px] font-bold text-white/80 mt-0.5">
+                            {ratePercent}%
+                          </span>
+                        )}
                       </div>
                     </div>
                   </div>
                 );
               })}
-
-              <p className="text-slate-500 text-[10px] font-bold mt-4 uppercase tracking-[0.2em] opacity-60">
+              
+              <p className="text-slate-500 text-[10px] font-bold mt-6 uppercase tracking-[0.2em] opacity-60">
                 5단계 미션
               </p>
 
             </div>
           </div>
+
           {/* 오른쪽 패널 (유지) */}
           <div className="w-full md:w-1/2 h-full flex flex-col">
             <div
