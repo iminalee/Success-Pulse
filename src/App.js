@@ -1212,9 +1212,20 @@ const renderHub = () => {
     // 0 나누기 0 에러 방지용 안전장치
     const totalProgress = mbGoalAmount > 0 ? Math.min(currentAsset / mbGoalAmount, 1) : 0;
 
+    // [Fix] 피라미드 모양 유지를 위한 각 레벨별 너비 설정
+    const widthMap = {
+      5: "w-[160px]", // 5단계 (제일 좁음)
+      4: "w-[200px]",
+      3: "w-[240px]",
+      2: "w-[280px]",
+      1: "w-[320px]", // 1단계 (제일 넓음)
+    };
+
     return (
       <div className="relative w-full h-full flex-grow flex flex-col overflow-y-auto no-scrollbar pb-24">
-        {/* 잠금 화면 (계약 전) */}
+        {/* ======================= */}
+        {/* 1. 잠금 화면 (계약 전) - 유지 */}
+        {/* ======================= */}
         {isLocked && (
           <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-slate-950/60 backdrop-blur-[6px] animate-fadeIn">
             <div className="bg-[#0A0F1E] border border-amber-500/30 p-10 rounded-[3rem] text-center shadow-[0_0_100px_rgba(245,158,11,0.2)] max-w-md transform transition-all hover:scale-105">
@@ -1239,12 +1250,12 @@ const renderHub = () => {
           {/* [좌측 패널] 피라미드 */}
           {/* ======================= */}
           <div className="w-full md:w-1/2 flex flex-col items-center justify-center relative z-10 pt-10">
-             
+              
              {/* BPS Header (캐릭터 가로 한 줄 배치 + BPS 위치 조정) */}
              <div className="relative flex justify-center items-end mb-4 z-20 w-full"> 
                 <div onClick={() => setActiveLevel(6)} className="relative flex flex-col items-center justify-end cursor-pointer group w-full">
                   
-                  {/* [수정 5] 캐릭터 5개 가로로 쫙 펼치기 */}
+                  {/* 캐릭터 5개 가로로 쫙 펼치기 */}
                   <div className="flex justify-between items-center w-full max-w-md px-4 mb-4"> 
                     {activeTraits.map((trait, i) => (
                       <span key={i} className={`text-[10px] md:text-xs font-black px-3 py-1.5 rounded-full bg-slate-900/90 border border-amber-500/40 whitespace-nowrap shadow-lg animate-pulse ${activeLevel === 6 ? "text-amber-400 drop-shadow-[0_0_5px_rgba(245,158,11,0.8)]" : "text-slate-400 opacity-70"}`}>
@@ -1253,7 +1264,7 @@ const renderHub = () => {
                     ))}
                   </div>
 
-                  {/* [수정 4] BPS 글자 위로 더 띄움 (삼각형 꼭지점과 간격 확보) */}
+                  {/* BPS 글자 */}
                   <h4 className={`text-xl font-black tracking-tighter transition-all duration-500 translate-y-[-5px] ${activeLevel === 6 ? "text-amber-400 scale-110" : "text-slate-600"}`}
                       style={{ filter: `drop-shadow(0 0 ${10 + totalProgress * 40}px rgba(245, 158, 11, ${0.5 + totalProgress * 0.5}))` }}>
                     BPS
@@ -1261,61 +1272,56 @@ const renderHub = () => {
                 </div>
              </div>
 
-             {/* Pyramid Levels */}
-{/* [추가] BPS 상징 노란 삼각형 (장식용) */}
-<div className="flex justify-center mb-1">
-  <div className="w-0 h-0 
-    border-l-[30px] border-l-transparent 
-    border-r-[30px] border-r-transparent 
-    border-b-[40px] border-b-yellow-500 
-    drop-shadow-lg">
-  </div>
-</div>
+             {/* [수정 포인트] 장식용 노란 삼각형 (반복문 밖으로 분리됨!) */}
+             <div className="flex justify-center mb-1 animate-pulse">
+               <div className="w-0 h-0 
+                 border-l-[30px] border-l-transparent 
+                 border-r-[30px] border-r-transparent 
+                 border-b-[40px] border-b-yellow-500 
+                 drop-shadow-[0_0_10px_rgba(234,179,8,0.6)]">
+               </div>
+             </div>
+
+             {/* [수정 포인트] Pyramid Levels (모두 Bar 형태로 통일) */}
              {[5, 4, 3, 2, 1].map((lv) => {
                 const isConfigured = visions[lv].title !== "";
                 const isActive = lv === activeLevel;
                 
-                // [수정 1] % 표시 복원 (전체 자산 비율 사용)
-                // totalProgress는 0.0 ~ 1.0 사이 값 (0.5 = 50%)
+                // 퍼센트 계산 (기존 로직 유지)
                 const visualPercent = totalProgress * 100; 
                 const displayPercent = visualPercent.toFixed(1);
 
-                let progressColor = "#4A5568";
-                if (isActive) progressColor = "#F59E0B"; 
-                else if (isConfigured) progressColor = "#B45309"; 
-                if (visualPercent >= 100 && !isActive) progressColor = "#10B981";
-
                 return (
-                  <div key={lv} onClick={() => setActiveLevel(lv)} className={`cursor-pointer transition-all duration-500 flex items-center justify-center relative my-1 ${isActive ? "scale-105 z-10 brightness-110" : "opacity-90 hover:opacity-100"}`}>
-                    <div className={`relative flex items-center justify-center overflow-hidden shadow-lg backdrop-blur-sm
-                        ${lv === 5 ? "w-0 h-0 border-l-[60px] md:border-l-[75px] border-l-transparent border-r-[60px] md:border-r-[75px] border-r-transparent border-b-[80px] md:border-b-[100px]" : "h-12 md:h-14 border border-white/5 rounded-xl"}`}
-                      style={{
-                        borderBottomColor: lv === 5 ? (isActive ? "#F59E0B" : progressColor) : undefined,
-                        // [수정 2] 오른쪽 바 이상한 색깔 제거 -> 투명도 조절된 단색 배경으로 통일
-                        background: lv !== 5 ? `linear-gradient(to right, ${progressColor} ${visualPercent}%, rgba(30, 41, 59, 0.4) ${visualPercent}%)` : undefined,
-                        width: lv !== 5 ? `${200 + (5 - lv) * 60}px` : undefined,
-                      }}>
+                  <div 
+                    key={lv} 
+                    onClick={() => setActiveLevel(lv)} 
+                    // [Fix] 너비는 widthMap을 사용해 피라미드 형태 유지
+                    className={`
+                      cursor-pointer relative flex items-center justify-center h-[50px] rounded-2xl mb-2 overflow-hidden transition-all duration-300 
+                      border border-slate-700/50 bg-slate-800/80
+                      ${widthMap[lv]}
+                      ${isActive ? "ring-2 ring-amber-500 scale-105 z-10 brightness-110 shadow-[0_0_15px_rgba(245,158,11,0.3)]" : "opacity-90 hover:opacity-100 hover:border-slate-500"}
+                    `}
+                  >
+                    {/* 1. 배경 게이지 (파란색 그라데이션) */}
+                    <div 
+                      className="absolute left-0 top-0 h-full bg-gradient-to-r from-blue-600 to-blue-400 opacity-90 transition-all duration-1000" 
+                      style={{ width: `${displayPercent}%` }} 
+                    />
 
-
-{/* [수정] 레벨 5도 이제 평범한 '바(Bar)'입니다. (삼각형 아님) */}
-<div className={`relative flex items-center justify-center rounded-2xl mb-2 transition-all duration-300
-  ${lv === 5 ? "w-[160px] h-[50px] bg-slate-700/80" : "w-full h-[60px] ... (기존 스타일)"}
-`}>
-  
-  {/* 내용물 (이제 정렬 걱정 끝!) */}
-  <div className="flex flex-col items-center z-20">
-    <span className="text-white font-bold text-sm">
-      {levelMap[lv]} {/* 자아실현 */}
-    </span>
-    <span className="text-[10px] text-yellow-400 font-bold">
-      {displayPercent}%
-    </span>
-  </div>
-      
+                    {/* 2. 텍스트 정보 (항상 중앙 정렬, 삼각형 문제 해결됨) */}
+                    <div className="relative z-10 flex flex-col items-center justify-center leading-none">
+                      <span className={`font-bold uppercase text-sm ${isActive ? "text-white" : "text-slate-300"}`}>
+                        {levelMap[lv]}
+                      </span>
+                      <span className="text-[10px] text-yellow-300 font-bold mt-0.5">
+                        {displayPercent}%
+                      </span>
                     </div>
                   </div>
                 );
              })}
+             
              <p className="text-slate-500 text-[10px] font-bold mt-4 uppercase tracking-[0.2em] opacity-60">5단계 미션</p>
           </div>
 
@@ -1323,7 +1329,7 @@ const renderHub = () => {
           {/* [우측 패널] 비전 카드 (기능 유지) */}
           {/* ======================= */}
           <div className="w-full md:w-1/2 flex flex-col gap-6 animate-fadeIn h-full justify-center">
-            {/* ... (우측 패널 코드는 기존과 동일하게 유지) ... */}
+            
             <div className="bg-[#1A202C]/80 border border-white/10 rounded-[2.5rem] p-8 shadow-2xl relative overflow-hidden min-h-[500px] flex flex-col">
                <div className="absolute top-0 right-0 p-6 opacity-5 pointer-events-none"><Zap size={150} className="text-white" /></div>
                <div className="mb-6 relative z-10">
@@ -1347,7 +1353,6 @@ const renderHub = () => {
                    <h4 className="text-sm font-black text-white uppercase tracking-widest flex items-center gap-2">
                      <ListPlus size={16} className="text-amber-500" /> Value Events
                    </h4>
-                   {/* ... (우측 하단 코드는 기존과 동일) ... */}
                  </div>
                  <div className="space-y-3 overflow-y-auto pr-2 custom-scrollbar max-h-[250px]">
                     {visions[activeLevel].events.length === 0 ? (
