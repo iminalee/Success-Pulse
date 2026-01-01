@@ -1286,16 +1286,37 @@ const renderHub = () => {
                         background: lv !== 5 ? `linear-gradient(to right, ${progressColor} ${visualPercent}%, rgba(30, 41, 59, 0.4) ${visualPercent}%)` : undefined,
                         width: lv !== 5 ? `${200 + (5 - lv) * 60}px` : undefined,
                       }}>
-                      
-{/* [수정] Level 5(자아실현) 위치 강제 조정: 삼각형 무게중심에 맞춤 */}
-<div className={`absolute left-0 right-0 flex flex-col items-center justify-center leading-none z-20 ${lv === 5 ? "top-[60%] -translate-y-1/2" : "inset-0"}`}>
-  <span className={`font-black uppercase tracking-tighter ${isActive ? "text-white text-sm md:text-base" : "text-slate-200 text-xs md:text-sm"}`}>
-    {levelMap[lv]}
-  </span>
-  {/* 모든 단계에 % 표시 */}
-  <span className="text-[9px] font-bold text-white/80 mt-0.5">
-    {displayPercent}%
-  </span>
+{/* [추가] BPS 상징 노란 삼각형 (장식용) */}
+<div className="flex justify-center mb-1">
+  <div className="w-0 h-0 
+    border-l-[30px] border-l-transparent 
+    border-r-[30px] border-r-transparent 
+    border-b-[40px] border-b-yellow-500 
+    drop-shadow-lg">
+  </div>
+</div>
+
+
+
+{/* [수정] 레벨 5도 이제 평범한 '바(Bar)'입니다. (삼각형 아님) */}
+<div className={`relative flex items-center justify-center rounded-2xl mb-2 transition-all duration-300
+  ${lv === 5 ? "w-[160px] h-[50px] bg-slate-700/80" : "w-full h-[60px] ... (기존 스타일)"}
+`}>
+  
+  {/* 내용물 (이제 정렬 걱정 끝!) */}
+  <div className="flex flex-col items-center z-20">
+    <span className="text-white font-bold text-sm">
+      {levelMap[lv]} {/* 자아실현 */}
+    </span>
+    <span className="text-[10px] text-yellow-400 font-bold">
+      {displayPercent}%
+    </span>
+  </div>
+      {/* 배경 게이지 (필요하다면 유지) */}
+  <div 
+    className="absolute left-0 top-0 h-full rounded-2xl bg-gradient-to-r from-blue-600 to-blue-400 opacity-50" 
+    style={{ width: `${displayPercent}%` }} 
+  />
 </div>
                     </div>
                   </div>
