@@ -430,7 +430,7 @@ const App = () => {
       } else {
         // 성공해야만 이 줄이 실행됨 -> 입력칸 생김!
         setIsOtpSent(true); 
-        alert("✅ 인증번호가 발송되었습니다! 메일함의 숫자 6자리를 확인하세요.");
+        alert("✅ 인증번호가 발송되었습니다! 메일함의 숫자 8자리를 확인하세요.");
       }
     } catch (err) {
       alert("시스템 에러: " + err.message);
