@@ -2400,7 +2400,7 @@ const renderHub = () => {
               <h2 className="text-4xl font-black text-white uppercase italic tracking-tighter text-rose-500">
                 Trash Bin
               </h2>
-            </div>
+            </div>  
             {trashVisions.length === 0 ? (
               <div className="text-center py-32 opacity-20 italic font-serif">
                 The Void is empty.
