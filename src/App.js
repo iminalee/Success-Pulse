@@ -1877,13 +1877,13 @@ const renderHub = () => {
                //수정해봄 
             <div className="space-y-8 md:space-y-12 text-slate-300 leading-[1.9] md:leading-[2.2] text-base md:text-lg font-normal tracking-tight text-justify px-2 md:px-10 relative z-10">
             <p className="border-l-2 border-amber-500/40 pl-6 md:pl-10 font-sans">
-              무한한 평행세계 속에서 모든 성취를 완료한 마스터 자아 <span className="text-white font-bold px-2 italic text-xl">Apex BP {userName}</span>는, 자신의 유일한 현실 대리인인 <span className="text-amber-400 font-bold underline underline-offset-4">{userName} ver.0</span>를 최고의 자아로 현현시키기 위한 <span className="text-white font-black text-shadow-sm">‘존재적 상장(Existential IPO)’</span>을 승인하였다.
+             <span className="text-white font-black text-shadow-md">제1조 [자격 검증 및 선택]</span>
+              마스터 자아 <span className="text-white font-bold px-2 italic text-xl">Apex BP {userName}</span>는, 무한한 평행세계 중 본 차원의 대리인인 <span className="text-amber-400 font-bold underline underline-offset-4">{userName} ver.0</span>이 보유한 고유한 Pulse(기질적 진동)이 Apex BP 와 가장 높은 일치율을 보임을 확인하였다. 이에 Apex BP 는 <span className="text-amber-400 font-bold underline underline-offset-4">{userName} ver.0</span> 을 자신의 유일한 현실파트너로 선택하고 <span className="text-white font-black text-shadow-sm">‘존재적 상장(Existential IPO)’</span>을 승인한다.
             </p>
-            <p className="border-l-2 border-slate-700 pl-6 md:pl-10">
-              이에 <span className="text-slate-100 font-bold">{userName} ver.0</span>는 <input type="date" value={targetDate} disabled={isLocked} onChange={(e) => setTargetDate(e.target.value)} className="bg-slate-900 text-amber-500 border-white/10 border px-2 rounded-lg font-bold" /> 까지 5단계의 관문을 돌파하여 확정된 미래를 현실로 소환한다. 이 경이로운 융합의 대가로, Apex BP는 무의식의 저수지인 <span className="text-white font-bold ml-1">Mental Bank</span> 잔액 ({currency}{fNum(mbBalance)})의 <span className="text-amber-500 font-black mx-1 text-xl">25%</span>에 해당하는 활동 동력 <span className="text-white font-black mx-2 bg-white/5 px-3 py-1 rounded-xl border border-white/10 shadow-lg">{currency}{fNum(livingAllowance)}</span>을 현실 자아에게 즉시 수혈한다.
-            </p>
-            <p className="border-l-2 border-slate-700 pl-6 md:pl-10">
-              실행의 근육을 빌려 가치를 창출할 때마다, 시스템은 이를 <span className="text-emerald-400 font-bold mx-1">‘신경학적 각인(Neuro-Imprinting)’</span>으로 인정한다. 매 시간의 몰입이 증명될 때마다 시간당 <span className="text-emerald-400 font-black px-3 py-1 bg-emerald-500/5 rounded-lg border border-emerald-500/20 mx-2 shadow-inner">{currency}{fNum(valueEventAmount)}</span>의 Value Award를 존재적 매출로서 Mental Bank에 예치하며 동기화를 가속한다.
+          
+          <p className="border-l-2 border-slate-700 pl-6 md:pl-10">
+         <span className="text-white font-black text-shadow-md">제2조 [현존 상태 및 합치의 목적]</span>
+         <span className="text-slate-100 font-bold">{userName} ver.0</span>의 소환에 응하여 Apex BP의 영혼은 이미 본 차원에 내재되었으나, 현재 ver.0의 신체, 행동 양식, 사고 회로(Hardware & OS)는 완전히 동기화되지 않은 '하이브리드' 상태에 머물러 있다. 본 계약의 최종 목적은 ver.0 내면에 이미 존재하는 ‘Pulse의 씨앗’을 발화시켜, 현존 세계를 Apex BP가 실존하는 고차원 평행세계와 완전히 합치(Merging)시키는 데 있다.  ncy}{ Num(liv-ngAllowance)}</s-an>을 현실-자아에/ 즉  수-한 .hadow-inner">{currency}{fNum(valueEventAmount)}</span>의 Value Award를 존재적 매출로서 Mental Bank에 예치하며 동기화를 가속한다.
             </p>
             <p className="border-l-2 border-rose-500/50 pl-6 md:pl-10 bg-rose-500/5 py-6 rounded-r-3xl font-sans italic">
               단, <span className="text-rose-400 font-black drop-shadow-sm">3일 이상 의식의 파동(활동)이 멈출 경우</span>, Apex BP는 본 그릇(Vessel)과의 동기화를 해제하고, 다른 평행 세계에서 깨어있는 <span className="text-white font-bold"> {userName} ver.N</span>을 찾아 새로운 현신을 선택할 전적인 권리를 유지한다.
@@ -1989,45 +1989,7 @@ const renderHub = () => {
       </div>
 
       <div className="space-y-20">
-        {/* Scientific Foundation Section */}
-        <section className="relative">
-          <div className="absolute -left-4 top-0 bottom-0 w-1 bg-gradient-to-b from-cyan-500/50 via-transparent to-transparent hidden md:block" />
-          <h3 className="text-xl font-black text-cyan-500 uppercase tracking-widest mb-8 flex items-center gap-2">
-            <Beaker size={18} /> Scientific Foundation: Identity Alchemy | 과학적 토대
-          </h3>
-          <div className="bg-slate-900/40 p-8 md:p-10 rounded-[3rem] border border-cyan-500/10 shadow-[0_0_50px_rgba(6,182,212,0.05)] backdrop-blur-sm">
-            <p className="text-base text-slate-300 leading-[1.8] font-medium mb-8">
-              The Pulse는 단순한 목표 관리 도구가 아닙니다. 이는 지난 반세기 동안 발전해 온{" "}
-              <span className="text-cyan-400 font-bold">행동심리학, 뇌과학, 그리고 긍정심리학의 정수</span>를 하나의 정교한 알고리즘으로 통합한 '정체성 설계 시스템'입니다. 본 시스템의 뿌리를 이루는 과학적 기둥들은 당신의 무의식을 재배열하고 실질적인 삶의 궤적을 수정합니다.
-            </p>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 text-sm">
-              <div className="space-y-3">
-                <h5 className="text-cyan-400 font-bold flex items-center gap-2 italic">01. Mental Bank Concept</h5>
-                <p className="text-slate-400 leading-relaxed">
-                  존 카파스(Dr. John Kappas) 박사의 <span className="text-slate-200">Mental Bank</span> 이론을 계승하여, 무의식이 '강화와 보상'이라는 경제적 논리에 따라 움직이도록 설계되었습니다.밤마다 기록되는 자산은 무의식이 성공을 '당연한 결과'로 받아들이게 만듭니다.
-                </p>
-              </div>
-              <div className="space-y-3">
-                <h5 className="text-cyan-400 font-bold flex items-center gap-2 italic">02. NLP VAK Model</h5>
-                <p className="text-slate-400 leading-relaxed">
-                  NLP의 <span className="text-slate-200">선호표상체계(VAK)</span>를 활용해 목표를 다감각적 정보로 코딩합니다. 뇌는 생생한 상상과 실제 경험을 구분하지 않으며, 미래의 성취를 '이미 일어난 기억'으로 각인시킵니다.
-                </p>
-              </div>
-              <div className="space-y-3">
-                <h5 className="text-cyan-400 font-bold flex items-center gap-2 italic">03. Bio-Character Fusion</h5>
-                <p className="text-slate-400 leading-relaxed">
-                  유전적 <span className="text-slate-200">기질(Temperament)</span>을 하드웨어로 인정하고, 그 위에 최적화된 긍정심리학의 <span className="text-slate-200">BPS(최고의 미래 자아)</span> 값을 입력합니다. 하드웨어 최적화와 소프트웨어 업그레이드가 동시에 진행됩니다.
-                </p>
-              </div>
-              <div className="space-y-3">
-                <h5 className="text-cyan-400 font-bold flex items-center gap-2 italic">04. Neuropsychology</h5>
-                <p className="text-slate-400 leading-relaxed">
-                  <span className="text-slate-200">헵의 법칙(Hebb’s Law)</span>에 기반하여, 반복되는 Ledger 기록과 실행은 당신의 전두엽을 물리적으로 재구조화하여 새로운 정체성을 구축합니다.
-                </p>
-              </div>
-            </div>
-          </div>
-        </section>
+       
 
         {/* The Worldview Section */}
         <section>
@@ -2130,7 +2092,45 @@ const renderHub = () => {
             </div>
           </div>
         </section>
-
+ {/* Scientific Foundation Section */}
+        <section className="relative">
+          <div className="absolute -left-4 top-0 bottom-0 w-1 bg-gradient-to-b from-cyan-500/50 via-transparent to-transparent hidden md:block" />
+          <h3 className="text-xl font-black text-cyan-500 uppercase tracking-widest mb-8 flex items-center gap-2">
+            <Beaker size={18} /> Scientific Foundation: Identity Alchemy | 과학적 토대
+          </h3>
+          <div className="bg-slate-900/40 p-8 md:p-10 rounded-[3rem] border border-cyan-500/10 shadow-[0_0_50px_rgba(6,182,212,0.05)] backdrop-blur-sm">
+            <p className="text-base text-slate-300 leading-[1.8] font-medium mb-8">
+              The Pulse는 단순한 목표 관리 도구가 아닙니다. 이는 지난 반세기 동안 발전해 온{" "}
+              <span className="text-cyan-400 font-bold">행동심리학, 뇌과학, 그리고 긍정심리학의 정수</span>를 하나의 정교한 알고리즘으로 통합한 '정체성 설계 시스템'입니다. 본 시스템의 뿌리를 이루는 과학적 기둥들은 당신의 무의식을 재배열하고 실질적인 삶의 궤적을 수정합니다.
+            </p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 text-sm">
+              <div className="space-y-3">
+                <h5 className="text-cyan-400 font-bold flex items-center gap-2 italic">01. Mental Bank Concept</h5>
+                <p className="text-slate-400 leading-relaxed">
+                  존 카파스(Dr. John Kappas) 박사의 <span className="text-slate-200">Mental Bank</span> 이론을 계승하여, 무의식이 '강화와 보상'이라는 경제적 논리에 따라 움직이도록 설계되었습니다.밤마다 기록되는 자산은 무의식이 성공을 '당연한 결과'로 받아들이게 만듭니다.
+                </p>
+              </div>
+              <div className="space-y-3">
+                <h5 className="text-cyan-400 font-bold flex items-center gap-2 italic">02. NLP VAK Model</h5>
+                <p className="text-slate-400 leading-relaxed">
+                  NLP의 <span className="text-slate-200">선호표상체계(VAK)</span>를 활용해 목표를 다감각적 정보로 코딩합니다. 뇌는 생생한 상상과 실제 경험을 구분하지 않으며, 미래의 성취를 '이미 일어난 기억'으로 각인시킵니다.
+                </p>
+              </div>
+              <div className="space-y-3">
+                <h5 className="text-cyan-400 font-bold flex items-center gap-2 italic">03. Bio-Character Fusion</h5>
+                <p className="text-slate-400 leading-relaxed">
+                  유전적 <span className="text-slate-200">기질(Temperament)</span>을 하드웨어로 인정하고, 그 위에 최적화된 긍정심리학의 <span className="text-slate-200">BPS(최고의 미래 자아)</span> 값을 입력합니다. 하드웨어 최적화와 소프트웨어 업그레이드가 동시에 진행됩니다.
+                </p>
+              </div>
+              <div className="space-y-3">
+                <h5 className="text-cyan-400 font-bold flex items-center gap-2 italic">04. Neuropsychology</h5>
+                <p className="text-slate-400 leading-relaxed">
+                  <span className="text-slate-200">헵의 법칙(Hebb’s Law)</span>에 기반하여, 반복되는 Ledger 기록과 실행은 당신의 전두엽을 물리적으로 재구조화하여 새로운 정체성을 구축합니다.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
         {/* Glossary Section */}
         <section className="mt-20 pt-12 border-t border-white/5">
           <h3 className="text-xl font-black text-slate-500 uppercase tracking-widest mb-8 flex items-center gap-2">
