@@ -1882,8 +1882,7 @@ const renderHub = () => {
 
 
     <div className="w-full max-w-4xl mx-auto p-1">
-      {/* 붉은색 네온 테두리 효과를 주는 컨테이너 */}
-      <div className="relative rounded-2xl border border-rose-500/50 bg-black/80 shadow-[0_0_30px_-5px_rgba(244,63,94,0.3)] overflow-hidden">
+     
         
         {/* 배경에 깔리는 은은한 붉은 그라데이션 */}
         <div className="absolute top-0 right-0 w-64 h-64 bg-rose-600/10 blur-[80px] rounded-full pointer-events-none" />
@@ -1972,7 +1971,7 @@ const renderHub = () => {
 
         </div>
       </div>
-    </div>
+   
 
 
 
