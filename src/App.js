@@ -1882,12 +1882,39 @@ const renderHub = () => {
             </p>
           
           <p className="border-l-2 border-slate-700 pl-6 md:pl-10">
-         <span className="text-white font-black text-shadow-md">제2조 [현존 상태 및 합치의 목적]</span>
-         <span className="text-slate-100 font-bold">{userName} ver.0</span>의 소환에 응하여 Apex BP의 영혼은 이미 본 차원에 내재되었으나, 현재 ver.0의 신체, 행동 양식, 사고 회로(Hardware & OS)는 완전히 동기화되지 않은 '하이브리드' 상태에 머물러 있다. 본 계약의 최종 목적은 ver.0 내면에 이미 존재하는 ‘Pulse의 씨앗’을 발화시켜, 현존 세계를 Apex BP가 실존하는 고차원 평행세계와 완전히 합치(Merging)시키는 데 있다.  ncy}{ Num(liv-ngAllowance)}</s-an>을 현실-자아에/ 즉  수-한 .hadow-inner">{currency}{fNum(valueEventAmount)}</span>의 Value Award를 존재적 매출로서 Mental Bank에 예치하며 동기화를 가속한다.
+           <span className="text-white font-black text-shadow-md">제2조 [현존 상태 및 합치의 목적]</span>
+            <span className="text-slate-100 font-bold">{userName} ver.0</span>의 소환에 응하여 Apex BP의 영혼은 이미 본 차원에 내재되었으나, 현재 ver.0의 신체, 행동 양식, 사고 회로(Hardware & OS)는 완전히 동기화되지 않은 '하이브리드' 상태에 머물러 있다. 본 계약의 최종 목적은 ver.0 내면에 이미 존재하는 ‘Pulse의 씨앗’을 발화시켜, 현존 세계를 Apex BP가 실존하는 고차원 평행세계와 완전히 합치(Merging)시키는 데 있다.
+          </p>
+          <p className="border-l-2 border-rose-500/50 pl-6 md:pl-10 bg-rose-500/5 py-6 rounded-r-3xl font-sans italic">
+                <span className="text-white font-black text-shadow-md">제3조 [주야간 동기화 프로토콜]</span>
+              <span className="text-slate-100 font-bold">{userName} ver.0</span>은 이미 내재된 Apex BP 의 리드에 따라 다음과 같은  <span className="text-white font-black text-shadow-sm">'신경학적 각인 (Neuro-Imprinting)'</span> 절차를 수행한다. 
+              <span className="text-rose-400 font-black drop-shadow-sm">1.일간 실행 (Daily Execution): </span> 낮 시간 동안 <span className="text-white font-bold"> {userName} ver.0</span>는 Apex BP의 생각, 품성, 행동 정체성을 자신의 것으로 채택하여 물리적 세계에서 행동한다.
+              <span className="text-rose-400 font-black drop-shadow-sm">2.야간 접속(Nocturnal Connection): </span> 취침 전, <span className="text-white font-bold"> {userName} ver.0</span>는 Apex BP로서 살아낸 하루의 감각을 복기하며 진정한 미래 차원의 Apex BP와 접속한다.
+              <span className="text-rose-400 font-black drop-shadow-sm">3.지속적 유지: </span> 수면 시간 동안 이 접속 상태를 유지함으로써, 무의식의 영역에서 두 세계의 경계를 허물고 정체성을 고착화한다.
             </p>
-            <p className="border-l-2 border-rose-500/50 pl-6 md:pl-10 bg-rose-500/5 py-6 rounded-r-3xl font-sans italic">
-              단, <span className="text-rose-400 font-black drop-shadow-sm">3일 이상 의식의 파동(활동)이 멈출 경우</span>, Apex BP는 본 그릇(Vessel)과의 동기화를 해제하고, 다른 평행 세계에서 깨어있는 <span className="text-white font-bold"> {userName} ver.N</span>을 찾아 새로운 현신을 선택할 전적인 권리를 유지한다.
+            <p className="border-l-2 border-amber-500/40 pl-6 md:pl-10 font-sans">
+             <span className="text-white font-black text-shadow-md">제4조 [에너지 자원 할당]</span>
+              Apex BP는 현존 세계의 강력한 저항(심리적 불안, 현실적 한계 등)을 극복할 자원으로서, 무의식 원장인 멘탈뱅크 잔액{" "}
+              <span className="text-white font-black">Mental Bank Balance</span>{" "}
+              (<span className="text-white border-b border-white/30">{currency}{fNum(mbBalance)}</span>) 의  <span className="text-amber-500 font-bold">25%</span>에 해당하는'Pulse 에너지' 금액인{" "}
+              <span className="text-white font-bold mx-2 bg-white/5 px-3 py-1 rounded-lg">
+                {currency}
+                {fNum(livingAllowance)}
+              </span>를 <span className="text-white font-bold"> {userName} ver.0</span>에게 즉시 부여한다. 이 에너지는 현실의 마찰력을 상쇄하는 강력한 추진력이 된다. 
+                 </p>
+
+
+ <p className="border-l-2 border-rose-500/50 pl-6 md:pl-10 bg-rose-500/5 py-6 rounded-r-3xl font-sans italic">
+                <span className="text-white font-black text-shadow-md">제5조 [미션 및 보상 체계]</span>
+              
+              <span className="text-white-400 font-black drop-shadow-sm">1. </span>  <span className="text-white font-bold"> {userName} ver.0</span>는 매일 1~5개 단계의 핵심 미션을 설정하고 이를 수행한다.
+              <span className="text-white-400 font-black drop-shadow-sm">2. </span> 실행의 밀도가 높아질수록, 즉 미션 성취도가 높을수록 시간당 적립액(<span className="text-emerald-400 font-bold px-3 py-1 bg-white/5 rounded-lg border border-white/10">
+                {currency}
+                {fNum(valueEventAmount)}
+              </span>)은 기하급수적으로 증폭된다.
+              <span className="text-white-400 font-black drop-shadow-sm">3. </span> 발생한 모든 적립액은 Mental Bank에 즉시 예치되어 두 자아 사이의 동기화 속도를 가속한다.
             </p>
+                
           </div>
                 
           </div>
