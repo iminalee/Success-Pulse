@@ -1741,7 +1741,7 @@ const renderHub = () => {
     );
   };
 
-  const renderContract = () => {
+    const renderContract = () => {
     const isLocked = !!signedDate;
     const handleExecuteContract = () => {
       if (!signature.trim()) return showToast("서명란이 비어있습니다.");
@@ -1789,198 +1789,188 @@ const renderHub = () => {
             </div>
           )}
         </div>
-<div
-  className={`bg-[#0A0F1E] border-2 rounded-[2rem] md:rounded-[3.5rem] p-6 md:p-16 relative overflow-hidden shadow-2xl transition-all duration-500 ${
-    isLocked
-      ? "border-emerald-500/30 shadow-[0_0_50px_rgba(16,185,129,0.1)]"
-      : "border-white/10"
-  }`}
->
-  <div className="absolute top-0 right-0 p-4 md:p-16 opacity-5 pointer-events-none">
-    <ShieldCheck size={280} className="text-white" />
-  </div>
-  
-  <div className="flex flex-col items-center mb-8 md:mb-16 text-center">
-    <h3 className="text-2xl md:text-4xl font-light text-white tracking-[0.3em] uppercase border-b border-white/10 pb-4 md:pb-8 mb-4 md:mb-6 font-serif">
-      存在 的 契約
-    </h3>
-    <p className="text-[10px] text-slate-500 font-bold tracking-[0.6em] uppercase">
-      The Bond of Essential Identity
-    </p>
-  </div>
-  
-  <div className="space-y-6 md:space-y-10 text-slate-300 leading-[1.8] md:leading-[2.2] text-base md:text-xl font-normal tracking-tight text-center md:text-left px-0 md:px-10">
-    <p className="border-l-2 border-amber-500/30 pl-4 md:pl-8 font-sans">
-      {" "}
-      <span className="text-white font-bold px-1 md:px-2 underline decoration-amber-500/40 italic">
-        Apex BP {userName}
-      </span>
-      는 현 시점 자아인{" "}
-      <span className="text-white font-bold">{userName} ver.0</span>이
-      본질적 자아로 도약할 가능성을 선택하였다.
-          </p>
-            <p className="border-l-2 border-amber-500/30 pl-8 font-sans">
-              이에 {" "}
-              <span className="text-white font-bold">
-                {userName} ver.0
-              </span>는{" "}
-              <input
-                type="date"
-                value={targetDate}
-                disabled={isLocked}
-                onChange={(e) => setTargetDate(e.target.value)}
-                className={`mx-2 px-4 py-2 rounded-xl text-xl font-bold border outline-none shadow-inner transition-all ${
-                  isLocked
-                    ? "bg-emerald-900/20 text-emerald-400 border-emerald-500/30 cursor-not-allowed"
-                    : "bg-slate-900 text-amber-500 border-white/5 focus:border-amber-500"
-                }`}
-              />{" "}
-              까지 Apex BP를 이루는 최대 5개의 목표를 달성한다.{" "} 이 댓가로 BP
-              {userName}는 현 멘탈뱅크 잔액{" "}
-              <span className="text-white font-black">Mental Bank Balance</span>{" "}
-              (
-              <span className="text-white border-b border-white/30">
-                {currency}
-                {fNum(mbBalance)}
-              </span>
-              )의 <span className="text-amber-500 font-bold">25%</span> 
-              금액인{" "}
-              <span className="text-white font-bold mx-2 bg-white/5 px-3 py-1 rounded-lg">
-                {currency}
-                {fNum(livingAllowance)}
-              </span>
-              을 지급하되, 
-            </p>
-            <p className="border-l-2 border-amber-500/30 pl-8 font-sans">
-              목표달성 활동으로 매시간의 실천 가치를
-              증명할 때마다 시간당{" "}
-              <span className="text-emerald-400 font-bold px-3 py-1 bg-white/5 rounded-lg border border-white/10">
-                {currency}
-                {fNum(valueEventAmount)}
-              </span>
-              의{" "}
-              <span className="text-xs uppercase opacity-60 font-bold tracking-widest">
-                Value Award
-              </span>
-              으로 지급한다.
-            </p>
-            <p className="border-l-2 border-rose-500/50 pl-8 bg-rose-500/5 py-4 rounded-r-xl font-sans">
-              단,{" "}
-              <span className="text-rose-400 font-black">
-                3일 이상 무활동 시
-              </span>
-              , BP {userName}는 계약을 파기하고 다른 평행 세계의{" "}
-              <span className="italic opacity-80">{userName} ver.N</span>을 찾아
-              선택할 권리를 가진다.
-            </p>
-               
-               //수정해봄 
-            <div className="space-y-8 md:space-y-12 text-slate-300 leading-[1.9] md:leading-[2.2] text-base md:text-lg font-normal tracking-tight text-justify px-2 md:px-10 relative z-10">
-                여기서
-
-
-
-
-    <div className="w-full max-w-4xl mx-auto p-1">
-     
-        
-        {/* 배경에 깔리는 은은한 붉은 그라데이션 */}
-        <div className="absolute top-0 right-0 w-64 h-64 bg-rose-600/10 blur-[80px] rounded-full pointer-events-none" />
-        <div className="absolute bottom-0 left-0 w-64 h-64 bg-rose-900/10 blur-[80px] rounded-full pointer-events-none" />
-
-        <div className="relative z-10 p-6 md:p-10 space-y-10 text-justify leading-relaxed">
-          
-          {/* 제1조 */}
-          <div className="group">
-            <h3 className="text-xl md:text-2xl font-black text-rose-500 mb-3 flex items-center gap-2">
-              <span className="inline-block w-1.5 h-6 bg-rose-500 rounded-full shadow-[0_0_10px_#f43f5e]"></span>
-              제1조 [자격 검증 및 선택]
+        <div
+          className={`bg-[#0A0F1E] border-2 rounded-[2rem] md:rounded-[3.5rem] p-6 md:p-16 relative overflow-hidden shadow-2xl transition-all duration-500 ${
+            isLocked
+              ? "border-emerald-500/30 shadow-[0_0_50px_rgba(16,185,129,0.1)]"
+              : "border-white/10"
+          }`}
+        >
+          <div className="absolute top-0 right-0 p-4 md:p-16 opacity-5 pointer-events-none">
+            <ShieldCheck size={280} className="text-white" />
+          </div>
+          <div className="flex flex-col items-center mb-8 md:mb-16 text-center">
+            <h3 className="text-2xl md:text-4xl font-light text-white tracking-[0.3em] uppercase border-b border-white/10 pb-4 md:pb-8 mb-4 md:mb-6 font-serif">
+              存在 的 契約
             </h3>
-            <p className="text-slate-300 text-base md:text-lg font-light tracking-wide pl-4 border-l border-rose-900/30">
-              마스터 자아 <span className="text-white font-bold italic px-1">Apex BP {userName}</span>는, 무한한 평행세계 중 본 차원의 대리인인 <span className="text-amber-400 font-bold underline underline-offset-4 decoration-rose-500/50">{userName} ver.0</span>이 보유한 고유한 Pulse(기질적 진동)가 Apex BP와 가장 높은 일치율을 보임을 확인하였다. 이에 Apex BP는 <span className="text-amber-400 font-bold">{userName} ver.0</span>을 자신의 유일한 현실 파트너로 선택하고 <span className="text-white font-black drop-shadow-[0_0_8px_rgba(255,255,255,0.5)]">‘존재적 상장(Existential IPO)’</span>을 승인한다.
+            <p className="text-[10px] text-slate-500 font-bold tracking-[0.6em] uppercase">
+              The Bond of Essential Identity
             </p>
           </div>
-
-          {/* 제2조 */}
-          <div className="group">
-            <h3 className="text-xl md:text-2xl font-black text-rose-500 mb-3 flex items-center gap-2">
-              <span className="inline-block w-1.5 h-6 bg-rose-500 rounded-full shadow-[0_0_10px_#f43f5e]"></span>
-              제2조 [현존 상태 및 합치의 목적]
-            </h3>
-            <p className="text-slate-300 text-base md:text-lg font-light tracking-wide pl-4 border-l border-rose-900/30">
-              <span className="text-slate-100 font-semibold">{userName} ver.0</span>의 소환에 응하여 Apex BP의 영혼은 이미 본 차원에 내재되었으나, 현재 ver.0의 신체, 행동 양식, 사고 회로(Hardware & OS)는 완전히 동기화되지 않은 <span className="text-rose-300">'하이브리드'</span> 상태에 머물러 있다. 본 계약의 최종 목적은 ver.0 내면에 이미 존재하는 ‘Pulse의 씨앗’을 발화시켜, 현존 세계를 Apex BP가 실존하는 고차원 평행세계와 완전히 합치(Merging)시키는 데 있다.
-            </p>
-          </div>
-
-          {/* 제3조 (강조 박스) */}
-          <div className="rounded-xl bg-gradient-to-r from-rose-900/20 to-transparent border border-rose-500/20 p-6 md:p-8">
-            <h3 className="text-xl md:text-2xl font-black text-rose-400 mb-4 flex items-center gap-2">
-              <span className="text-rose-500">❖</span>
-              제3조 [주야간 동기화 프로토콜]
-            </h3>
-            <div className="space-y-4 text-slate-300 text-base md:text-lg">
-              <p>
-                <span className="text-white font-bold">{userName} ver.0</span>은 이미 내재된 Apex BP의 리드에 따라 다음과 같은 <span className="text-rose-400 font-bold border-b border-rose-500">'신경학적 각인(Neuro-Imprinting)'</span> 절차를 수행한다.
+          <div className="relative z-10 p-8 md:p-12 space-y-12 text-justify leading-relaxed font-sans">
+            {/* 제1조 */}
+            <div className="group">
+              <h3 className="text-lg md:text-xl font-bold text-amber-500/90 mb-4 flex items-center gap-3 font-serif">
+                <span className="text-sm border border-amber-500/50 px-2 py-0.5 rounded text-amber-500">
+                  Article 01
+                </span>
+                자격 검증 및 선택
+              </h3>
+              <p className="text-stone-300 text-base md:text-lg font-light tracking-wide pl-2 md:pl-4 border-l-2 border-stone-700">
+                마스터 자아{" "}
+                <span className="text-stone-100 font-bold italic px-1">
+                  Apex BP {userName}
+                </span>
+                는, 무한한 평행세계 중 본 차원의 대리인인{" "}
+                <span className="text-stone-100 font-bold underline underline-offset-4 decoration-stone-500">
+                  {userName} ver.0
+                </span>
+                이 보유한 고유한 Pulse(기질적 진동)가 Apex BP와 가장 높은
+                일치율을 보임을 확인하였다. 이에 Apex BP는 현존 자아를 자신의
+                유일한 현실 파트너로 선택하고{" "}
+                <span className="text-amber-400 font-bold">
+                  ‘존재적 상장(Existential IPO)’
+                </span>
+                을 승인한다.
               </p>
-              <ul className="space-y-3 mt-2">
-                <li className="flex gap-3">
-                  <span className="text-rose-500 font-bold whitespace-nowrap">1. 일간 실행:</span>
-                  <span>낮 시간 동안 ver.0는 Apex BP의 생각, 품성, 행동 정체성을 자신의 것으로 채택하여 행동한다.</span>
-                </li>
-                <li className="flex gap-3">
-                  <span className="text-rose-500 font-bold whitespace-nowrap">2. 야간 접속:</span>
-                  <span>취침 전, ver.0는 하루의 감각을 복기하며 진정한 미래 차원의 Apex BP와 접속한다.</span>
-                </li>
-                <li className="flex gap-3">
-                  <span className="text-rose-500 font-bold whitespace-nowrap">3. 지속적 유지:</span>
-                  <span>수면 시간 동안 이 접속 상태를 유지함으로써, 무의식의 영역에서 정체성을 고착화한다.</span>
-                </li>
-              </ul>
+            </div>
+
+            {/* 제2조 */}
+            <div className="group">
+              <h3 className="text-lg md:text-xl font-bold text-stone-400 mb-4 flex items-center gap-3 font-serif">
+                <span className="text-sm border border-stone-600 px-2 py-0.5 rounded text-stone-500">
+                  Article 02
+                </span>
+                현존 상태 및 합치의 목적
+              </h3>
+              <p className="text-stone-300 text-base md:text-lg font-light tracking-wide pl-2 md:pl-4 border-l-2 border-stone-700">
+                <span className="text-stone-200 font-semibold">
+                  {userName} ver.0
+                </span>
+                의 소환에 응하여 Apex BP의 영혼은 이미 본 차원에 내재되었으나,
+                현재의 신체와 사고 회로는 완전히 동기화되지 않은 상태이다. 본
+                계약의 목적은 내면의 씨앗을 발화시켜, 현존 세계를 Apex BP가
+                실존하는 고차원 평행세계와 완전히 합치(Merging)시키는 데 있다.
+              </p>
+            </div>
+
+            {/* 제3조 (박스 스타일 유지 + 엷은 앰버 색상 적용) */}
+            <div className="rounded-lg bg-stone-900/50 border border-stone-700/50 p-6 md:p-8 shadow-inner">
+              <h3 className="text-lg md:text-xl font-bold text-amber-500/90 mb-5 font-serif border-b border-stone-700 pb-2 inline-block">
+                Article 03. 주야간 동기화 프로토콜
+              </h3>
+              <div className="space-y-4 text-stone-300 text-base md:text-lg">
+                <p>
+                  <span className="text-stone-100 font-bold">
+                    {userName} ver.0
+                  </span>
+                  은 이미 내재된 Apex BP의 리드에 따라 다음과 같은 절차를
+                  수행한다.
+                </p>
+                <ul className="space-y-3 mt-4 text-sm md:text-base">
+                  <li className="flex gap-4 items-start">
+                    <span className="text-amber-600 font-serif font-bold whitespace-nowrap pt-1">
+                      I.
+                    </span>
+                    {/* 요청하신 '엷은 amber' (amber-200) 적용 */}
+                    <span>
+                      <strong className="text-amber-200 font-medium">
+                        일간 실행 (Day):
+                      </strong>{" "}
+                      낮 시간 동안 ver.0는 Apex BP의 생각과 품성을 채택하여
+                      행동한다.
+                    </span>
+                  </li>
+                  <li className="flex gap-4 items-start">
+                    <span className="text-amber-600 font-serif font-bold whitespace-nowrap pt-1">
+                      II.
+                    </span>
+                    <span>
+                      <strong className="text-amber-200 font-medium">
+                        야간 접속 (Night):
+                      </strong>{" "}
+                      취침 전, 하루의 감각을 복기하며 미래 차원과 접속한다.
+                    </span>
+                  </li>
+                  <li className="flex gap-4 items-start">
+                    <span className="text-amber-600 font-serif font-bold whitespace-nowrap pt-1">
+                      III.
+                    </span>
+                    <span>
+                      <strong className="text-amber-200 font-medium">
+                        지속적 유지:
+                      </strong>{" "}
+                      수면 중 무의식 영역에서 정체성을 고착화한다.
+                    </span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+
+            {/* 제4조 (넓게 배치) */}
+            <div className="group">
+              <h3 className="text-lg md:text-xl font-bold text-stone-400 mb-4 flex items-center gap-3 font-serif">
+                <span className="text-sm border border-stone-600 px-2 py-0.5 rounded text-stone-500">
+                  Article 04
+                </span>
+                에너지 자원 할당
+              </h3>
+              <p className="text-stone-300 text-base md:text-lg font-light tracking-wide pl-2 md:pl-4 border-l-2 border-stone-700">
+                무의식 원장인{" "}
+                <span className="text-stone-100 font-medium">
+                  Mental Bank Balance
+                </span>
+                의 <span className="text-amber-500 font-bold">25%</span>에
+                해당하는 금액인{" "}
+                <span className="text-stone-200 border-b border-stone-600 font-mono mx-1">
+                  {currency}
+                  {fNum(livingAllowance)}
+                </span>
+                를 활동 에너지로 즉시 부여한다. 이 에너지는 현실의 마찰력을
+                상쇄하는 강력한 추진력이 된다.
+              </p>
+            </div>
+
+            {/* 제5조 (넓게 배치) */}
+            <div className="group">
+              <h3 className="text-lg md:text-xl font-bold text-stone-400 mb-4 flex items-center gap-3 font-serif">
+                <span className="text-sm border border-stone-600 px-2 py-0.5 rounded text-stone-500">
+                  Article 05
+                </span>
+                미션 및 보상
+              </h3>
+              <p className="text-stone-300 text-base md:text-lg font-light tracking-wide pl-2 md:pl-4 border-l-2 border-stone-700">
+                매일 5단계 이내의 핵심 미션을 설정하고, 설정된 목표 날짜({" "}
+                <input
+                  type="date"
+                  value={targetDate}
+                  disabled={isLocked}
+                  onChange={(e) => setTargetDate(e.target.value)}
+                  className={`mx-2 px-2 py-1 rounded-md text-sm font-bold border outline-none shadow-inner transition-all ${
+                    isLocked
+                      ? "bg-emerald-900/20 text-emerald-400 border-emerald-500/30 cursor-not-allowed"
+                      : "bg-slate-900 text-amber-500 border-white/5 focus:border-amber-500"
+                  }`}
+                />{" "}
+                )를 기준으로 이를 수행한다. 실행 밀도가 높아질수록 시간당 가치
+                보상(
+                <span className="text-stone-200 border-b border-stone-600 font-mono mx-1">
+                  {currency}
+                  {fNum(valueEventAmount)}
+                </span>
+                )은 기하급수적으로 증폭되며, 발생한 모든 보상은 Mental Bank에
+                즉시 예치되어 두 자아 사이의 동기화 속도를 가속한다.
+              </p>
             </div>
           </div>
 
-          {/* 제4조 */}
-          <div className="group">
-            <h3 className="text-xl md:text-2xl font-black text-rose-500 mb-3 flex items-center gap-2">
-              <span className="inline-block w-1.5 h-6 bg-rose-500 rounded-full shadow-[0_0_10px_#f43f5e]"></span>
-              제4조 [에너지 자원 할당]
-            </h3>
-            <p className="text-slate-300 text-base md:text-lg font-light tracking-wide pl-4 border-l border-rose-900/30">
-              Apex BP는 현존 세계의 강력한 저항을 극복할 자원으로서, 무의식 원장인 <span className="text-white font-bold">Mental Bank Balance</span> (<span className="text-emerald-400 font-mono">{currency}{fNum(mbBalance)}</span>)의 <span className="text-amber-500 font-black text-xl">25%</span>에 해당하는 'Pulse 에너지' 금액인 <span className="inline-block bg-rose-600/20 text-rose-300 border border-rose-500/50 px-3 py-0.5 rounded ml-1 font-mono font-bold">{currency}{fNum(livingAllowance)}</span>를 ver.0에게 즉시 부여한다.
+          {/* 서명 조항 (Signature Clause) */}
+          <div className="mt-8 flex flex-col items-end gap-2 opacity-80">
+            <p className="text-stone-400 text-sm md:text-base font-light italic tracking-wider">
+              "위 내용을 확인하였으며, 이에 양자는 서명한다."
             </p>
           </div>
 
-          {/* 제5조 (박스 스타일) */}
-          <div className="rounded-xl border border-dashed border-rose-500/30 p-6 md:p-8 bg-black/40">
-            <h3 className="text-xl md:text-2xl font-black text-rose-500 mb-4 flex items-center gap-2">
-              <span className="inline-block w-1.5 h-6 bg-rose-500 rounded-full shadow-[0_0_10px_#f43f5e]"></span>
-              제5조 [미션 및 보상 체계]
-            </h3>
-            <ol className="list-decimal list-inside space-y-3 text-slate-300 text-base md:text-lg">
-              <li>
-                <span className="text-white font-bold">{userName} ver.0</span>는 매일 1~5개 단계의 핵심 미션을 설정하고 이를 수행한다.
-              </li>
-              <li>
-                실행의 밀도가 높아질수록 시간당 가치 보상(<span className="text-emerald-400 font-bold">{currency}{fNum(valueEventAmount)}</span>)은 기하급수적으로 증폭된다.
-              </li>
-              <li>
-                발생한 모든 적립액은 Mental Bank에 즉시 예치되어 두 자아 사이의 동기화 속도를 가속한다.
-              </li>
-            </ol>
-          </div>
-
-        </div>
-      </div>
-   
-
-
-
-
-
-                여기까지
-            </div>
-                //
-          </div>
           <div className="mt-20 border-t border-white/10 pt-12 px-4 md:px-12 pb-8">
             <div className="flex flex-col md:flex-row justify-between items-end gap-16 md:gap-0">
               <div className="flex flex-col items-center md:items-start gap-4 w-full md:w-auto">
