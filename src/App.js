@@ -1285,8 +1285,10 @@ const App = () => {
       <div className="relative w-full h-full flex-grow flex flex-col overflow-y-auto no-scrollbar pb-24">
         {/* [수정] 상황별 스마트 오버레이 */}
         {showOverlay && (
-          <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-slate-950/60 backdrop-blur-[6px] animate-fadeIn">
-            <div className="bg-[#0A0F1E] border border-amber-500/50 p-10 rounded-[3rem] text-center shadow--[0_0_80px_rgba(245,158,11,0.4)] transform transition-all hover:scale-105 max-w-md relative z-10">
+          <div className="fixed inset-0 z-[5000] flex flex-col items-center justify-center bg-slate-950/80 backdrop-blur-[8px] animate-fadeIn px-6">
+            {/* 박스 크기 및 패딩 모바일 대응 (p-8, w-[90%]) */}
+
+            <div className="bg-[#0A0F1E] border border-amber-500/50 p-8 md:p-10 rounded-[2.5rem] md:rounded-[3rem] text-center shadow-[0_0_100px_rgba(245,158,11,0.5)] transform transition-all hover:scale-105 w-full max-w-[340px] md:max-w-md relative z-10">
               <ShieldCheck size={32} className="text-slate-600 mb-6 mx-auto" />
               <h3 className="text-2xl font-black text-white uppercase italic tracking-tighter mb-2">
                 System Preview
@@ -2944,13 +2946,13 @@ const App = () => {
           />
         </nav>
         <div className="text-center space-y-1">
-            <p className="text-[7px] text-slate-800 font-black uppercase tracking-[0.4em] leading-none opacity-60">
-              © 2026 THE PULSE // IDENTITY SYNCHRONIZATION TERMINAL
-            </p>
-            <p className="text-[6px] text-amber-900 font-bold uppercase tracking-[0.3em] leading-none opacity-40">
-              ACCESS POINT: THEPULSE.MILESTONES.TODAY
-            </p>
-          </div>
+          <p className="text-[7px] text-slate-800 font-black uppercase tracking-[0.4em] leading-none opacity-60">
+            © 2026 THE PULSE // IDENTITY SYNCHRONIZATION TERMINAL
+          </p>
+          <p className="text-[6px] text-amber-900 font-bold uppercase tracking-[0.3em] leading-none opacity-40">
+            ACCESS POINT: THEPULSE.MILESTONES.TODAY
+          </p>
+        </div>
       </footer>
 
       {isSensoryModalOpen && activeSensory && (
