@@ -41,14 +41,19 @@ const supabaseUrl = "https://ihhfgoqpsubjdqlytzvs.supabase.co";
 const supabaseAnonKey =
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImloaGZnb3Fwc3ViamRxbHl0enZzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjcxMDYxMDEsImV4cCI6MjA4MjY4MjEwMX0.1ZtWo4LiiOOJIFyKyvhPNXFwrvUgGeMTKTNp39kz61M";
 
-// [수정] 옵션을 추가하여 세션 유지력을 강화합니다.
+
+// [수정됨] 로그인 유지 설정 추가
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
-    persistSession: true, // 세션을 로컬 스토리지에 저장 (기본값이나 명시적으로 작성)
-    autoRefreshToken: true, // 토큰 만료 시 자동 갱신
-    detectSessionInUrl: true, // URL의 세션 정보 감지
+    persistSession: true, // 세션을 로컬 스토리지에 강제로 저장
+    storageKey: 'pulse-auth-token', // 고유 키 이름 설정 (충돌 방지)
+    storage: window.localStorage, // 웹 브라우저 저장소 사용 명시
+    autoRefreshToken: true, // 토큰 자동 갱신
+    detectSessionInUrl: true,
   },
 });
+
+
 
 // 2. 유틸리티
 const AutoTextarea = ({
