@@ -115,14 +115,13 @@ const SensoryItem = ({ label, color, val }) => (
 
 // 3. 메인 앱
 const App = () => {
-
   // 기존 코드들 아래에 추가하세요
   const [otp, setOtp] = useState(""); // 인증번호 저장할 곳
   const [isOtpSent, setIsOtpSent] = useState(false); // 메일 보냈는지 확인하는 스위치
 
   // ▼▼▼ [추가] 시간(Duration) 상태 관리 (기본값 1시간) ▼▼▼
   const [duration, setDuration] = useState(1);
-  
+
   // 상태 관리 (DB 동기화용)
   const [user, setUser] = useState(null);
   const [email, setEmail] = useState("");
@@ -414,7 +413,7 @@ const App = () => {
     }
   };
 
-// 1. 메일 보내기 함수 (수정버전)
+  // 1. 메일 보내기 함수 (수정버전)
   const handleLogin = async (email) => {
     if (!email) return alert("이메일을 입력해 주세요!");
     setLoading(true);
@@ -433,8 +432,10 @@ const App = () => {
         alert("❌ 메일 전송 실패: " + error.message);
       } else {
         // 성공해야만 이 줄이 실행됨 -> 입력칸 생김!
-        setIsOtpSent(true); 
-        alert("✅ 인증번호가 발송되었습니다! 메일함의 숫자 8자리를 확인하세요.");
+        setIsOtpSent(true);
+        alert(
+          "✅ 인증번호가 발송되었습니다! 메일함의 숫자 8자리를 확인하세요."
+        );
       }
     } catch (err) {
       alert("시스템 에러: " + err.message);
@@ -464,7 +465,6 @@ const App = () => {
       setIsOtpSent(false); // 입력창 닫기
     }
   };
-  
 
   const fNum = (n) => Math.floor(n).toLocaleString();
   const mbGoalAmount = annualIncome * 2;
@@ -489,7 +489,7 @@ const App = () => {
     }
   };
 
-// 회원 탈퇴 함수
+  // 회원 탈퇴 함수
   const handleDeleteAccount = async () => {
     if (
       window.confirm(
@@ -500,10 +500,10 @@ const App = () => {
         setLoading(true);
         // 1. 데이터 삭제
         await supabase.from("pulse_data").delete().eq("id", user.id);
-        
+
         // 2. 계정 삭제 (아까 만든 SQL 함수 실행)
         const { error } = await supabase.rpc("delete_user");
-        
+
         if (error) throw error;
 
         alert("탈퇴가 완료되었습니다. 이용해 주셔서 감사합니다.");
@@ -516,7 +516,7 @@ const App = () => {
       }
     }
   };
-  
+
   const showToast = (msg) => {
     const toast = document.createElement("div");
     toast.className =
@@ -526,12 +526,13 @@ const App = () => {
     setTimeout(() => toast.remove(), 2500);
   };
 
-// [수정] 개별 아이템 입금 처리 함수
+  // [수정] 개별 아이템 입금 처리 함수
   const handleDepositSubmit = (eventName) => {
     // 1. 현재 달성률 계산 (인플레이션 보너스 산정용)
-    const progressRate = mbGoalAmount > 0 ? (currentAsset / mbGoalAmount) * 100 : 0;
+    const progressRate =
+      mbGoalAmount > 0 ? (currentAsset / mbGoalAmount) * 100 : 0;
     let inflationBonus = 1; // 기본 1배
-    
+
     // 60% 이상부터 10%씩 할증
     if (progressRate >= 60) inflationBonus += 0.1;
     if (progressRate >= 70) inflationBonus += 0.1;
@@ -542,21 +543,25 @@ const App = () => {
     const finalAmount = valueEventAmount * inflationBonus * duration;
 
     // 3. 장부(Ledger)에 기록
-    const newEntry = { 
-      date: new Date(), 
-      amount: finalAmount, 
-      desc: `${eventName} (${duration}h)` // 어떤 행동을 몇 시간 했는지 기록
+    const newEntry = {
+      date: new Date(),
+      amount: finalAmount,
+      desc: `${eventName} (${duration}h)`, // 어떤 행동을 몇 시간 했는지 기록
     };
     setLedger((prev) => [...prev, newEntry]);
-    
+
     // 4. 해당 레벨 자산 업데이트
     const newProgress = visions[activeLevel].progressAsset + finalAmount;
     updateVision(activeLevel, { progressAsset: newProgress });
 
-    showToast(`[${eventName}] ${duration}시간 수행! ${currency}${fNum(finalAmount)} 입금 완료`);
+    showToast(
+      `[${eventName}] ${duration}시간 수행! ${currency}${fNum(
+        finalAmount
+      )} 입금 완료`
+    );
     setDuration(1); // 시간 초기화
   };
-  
+
   const archiveVision = (lv) => {
     const lvGoal = mbGoalAmount / 5;
     const isOverTarget = visions[lv].progressAsset >= lvGoal;
@@ -662,12 +667,12 @@ const App = () => {
 
   const renderLab = () => {
     const missionMap = {
-  1: "생존의 기초. 신체적 활력과 생물학적 균형을 유지하여 엔진을 가동합니다.",
-  2: "위협으로부터의 보호. 재정적 자립과 안전망을 구축하여 심리적 평온을 확보합니다.",
-  3: "사회적 연결. 건강한 관계 속에서 소속감과 사랑을 주고받으며 정서적 지지대를 만듭니다.",
-  4: "사회적 성취와 자부심. 전문성을 인정받고 스스로 당당한 사회적 자아를 확립합니다.",
-  5: "존재의 완성. 외부 자극에 흔들리지 않는 평온을 얻고, 타고난 잠재력을 완전히 꽃피우는 최종 단계입니다."
-};
+      1: "생존의 기초. 신체적 활력과 생물학적 균형을 유지하여 엔진을 가동합니다.",
+      2: "위협으로부터의 보호. 재정적 자립과 안전망을 구축하여 심리적 평온을 확보합니다.",
+      3: "사회적 연결. 건강한 관계 속에서 소속감과 사랑을 주고받으며 정서적 지지대를 만듭니다.",
+      4: "사회적 성취와 자부심. 전문성을 인정받고 스스로 당당한 사회적 자아를 확립합니다.",
+      5: "존재의 완성. 외부 자극에 흔들리지 않는 평온을 얻고, 타고난 잠재력을 완전히 꽃피우는 최종 단계입니다.",
+    };
     const greenGroup = ["ns", "ha", "rd", "p"];
     const sdCValue =
       tciProfile.sd_c?.score ??
@@ -709,7 +714,7 @@ const App = () => {
                   </div>
                 </div>
 
-{user ? (
+                {user ? (
                   <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-2xl p-6 text-center animate-fadeIn">
                     <p className="text-emerald-500 font-black text-md mb-2">
                       🎉 Identity Confirmed!
@@ -727,13 +732,13 @@ const App = () => {
                     >
                       로그아웃
                     </button>
-                        <span className="text-slate-700 text-[10px]">|</span>
-                      <button
-                        onClick={handleDeleteAccount}
-                        className="text-[10px] text-rose-500/60 hover:text-rose-500 underline decoration-rose-900/30 underline-offset-4"
-                      >
-                        회원 탈퇴
-                      </button>
+                    <span className="text-slate-700 text-[10px]">|</span>
+                    <button
+                      onClick={handleDeleteAccount}
+                      className="text-[10px] text-rose-500/60 hover:text-rose-500 underline decoration-rose-900/30 underline-offset-4"
+                    >
+                      회원 탈퇴
+                    </button>
                   </div>
                 ) : (
                   <div className="flex flex-col gap-3 w-full animate-fadeIn">
@@ -750,7 +755,7 @@ const App = () => {
                           type="email"
                           value={email}
                           onChange={(e) => setEmail(e.target.value)}
-                          placeholder="이메일을 입력하세요"
+                          placeholder="이메일을 입력하세요 (ID로 사용됨)"
                           className="w-full bg-slate-900/80 border border-white/10 rounded-2xl p-4 text-white outline-none focus:ring-2 focus:ring-blue-500/50"
                         />
                         <button
@@ -758,8 +763,15 @@ const App = () => {
                           disabled={loading}
                           className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-4 rounded-2xl transition-all shadow-lg shadow-blue-500/20 disabled:opacity-50"
                         >
-                          {loading ? "전송 중..." : "인증번호 받기"}
+                          {loading
+                            ? "전송 중..."
+                            : "인증번호 받기 (회원가입/로그인)"}
                         </button>
+                        {/* [추가] 신규 유저 안내 문구 */}
+                        <p className="text-center text-[10px] text-slate-500 mt-1">
+                          * 신규 사용자는 인증번호 확인 시 자동으로 회원가입
+                          처리됩니다.
+                        </p>
                       </>
                     ) : (
                       /* 2단계: 인증번호 입력 (메일 보내고 나면 이 화면이 뜸) */
@@ -784,7 +796,7 @@ const App = () => {
                           disabled={loading}
                           className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-4 rounded-2xl transition-all shadow-lg shadow-emerald-500/20 disabled:opacity-50"
                         >
-                          {loading ? "확인 중..." : "로그인 완료"}
+                          {loading ? "확인 중..." : "확인 및 로그인 완료"}
                         </button>
                         <button
                           onClick={() => setIsOtpSent(false)}
@@ -796,9 +808,6 @@ const App = () => {
                     )}
                   </div>
                 )}
-
-
-              
               </div>
             </div>
             <div className="bg-[#2D3748]/30 p-10 rounded-[3rem] border border-white/5 shadow-xl border-t-4 border-amber-500/50">
@@ -830,17 +839,17 @@ const App = () => {
                     <Zap size={14} /> Goal Architect
                   </p>
 
-{/* 단계 이름과 미션 설명 결합 */}
-          <div className="flex flex-col gap-1.5">
-            <p className="text-[12px] font-bold text-amber-500 italic bg-slate-900/50 px-3 py-1 rounded-full border border-white/5 inline-block w-fit">
-              {activeLevel}단계: {levelMap[activeLevel]}
-            </p>
-            
-            {/* ▼ [추가] 미션 설명 단락: 텍스트가 Bar 너비에 맞춰 자동 조절되도록 설정 */}
-            <p className="text-[11px] text-slate-400 font-medium leading-relaxed pl-1 mt-1 animate-fadeIn max-w-md">
-              {missionMap[activeLevel]}
-            </p>
-          </div>
+                  {/* 단계 이름과 미션 설명 결합 */}
+                  <div className="flex flex-col gap-1.5">
+                    <p className="text-[12px] font-bold text-amber-500 italic bg-slate-900/50 px-3 py-1 rounded-full border border-white/5 inline-block w-fit">
+                      {activeLevel}단계: {levelMap[activeLevel]}
+                    </p>
+
+                    {/* ▼ [추가] 미션 설명 단락: 텍스트가 Bar 너비에 맞춰 자동 조절되도록 설정 */}
+                    <p className="text-[11px] text-slate-400 font-medium leading-relaxed pl-1 mt-1 animate-fadeIn max-w-md">
+                      {missionMap[activeLevel]}
+                    </p>
+                  </div>
                 </div>
                 <div className="flex gap-1.5">
                   {[1, 2, 3, 4, 5].map((lv) => (
@@ -856,7 +865,6 @@ const App = () => {
                       {lv}
                     </button>
                   ))}
-
                 </div>
               </div>
               <div className="space-y-6 mb-10">
@@ -867,7 +875,7 @@ const App = () => {
                       updateVision(activeLevel, { emoji: e.target.value })
                     }
                     className="w-20 bg-slate-900 border border-white/5 rounded-3xl p-3 text-3xl text-center outline-none shrink-0"
-      placeholder="🏥"
+                    placeholder="🏥"
                   />
                   <input
                     value={visions[activeLevel].title}
@@ -875,7 +883,7 @@ const App = () => {
                       updateVision(activeLevel, { title: e.target.value })
                     }
                     className="flex-1 min-w-0 bg-slate-900 border border-white/5 rounded-3xl p-4 text-md font-black text-white outline-none"
-      placeholder="Enter Vision Title"
+                    placeholder="Enter Vision Title"
                   />
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -1223,200 +1231,266 @@ const App = () => {
     );
   };
 
-const renderHub = () => {
+  const renderHub = () => {
     // 5개 Character가 다 보이도록 전체 배열 사용
     const activeTraits = bpsTraits;
-    const isLocked = !signedDate;
-    // 0 나누기 0 에러 방지용 안전장치
-    const totalProgress = mbGoalAmount > 0 ? Math.min(currentAsset / mbGoalAmount, 1) : 0;
+
+    // [수정] 오버레이 표시 조건 변경
+    // 1. 로그인을 안 했거나 (!user)
+    // 2. 로그인했는데 서명을 안 했으면 (user && !signedDate) -> 오버레이 표시
+    const showOverlay = !user || (user && !signedDate);
+
+    const totalProgress =
+      mbGoalAmount > 0 ? Math.min(currentAsset / mbGoalAmount, 1) : 0;
 
     // 피라미드 너비 설정
     const widthMap = {
-      5: "w-[130px]",
-      4: "w-[170px]",
-      3: "w-[210px]",
-      2: "w-[260px]",
+      5: "w-[160px]",
+      4: "w-[200px]",
+      3: "w-[240px]",
+      2: "w-[280px]",
       1: "w-[320px]",
     };
 
     return (
       <div className="relative w-full h-full flex-grow flex flex-col overflow-y-auto no-scrollbar pb-24">
-        {/* 잠금 화면 (계약 전) - 기존 유지 */}
-        {isLocked && (
+        {/* [수정] 스마트 오버레이 (상황별 안내) */}
+        {showOverlay && (
           <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-slate-950/60 backdrop-blur-[6px] animate-fadeIn">
             <div className="bg-[#0A0F1E] border border-amber-500/30 p-10 rounded-[3rem] text-center shadow-[0_0_100px_rgba(245,158,11,0.2)] max-w-md transform transition-all hover:scale-105">
               <div className="mx-auto bg-slate-900 w-20 h-20 rounded-full flex items-center justify-center mb-6 border border-white/10 shadow-inner group">
-                <ShieldCheck size={32} className="text-slate-600 group-hover:text-amber-500 transition-colors duration-500" />
+                <ShieldCheck
+                  size={32}
+                  className="text-slate-600 group-hover:text-amber-500 transition-colors duration-500"
+                />
               </div>
-              <h3 className="text-2xl font-black text-white uppercase italic tracking-tighter mb-2">System Preview</h3>
+              <h3 className="text-2xl font-black text-white uppercase italic tracking-tighter mb-2">
+                System Preview
+              </h3>
+
+              {/* 상황에 따른 안내 문구 변경 */}
               <p className="text-slate-400 text-sm leading-relaxed mb-8 font-medium">
-                현재 <span className="text-amber-500 font-bold">미리보기 모드</span> 입니다.<br />서약서에 서명하면 모든 기능이 활성화됩니다.
+                {user
+                  ? "서약서에 서명하면 모든 기능이 활성화됩니다."
+                  : "시스템을 사용하려면 ID 등록(로그인)이 필요합니다."}
               </p>
-              <button onClick={() => setCurrentView("contract")} className="bg-amber-600 hover:bg-amber-500 text-white px-8 py-4 rounded-2xl font-black text-xs uppercase tracking-widest shadow-2xl flex items-center gap-3 mx-auto transition-all active:scale-95">
-                <PenTool size={14} /> Sign Agreement to Unlock
+
+              {/* 상황에 따른 버튼 동작 및 텍스트 변경 */}
+              <button
+                onClick={() => {
+                  if (!user) {
+                    setCurrentView("lab"); // 로그인 안 했으면 Lab으로 이동
+                    showToast("이메일로 인증하여 ID를 등록하세요.");
+                  } else {
+                    setCurrentView("contract"); // 로그인 했으면 계약서로 이동
+                  }
+                }}
+                className="bg-amber-600 hover:bg-amber-500 text-white px-8 py-4 rounded-2xl font-black text-xs uppercase tracking-widest shadow-2xl flex items-center gap-3 mx-auto transition-all active:scale-95"
+              >
+                {user ? (
+                  <>
+                    <PenTool size={14} /> Sign Agreement
+                  </>
+                ) : (
+                  <>
+                    <User size={14} /> Start Registration
+                  </>
+                )}
               </button>
             </div>
           </div>
         )}
 
-        {/* 메인 레이아웃 */}
-        <div className={`flex flex-col md:flex-row items-center justify-center w-full h-full px-2 md:px-10 gap-8 transition-all duration-1000 ${isLocked ? "opacity-40 blur-sm pointer-events-none" : "opacity-100"}`}>
-          
+        {/* 메인 레이아웃 (오버레이 뒤쪽) */}
+        <div
+          className={`flex flex-col md:flex-row items-center justify-center w-full h-full px-2 md:px-10 gap-8 transition-all duration-1000 ${
+            showOverlay
+              ? "opacity-40 blur-sm pointer-events-none"
+              : "opacity-100"
+          }`}
+        >
           {/* [좌측 패널] 피라미드 */}
           <div className="w-full md:w-1/2 flex flex-col items-center justify-center relative z-10 pt-10">
-              
-             {/* BPS Header */}
-             <div className="relative flex justify-center items-end mb-4 z-20 w-full"> 
-                <div onClick={() => setActiveLevel(6)} className="relative flex flex-col items-center justify-end cursor-pointer group w-full">
-                  <div className="flex justify-between items-center w-full max-w-md px-4 mb-4"> 
-                    {activeTraits.map((trait, i) => (
-                      <span key={i} className={`text-[10px] md:text-xs font-black px-3 py-1.5 rounded-full bg-slate-900/90 border border-amber-500/40 whitespace-nowrap shadow-lg animate-pulse ${activeLevel === 6 ? "text-amber-400 drop-shadow-[0_0_5px_rgba(245,158,11,0.8)]" : "text-slate-400 opacity-70"}`}>
-                        {trait || "Empty"}
-                      </span>
-                    ))}
+            {/* BPS Header */}
+            <div className="relative flex justify-center items-end mb-4 z-20 w-full">
+              <div
+                onClick={() => setActiveLevel(6)}
+                className="relative flex flex-col items-center justify-end cursor-pointer group w-full"
+              >
+                <div className="flex justify-between items-center w-full max-w-md px-4 mb-4">
+                  {activeTraits.map((trait, i) => (
+                    <span
+                      key={i}
+                      className={`text-[10px] md:text-xs font-black px-3 py-1.5 rounded-full bg-slate-900/90 border border-amber-500/40 whitespace-nowrap shadow-lg animate-pulse ${
+                        activeLevel === 6
+                          ? "text-amber-400 drop-shadow-[0_0_5px_rgba(245,158,11,0.8)]"
+                          : "text-slate-400 opacity-70"
+                      }`}
+                    >
+                      {trait || "Empty"}
+                    </span>
+                  ))}
+                </div>
+                <h4
+                  className={`text-xl font-black tracking-tighter transition-all duration-500 translate-y-[-5px] ${
+                    activeLevel === 6
+                      ? "text-amber-400 scale-110"
+                      : "text-slate-600"
+                  }`}
+                  style={{
+                    filter: `drop-shadow(0 0 ${
+                      10 + totalProgress * 40
+                    }px rgba(245, 158, 11, ${0.5 + totalProgress * 0.5}))`,
+                  }}
+                >
+                  BPS
+                </h4>
+              </div>
+            </div>
+
+            {/* 장식용 노란 삼각형 */}
+            <div className="flex justify-center mb-1 animate-pulse">
+              <div className="w-0 h-0 border-l-[30px] border-l-transparent border-r-[30px] border-r-transparent border-b-[40px] border-b-yellow-500 drop-shadow-[0_0_10px_rgba(234,179,8,0.6)]"></div>
+            </div>
+
+            {/* Pyramid Levels */}
+            {[5, 4, 3, 2, 1].map((lv) => {
+              const isConfigured = visions[lv].title !== "";
+              const isActive = lv === activeLevel;
+              const visualPercent = totalProgress * 100;
+              const displayPercent = visualPercent.toFixed(1);
+              const barBackground = isConfigured
+                ? "bg-gradient-to-r from-amber-600 via-yellow-400 to-amber-600"
+                : "bg-slate-600";
+              const containerStyle = isActive
+                ? "border-amber-400 ring-2 ring-amber-500/50 shadow-[0_0_30px_rgba(245,158,11,0.6)] z-10 scale-105 brightness-110"
+                : isConfigured
+                ? "border-amber-600/30 opacity-90 hover:brightness-110"
+                : "border-slate-700/50 opacity-60 hover:opacity-80";
+              const textStyle = isConfigured
+                ? "text-white drop-shadow-[0_2px_2px_rgba(0,0,0,0.9)]"
+                : "text-slate-300 drop-shadow-md";
+
+              return (
+                <div
+                  key={lv}
+                  onClick={() => setActiveLevel(lv)}
+                  className={`cursor-pointer relative flex items-center justify-center h-[50px] rounded-2xl mb-2 overflow-hidden transition-all duration-300 border bg-slate-900/50 ${widthMap[lv]} ${containerStyle}`}
+                >
+                  <div
+                    className={`absolute left-0 top-0 h-full transition-all duration-1000 ${barBackground}`}
+                    style={{ width: `${displayPercent}%` }}
+                  />
+                  {visualPercent >= 60 && isConfigured && (
+                    <div className="absolute inset-0 bg-white/10 animate-pulse pointer-events-none" />
+                  )}
+                  <div className="relative z-10 flex flex-col items-center justify-center leading-none">
+                    <span
+                      className={`font-black uppercase text-sm tracking-tight ${textStyle}`}
+                    >
+                      {levelMap[lv]}
+                    </span>
+                    <span
+                      className={`text-[11px] font-black mt-0.5 ${textStyle} opacity-90`}
+                    >
+                      {displayPercent}%
+                    </span>
                   </div>
-                  <h4 className={`text-xl font-black tracking-tighter transition-all duration-500 translate-y-[-5px] ${activeLevel === 6 ? "text-amber-400 scale-110" : "text-slate-600"}`}
-                      style={{ filter: `drop-shadow(0 0 ${10 + totalProgress * 40}px rgba(245, 158, 11, ${0.5 + totalProgress * 0.5}))` }}>
-                    BPS
+                </div>
+              );
+            })}
+            <p className="text-slate-600 text-[10px] font-bold mt-4 uppercase tracking-[0.2em] opacity-40">
+              5단계 미션
+            </p>
+          </div>
+
+          {/* [우측 패널] 비전 카드 */}
+          <div className="w-full md:w-1/2 flex flex-col gap-6 animate-fadeIn h-full justify-center">
+            <div className="bg-[#1A202C]/80 border border-white/10 rounded-[2.5rem] p-8 shadow-2xl relative overflow-hidden min-h-[500px] flex flex-col">
+              <div className="absolute top-0 right-0 p-6 opacity-5 pointer-events-none">
+                <Zap size={150} className="text-white" />
+              </div>
+              <div className="mb-6 relative z-10">
+                <div className="flex items-center gap-3 mb-2">
+                  <span className="text-4xl">
+                    {visions[activeLevel].emoji || "✨"}
+                  </span>
+                  <div>
+                    <p className="text-[10px] font-black text-emerald-500 uppercase tracking-widest">
+                      {levelMap[activeLevel]} VISION
+                    </p>
+                    <h2 className="text-2xl md:text-3xl font-black text-white leading-tight">
+                      {visions[activeLevel].title || "비전을 설정해주세요"}
+                    </h2>
+                  </div>
+                </div>
+              </div>
+              <div className="bg-slate-900/50 p-6 rounded-2xl border border-white/5 mb-8 relative z-10 flex-grow-0">
+                <p className="text-sm text-slate-300 italic leading-relaxed">
+                  {visions[activeLevel].immersionScript
+                    ? `"${visions[activeLevel].immersionScript}"`
+                    : "My Lab에서 AI 몰입 시나리오를 생성해보세요."}
+                </p>
+              </div>
+              <div className="flex-grow flex flex-col">
+                <div className="flex justify-between items-end mb-4 border-b border-white/10 pb-2">
+                  <h4 className="text-sm font-black text-white uppercase tracking-widest flex items-center gap-2">
+                    <ListPlus size={16} className="text-amber-500" /> Value
+                    Events
                   </h4>
                 </div>
-             </div>
-
-             {/* 장식용 노란 삼각형 (최상단) */}
-             <div className="flex justify-center mb-1 animate-pulse">
-               <div className="w-0 h-0 
-                 border-l-[30px] border-l-transparent 
-                 border-r-[30px] border-r-transparent 
-                 border-b-[40px] border-b-yellow-500 
-                 drop-shadow-[0_0_10px_rgba(234,179,8,0.6)]">
-               </div>
-             </div>
-
-             {/* Pyramid Levels (1/5 균등 분배 시각화) */}
-             {[5, 4, 3, 2, 1].map((lv) => {
-                const isConfigured = visions[lv].title !== "";
-                const isActive = lv === activeLevel;
-                
-                // [수정] 모든 단계가 전체 진행률(totalProgress)을 공유합니다.
-                // 기본적으로 50%에서 시작하여 점점 차오르게 됩니다.
-                const visualPercent = totalProgress * 100; 
-                const displayPercent = visualPercent.toFixed(1);
-
-                // [색상 및 스타일 로직]
-                // 활성(Configured): 화려한 Gold Gradient
-                // 비활성(!Configured): 차분한 Solid Gray (회색 Bar)
-                const barBackground = isConfigured 
-                    ? "bg-gradient-to-r from-amber-600 via-yellow-400 to-amber-600" 
-                    : "bg-slate-600"; // 회색 Bar 채우기
-
-                // 테두리 및 그림자 효과
-                const containerStyle = isActive
-                    ? "border-amber-400 ring-2 ring-amber-500/50 shadow-[0_0_30px_rgba(245,158,11,0.6)] z-10 scale-105 brightness-110"
-                    : isConfigured 
-                        ? "border-amber-600/30 opacity-90 hover:brightness-110"
-                        : "border-slate-700/50 opacity-60 hover:opacity-80"; // 비활성은 약간 투명하게
-
-                // 텍스트 스타일: 활성은 흰색+그림자, 비활성은 밝은 회색
-                const textStyle = isConfigured
-                    ? "text-white drop-shadow-[0_2px_2px_rgba(0,0,0,0.9)]" 
-                    : "text-slate-300 drop-shadow-md"; 
-
-                return (
-                  <div 
-                    key={lv} 
-                    onClick={() => setActiveLevel(lv)} 
-                    className={`
-                      cursor-pointer relative flex items-center justify-center h-[50px] rounded-2xl mb-2 overflow-hidden transition-all duration-300 
-                      border bg-slate-900/50
-                      ${widthMap[lv]}
-                      ${containerStyle}
-                    `}
-                  >
-                    {/* [Bar 게이지] 비활성 단계도 회색으로 채워짐 (width는 동일하게 displayPercent 적용) */}
-                    <div 
-                      className={`absolute left-0 top-0 h-full transition-all duration-1000 ${barBackground}`}
-                      style={{ width: `${displayPercent}%` }} 
-                    />
-
-                    {/* [가속 구간 표시] 60% 이상일 때 미세한 광택 효과 추가 (가속 암시) */}
-                    {visualPercent >= 60 && isConfigured && (
-                      <div className="absolute inset-0 bg-white/10 animate-pulse pointer-events-none" />
-                    )}
-
-                    {/* 텍스트 정보 */}
-                    <div className="relative z-10 flex flex-col items-center justify-center leading-none">
-                      <span className={`font-black uppercase text-sm tracking-tight ${textStyle}`}>
-                        {levelMap[lv]}
-                      </span>
-                      
-                      {/* 비활성 단계도 이제 %를 보여줍니다 */}
-                      <span className={`text-[11px] font-black mt-0.5 ${textStyle} opacity-90`}>
-                        {displayPercent}%
-                      </span>
+                <div className="space-y-3 overflow-y-auto pr-2 custom-scrollbar max-h-[250px]">
+                  {visions[activeLevel].events.length === 0 ? (
+                    <div className="text-center py-8 text-slate-600 text-xs">
+                      등록된 Value Event가 없습니다.
+                      <br />
+                      My Lab에서 행동 목록을 추가하세요.
                     </div>
-                  </div>
-                );
-             })}
-             
-             <p className="text-slate-600 text-[10px] font-bold mt-4 uppercase tracking-[0.2em] opacity-40">5단계 미션</p>
-          </div>
-
-          {/* [우측 패널] 비전 카드 (기존 유지) */}
-          <div className="w-full md:w-1/2 flex flex-col gap-6 animate-fadeIn h-full justify-center">
-            {/* ... 기존 우측 패널 코드는 그대로 두시면 됩니다 ... */}
-            <div className="bg-[#1A202C]/80 border border-white/10 rounded-[2.5rem] p-8 shadow-2xl relative overflow-hidden min-h-[500px] flex flex-col">
-               <div className="absolute top-0 right-0 p-6 opacity-5 pointer-events-none"><Zap size={150} className="text-white" /></div>
-               <div className="mb-6 relative z-10">
-                 <div className="flex items-center gap-3 mb-2">
-                   <span className="text-4xl">{visions[activeLevel].emoji || "✨"}</span>
-                   <div>
-                     <p className="text-[10px] font-black text-emerald-500 uppercase tracking-widest">{levelMap[activeLevel]} VISION</p>
-                     <h2 className="text-2xl md:text-3xl font-black text-white leading-tight">
-                       {visions[activeLevel].title || "비전을 설정해주세요"}
-                     </h2>
-                   </div>
-                 </div>
-               </div>
-               <div className="bg-slate-900/50 p-6 rounded-2xl border border-white/5 mb-8 relative z-10 flex-grow-0">
-                 <p className="text-sm text-slate-300 italic leading-relaxed">
-                   {visions[activeLevel].immersionScript ? `"${visions[activeLevel].immersionScript}"` : "My Lab에서 AI 몰입 시나리오를 생성해보세요."}
-                 </p>
-               </div>
-               <div className="flex-grow flex flex-col">
-                 <div className="flex justify-between items-end mb-4 border-b border-white/10 pb-2">
-                   <h4 className="text-sm font-black text-white uppercase tracking-widest flex items-center gap-2">
-                     <ListPlus size={16} className="text-amber-500" /> Value Events
-                   </h4>
-                 </div>
-                 <div className="space-y-3 overflow-y-auto pr-2 custom-scrollbar max-h-[250px]">
-                    {visions[activeLevel].events.length === 0 ? (
-                      <div className="text-center py-8 text-slate-600 text-xs">
-                        등록된 Value Event가 없습니다.<br/>My Lab에서 행동 목록을 추가하세요.
-                      </div>
-                    ) : (
-                      visions[activeLevel].events.map((ev) => (
-                        <div key={ev.id} className="group bg-slate-800/40 hover:bg-slate-800/80 border border-white/5 hover:border-amber-500/50 rounded-xl p-4 transition-all">
-                          <div className="flex justify-between items-start mb-3">
-                            <span className="text-sm font-bold text-slate-200 group-hover:text-white">{ev.name}</span>
-                          </div>
-                          <div className="flex items-center justify-between gap-3">
-                            <div className="flex items-center gap-2 bg-slate-950 rounded-lg p-1 border border-white/10">
-                               <button onClick={() => setDuration(Math.max(0.5, duration - 0.5))} className="w-6 h-6 flex items-center justify-center text-slate-400 hover:text-white font-bold text-xs">-</button>
-                               <span className="text-xs font-black text-white w-8 text-center">{duration}h</span>
-                               <button onClick={() => setDuration(duration + 0.5)} className="w-6 h-6 flex items-center justify-center text-slate-400 hover:text-white font-bold text-xs">+</button>
-                            </div>
-                            <button onClick={() => handleDepositSubmit(ev.name)} className="bg-emerald-600 hover:bg-emerald-500 text-white text-[10px] font-black px-4 py-2 rounded-lg uppercase tracking-widest shadow-lg active:scale-95 transition-all flex items-center gap-2">
-                              <Coins size={12} /> Deposit
+                  ) : (
+                    visions[activeLevel].events.map((ev) => (
+                      <div
+                        key={ev.id}
+                        className="group bg-slate-800/40 hover:bg-slate-800/80 border border-white/5 hover:border-amber-500/50 rounded-xl p-4 transition-all"
+                      >
+                        <div className="flex justify-between items-start mb-3">
+                          <span className="text-sm font-bold text-slate-200 group-hover:text-white">
+                            {ev.name}
+                          </span>
+                        </div>
+                        <div className="flex items-center justify-between gap-3">
+                          <div className="flex items-center gap-2 bg-slate-950 rounded-lg p-1 border border-white/10">
+                            <button
+                              onClick={() =>
+                                setDuration(Math.max(0.5, duration - 0.5))
+                              }
+                              className="w-6 h-6 flex items-center justify-center text-slate-400 hover:text-white font-bold text-xs"
+                            >
+                              -
+                            </button>
+                            <span className="text-xs font-black text-white w-8 text-center">
+                              {duration}h
+                            </span>
+                            <button
+                              onClick={() => setDuration(duration + 0.5)}
+                              className="w-6 h-6 flex items-center justify-center text-slate-400 hover:text-white font-bold text-xs"
+                            >
+                              +
                             </button>
                           </div>
+                          <button
+                            onClick={() => handleDepositSubmit(ev.name)}
+                            className="bg-emerald-600 hover:bg-emerald-500 text-white text-[10px] font-black px-4 py-2 rounded-lg uppercase tracking-widest shadow-lg active:scale-95 transition-all flex items-center gap-2"
+                          >
+                            <Coins size={12} /> Deposit
+                          </button>
                         </div>
-                      ))
-                    )}
-                 </div>
-               </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
             </div>
           </div>
-
         </div>
       </div>
     );
@@ -1741,7 +1815,7 @@ const renderHub = () => {
     );
   };
 
-    const renderContract = () => {
+  const renderContract = () => {
     const isLocked = !!signedDate;
     const handleExecuteContract = () => {
       if (!signature.trim()) return showToast("서명란이 비어있습니다.");
@@ -2051,7 +2125,7 @@ const renderHub = () => {
     );
   };
 
- const renderPhilosophy = () => (
+  const renderPhilosophy = () => (
     <div className="flex-grow w-full max-w-5xl mx-auto overflow-y-auto no-scrollbar pb-24 px-6 animate-fadeIn font-sans text-left">
       {/* Header Section */}
       <div className="flex items-center gap-4 mb-12 border-b border-white/10 pb-8 mt-4">
@@ -2069,27 +2143,51 @@ const renderHub = () => {
       </div>
 
       <div className="space-y-20">
-       
-
         {/* The Worldview Section */}
         <section>
           <h3 className="text-xl font-black text-emerald-500 uppercase tracking-widest mb-8 flex items-center gap-2">
             <Sparkles size={18} /> I. The Worldview | 세계관
           </h3>
-          
+
           <div className="mb-10 bg-gradient-to-br from-emerald-500/10 to-transparent p-8 md:p-12 rounded-[3rem] border border-emerald-500/20 backdrop-blur-md">
             <p className="text-2xl text-slate-100 leading-[1.6] font-black italic mb-8 tracking-tight">
-              "미래는 찾아가는 것이 아니라, <br/>지금 이 순간으로 초대하는 것입니다."
+              "미래는 찾아가는 것이 아니라, <br />
+              지금 이 순간으로 초대하는 것입니다."
             </p>
             <div className="text-base text-slate-300 leading-[1.9] space-y-6 font-medium">
               <p>
-                무한한 평행세계 속에서 당신이 갈망하는 모든 성취를 이미 이룬 존재, <span className="text-emerald-400 font-bold">Apex BP(Best Possible Self)</span>가 당신을 지켜보고 있습니다. 그는 수많은 '나'들 중 오직 당신만을 자신의 유일한 현실 대리인인 <span className="text-cyan-400 font-bold">The Vessel(ver.0)</span>로 선택했습니다.
+                무한한 평행세계 속에서 당신이 갈망하는 모든 성취를 이미 이룬
+                존재,{" "}
+                <span className="text-emerald-400 font-bold">
+                  Apex BP(Best Possible Self)
+                </span>
+                가 당신을 지켜보고 있습니다. 그는 수많은 '나'들 중 오직 당신만을
+                자신의 유일한 현실 대리인인{" "}
+                <span className="text-cyan-400 font-bold">
+                  The Vessel(ver.0)
+                </span>
+                로 선택했습니다.
               </p>
               <p>
-                이 선택은 우연이 아닙니다. 당신의 타고난 유전적 기질(<span className="text-white">TCI</span>)은 마스터 자아의 위대한 업적을 현시점에 소환해낼 수 있는 가장 완벽한 물리적 토대였기 때문입니다. 당신의 기질적 결함이라 믿었던 특성들조차, 사실은 마스터 자아가 설계한 정교한 성공의 재료였습니다.
+                이 선택은 우연이 아닙니다. 당신의 타고난 유전적 기질(
+                <span className="text-white">TCI</span>)은 마스터 자아의 위대한
+                업적을 현시점에 소환해낼 수 있는 가장 완벽한 물리적 토대였기
+                때문입니다. 당신의 기질적 결함이라 믿었던 특성들조차, 사실은
+                마스터 자아가 설계한 정교한 성공의 재료였습니다.
               </p>
               <p>
-                당신이 <span className="text-white font-bold">Manifestation Contract</span>에 서명하는 찰나, 시공간의 장벽을 넘어 Apex BP의 의식 파동이 당신의 신경계로 전송됩니다. 이제 당신의 몸은 두 자아가 공유하는 <span className="text-emerald-500 font-bold">'공동 점유 상태(Occupancy)'</span>가 됩니다. 당신은 더 이상 고독하게 노력하는 자가 아닙니다. 이미 승리한 자의 감각과 통찰을 빌려, 확정된 미래를 오늘로 구현해내는 위대한 현신입니다.
+                당신이{" "}
+                <span className="text-white font-bold">
+                  Manifestation Contract
+                </span>
+                에 서명하는 찰나, 시공간의 장벽을 넘어 Apex BP의 의식 파동이
+                당신의 신경계로 전송됩니다. 이제 당신의 몸은 두 자아가 공유하는{" "}
+                <span className="text-emerald-500 font-bold">
+                  '공동 점유 상태(Occupancy)'
+                </span>
+                가 됩니다. 당신은 더 이상 고독하게 노력하는 자가 아닙니다. 이미
+                승리한 자의 감각과 통찰을 빌려, 확정된 미래를 오늘로 구현해내는
+                위대한 현신입니다.
               </p>
             </div>
           </div>
@@ -2099,18 +2197,26 @@ const renderHub = () => {
               <div className="mb-6 bg-amber-500/10 w-14 h-14 rounded-full flex items-center justify-center border border-amber-500/30">
                 <ShieldCheck size={24} className="text-amber-500" />
               </div>
-              <h4 className="text-xl font-black text-white mb-3 uppercase">존재적 상장 (Existential IPO)</h4>
+              <h4 className="text-xl font-black text-white mb-3 uppercase">
+                존재적 상장 (Existential IPO)
+              </h4>
               <p className="text-sm text-slate-400 leading-relaxed">
-                미래 가치를 담보로 당신의 정체성을 현 시점에 상장시키십시오. 이 계약을 통해 '고통스러운 노력'은 '가치 창출을 위한 자본금 납입'으로 재정의됩니다.
+                미래 가치를 담보로 당신의 정체성을 현 시점에 상장시키십시오. 이
+                계약을 통해 '고통스러운 노력'은 '가치 창출을 위한 자본금
+                납입'으로 재정의됩니다.
               </p>
             </div>
             <div className="bg-[#1A202C]/60 p-8 rounded-[2.5rem] border border-white/5 shadow-xl hover:bg-slate-900/80 transition-all group">
               <div className="mb-6 bg-emerald-500/10 w-14 h-14 rounded-full flex items-center justify-center border border-emerald-500/30">
                 <Brain size={24} className="text-emerald-500" />
               </div>
-              <h4 className="text-xl font-black text-white mb-3 uppercase">신경학적 각인 (Neuro-Imprinting)</h4>
+              <h4 className="text-xl font-black text-white mb-3 uppercase">
+                신경학적 각인 (Neuro-Imprinting)
+              </h4>
               <p className="text-sm text-slate-400 leading-relaxed">
-                VAK 모델은 목표를 단순한 텍스트가 아닌 '감각적 체험'으로 변환합니다. 이는 미래를 '이미 일어난 기억'으로 뇌에 물리적으로 각인시킵니다.
+                VAK 모델은 목표를 단순한 텍스트가 아닌 '감각적 체험'으로
+                변환합니다. 이는 미래를 '이미 일어난 기억'으로 뇌에 물리적으로
+                각인시킵니다.
               </p>
             </div>
           </div>
@@ -2119,93 +2225,155 @@ const renderHub = () => {
         {/* Operational Protocol Section */}
         <section>
           <h3 className="text-xl font-black text-amber-500 uppercase tracking-widest mb-8 flex items-center gap-2">
-            <Zap size={18} /> II. Operational Protocol | 운영 프로토콜
+            <Zap size={18} /> II. 운영 프로토콜 | Operational Protocol
           </h3>
           <div className="relative border-l-2 border-slate-800 ml-4 space-y-12 pb-4">
             <div className="relative pl-12">
-              <div className="absolute -left-[17px] top-0 w-9 h-9 bg-[#0A0F1E] border-2 border-slate-600 rounded-full flex items-center justify-center text-[10px] font-black text-slate-400">01</div>
+              <div className="absolute -left-[17px] top-0 w-9 h-9 bg-[#0A0F1E] border-2 border-slate-600 rounded-full flex items-center justify-center text-[10px] font-black text-slate-400">
+                01
+              </div>
               <div className="bg-[#1A202C]/40 p-8 rounded-[2.5rem] border border-white/5">
                 <div className="flex items-center gap-3 mb-4">
                   <Settings size={22} className="text-slate-400" />
-                  <h4 className="text-xl font-black text-white uppercase tracking-tight">Initialize Identity (My Lab)</h4>
+                  <h4 className="text-xl font-black text-white uppercase tracking-tight">
+                    My Lab - 시작점의 나, Ver.0 
+                  </h4>
                 </div>
                 <p className="text-base text-slate-400 leading-relaxed">
-                  마스터 자아가 점유할 당신의 그릇(<span className="text-white font-bold">The Vessel</span>)을 최적화하십시오. 기질(TCI)과 감각 선호도(VAK)를 등록하여 차원 간 동기화 채널을 개설합니다.
+                  마스터 자아가 점유할 당신의 그릇(
+                  <span className="text-white font-bold">The Vessel</span>)을
+                  최적화하십시오. 기질(TCI)과 감각 선호도(VAK)를 등록하여 차원
+                  간 동기화 채널을 개설합니다.
                 </p>
               </div>
             </div>
             <div className="relative pl-12">
-              <div className="absolute -left-[17px] top-0 w-9 h-9 bg-[#0A0F1E] border-2 border-amber-500/50 rounded-full flex items-center justify-center text-[10px] font-black text-amber-500">02</div>
+              <div className="absolute -left-[17px] top-0 w-9 h-9 bg-[#0A0F1E] border-2 border-amber-500/50 rounded-full flex items-center justify-center text-[10px] font-black text-amber-500">
+                02
+              </div>
               <div className="bg-amber-500/5 p-8 rounded-[2.5rem] border border-amber-500/20">
                 <div className="flex items-center gap-3 mb-4">
                   <PenTool size={22} className="text-amber-500" />
-                  <h4 className="text-xl font-black text-white uppercase tracking-tight">Sign The Manifestation Contract</h4>
+                  <h4 className="text-xl font-black text-white uppercase tracking-tight">
+                    Contract - 현현계약의 체결
+                  </h4>
                 </div>
                 <p className="text-base text-slate-400 leading-relaxed">
-                  마스터 자아에게 주도권을 위임하는 <span className="text-white font-bold">현현 계약</span>에 서명하십시오. 서명하는 순간 시스템이 활성화되며, 당신의 시간은 공식적인 가치로 인정받기 시작합니다.
+                  마스터 자아에게 주도권을 위임하는{" "}
+                  <span className="text-white font-bold">현현 계약</span>에
+                  서명하십시오. 서명하는 순간 시스템이 활성화되며, 당신의 시간은
+                  공식적인 가치로 인정받기 시작합니다.
                 </p>
               </div>
             </div>
             <div className="relative pl-12">
-              <div className="absolute -left-[17px] top-0 w-9 h-9 bg-[#0A0F1E] border-2 border-emerald-500/50 rounded-full flex items-center justify-center text-[10px] font-black text-emerald-500">03</div>
+              <div className="absolute -left-[17px] top-0 w-9 h-9 bg-[#0A0F1E] border-2 border-emerald-500/50 rounded-full flex items-center justify-center text-[10px] font-black text-emerald-500">
+                03
+              </div>
               <div className="bg-[#1A202C]/40 p-8 rounded-[2.5rem] border border-white/5">
                 <div className="flex items-center gap-3 mb-4">
                   <Home size={22} className="text-emerald-500" />
-                  <h4 className="text-xl font-black text-white uppercase tracking-tight">Execute & Deposit (Ledger)</h4>
+                  <h4 className="text-xl font-black text-white uppercase tracking-tight">
+                    Ledger - 실행과 예치
+                  </h4>
                 </div>
                 <p className="text-base text-slate-400 leading-relaxed">
-                  내 안의 Apex BP가 현실의 근육을 빌려 직접 가치를 창출하는 과정입니다. 실행 버튼을 누르는 즉시 창출된 가치는 <span className="text-emerald-500 font-bold">Mental Bank</span>에 존재적 매출로 예치됩니다.
+                  내 안의 Apex BP가 현실의 근육을 빌려 직접 가치를 창출하는
+                  과정입니다. 실행 버튼을 누르는 즉시 창출된 가치는{" "}
+                  <span className="text-emerald-500 font-bold">
+                    Mental Bank
+                  </span>
+                  에 존재적 매출로 예치됩니다.
                 </p>
               </div>
             </div>
             <div className="relative pl-12">
-              <div className="absolute -left-[17px] top-0 w-9 h-9 bg-[#0A0F1E] border-2 border-rose-500/50 rounded-full flex items-center justify-center text-[10px] font-black text-rose-500">04</div>
+              <div className="absolute -left-[17px] top-0 w-9 h-9 bg-[#0A0F1E] border-2 border-rose-500/50 rounded-full flex items-center justify-center text-[10px] font-black text-rose-500">
+                04
+              </div>
               <div className="bg-[#1A202C]/40 p-8 rounded-[2.5rem] border border-white/5">
                 <div className="flex items-center gap-3 mb-4">
                   <BarChart2 size={22} className="text-rose-500" />
-                  <h4 className="text-xl font-black text-white uppercase tracking-tight">Analyze Convergence (Stream)</h4>
+                  <h4 className="text-xl font-black text-white uppercase tracking-tight">
+                    Stream - 모니터링
+                  </h4>
                 </div>
                 <p className="text-base text-slate-400 leading-relaxed">
-                  현실 자아와 마스터 자아가 얼마나 하나로 <span className="text-white font-bold">융합(Convergence)</span>되었는지 모니터링하십시오. 단순한 숫자가 아닌, 목표를 향해 나아가는 에너지의 궤적을 확인합니다.
+                  현실 자아와 마스터 자아가 얼마나 하나로{" "}
+                  <span className="text-white font-bold">
+                    융합(Convergence)
+                  </span>
+                  되었는지 모니터링하십시오. 단순한 숫자가 아닌, 목표를 향해
+                  나아가는 에너지의 궤적을 확인합니다.
                 </p>
               </div>
             </div>
           </div>
         </section>
- {/* Scientific Foundation Section */}
+        {/* Scientific Foundation Section */}
         <section className="relative">
           <div className="absolute -left-4 top-0 bottom-0 w-1 bg-gradient-to-b from-cyan-500/50 via-transparent to-transparent hidden md:block" />
           <h3 className="text-xl font-black text-cyan-500 uppercase tracking-widest mb-8 flex items-center gap-2">
-            <Beaker size={18} /> Scientific Foundation: Identity Alchemy | 과학적 토대
+            <Beaker size={18} /> Scientific Foundation: Identity Alchemy |
+            과학적 토대
           </h3>
           <div className="bg-slate-900/40 p-8 md:p-10 rounded-[3rem] border border-cyan-500/10 shadow-[0_0_50px_rgba(6,182,212,0.05)] backdrop-blur-sm">
             <p className="text-base text-slate-300 leading-[1.8] font-medium mb-8">
-              The Pulse는 단순한 목표 관리 도구가 아닙니다. 이는 지난 반세기 동안 발전해 온{" "}
-              <span className="text-cyan-400 font-bold">행동심리학, 뇌과학, 그리고 긍정심리학의 정수</span>를 하나의 정교한 알고리즘으로 통합한 '정체성 설계 시스템'입니다. 본 시스템의 뿌리를 이루는 과학적 기둥들은 당신의 무의식을 재배열하고 실질적인 삶의 궤적을 수정합니다.
+              The Pulse는 단순한 목표 관리 도구가 아닙니다. 이는 지난 반세기
+              동안 발전해 온{" "}
+              <span className="text-cyan-400 font-bold">
+                행동심리학, 뇌과학, 그리고 긍정심리학의 정수
+              </span>
+              를 하나의 정교한 알고리즘으로 통합한 '정체성 설계 시스템'입니다.
+              본 시스템의 뿌리를 이루는 과학적 기둥들은 당신의 무의식을
+              재배열하고 실질적인 삶의 궤적을 수정합니다.
             </p>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 text-sm">
               <div className="space-y-3">
-                <h5 className="text-cyan-400 font-bold flex items-center gap-2 italic">01. Mental Bank Concept</h5>
+                <h5 className="text-cyan-400 font-bold flex items-center gap-2 italic">
+                  01. Mental Bank Concept
+                </h5>
                 <p className="text-slate-400 leading-relaxed">
-                  존 카파스(Dr. John Kappas) 박사의 <span className="text-slate-200">Mental Bank</span> 이론을 계승하여, 무의식이 '강화와 보상'이라는 경제적 논리에 따라 움직이도록 설계되었습니다.밤마다 기록되는 자산은 무의식이 성공을 '당연한 결과'로 받아들이게 만듭니다.
+                  존 카파스(Dr. John Kappas) 박사의{" "}
+                  <span className="text-slate-200">Mental Bank</span> 이론을
+                  계승하여, 무의식이 '강화와 보상'이라는 경제적 논리에 따라
+                  움직이도록 설계되었습니다.밤마다 기록되는 자산은 무의식이
+                  성공을 '당연한 결과'로 받아들이게 만듭니다.
                 </p>
               </div>
               <div className="space-y-3">
-                <h5 className="text-cyan-400 font-bold flex items-center gap-2 italic">02. NLP VAK Model</h5>
+                <h5 className="text-cyan-400 font-bold flex items-center gap-2 italic">
+                  02. NLP VAK Model
+                </h5>
                 <p className="text-slate-400 leading-relaxed">
-                  NLP의 <span className="text-slate-200">선호표상체계(VAK)</span>를 활용해 목표를 다감각적 정보로 코딩합니다. 뇌는 생생한 상상과 실제 경험을 구분하지 않으며, 미래의 성취를 '이미 일어난 기억'으로 각인시킵니다.
+                  NLP의{" "}
+                  <span className="text-slate-200">선호표상체계(VAK)</span>를
+                  활용해 목표를 다감각적 정보로 코딩합니다. 뇌는 생생한 상상과
+                  실제 경험을 구분하지 않으며, 미래의 성취를 '이미 일어난
+                  기억'으로 각인시킵니다.
                 </p>
               </div>
               <div className="space-y-3">
-                <h5 className="text-cyan-400 font-bold flex items-center gap-2 italic">03. Bio-Character Fusion</h5>
+                <h5 className="text-cyan-400 font-bold flex items-center gap-2 italic">
+                  03. Bio-Character Fusion
+                </h5>
                 <p className="text-slate-400 leading-relaxed">
-                  유전적 <span className="text-slate-200">기질(Temperament)</span>을 하드웨어로 인정하고, 그 위에 최적화된 긍정심리학의 <span className="text-slate-200">BPS(최고의 미래 자아)</span> 값을 입력합니다. 하드웨어 최적화와 소프트웨어 업그레이드가 동시에 진행됩니다.
+                  유전적{" "}
+                  <span className="text-slate-200">기질(Temperament)</span>을
+                  하드웨어로 인정하고, 그 위에 최적화된 긍정심리학의{" "}
+                  <span className="text-slate-200">BPS(최고의 미래 자아)</span>{" "}
+                  값을 입력합니다. 하드웨어 최적화와 소프트웨어 업그레이드가
+                  동시에 진행됩니다.
                 </p>
               </div>
               <div className="space-y-3">
-                <h5 className="text-cyan-400 font-bold flex items-center gap-2 italic">04. Neuropsychology</h5>
+                <h5 className="text-cyan-400 font-bold flex items-center gap-2 italic">
+                  04. Neuropsychology
+                </h5>
                 <p className="text-slate-400 leading-relaxed">
-                  <span className="text-slate-200">헵의 법칙(Hebb’s Law)</span>에 기반하여, 반복되는 Ledger 기록과 실행은 당신의 전두엽을 물리적으로 재구조화하여 새로운 정체성을 구축합니다.
+                  <span className="text-slate-200">헵의 법칙(Hebb’s Law)</span>
+                  에 기반하여, 반복되는 Ledger 기록과 실행은 당신의 전두엽을
+                  물리적으로 재구조화하여 새로운 정체성을 구축합니다.
                 </p>
               </div>
             </div>
@@ -2218,20 +2386,33 @@ const renderHub = () => {
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
             <div className="p-4 bg-slate-900/20 rounded-xl border border-white/5">
-              <span className="text-white font-bold block mb-1">Apex BP (Best Possible Self)</span>
-              <span className="text-slate-500">평행세계에서 모든 목표를 이룬 당신의 완성된 자아.</span>
-           
-          
-              <span className="text-white font-bold block mb-1">The Vessel (ver.0)</span>
-              <span className="text-slate-500">마스터 자아의 의식을 현실에서 구현해내는 당신의 현재 육체.</span>
-            
-           
-              <span className="text-white font-bold block mb-1">Mental Bank (MB)</span>
-              <span className="text-slate-500">행동의 가치가 복리로 적립되는 당신의 무의식 자산 계좌.</span>
-           
-            
-              <span className="text-white font-bold block mb-1">Magnitude (누적 진폭)</span>
-              <span className="text-slate-500">현실을 변화시킨 에너지의 총량. 100% 도달 시 합일이 일어납니다.</span>
+              <span className="text-white font-bold block mb-1">
+                Apex BP (Best Possible Self)
+              </span>
+              <span className="text-slate-500">
+                평행세계에서 모든 목표를 이룬 당신의 완성된 자아.
+              </span>
+
+              <span className="text-white font-bold block mb-1">
+                The Vessel (ver.0)
+              </span>
+              <span className="text-slate-500">
+                마스터 자아의 의식을 현실에서 구현해내는 당신의 현재 육체.
+              </span>
+
+              <span className="text-white font-bold block mb-1">
+                Mental Bank (MB)
+              </span>
+              <span className="text-slate-500">
+                행동의 가치가 복리로 적립되는 당신의 무의식 자산 계좌.
+              </span>
+
+              <span className="text-white font-bold block mb-1">
+                Magnitude (누적 진폭)
+              </span>
+              <span className="text-slate-500">
+                현실을 변화시킨 에너지의 총량. 100% 도달 시 합일이 일어납니다.
+              </span>
             </div>
           </div>
         </section>
@@ -2239,16 +2420,15 @@ const renderHub = () => {
     </div>
   );
 
-
   return (
     <div className="min-h-screen bg-slate-950 text-slate-200 p-4 md:p-10 font-sans overflow-hidden flex flex-col selection:bg-amber-500/30">
       <style>{`@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css'); * { font-family: 'Pretendard', sans-serif; letter-spacing: -0.02em; } .animate-fadeIn { animation: fadeIn 0.8s ease-out; } .animate-spin-slow { animation: spin 20s linear infinite; } @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } } @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }`}</style>
 
-{/* 헤더 */}
+      {/* 헤더 */}
       <header className="flex justify-between items-start md:items-center mb-8 px-4 max-w-7xl mx-auto w-full shrink-0 pt-4">
         {/* ▼▼▼ 여기를 수정했습니다 (클릭하면 홈으로 이동) ▼▼▼ */}
-        <div 
-          onClick={() => setCurrentView("hub")} 
+        <div
+          onClick={() => setCurrentView("hub")}
           className="cursor-pointer group"
         >
           <h1 className="text-3xl md:text-4xl font-black text-white tracking-tighter italic uppercase leading-none group-hover:opacity-80 transition-opacity">
@@ -2379,7 +2559,7 @@ const renderHub = () => {
               <h2 className="text-4xl font-black text-white uppercase italic tracking-tighter text-rose-500">
                 Trash Bin
               </h2>
-            </div>  
+            </div>
             {trashVisions.length === 0 ? (
               <div className="text-center py-32 opacity-20 italic font-serif">
                 The Void is empty.
@@ -2439,11 +2619,10 @@ const renderHub = () => {
         )}
       </div>
 
-{/* 하단 네비게이션 (Floating 적용 완료) */}
-{/* 하단 네비게이션 (Ledger를 맨 앞으로 이동!) */}
+      {/* 하단 네비게이션 (Floating 적용 완료) */}
+      {/* 하단 네비게이션 (Ledger를 맨 앞으로 이동!) */}
       <footer className="fixed bottom-6 left-0 right-0 z-[1000] px-4 animate-fadeIn">
         <nav className="max-w-xl mx-auto flex justify-between md:justify-around items-center bg-[#0A0F1E]/90 backdrop-blur-xl rounded-full py-3 px-3 border border-white/10 shadow-[0_10px_40px_rgba(0,0,0,0.8)] overflow-x-auto no-scrollbar gap-1">
-          
           {/* 1. Ledger (홈) - 맨 앞으로 이동 완료! */}
           <NavBtn
             active={currentView === "hub"}
