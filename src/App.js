@@ -2896,7 +2896,7 @@ const App = () => {
       {/* 하단 네비게이션 (Floating 적용 완료) */}
       {/* 하단 네비게이션 (Ledger를 맨 앞으로 이동!) */}
       <footer className="fixed bottom-6 left-0 right-0 z-[1000] px-4 animate-fadeIn">
-        <nav className="max-w-xl mx-auto flex justify-between md:justify-around items-center bg-[#0A0F1E]/90 backdrop-blur-xl rounded-full py-3 px-3 border border-white/10 shadow-[0_10px_40px_rgba(0,0,0,0.8)] overflow-x-auto no-scrollbar gap-1">
+        <nav className="max-w-xl mx-auto flex justify-between md:justify-around items-center bg-[#0A0F1E]/90 backdrop-blur-xl rounded-full py-3 px-3 border border-white/10 shadow-[0_10px_40px_rgba(0,0,0,0.8)] mb-1 overflow-x-auto no-scrollbar gap-1">
           {/* 1. Ledger (홈) - 맨 앞으로 이동 완료! */}
           <NavBtn
             active={currentView === "hub"}
@@ -2904,7 +2904,6 @@ const App = () => {
             icon={<Home size={24} className="md:w-7 md:h-7" />}
             label="Ledger"
           />
-
           {/* 2. My Lab */}
           <NavBtn
             active={currentView === "lab"}
@@ -2912,7 +2911,6 @@ const App = () => {
             icon={<Settings size={20} className="md:w-6 md:h-6" />}
             label="My Lab"
           />
-
           {/* 3. Contract */}
           <NavBtn
             active={currentView === "contract"}
@@ -2920,7 +2918,6 @@ const App = () => {
             icon={<PenTool size={20} className="md:w-6 md:h-6" />}
             label="Contract"
           />
-
           {/* 4. Stream */}
           <NavBtn
             active={currentView === "analysis"}
@@ -2928,7 +2925,6 @@ const App = () => {
             icon={<BarChart2 size={20} className="md:w-6 md:h-6" />}
             label="Stream"
           />
-
           {/* 5. Milestone */}
           <NavBtn
             active={currentView === "archive"}
@@ -2936,7 +2932,6 @@ const App = () => {
             icon={<Trophy size={20} className="md:w-6 md:h-6" />}
             label="Milestone"
           />
-
           {/* 6. Philosophy */}
           <NavBtn
             active={currentView === "philosophy"}
@@ -2945,11 +2940,13 @@ const App = () => {
             label="Philosophy"
           />
         </nav>
-        <div className="text-center space-y-1">
-          <p className="text-[7px] text-slate-800 font-black uppercase tracking-[0.4em] leading-none opacity-60">
+
+        {/* 2. 시스템 정보 (내비게이션 바 아래로 이동) */}
+        <div className="text-center space-y-1.5 transition-all duration-500">
+          <p className="text-[8px] text-slate-500/60 font-black uppercase tracking-[0.4em] leading-none">
             © 2026 THE PULSE // IDENTITY SYNCHRONIZATION TERMINAL
           </p>
-          <p className="text-[6px] text-amber-900 font-bold uppercase tracking-[0.3em] leading-none opacity-40">
+          <p className="text-[7px] text-slate-400/50 font-bold uppercase tracking-[0.3em] leading-none">
             ACCESS POINT: THEPULSE.MILESTONES.TODAY
           </p>
         </div>
