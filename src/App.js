@@ -40,7 +40,15 @@ import { createClient } from "@supabase/supabase-js";
 const supabaseUrl = "https://ihhfgoqpsubjdqlytzvs.supabase.co";
 const supabaseAnonKey =
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImloaGZnb3Fwc3ViamRxbHl0enZzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjcxMDYxMDEsImV4cCI6MjA4MjY4MjEwMX0.1ZtWo4LiiOOJIFyKyvhPNXFwrvUgGeMTKTNp39kz61M";
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+
+// [수정] 옵션을 추가하여 세션 유지력을 강화합니다.
+export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+  auth: {
+    persistSession: true, // 세션을 로컬 스토리지에 저장 (기본값이나 명시적으로 작성)
+    autoRefreshToken: true, // 토큰 만료 시 자동 갱신
+    detectSessionInUrl: true, // URL의 세션 정보 감지
+  },
+});
 
 // 2. 유틸리티
 const AutoTextarea = ({
