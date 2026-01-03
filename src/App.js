@@ -136,6 +136,7 @@ const App = () => {
   const [user, setUser] = useState(null);
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
+  const [customTask, setCustomTask] = useState("");
 
   const [currency, setCurrency] = useState("₩");
   const [userName, setUserName] = useState("");
@@ -1470,53 +1471,105 @@ const App = () => {
                     Events
                   </h4>
                 </div>
-                <div className="space-y-3 overflow-y-auto pr-2 custom-scrollbar max-h-[250px]">
-                  {visions[activeLevel].events.length === 0 ? (
-                    <div className="text-center py-8 text-slate-600 text-xs">
-                      등록된 Value Event가 없습니다.
-                      <br />
-                      My Lab에서 행동 목록을 추가하세요.
-                    </div>
-                  ) : (
-                    visions[activeLevel].events.map((ev) => (
-                      <div
-                        key={ev.id}
-                        className="group bg-slate-800/40 hover:bg-slate-800/80 border border-white/5 hover:border-amber-500/50 rounded-xl p-4 transition-all"
-                      >
-                        <div className="flex justify-between items-start mb-3">
-                          <span className="text-sm font-bold text-slate-200 group-hover:text-white">
-                            {ev.name}
-                          </span>
-                        </div>
-                        <div className="flex items-center justify-between gap-3">
-                          <div className="flex items-center gap-2 bg-slate-950 rounded-lg p-1 border border-white/10">
-                            <button
-                              onClick={() =>
-                                setDuration(Math.max(0.5, duration - 0.5))
-                              }
-                              className="w-6 h-6 flex items-center justify-center text-slate-400 hover:text-white font-bold text-xs"
-                            >
-                              -
-                            </button>
-                            <span className="text-xs font-black text-white w-8 text-center">
-                              {duration}h
-                            </span>
-                            <button
-                              onClick={() => setDuration(duration + 0.5)}
-                              className="w-6 h-6 flex items-center justify-center text-slate-400 hover:text-white font-bold text-xs"
-                            >
-                              +
-                            </button>
-                          </div>
+
+                {/* renderHub 내부 VALUE EVENTS 목록 하단에 추가할 코드 예시*/}
+                <div className="space-y-3 overflow-y-auto pr-2 custom-scrollbar max-h-[450px]">
+                  {/* 1. 등록된 항목 리스트 (있을 때만 출력) */}
+                  {visions[activeLevel].events.map((ev) => (
+                    <div
+                      key={ev.id}
+                      className="group bg-slate-800/40 hover:bg-slate-800/80 border border-white/5 p-4 rounded-xl transition-all"
+                    >
+                      <div className="flex justify-between items-start mb-3">
+                        <span className="text-sm font-bold text-slate-200">
+                          {ev.name}
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2 bg-slate-950 rounded-lg p-1 border border-white/10">
                           <button
-                            onClick={() => handleDepositSubmit(ev.name)}
-                            className="bg-emerald-600 hover:bg-emerald-500 text-white text-[10px] font-black px-4 py-2 rounded-lg uppercase tracking-widest shadow-lg active:scale-95 transition-all flex items-center gap-2"
+                            onClick={() =>
+                              setDuration(Math.max(0.5, duration - 0.5))
+                            }
+                            className="w-6 h-6 flex items-center justify-center text-slate-400 font-bold text-xs"
                           >
-                            <Coins size={12} /> Deposit
+                            -
+                          </button>
+                          <span className="text-xs font-black text-white w-8 text-center">
+                            {duration}h
+                          </span>
+                          <button
+                            onClick={() => setDuration(duration + 0.5)}
+                            className="w-6 h-6 flex items-center justify-center text-slate-400 font-bold text-xs"
+                          >
+                            +
                           </button>
                         </div>
+                        <button
+                          onClick={() => handleDepositSubmit(ev.name)}
+                          className="bg-emerald-600 hover:bg-emerald-500 text-white text-[10px] font-black px-4 py-2 rounded-lg transition-all flex items-center gap-2"
+                        >
+                          <Coins size={12} /> Deposit
+                        </button>
                       </div>
-                    ))
+                    </div>
+                  ))}
+
+                  {/* 2. 새로운 활동 직접 입력 (경계선 삭제 및 간격 조정) */}
+                  {/* [수정] pt-4와 border-t를 삭제하여 요청하신 대로 줄을 없앴습니다. */}
+                  <div className="mt-2 flex flex-col gap-3">
+                    <input
+                      type="text"
+                      value={customTask}
+                      onChange={(e) => setCustomTask(e.target.value)}
+                      placeholder="새로운 활동 직접 입력..."
+                      className="bg-transparent border-b border-slate-700 p-2 text-sm text-slate-300 outline-none focus:border-amber-500 transition-colors placeholder:text-slate-600"
+                    />
+                    <div className="flex items-center justify-between px-1">
+                      {/* 직접 입력용 시간 조절 */}
+                      <div className="flex items-center gap-2 bg-slate-950/50 rounded-lg p-1 border border-white/5">
+                        <button
+                          onClick={() =>
+                            setDuration(Math.max(0.5, duration - 0.5))
+                          }
+                          className="w-6 h-6 text-slate-500 hover:text-white font-bold text-xs"
+                        >
+                          -
+                        </button>
+                        <span className="text-[10px] font-black text-slate-300 w-8 text-center">
+                          {duration}h
+                        </span>
+                        <button
+                          onClick={() => setDuration(duration + 0.5)}
+                          className="w-6 h-6 text-slate-500 hover:text-white font-bold text-xs"
+                        >
+                          +
+                        </button>
+                      </div>
+                      {/* 작고 세련된 Quick Deposit 버튼 */}
+                      <button
+                        onClick={() => {
+                          if (!customTask.trim())
+                            return alert("활동 내용을 입력해주세요.");
+                          handleDepositSubmit(customTask);
+                          setCustomTask("");
+                        }}
+                        className="bg-amber-600/20 hover:bg-amber-600/40 text-amber-500 text-[10px] font-black px-4 py-2 rounded-lg transition-all flex items-center gap-2 border border-amber-500/20"
+                      >
+                        <Coins size={12} /> Quick Deposit
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* 3. 안내 문구 (목록이 0개일 때만 하단에 출력) */}
+                  {visions[activeLevel].events.length === 0 && (
+                    <div className="text-center py-6 text-slate-500 text-[11px] leading-relaxed italic animate-fadeIn">
+                      등록된 Value Event 가 없습니다.
+                      <br />
+                      My Lab 에서 행동 목록을 추가하거나,
+                      <br />
+                      위에서 새로운 활동을 직접 입력하세요.
+                    </div>
                   )}
                 </div>
               </div>
