@@ -557,12 +557,22 @@ const App = () => {
     const finalAmount = valueEventAmount * inflationBonus * duration;
 
     // 3. 장부(Ledger)에 기록
+    // [수정] 차트 분석을 위해 level과 순수 duration을 따로 저장합니다.
     const newEntry = {
       date: new Date(),
       amount: finalAmount,
-      desc: `${eventName} (${duration}h)`, // 어떤 행동을 몇 시간 했는지 기록
+      desc: eventName,
+      duration: duration, // 시간 정보
+      level: activeLevel, // 현재 활성화된 단계 (1~5)
     };
     setLedger((prev) => [...prev, newEntry]);
+    updateVision(activeLevel, {
+      progressAsset: visions[activeLevel].progressAsset + finalAmount,
+    });
+    showToast(
+      `${duration}시간 수행! ${currency}${fNum(finalAmount)} 예치 완료`
+    );
+    setDuration(1);
 
     // 4. 해당 레벨 자산 업데이트
     const newProgress = visions[activeLevel].progressAsset + finalAmount;
@@ -1580,6 +1590,16 @@ const App = () => {
     );
   };
   const renderAnalysis = () => {
+    // 1. 데이터 집계: 단계별 사용 시간 합산
+    const distribution = [0, 0, 0, 0, 0]; // 1~5단계 순서
+    ledger.forEach((item) => {
+      if (item.level >= 1 && item.level <= 5) {
+        distribution[item.level - 1] += item.duration || 0;
+      }
+    });
+
+    const totalHours = distribution.reduce((a, b) => a + b, 0);
+
     const startDate = signedDate ? new Date(signedDate) : new Date();
     const targetDateObj = new Date(targetDate);
     const today = new Date();
@@ -1889,11 +1909,179 @@ const App = () => {
             </g>
           </svg>
         </div>
+
         <div className="mt-8 text-center opacity-40">
           <p className="text-[10px] uppercase tracking-widest">
             Data reflects actual ledger entries from{" "}
             {startDate.toLocaleDateString()}
           </p>
+          <br></br>
+          <br></br> <br></br> 
+          <div className="flex justify-between items-end mb-6 mt-4 px-2">
+            <div>
+              <div className="flex items-center gap-2">
+                <h4 className="text-sm font-black text-white uppercase tracking-widest flex items-center gap-2 mb-6">
+                  <ClipboardList size={18} className="text-emerald-500" />{" "}
+                  Activity Focus
+                </h4>
+              </div>
+            </div>
+            <div className="text-right">
+              <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">
+                Total Identity Hours
+              </p>
+              <span className="text-3xl font-black text-emerald-500 font-mono">
+                {totalHours.toFixed(1)}h
+              </span>
+            </div>
+          </div>
+          {/* [차트 섹션] 집중도 분석 (Focus Breakdown) */}
+          <div className="bg-[#0A0F1E]/60 border border-white/5 rounded-[3rem] p-8 mb-10 shadow-2xl relative overflow-hidden">
+            <div className="flex flex-col md:flex-row items-center gap-10">
+              {/* 시각화 그래픽 (SVG 도넛 차트 형태) */}
+              <div className="relative w-48 h-48 shrink-0">
+                <svg
+                  viewBox="0 0 36 36"
+                  className="w-full h-full transform -rotate-90"
+                >
+                  <circle
+                    cx="18"
+                    cy="18"
+                    r="15.9"
+                    fill="transparent"
+                    stroke="#1A202C"
+                    strokeWidth="3"
+                  />
+                  {distribution.map((val, i) => {
+                    const offset = distribution
+                      .slice(0, i)
+                      .reduce((a, b) => a + b, 0);
+                    const strokeDash = (val / (totalHours || 1)) * 100;
+                    const strokeOffset = (offset / (totalHours || 1)) * 100;
+                    const colors = [
+                      "#F87171",
+                      "#FB923C",
+                      "#FBBF24",
+                      "#34D399",
+                      "#60A5FA",
+                    ];
+                    return (
+                      <circle
+                        key={i}
+                        cx="18"
+                        cy="18"
+                        r="15.9"
+                        fill="transparent"
+                        stroke={colors[i]}
+                        strokeWidth="3.2"
+                        strokeDasharray={`${strokeDash} 100`}
+                        strokeDashoffset={`-${strokeOffset}`}
+                        strokeLinecap="round"
+                      />
+                    );
+                  })}
+                </svg>
+                <div className="absolute inset-0 flex flex-col items-center justify-center">
+                  <p className="text-[10px] text-slate-500 font-bold uppercase">
+                    Balance
+                  </p>
+                  <TrendingUp size={20} className="text-amber-500" />
+                </div>
+              </div>
+              {/* 범례 및 통계 */}
+              <div className="flex-grow grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {[1, 2, 3, 4, 5].map((lv) => (
+                  <div
+                    key={lv}
+                    className="flex items-center justify-between p-3 bg-slate-900/40 rounded-2xl border border-white/5"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div
+                        className={`w-2 h-2 rounded-full ${
+                          [
+                            "bg-rose-500",
+                            "bg-orange-400",
+                            "bg-amber-400",
+                            "bg-emerald-400",
+                            "bg-blue-400",
+                          ][lv - 1]
+                        }`}
+                      />
+                      <span className="text-[11px] font-bold text-slate-300">
+                        {lv}단계: {levelMap[lv]}
+                      </span>
+                    </div>
+                    <span className="text-xs font-black text-white">
+                      {(
+                        (distribution[lv - 1] / (totalHours || 1)) *
+                        100
+                      ).toFixed(1)}
+                      %
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+          {/* [리스트 섹션] 활동 로그 (Identity Log) */}
+          <div className="px-2 mb-4">
+            <h4 className="text-sm font-black text-white uppercase tracking-widest flex items-center gap-2 mb-6">
+              <ClipboardList size={18} className="text-emerald-500" /> Activity
+              Timeline
+            </h4>
+            <div className="space-y-4">
+              {ledger.length === 0 ? (
+                <div className="text-center py-20 bg-slate-900/20 rounded-[2rem] border border-dashed border-white/5 text-slate-600 text-sm">
+                  기록된 활동 파동이 없습니다.
+                </div>
+              ) : (
+                [...ledger].reverse().map((log, i) => (
+                  <div key={i} className="flex items-center gap-4 group">
+                    {/* 날짜 표시 */}
+                    <div className="w-16 shrink-0 text-right">
+                      <p className="text-[10px] font-bold text-slate-600 uppercase">
+                        {new Date(log.date).getMonth() + 1}.
+                        {new Date(log.date).getDate()}
+                      </p>
+                      <p className="text-[8px] text-slate-700 font-mono">
+                        {new Date(log.date).getHours()}:
+                        {String(new Date(log.date).getMinutes()).padStart(
+                          2,
+                          "0"
+                        )}
+                      </p>
+                    </div>
+
+                    {/* 로그 카드 */}
+                    <div className="flex-grow bg-[#1A202C]/40 border border-white/5 p-5 rounded-[2rem] flex items-center justify-between hover:bg-slate-900/60 transition-all">
+                      <div>
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="text-[9px] font-black px-2 py-0.5 rounded-full bg-slate-900 border border-white/10 text-slate-500 uppercase tracking-tighter">
+                            LV.{log.level || "?"}
+                          </span>
+                          <h5 className="text-sm font-bold text-slate-200">
+                            {log.desc}
+                          </h5>
+                        </div>
+                        <p className="text-[10px] text-slate-500 font-medium">
+                          수행 시간: {log.duration || 0}시간
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-xs font-black text-amber-500">
+                          +{currency}
+                          {fNum(log.amount)}
+                        </p>
+                        <p className="text-[9px] text-slate-600 font-bold uppercase tracking-widest">
+                          Magnitude
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
         </div>
       </div>
     );
