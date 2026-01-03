@@ -1916,7 +1916,7 @@ const App = () => {
             {startDate.toLocaleDateString()}
           </p>
           <br></br>
-          <br></br> <br></br> 
+          <br></br> <br></br>
           <div className="flex justify-between items-end mb-6 mt-4 px-2">
             <div>
               <div className="flex items-center gap-2">
@@ -2943,6 +2943,14 @@ const App = () => {
             label="Philosophy"
           />
         </nav>
+        <div className="text-center space-y-1">
+            <p className="text-[7px] text-slate-800 font-black uppercase tracking-[0.4em] leading-none opacity-60">
+              © 2026 THE PULSE // IDENTITY SYNCHRONIZATION TERMINAL
+            </p>
+            <p className="text-[6px] text-amber-900 font-bold uppercase tracking-[0.3em] leading-none opacity-40">
+              ACCESS POINT: THEPULSE.MILESTONES.TODAY
+            </p>
+          </div>
       </footer>
 
       {isSensoryModalOpen && activeSensory && (
