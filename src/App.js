@@ -1275,7 +1275,7 @@ const App = () => {
         {/* [수정] 상황별 스마트 오버레이 */}
         {showOverlay && (
           <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-slate-950/60 backdrop-blur-[6px] animate-fadeIn">
-            <div className="bg-[#0A0F1E] border border-amber-500/30 p-10 rounded-[3rem] text-center shadow-2xl transform transition-all hover:scale-105 max-w-md">
+            <div className="bg-[#0A0F1E] border border-amber-500/50 p-10 rounded-[3rem] text-center shadow--[0_0_80px_rgba(245,158,11,0.4)] transform transition-all hover:scale-105 max-w-md relative z-10">
               <ShieldCheck size={32} className="text-slate-600 mb-6 mx-auto" />
               <h3 className="text-2xl font-black text-white uppercase italic tracking-tighter mb-2">
                 System Preview
@@ -1373,17 +1373,34 @@ const App = () => {
               const isActive = lv === activeLevel;
               const visualPercent = totalProgress * 100;
               const displayPercent = visualPercent.toFixed(1);
-              const barBackground = isConfigured
-                ? "bg-gradient-to-r from-amber-600 via-yellow-400 to-amber-600"
-                : "bg-slate-600";
-              const containerStyle = isActive
-                ? "border-amber-400 ring-2 ring-amber-500/50 shadow-[0_0_30px_rgba(245,158,11,0.6)] z-10 scale-105 brightness-110"
-                : isConfigured
-                ? "border-amber-600/30 opacity-90 hover:brightness-110"
-                : "border-slate-700/50 opacity-60 hover:opacity-80";
+
+              // [수정] 피라미드 색상 차등 적용 로직
+              let barBackground;
+              let containerStyle;
+
+              if (isActive) {
+                // 1. 현재 활성화된 단계 (가장 밝고 화려한 빛나는 황금색)
+                barBackground =
+                  "bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-500 shadow-[0_0_20px_rgba(245,158,11,0.8)]";
+                containerStyle =
+                  "border-amber-400 ring-2 ring-amber-500/50 shadow-[0_0_30px_rgba(245,158,11,0.6)] z-10 scale-105 brightness-110";
+              } else if (isConfigured) {
+                // 2. 입력은 했지만 현재 선택 안 된 단계 (톤 다운된 차분한 황금색)
+                // amber-900(갈색) 대신 amber-600/yellow-600을 사용하여 '황금색' 유지
+                barBackground =
+                  "bg-gradient-to-r from-amber-600 via-yellow-600 to-amber-600 opacity-90";
+                containerStyle =
+                  "border-amber-600/50 opacity-80 hover:opacity-100 hover:brightness-110 hover:border-amber-400/50";
+              } else {
+                // 3. 아직 입력 안 한 단계 (회색)
+                barBackground = "bg-slate-800";
+                containerStyle =
+                  "border-slate-700/50 opacity-60 hover:opacity-80";
+              }
+
               const textStyle = isConfigured
                 ? "text-white drop-shadow-[0_2px_2px_rgba(0,0,0,0.9)]"
-                : "text-slate-300 drop-shadow-md";
+                : "text-slate-400 drop-shadow-md";
 
               return (
                 <div
