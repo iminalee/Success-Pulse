@@ -2,3 +2,8 @@
   font-family: sans-serif;
   text-align: center;
 }
+/* 이모지(글자)용 그림자 */
+.emoji-shadow {
+  /* 글자 뒤에 그림자 생성 */
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
