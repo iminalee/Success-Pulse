@@ -371,66 +371,68 @@ ${visionSummary}
       setIsRecoveryMode(true);
     }
 
-// [수정된 initSession 함수]
-const initSession = async () => {
-  setLoading(true);
-  
-  // 1. 먼저 로그인 세션과 유저 정보를 가져옵니다.
-  const { data: { session } } = await supabase.auth.getSession();
-  const currentUser = session?.user;
-  setUser(currentUser);
+    // [수정된 initSession 함수]
+    const initSession = async () => {
+      setLoading(true);
 
-  // 2. 유저가 있다면 DB에서 데이터를 가져옵니다.
-  if (currentUser) {
-    const { data, error } = await supabase
-      .from("pulse_data")
-      .select("*")
-      .eq("id", currentUser.id)
-      .single();
+      // 1. 먼저 로그인 세션과 유저 정보를 가져옵니다.
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      const currentUser = session?.user;
+      setUser(currentUser);
 
-    // 3. DB 데이터를 가져온 '이후'에 로직을 실행해야 에러가 안 납니다.
-    if (data) {
-      // ▼▼▼ [이름 동기화 로직 위치] ▼▼▼
-      if (data.user_name) {
-        // DB에 이름이 이미 있으면 그걸 씁니다.
-        setUserName(data.user_name);
-      } else if (currentUser?.user_metadata?.user_name) {
-        // DB는 비어있는데, 가입할 때 쓴 이름이 있다면? -> 화면에 보여주고 DB에 저장!
-        const nameFromMeta = currentUser.user_metadata.user_name;
-        setUserName(nameFromMeta); 
-
-        supabase
+      // 2. 유저가 있다면 DB에서 데이터를 가져옵니다.
+      if (currentUser) {
+        const { data, error } = await supabase
           .from("pulse_data")
-          .update({ user_name: nameFromMeta })
+          .select("*")
           .eq("id", currentUser.id)
-          .then(({ error }) => {
-            if (error) console.error("이름 DB 저장 실패:", error);
-            else console.log("이름 DB 동기화 완료:", nameFromMeta);
-          });
+          .single();
+
+        // 3. DB 데이터를 가져온 '이후'에 로직을 실행해야 에러가 안 납니다.
+        if (data) {
+          // ▼▼▼ [이름 동기화 로직 위치] ▼▼▼
+          if (data.user_name) {
+            // DB에 이름이 이미 있으면 그걸 씁니다.
+            setUserName(data.user_name);
+          } else if (currentUser?.user_metadata?.user_name) {
+            // DB는 비어있는데, 가입할 때 쓴 이름이 있다면? -> 화면에 보여주고 DB에 저장!
+            const nameFromMeta = currentUser.user_metadata.user_name;
+            setUserName(nameFromMeta);
+
+            supabase
+              .from("pulse_data")
+              .update({ user_name: nameFromMeta })
+              .eq("id", currentUser.id)
+              .then(({ error }) => {
+                if (error) console.error("이름 DB 저장 실패:", error);
+                else console.log("이름 DB 동기화 완료:", nameFromMeta);
+              });
+          }
+          // ▲▲▲ [이름 동기화 끝] ▲▲▲
+
+          // 나머지 데이터 불러오기
+          if (data.currency) setCurrency(data.currency);
+          if (data.annual_income) setAnnualIncome(data.annual_income);
+          if (data.target_date) setTargetDate(data.target_date);
+          if (data.ledger) setLedger(data.ledger);
+          if (data.visions) setVisions(data.visions);
+          if (data.bps_traits) setBpsTraits(data.bps_traits);
+          if (data.vak_profile) setVakProfile(data.vak_profile);
+          if (data.tci_profile) setTciProfile(data.tci_profile);
+          if (data.archived_visions) setArchivedVisions(data.archived_visions);
+          if (data.trash_visions) setTrashVisions(data.trash_visions);
+          if (data.signature) setSignature(data.signature);
+          if (data.signed_date) setSignedDate(data.signed_date);
+
+          // 권한 설정 불러오기
+          setHasEditAccess(data.has_edit_access || false);
+          setHasAiAccess(data.has_ai_access || false);
+        }
       }
-      // ▲▲▲ [이름 동기화 끝] ▲▲▲
-
-      // 나머지 데이터 불러오기
-      if (data.currency) setCurrency(data.currency);
-      if (data.annual_income) setAnnualIncome(data.annual_income);
-      if (data.target_date) setTargetDate(data.target_date);
-      if (data.ledger) setLedger(data.ledger);
-      if (data.visions) setVisions(data.visions);
-      if (data.bps_traits) setBpsTraits(data.bps_traits);
-      if (data.vak_profile) setVakProfile(data.vak_profile);
-      if (data.tci_profile) setTciProfile(data.tci_profile);
-      if (data.archived_visions) setArchivedVisions(data.archived_visions);
-      if (data.trash_visions) setTrashVisions(data.trash_visions);
-      if (data.signature) setSignature(data.signature);
-      if (data.signed_date) setSignedDate(data.signed_date);
-
-      // 권한 설정 불러오기
-      setHasEditAccess(data.has_edit_access || false);
-      setHasAiAccess(data.has_ai_access || false);
-    }
-  }
-  setLoading(false);
-};
+      setLoading(false);
+    };
 
     initSession();
 
@@ -2277,7 +2279,7 @@ const initSession = async () => {
                 자격 검증 및 선택
               </h3>
               <p className="text-stone-300 text-base md:text-lg font-light tracking-wide pl-2 md:pl-4 border-l-2 border-stone-700">
-                마스터 자아{" "}
+              현존 자아(Ver.0)가 갈망하는 모든 성취를 이미 완수하여 잠재력을 100% 개화시킨 완성체, 마스터 자아{" "}
                 <span className="text-stone-100 font-bold italic px-1">
                   Apex BP {userName}
                 </span>
