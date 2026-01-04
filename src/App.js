@@ -1290,7 +1290,7 @@ ${visionSummary}
       <div className="relative w-full h-full flex-grow flex flex-col overflow-y-auto no-scrollbar pb-24">
         {/* 시스템 오버레이 (서약 전) */}
         {showOverlay && (
-          <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-slate-950/60 backdrop-blur-[6px] animate-fadeIn">
+          <div style={overlayStyle} className="bg-slate-950/90 backdrop-blur-xl border border-amber-500/50 p-8 rounded-[3rem] text-center shadow-[0_0_80px_rgba(245,158,11,0.4)] animate-fadeIn">
             <div className="bg-[#0A0F1E] border border-amber-500/50 p-10 rounded-[3rem] text-center shadow-[0_0_80px_rgba(245,158,11,0.4)] max-w-md">
               <ShieldCheck size={32} className="text-slate-600 mb-6 mx-auto" />
               <h3 className="text-2xl font-black text-white uppercase italic mb-2">
