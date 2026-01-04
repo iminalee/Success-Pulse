@@ -511,6 +511,26 @@ ${visionSummary}
     // 성공 시 useEffect가 세션을 감지하여 자동으로 처리합니다.
   };
 
+  // 비밀번호 재설정 메일 발송 함수
+  const handleResetPassword = async () => {
+    if (!email) return alert("비밀번호를 재설정할 이메일을 입력해주세요.");
+
+    setLoading(true);
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      // 사용자가 메일의 링크를 클릭했을 때 돌아올 주소 (현재 페이지)
+      redirectTo: window.location.origin,
+    });
+
+    if (error) {
+      alert("메일 발송 실패: " + error.message);
+    } else {
+      alert(
+        "비밀번호 재설정 링크가 메일로 발송되었습니다. 메일함을 확인해주세요!"
+      );
+    }
+    setLoading(false);
+  };
+
   const fNum = (n) => Math.floor(n).toLocaleString();
   const mbGoalAmount = annualIncome * 2;
   const mbBalance = mbGoalAmount * 4;
@@ -846,6 +866,16 @@ ${visionSummary}
                           className="flex-1 bg-amber-600 hover:bg-amber-500 text-white font-bold py-4 rounded-2xl transition-all shadow-lg"
                         >
                           {loading ? "..." : "회원가입"}
+                        </button>
+                      </div>
+                      {/* ▼ 추가된 부분 */}
+                      <div className="text-center mt-4">
+                        <button
+                          onClick={handleResetPassword}
+                          disabled={loading}
+                          className="text-[10px] text-slate-500 hover:text-amber-500 transition-colors"
+                        >
+                          비밀번호를 잊으셨나요?
                         </button>
                       </div>
 
