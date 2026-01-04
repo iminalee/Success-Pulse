@@ -1554,7 +1554,7 @@ ${visionSummary}
                     <span className="font-black uppercase text-sm tracking-tight text-white drop-shadow-md flex items-center gap-2">
                       {/* 설정된 단계면 이모지 표시 */}
                       {isConfigured && (
-                        <span className="text-xs">{visions[lv].emoji}</span>
+                        <span className="text-xs emoji-shadow ">{visions[lv].emoji}</span>
                       )}
                       {levelMap[lv]}
                     </span>
