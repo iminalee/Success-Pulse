@@ -1470,7 +1470,10 @@ ${visionSummary}
         )}
 
         <div
-          className={`flex flex-col md:flex-row items-center justify-center w-full h-full px-2 md:px-10 gap-8 transition-all duration-1000 ${
+          className={`flex flex-col md:flex-row items-center justify-start md:justify-center  /* [수정] 모바일은 위에서부터, PC는 중앙 정렬 */
+          w-full min-h-full                /* [수정] 높이 강제(h-full) 대신 최소 높이(min-h-full) */
+          px-2 md:px-10 gap-8 py-10        /* [수정] 위아래 여백(py-10) 추가 */
+          transition-all duration-1000 ${
             showOverlay
               ? "opacity-40 blur-sm pointer-events-none"
               : "opacity-100"
@@ -2379,7 +2382,7 @@ ${visionSummary}
                 에너지 자원 할당
               </h3>
               <p className="text-stone-300 text-base md:text-lg font-light tracking-wide pl-2 md:pl-4 border-l-2 border-stone-700">
-              <span className="text-stone-100 font-bold italic px-1">
+                <span className="text-stone-100 font-bold italic px-1">
                   Apex BP {userName}
                 </span>
                 는 무의식 원장인{" "}
@@ -2406,7 +2409,7 @@ ${visionSummary}
                 미션 및 보상
               </h3>
               <p className="text-stone-300 text-base md:text-lg font-light tracking-wide pl-2 md:pl-4 border-l-2 border-stone-700">
-              <span className="text-stone-100 font-bold italic px-1">
+                <span className="text-stone-100 font-bold italic px-1">
                   {userName} ver.0
                 </span>
                 은 매일 5단계 이내의 핵심 미션을 설정하고, 설정된 목표 날짜({" "}
