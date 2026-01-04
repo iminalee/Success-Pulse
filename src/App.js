@@ -125,12 +125,69 @@ const SensoryItem = ({ label, color, val }) => (
 
 // 3. 메인 앱
 const App = () => {
+  const handleGenerateBPSScenario = () => {
+    // 1-5단계 데이터 수집
+    const activeVisions = [1, 2, 3, 4, 5]
+      .filter((lv) => visions[lv].title !== "")
+      .map((lv) => ({
+        level: levelMap[lv],
+        title: visions[lv].title,
+        // 각 단계에서 강조된 VAK 요소가 있다면 포함 (기존 데이터 구조 기반)
+      }));
+
+    if (activeVisions.length === 0 && bpsTraits.every((t) => t === "Empty")) {
+      showToast(
+        "데이터가 부족합니다. 하위 단계의 비전과 Traits를 먼저 설정하세요."
+      );
+      return;
+    }
+
+    const traitsStr = bpsTraits.filter((t) => t !== "Empty").join(", ");
+    const visionSummary = activeVisions
+      .map((v) => `${v.level}: ${v.title}`)
+      .join("\n");
+
+    // AI 시나리오 생성 템플릿
+    const aiScript = `[통합 정체성 동기화 완료]
+당신은 이제 '${traitsStr}'의 정체성을 가진 완벽한 존재, Apex BP로 거듭났습니다.
+
+당신의 내면에는 다음과 같은 하위 자아들의 성취가 하나의 거대한 흐름으로 요동칩니다:
+${visionSummary}
+
+당신이 눈을 뜨면(Visual) 그토록 갈망하던 성공의 풍경이 초고화질의 현실로 펼쳐지며, 당신의 내면에서는(Auditory) "나는 이미 모든 것을 이루었다"는 확신의 목소리가 웅장하게 울려 퍼집니다. 
+
+지금 느껴지는 이 전율(Kinesthetic)은 단순한 상상이 아니라, 당신의 세포 하나하나에 새겨진 미래의 기억입니다. 당신의 모든 행동은 이제 이 통합된 정체성으로부터 자연스럽게 흘러나오는 위대한 서사가 될 것입니다.`;
+
+    // Level 6의 immersionScript에 저장
+    updateVision(6, { immersionScript: aiScript });
+    showToast("AI가 통합 마스터 시나리오를 생성했습니다.");
+  };
+
   // 기존 코드들 아래에 추가하세요
   const [otp, setOtp] = useState(""); // 인증번호 저장할 곳
   const [isOtpSent, setIsOtpSent] = useState(false); // 메일 보냈는지 확인하는 스위치
 
   // ▼▼▼ [추가] 시간(Duration) 상태 관리 (기본값 1시간) ▼▼▼
   const [duration, setDuration] = useState(1);
+
+  // 1. 개별 항목의 시간을 저장할 객체 상태 (기본값 1시간)
+  const [eventDurations, setEventDurations] = useState({});
+
+  // 2. 특정 항목의 시간을 조절하는 전용 함수. // [수정] 내부 단위를 '분'으로 변경 (10분 단위)
+  const updateSpecificDuration = (id, delta) => {
+    setEventDurations((prev) => ({
+      ...prev,
+      [id]: Math.max(0, (prev[id] !== undefined ? prev[id] : 60) + delta),
+    }));
+  };
+
+  // [추가] 분을 "1h 20m" 형태로 예쁘게 바꿔주는 변환 함수
+  const formatDuration = (totalMinutes) => {
+    if (totalMinutes === 0) return "0m";
+    const h = Math.floor(totalMinutes / 60);
+    const m = totalMinutes % 60;
+    return h > 0 ? `${h}h ${m > 0 ? m + "m" : ""}` : `${m}m`;
+  };
 
   // 상태 관리 (DB 동기화용)
   const [user, setUser] = useState(null);
@@ -541,7 +598,7 @@ const App = () => {
   };
 
   // [수정] 개별 아이템 입금 처리 함수
-  const handleDepositSubmit = (eventName) => {
+  const handleDepositSubmit = (eventName, taskMinutes) => {
     // 1. 현재 달성률 계산 (인플레이션 보너스 산정용)
     const progressRate =
       mbGoalAmount > 0 ? (currentAsset / mbGoalAmount) * 100 : 0;
@@ -553,27 +610,35 @@ const App = () => {
     if (progressRate >= 80) inflationBonus += 0.1;
     if (progressRate >= 90) inflationBonus += 0.1;
 
+    // [수정] 분을 시간으로 환산 (예: 70분 -> 1.166...시간) 하여 금액 계산
+    const taskHours = taskMinutes / 60;
+
     // 2. 최종 입금액 계산 (기본단가 * 인플레 * 시간)
-    const finalAmount = valueEventAmount * inflationBonus * duration;
+    const finalAmount = valueEventAmount * inflationBonus * taskhours;
 
     // 3. 장부(Ledger)에 기록
-    // [수정] 차트 분석을 위해 level과 순수 duration을 따로 저장합니다.
+    // 2. 장부(Ledger)에 기록할 데이터 생성
     const newEntry = {
       date: new Date(),
       amount: finalAmount,
-      desc: eventName,
-      duration: duration, // 시간 정보
-      level: activeLevel, // 현재 활성화된 단계 (1~5)
+      // formatDuration 함수를 사용하여 "1h 10m" 형태로 저장
+      desc: `${eventName} (${formatDuration(taskMinutes)})`,
+      duration: taskHours, // 분석 차트용 소수점 시간
+      level: activeLevel, // 현재 활성화된 피라미드 단계
     };
+
+    // 3. 상태 업데이트
     setLedger((prev) => [...prev, newEntry]);
+    // 비전 데이터(피라미드 바) 업데이트
     updateVision(activeLevel, {
       progressAsset: visions[activeLevel].progressAsset + finalAmount,
     });
+    // 4. 완료 알림
     showToast(
-      `${duration}시간 수행! ${currency}${fNum(finalAmount)} 예치 완료`
+      `${formatDuration(taskMinutes)} 수행! ${currency}${fNum(
+        finalAmount
+      )} 예치 완료`
     );
-    setDuration(1);
-
     // 4. 해당 레벨 자산 업데이트
     const newProgress = visions[activeLevel].progressAsset + finalAmount;
     updateVision(activeLevel, { progressAsset: newProgress });
@@ -1263,72 +1328,41 @@ const App = () => {
   };
 
   const renderHub = () => {
-    // 5개 Character가 다 보이도록 전체 배열 사용
     const activeTraits = bpsTraits;
-
-    // [수정] 오버레이 표시 조건: 로그인을 안 했거나(!user) OR 로그인했는데 서명을 안 했으면(!signedDate)
-    const showOverlay = !user || (user && !signedDate);
-
     const totalProgress =
       mbGoalAmount > 0 ? Math.min(currentAsset / mbGoalAmount, 1) : 0;
-
-    // 피라미드 너비 설정
     const widthMap = {
-      5: "w-[160px]",
-      4: "w-[200px]",
-      3: "w-[240px]",
-      2: "w-[280px]",
+      5: "w-[130px]",
+      4: "w-[170px]",
+      3: "w-[210px]",
+      2: "w-[260px]",
       1: "w-[320px]",
     };
+    const showOverlay = !user || (user && !signedDate);
 
     return (
       <div className="relative w-full h-full flex-grow flex flex-col overflow-y-auto no-scrollbar pb-24">
-        {/* [수정] 상황별 스마트 오버레이 */}
+        {/* 시스템 오버레이 (서약 전) */}
         {showOverlay && (
-          <div className="fixed inset-0 z-[5000] flex flex-col items-center justify-center bg-slate-950/80 backdrop-blur-[8px] animate-fadeIn px-6">
-            {/* 박스 크기 및 패딩 모바일 대응 (p-8, w-[90%]) */}
-
-            <div className="bg-[#0A0F1E] border border-amber-500/50 p-8 md:p-10 rounded-[2.5rem] md:rounded-[3rem] text-center shadow-[0_0_100px_rgba(245,158,11,0.5)] transform transition-all hover:scale-105 w-full max-w-[340px] md:max-w-md relative z-10">
+          <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-slate-950/60 backdrop-blur-[6px] animate-fadeIn">
+            <div className="bg-[#0A0F1E] border border-amber-500/50 p-10 rounded-[3rem] text-center shadow-[0_0_80px_rgba(245,158,11,0.4)] max-w-md">
               <ShieldCheck size={32} className="text-slate-600 mb-6 mx-auto" />
-              <h3 className="text-2xl font-black text-white uppercase italic tracking-tighter mb-2">
+              <h3 className="text-2xl font-black text-white uppercase italic mb-2">
                 System Preview
               </h3>
-
-              {/* 안내 문구: 로그인 여부에 따라 다르게 표시 */}
-              <p className="text-slate-400 text-sm leading-relaxed mb-8 font-medium">
-                {user
-                  ? "서약서에 서명하면 모든 기능이 활성화됩니다."
-                  : "시스템을 사용하려면 ID 등록(로그인)이 필요합니다."}
+              <p className="text-slate-400 text-sm mb-8">
+                서약서에 서명하면 모든 기능이 활성화됩니다.
               </p>
-
-              {/* 버튼 동작: 로그인 안 했으면 Lab으로, 했으면 Contract로 이동 */}
               <button
-                onClick={() => {
-                  if (!user) {
-                    setCurrentView("lab"); // 로그인하러 Lab으로 보냄
-                    showToast("이메일로 인증하여 ID를 등록하세요.");
-                  } else {
-                    setCurrentView("contract"); // 서명하러 계약서로 보냄
-                  }
-                }}
-                className="bg-amber-600 hover:bg-amber-500 text-white px-8 py-4 rounded-2xl font-black text-xs uppercase tracking-widest shadow-2xl flex items-center gap-3 mx-auto transition-all active:scale-95"
+                onClick={() => setCurrentView("contract")}
+                className="bg-amber-600 hover:bg-amber-500 text-white px-8 py-4 rounded-2xl font-black text-xs uppercase flex items-center gap-3 mx-auto"
               >
-                {user ? (
-                  <>
-                    <PenTool size={14} /> Sign Agreement
-                  </>
-                ) : (
-                  // 로그인 안 한 사람에게 보여줄 버튼
-                  <>
-                    <User size={14} /> Start Registration
-                  </>
-                )}
+                <PenTool size={14} /> Sign Agreement
               </button>
             </div>
           </div>
         )}
 
-        {/* 메인 레이아웃 (오버레이 뒤쪽) */}
         <div
           className={`flex flex-col md:flex-row items-center justify-center w-full h-full px-2 md:px-10 gap-8 transition-all duration-1000 ${
             showOverlay
@@ -1336,9 +1370,8 @@ const App = () => {
               : "opacity-100"
           }`}
         >
-          {/* [좌측 패널] 피라미드 */}
+          {/* [좌측 패널] 성취 피라미드 */}
           <div className="w-full md:w-1/2 flex flex-col items-center justify-center relative z-10 pt-10">
-            {/* BPS Header */}
             <div className="relative flex justify-center items-end mb-4 z-20 w-full">
               <div
                 onClick={() => setActiveLevel(6)}
@@ -1348,9 +1381,9 @@ const App = () => {
                   {activeTraits.map((trait, i) => (
                     <span
                       key={i}
-                      className={`text-[10px] md:text-xs font-black px-3 py-1.5 rounded-full bg-slate-900/90 border border-amber-500/40 whitespace-nowrap shadow-lg animate-pulse ${
+                      className={`text-[10px] font-black px-3 py-1.5 rounded-full bg-slate-900/90 border border-amber-500/40 animate-pulse ${
                         activeLevel === 6
-                          ? "text-amber-400 drop-shadow-[0_0_5px_rgba(245,158,11,0.8)]"
+                          ? "text-amber-400"
                           : "text-slate-400 opacity-70"
                       }`}
                     >
@@ -1359,232 +1392,207 @@ const App = () => {
                   ))}
                 </div>
                 <h4
-                  className={`text-xl font-black tracking-tighter transition-all duration-500 translate-y-[-5px] ${
+                  className={`text-xl font-black transition-all ${
                     activeLevel === 6
                       ? "text-amber-400 scale-110"
                       : "text-slate-600"
                   }`}
-                  style={{
-                    filter: `drop-shadow(0 0 ${
-                      10 + totalProgress * 40
-                    }px rgba(245, 158, 11, ${0.5 + totalProgress * 0.5}))`,
-                  }}
                 >
                   BPS
                 </h4>
               </div>
             </div>
-
-            {/* 장식용 노란 삼각형 */}
             <div className="flex justify-center mb-1 animate-pulse">
               <div className="w-0 h-0 border-l-[30px] border-l-transparent border-r-[30px] border-r-transparent border-b-[40px] border-b-yellow-500 drop-shadow-[0_0_10px_rgba(234,179,8,0.6)]"></div>
             </div>
-
-            {/* Pyramid Levels */}
-            {[5, 4, 3, 2, 1].map((lv) => {
-              const isConfigured = visions[lv].title !== "";
-              const isActive = lv === activeLevel;
-              const visualPercent = totalProgress * 100;
-              const displayPercent = visualPercent.toFixed(1);
-
-              // [수정] 피라미드 색상 차등 적용 로직
-              let barBackground;
-              let containerStyle;
-
-              if (isActive) {
-                // 1. 현재 활성화된 단계 (가장 밝고 화려한 빛나는 황금색)
-                barBackground =
-                  "bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-500 shadow-[0_0_20px_rgba(245,158,11,0.8)]";
-                containerStyle =
-                  "border-amber-400 ring-2 ring-amber-500/50 shadow-[0_0_30px_rgba(245,158,11,0.6)] z-10 scale-105 brightness-110";
-              } else if (isConfigured) {
-                // 2. 입력은 했지만 현재 선택 안 된 단계 (톤 다운된 차분한 황금색)
-                // amber-900(갈색) 대신 amber-600/yellow-600을 사용하여 '황금색' 유지
-                barBackground =
-                  "bg-gradient-to-r from-amber-600 via-yellow-600 to-amber-600 opacity-90";
-                containerStyle =
-                  "border-amber-600/50 opacity-80 hover:opacity-100 hover:brightness-110 hover:border-amber-400/50";
-              } else {
-                // 3. 아직 입력 안 한 단계 (회색)
-                barBackground = "bg-slate-800";
-                containerStyle =
-                  "border-slate-700/50 opacity-60 hover:opacity-80";
-              }
-
-              const textStyle = isConfigured
-                ? "text-white drop-shadow-[0_2px_2px_rgba(0,0,0,0.9)]"
-                : "text-slate-400 drop-shadow-md";
-
-              return (
+            {[5, 4, 3, 2, 1].map((lv) => (
+              <div
+                key={lv}
+                onClick={() => setActiveLevel(lv)}
+                className={`cursor-pointer relative flex items-center justify-center h-[50px] rounded-2xl mb-2 overflow-hidden transition-all border bg-slate-900/50 ${
+                  widthMap[lv]
+                } ${
+                  activeLevel === lv
+                    ? "border-amber-400 ring-2 ring-amber-500/50 scale-105"
+                    : "border-slate-700/50"
+                }`}
+              >
                 <div
-                  key={lv}
-                  onClick={() => setActiveLevel(lv)}
-                  className={`cursor-pointer relative flex items-center justify-center h-[50px] rounded-2xl mb-2 overflow-hidden transition-all duration-300 border bg-slate-900/50 ${widthMap[lv]} ${containerStyle}`}
-                >
-                  <div
-                    className={`absolute left-0 top-0 h-full transition-all duration-1000 ${barBackground}`}
-                    style={{ width: `${displayPercent}%` }}
-                  />
-                  {visualPercent >= 60 && isConfigured && (
-                    <div className="absolute inset-0 bg-white/10 animate-pulse pointer-events-none" />
-                  )}
-                  <div className="relative z-10 flex flex-col items-center justify-center leading-none">
-                    <span
-                      className={`font-black uppercase text-sm tracking-tight ${textStyle}`}
-                    >
-                      {levelMap[lv]}
-                    </span>
-                    <span
-                      className={`text-[11px] font-black mt-0.5 ${textStyle} opacity-90`}
-                    >
-                      {displayPercent}%
-                    </span>
-                  </div>
-                </div>
-              );
-            })}
+                  className="absolute left-0 top-0 h-full bg-gradient-to-r from-amber-600 to-amber-400 opacity-30"
+                  style={{ width: `${(totalProgress * 100).toFixed(1)}%` }}
+                />
+                <span className="relative z-10 font-black uppercase text-sm text-white tracking-tight">
+                  {levelMap[lv]}
+                </span>
+              </div>
+            ))}
             <p className="text-slate-600 text-[10px] font-bold mt-4 uppercase tracking-[0.2em] opacity-40">
               5단계 미션
             </p>
           </div>
 
-          {/* [우측 패널] 비전 카드 */}
+          {/* [우측 패널] 비전 카드 및 통합 시나리오 제어실 */}
           <div className="w-full md:w-1/2 flex flex-col gap-6 animate-fadeIn h-full justify-center">
-            <div className="bg-[#1A202C]/80 border border-white/10 rounded-[2.5rem] p-8 shadow-2xl relative overflow-hidden min-h-[500px] flex flex-col">
-              <div className="absolute top-0 right-0 p-6 opacity-5 pointer-events-none">
-                <Zap size={150} className="text-white" />
+            <div className="bg-[#1A202C]/80 border border-white/10 rounded-[2.5rem] p-8 shadow-2xl relative overflow-hidden min-h-[600px] flex flex-col">
+              {/* 공통 헤더 */}
+              <div className="mb-6 relative z-10 flex items-center gap-4">
+                <span className="text-5xl">
+                  {activeLevel === 6
+                    ? "👑"
+                    : visions[activeLevel].emoji || "✨"}
+                </span>
+                <div>
+                  <p className="text-[10px] font-black text-amber-500 uppercase tracking-[0.3em]">
+                    {activeLevel === 6
+                      ? "Master Identity"
+                      : `${levelMap[activeLevel]} VISION`}
+                  </p>
+                  <h2 className="text-2xl md:text-3xl font-black text-white italic tracking-tighter">
+                    {activeLevel === 6
+                      ? "APEX BP SYNCHRONIZATION"
+                      : visions[activeLevel].title || "비전을 설정해주세요"}
+                  </h2>
+                </div>
               </div>
-              <div className="mb-6 relative z-10">
-                <div className="flex items-center gap-3 mb-2">
-                  <span className="text-4xl">
-                    {visions[activeLevel].emoji || "✨"}
-                  </span>
-                  <div>
-                    <p className="text-[10px] font-black text-emerald-500 uppercase tracking-widest">
-                      {levelMap[activeLevel]} VISION
-                    </p>
-                    <h2 className="text-2xl md:text-3xl font-black text-white leading-tight">
-                      {visions[activeLevel].title || "비전을 설정해주세요"}
-                    </h2>
+
+              {activeLevel === 6 ? (
+                /* --- Level 6 전용: 통합 AI 시나리오 디스플레이 --- */
+                <div className="flex-grow flex flex-col animate-fadeIn">
+                  <div className="flex justify-between items-center mb-4">
+                    <h4 className="text-[10px] font-black text-slate-500 uppercase tracking-widest">
+                      Master Scenario
+                    </h4>
+                    <button
+                      onClick={handleGenerateBPSScenario}
+                      className="flex items-center gap-2 px-3 py-1.5 bg-amber-600/20 hover:bg-amber-600/40 border border-amber-500/30 rounded-full transition-all group"
+                    >
+                      <Sparkles size={12} className="text-amber-400" />
+                      <span className="text-[9px] font-black text-amber-400 uppercase">
+                        AI SYNC
+                      </span>
+                    </button>
+                  </div>
+                  <textarea
+                    value={visions[6].immersionScript || ""}
+                    onChange={(e) =>
+                      updateVision(6, { immersionScript: e.target.value })
+                    }
+                    placeholder="AI SYNC 버튼을 누르거나 마스터 시나리오를 직접 작성하세요..."
+                    className="flex-grow bg-slate-950/40 rounded-[2rem] p-8 border border-white/5 text-slate-300 leading-[1.8] text-[15px] italic outline-none focus:border-amber-500/30 transition-all resize-none no-scrollbar font-serif"
+                  />
+                  <div className="mt-6 flex flex-wrap gap-2 opacity-50">
+                    {activeTraits.map((t, i) => (
+                      <span
+                        key={i}
+                        className="text-[8px] font-bold text-slate-400 uppercase tracking-widest border border-slate-800 px-2 py-1 rounded-md"
+                      >
+                        #{t}
+                      </span>
+                    ))}
                   </div>
                 </div>
-              </div>
-              <div className="bg-slate-900/50 p-6 rounded-2xl border border-white/5 mb-8 relative z-10 flex-grow-0">
-                <p className="text-sm text-slate-300 italic leading-relaxed">
-                  {visions[activeLevel].immersionScript
-                    ? `"${visions[activeLevel].immersionScript}"`
-                    : "My Lab에서 AI 몰입 시나리오를 생성해보세요."}
-                </p>
-              </div>
-              <div className="flex-grow flex flex-col">
-                <div className="flex justify-between items-end mb-4 border-b border-white/10 pb-2">
-                  <h4 className="text-sm font-black text-white uppercase tracking-widest flex items-center gap-2">
-                    <ListPlus size={16} className="text-amber-500" /> Value
-                    Events
-                  </h4>
-                </div>
-
-                {/* renderHub 내부 VALUE EVENTS 목록 하단에 추가할 코드 예시*/}
-                <div className="space-y-3 overflow-y-auto pr-2 custom-scrollbar max-h-[450px]">
-                  {/* 1. 등록된 항목 리스트 (있을 때만 출력) */}
-                  {visions[activeLevel].events.map((ev) => (
-                    <div
-                      key={ev.id}
-                      className="group bg-slate-800/40 hover:bg-slate-800/80 border border-white/5 p-4 rounded-xl transition-all"
-                    >
-                      <div className="flex justify-between items-start mb-3">
-                        <span className="text-sm font-bold text-slate-200">
-                          {ev.name}
-                        </span>
-                      </div>
-                      <div className="flex items-center justify-between">
+              ) : (
+                /* --- Level 1~5: 기존 가치 이벤트 및 활동 입력창 --- */
+                <div className="flex-grow flex flex-col overflow-hidden">
+                  <div className="bg-slate-900/50 p-6 rounded-2xl border border-white/5 mb-8">
+                    <p className="text-sm text-slate-300 italic leading-relaxed text-center">
+                      {visions[activeLevel].immersionScript ||
+                        "My Lab에서 시나리오를 생성해보세요."}
+                    </p>
+                  </div>
+                  <div className="flex justify-between items-end mb-4 border-b border-white/10 pb-2">
+                    <h4 className="text-sm font-black text-white uppercase tracking-widest flex items-center gap-2">
+                      <ListPlus size={16} className="text-amber-500" /> Value
+                      Events
+                    </h4>
+                  </div>
+                  <div className="space-y-3 overflow-y-auto pr-2 custom-scrollbar max-h-[350px]">
+                    {visions[activeLevel].events.map((ev) => {
+                      const mins = eventDurations[ev.id] || 60;
+                      return (
+                        <div
+                          key={ev.id}
+                          className="bg-slate-800/40 border border-white/5 p-4 rounded-xl flex items-center justify-between transition-all hover:bg-slate-800/60"
+                        >
+                          <span className="text-sm font-bold text-slate-200">
+                            {ev.name}
+                          </span>
+                          <div className="flex items-center gap-3">
+                            <div className="flex items-center gap-2 bg-slate-950 rounded-lg p-1 border border-white/10">
+                              <button
+                                onClick={() =>
+                                  updateSpecificDuration(ev.id, -10)
+                                }
+                                className="w-5 h-5 text-slate-500 hover:text-white font-bold"
+                              >
+                                -
+                              </button>
+                              <span className="text-[10px] font-black text-white w-12 text-center">
+                                {formatDuration(mins)}
+                              </span>
+                              <button
+                                onClick={() =>
+                                  updateSpecificDuration(ev.id, 10)
+                                }
+                                className="w-5 h-5 text-slate-500 hover:text-white font-bold"
+                              >
+                                +
+                              </button>
+                            </div>
+                            <button
+                              onClick={() => handleDepositSubmit(ev.name, mins)}
+                              className="bg-emerald-600 p-2 rounded-lg text-white hover:bg-emerald-500 transition-colors"
+                            >
+                              <Coins size={14} />
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })}
+                    <div className="mt-4 pt-4 border-t border-white/5">
+                      <input
+                        type="text"
+                        value={customTask}
+                        onChange={(e) => setCustomTask(e.target.value)}
+                        placeholder="새로운 활동 직접 입력..."
+                        className="w-full bg-transparent border-b border-slate-700 p-2 text-sm text-slate-300 outline-none focus:border-amber-500 mb-3"
+                      />
+                      <div className="flex justify-between items-center">
                         <div className="flex items-center gap-2 bg-slate-950 rounded-lg p-1 border border-white/10">
                           <button
-                            onClick={() =>
-                              setDuration(Math.max(0.5, duration - 0.5))
-                            }
-                            className="w-6 h-6 flex items-center justify-center text-slate-400 font-bold text-xs"
+                            onClick={() => updateSpecificDuration("quick", -10)}
+                            className="w-5 h-5 text-slate-500"
                           >
                             -
                           </button>
-                          <span className="text-xs font-black text-white w-8 text-center">
-                            {duration}h
+                          <span className="text-[10px] text-white w-12 text-center">
+                            {formatDuration(eventDurations["quick"] || 60)}
                           </span>
                           <button
-                            onClick={() => setDuration(duration + 0.5)}
-                            className="w-6 h-6 flex items-center justify-center text-slate-400 font-bold text-xs"
+                            onClick={() => updateSpecificDuration("quick", 10)}
+                            className="w-5 h-5 text-slate-500"
                           >
                             +
                           </button>
                         </div>
                         <button
-                          onClick={() => handleDepositSubmit(ev.name)}
-                          className="bg-emerald-600 hover:bg-emerald-500 text-white text-[10px] font-black px-4 py-2 rounded-lg transition-all flex items-center gap-2"
+                          onClick={() => {
+                            if (!customTask.trim()) return;
+                            handleDepositSubmit(
+                              customTask,
+                              eventDurations["quick"] || 60
+                            );
+                            setCustomTask("");
+                          }}
+                          className="bg-amber-600/20 text-amber-500 text-[10px] font-black px-4 py-2 rounded-lg border border-amber-500/20 uppercase tracking-widest"
                         >
-                          <Coins size={12} /> Deposit
+                          Quick Deposit
                         </button>
                       </div>
-                    </div>
-                  ))}
-
-                  {/* 2. 새로운 활동 직접 입력 (경계선 삭제 및 간격 조정) */}
-                  {/* [수정] pt-4와 border-t를 삭제하여 요청하신 대로 줄을 없앴습니다. */}
-                  <div className="mt-2 flex flex-col gap-3">
-                    <input
-                      type="text"
-                      value={customTask}
-                      onChange={(e) => setCustomTask(e.target.value)}
-                      placeholder="새로운 활동 직접 입력..."
-                      className="bg-transparent border-b border-slate-700 p-2 text-sm text-slate-300 outline-none focus:border-amber-500 transition-colors placeholder:text-slate-600"
-                    />
-                    <div className="flex items-center justify-between px-1">
-                      {/* 직접 입력용 시간 조절 */}
-                      <div className="flex items-center gap-2 bg-slate-950/50 rounded-lg p-1 border border-white/5">
-                        <button
-                          onClick={() =>
-                            setDuration(Math.max(0.5, duration - 0.5))
-                          }
-                          className="w-6 h-6 text-slate-500 hover:text-white font-bold text-xs"
-                        >
-                          -
-                        </button>
-                        <span className="text-[10px] font-black text-slate-300 w-8 text-center">
-                          {duration}h
-                        </span>
-                        <button
-                          onClick={() => setDuration(duration + 0.5)}
-                          className="w-6 h-6 text-slate-500 hover:text-white font-bold text-xs"
-                        >
-                          +
-                        </button>
-                      </div>
-                      {/* 작고 세련된 Quick Deposit 버튼 */}
-                      <button
-                        onClick={() => {
-                          if (!customTask.trim())
-                            return alert("활동 내용을 입력해주세요.");
-                          handleDepositSubmit(customTask);
-                          setCustomTask("");
-                        }}
-                        className="bg-amber-600/20 hover:bg-amber-600/40 text-amber-500 text-[10px] font-black px-4 py-2 rounded-lg transition-all flex items-center gap-2 border border-amber-500/20"
-                      >
-                        <Coins size={12} /> Quick Deposit
-                      </button>
                     </div>
                   </div>
-
-                  {/* 3. 안내 문구 (목록이 0개일 때만 하단에 출력) */}
-                  {visions[activeLevel].events.length === 0 && (
-                    <div className="text-center py-6 text-slate-500 text-[11px] leading-relaxed italic animate-fadeIn">
-                      등록된 Value Event 가 없습니다.
-                      <br />
-                      My Lab 에서 행동 목록을 추가하거나,
-                      <br />
-                      위에서 새로운 활동을 직접 입력하세요.
-                    </div>
-                  )}
                 </div>
-              </div>
+              )}
             </div>
           </div>
         </div>
@@ -2943,11 +2951,8 @@ const App = () => {
 
         {/* 2. 시스템 정보 (내비게이션 바 아래로 이동) */}
         <div className="text-center space-y-1.5 transition-all duration-500">
-          <p className="text-[8px] text-slate-500/60 font-black uppercase tracking-[0.4em] leading-none">
-            © 2026 THE PULSE // IDENTITY SYNCHRONIZATION TERMINAL
-          </p>
           <p className="text-[7px] text-slate-400/50 font-bold uppercase tracking-[0.3em] leading-none">
-            ACCESS POINT: THEPULSE.MILESTONES.TODAY
+            © 2026 THE PULSE // ACCESS POINT: THEPULSE.MILESTONES.TODAY
           </p>
         </div>
       </footer>
