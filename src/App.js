@@ -1286,28 +1286,26 @@ ${visionSummary}
     };
     const showOverlay = !user || (user && !signedDate);
 
-    return (
+   return (
       <div className="relative w-full h-full flex-grow flex flex-col overflow-y-auto no-scrollbar pb-24">
-        {/* 시스템 오버레이 (서약 전) */}
-        
-            /* renderHub 내부의 {showOverlay && (...)} 부분을 이 코드로 교체하세요 */
-{showOverlay && (
-  <div style={overlayStyle} className="bg-[#0A0F1E]/95 backdrop-blur-2xl border border-amber-500/50 p-10 rounded-[3rem] text-center shadow-[0_0_80px_rgba(245,158,11,0.4)] animate-fadeIn">
-    <ShieldCheck size={32} className="text-slate-600 mb-6 mx-auto" />
-    <h3 className="text-xl font-black text-white uppercase italic mb-2 tracking-tighter">
-      System Preview
-    </h3>
-    <p className="text-slate-400 text-[11px] mb-8 leading-relaxed">
-      서약서에 서명하면 모든 기능이 활성화됩니다.
-    </p>
-    <button
-      onClick={() => setCurrentView("contract")}
-      className="bg-amber-600 hover:bg-amber-500 text-white px-8 py-4 rounded-2xl font-black text-[10px] uppercase flex items-center gap-3 mx-auto transition-all active:scale-95 shadow-lg"
-    >
-      <PenTool size={14} /> Sign Agreement
-    </button>
-  </div>
-)}
+        {/* 시스템 오버레이 - 한 겹으로 통합 및 위치 고정 */}
+        {showOverlay && (
+          <div style={overlayStyle} className="bg-[#0A0F1E]/95 backdrop-blur-2xl border border-amber-500/50 p-10 rounded-[3rem] text-center shadow-[0_0_80px_rgba(245,158,11,0.4)] animate-fadeIn">
+            <ShieldCheck size={32} className="text-slate-600 mb-6 mx-auto" />
+            <h3 className="text-xl font-black text-white uppercase italic mb-2 tracking-tighter">
+              System Preview
+            </h3>
+            <p className="text-slate-400 text-[11px] mb-8 leading-relaxed">
+              서약서에 서명하면 모든 기능이 활성화됩니다.
+            </p>
+            <button
+              onClick={() => setCurrentView("contract")}
+              className="bg-amber-600 hover:bg-amber-500 text-white px-8 py-4 rounded-2xl font-black text-[10px] uppercase flex items-center gap-3 mx-auto transition-all active:scale-95 shadow-lg"
+            >
+              <PenTool size={14} /> Sign Agreement
+            </button>
+          </div>
+        )}
             
 
         <div
