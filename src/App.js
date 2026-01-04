@@ -2991,5 +2991,15 @@ ${visionSummary}
     </div>
   );
 };
-
+/* App.js 맨 아래 export default App; 바로 위에 붙여넣으세요 */
+const overlayStyle = {
+  position: 'fixed',
+  bottom: '100px', /* 하단 바 높이(약 80px)보다 조금 위 */
+  left: '50%',
+  transform: 'translateX(-50%)',
+  width: '90%',
+  maxWidth: '420px',
+  zIndex: 2000,
+  animation: 'fadeIn 0.5s ease-out'
+};
 export default App;
