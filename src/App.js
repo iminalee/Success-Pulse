@@ -299,17 +299,24 @@ ${visionSummary}
   const [hasAiAccess, setHasAiAccess] = useState(false);
 
   // [핵심 1] 로그인 체크 및 데이터 불러오기 (Load)
+  // [핵심 1] 로그인 체크 및 데이터 불러오기 (Load) + 비밀번호 복구 감지
   useEffect(() => {
+    // 1. 주소창(URL) 분석: 비밀번호 재설정 링크인지 먼저 확인
+    // (Supabase는 링크 뒤에 #type=recovery 라는 표식을 붙여서 보냅니다)
+    const hash = window.location.hash;
+    if (hash && hash.includes("type=recovery")) {
+      setIsRecoveryMode(true);
+    }
+
     const initSession = async () => {
       setLoading(true);
-      // 1. 세션 확인
       const {
         data: { session },
       } = await supabase.auth.getSession();
       const currentUser = session?.user;
       setUser(currentUser);
 
-      // 2. 로그인 상태라면 DB에서 데이터 가져오기
+      // 데이터 불러오기 로직 (기존과 동일)
       if (currentUser) {
         const { data, error } = await supabase
           .from("pulse_data")
@@ -331,10 +338,10 @@ ${visionSummary}
           if (data.trash_visions) setTrashVisions(data.trash_visions);
           if (data.signature) setSignature(data.signature);
           if (data.signed_date) setSignedDate(data.signed_date);
+
+          // 권한 설정 불러오기
           setHasEditAccess(data.has_edit_access || false);
           setHasAiAccess(data.has_ai_access || false);
-        } else if (error && error.code !== "PGRST116") {
-          console.error("데이터 로딩 실패:", error);
         }
       }
       setLoading(false);
@@ -342,17 +349,19 @@ ${visionSummary}
 
     initSession();
 
-    // 3. 실시간 로그인 상태 감지
+    // 2. 실시간 상태 감지 (이벤트 리스너)
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
+    } = supabase.auth.onAuthStateChange((event, session) => {
       setUser(session?.user ?? null);
+
+      // [중요] Supabase가 알려주는 '복구 모드' 이벤트 감지
       if (event === "PASSWORD_RECOVERY") {
         setIsRecoveryMode(true);
       }
 
       if (!session) {
-        setLoading(false); // 로그아웃 시 로딩 해제
+        setLoading(false);
       }
     });
 
