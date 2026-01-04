@@ -287,6 +287,19 @@ ${visionSummary}
   const chartRef = useRef(null);
   const chartInstance = useRef(null);
 
+
+// 1. 현재 접속한 유저 이메일 (로그인 시스템에서 가져온다고 가정)
+const currentUserEmail = "접속한유저@gmail.com"; 
+const ADMIN_EMAIL = "5milestones.today@gmail.com";
+
+// 2. [수정 권한] - 입력창 등을 잠글지 여부
+// 예: 관리자가 아니면 잠금(true)
+const isLocked = (currentUserEmail !== ADMIN_EMAIL);
+
+// 3. [AI 접근 권한] - AI 생성 버튼 활성화 여부
+// 예: 관리자만 AI 기능을 사용할 수 있음(true)
+const hasAiAccess = (currentUserEmail === ADMIN_EMAIL);
+
   // [핵심 1] 로그인 체크 및 데이터 불러오기 (Load)
   useEffect(() => {
     const initSession = async () => {
@@ -967,7 +980,8 @@ ${visionSummary}
                     </p>
                     <button
                       onClick={generateImmersionScript}
-                      disabled={aiLoading}
+            // [수정 포인트] aiLoading이 true이거나, hasAiAccess가 false이면 비활성화
+                      disabled={aiLoading || !hasAiAccess}
                       className="bg-amber-600 hover:bg-amber-500 text-white p-3 rounded-xl active:scale-90 shadow-xl transition-all"
                     >
                       {aiLoading ? (
@@ -1153,6 +1167,7 @@ ${visionSummary}
                           />
                           <input
                             type="range"
+                            disabled={isLocked} // isLocked가 true이면 입력을 못 함
                             min="0"
                             max="100"
                             value={value}
@@ -1202,6 +1217,7 @@ ${visionSummary}
                         </span>
                         <input
                           type="number"
+                          disabled={isLocked} // isLocked가 true이면 입력을 못 함
                           value={score}
                           onChange={(e) =>
                             setTciProfile({
@@ -1295,9 +1311,12 @@ ${visionSummary}
             <h3 className="text-xl font-black text-white uppercase italic mb-2 tracking-tighter">
               System Preview
             </h3>
-            <p className="text-slate-400 text-[11px] mb-8 leading-relaxed">
-              서약서에 서명하면 모든 기능이 활성화됩니다.
-            </p>
+/* System Preview 박스 내부 수정 예시 */
+<p className="text-slate-400 text-[11px] mb-6 leading-relaxed">
+  현재 정체성 동기화 시스템은 <b>베타 테스터</b>에 한해 선별 운영 중입니다.<br/>
+  모든 기능을 활성화하려면 아래 메일로 문의주세요.<br/>
+  <span className="text-amber-500 font-bold">5milestones.today@gmail.com</span>
+</p>
             <button
               onClick={() => setCurrentView("contract")}
               className="bg-amber-600 hover:bg-amber-500 text-white px-8 py-4 rounded-2xl font-black text-[10px] uppercase flex items-center gap-3 mx-auto transition-all active:scale-95 shadow-lg"
