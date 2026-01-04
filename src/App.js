@@ -182,6 +182,8 @@ ${visionSummary}
   const [password, setPassword] = useState(""); // 추가
   const [loading, setLoading] = useState(false);
   const [customTask, setCustomTask] = useState("");
+  // 기존 상태 변수들 근처에 추가하세요
+  const [isRecoveryMode, setIsRecoveryMode] = useState(false);
 
   const [currency, setCurrency] = useState("₩");
   const [userName, setUserName] = useState("");
@@ -345,6 +347,10 @@ ${visionSummary}
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
+      if (event === "PASSWORD_RECOVERY") {
+        setIsRecoveryMode(true);
+      }
+
       if (!session) {
         setLoading(false); // 로그아웃 시 로딩 해제
       }
@@ -2705,7 +2711,16 @@ ${visionSummary}
       </div>
     </div>
   );
-
+  // ▼▼▼ [추가] 복구 모드일 때 변경창만 보여주기 ▼▼▼
+  if (isRecoveryMode) {
+    return (
+      <div className="min-h-screen bg-slate-950 flex items-center justify-center p-4">
+        {/* 아까 만들어드린 ResetPasswordUI 컴포넌트 */}
+        <ResetPasswordUI />
+      </div>
+    );
+  }
+  // ▲▲▲ 추가 끝 ▲▲▲
   return (
     <div className="min-h-screen bg-slate-950 text-slate-200 p-4 md:p-10 font-sans overflow-hidden flex flex-col selection:bg-amber-500/30">
       <style>{`@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css'); * { font-family: 'Pretendard', sans-serif; letter-spacing: -0.02em; } .animate-fadeIn { animation: fadeIn 0.8s ease-out; } .animate-spin-slow { animation: spin 20s linear infinite; } @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } } @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }`}</style>
