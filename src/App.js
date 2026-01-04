@@ -37,20 +37,7 @@ import {
 import { createClient } from "@supabase/supabase-js";
 
 // 1. Supabase 연결
-const supabaseUrl = "https://ihhfgoqpsubjdqlytzvs.supabase.co";
-const supabaseAnonKey =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImloaGZnb3Fwc3ViamRxbHl0enZzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjcxMDYxMDEsImV4cCI6MjA4MjY4MjEwMX0.1ZtWo4LiiOOJIFyKyvhPNXFwrvUgGeMTKTNp39kz61M";
-
-// [수정됨] 로그인 유지 설정 추가
-export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
-  auth: {
-    persistSession: true, // 세션을 로컬 스토리지에 강제로 저장
-    storageKey: "pulse-auth-token", // 고유 키 이름 설정 (충돌 방지)
-    storage: window.localStorage, // 웹 브라우저 저장소 사용 명시
-    autoRefreshToken: true, // 토큰 자동 갱신
-    detectSessionInUrl: true,
-  },
-});
+import { supabase } from "./supabaseClient";
 
 // 2. 유틸리티
 const AutoTextarea = ({
@@ -192,6 +179,7 @@ ${visionSummary}
   // 상태 관리 (DB 동기화용)
   const [user, setUser] = useState(null);
   const [email, setEmail] = useState("");
+  const [password, setPassword] = useState(""); // 추가
   const [loading, setLoading] = useState(false);
   const [customTask, setCustomTask] = useState("");
 
@@ -302,56 +290,57 @@ ${visionSummary}
   // [핵심 1] 로그인 체크 및 데이터 불러오기 (Load)
   useEffect(() => {
     const initSession = async () => {
+      setLoading(true);
+      // 1. 세션 확인
       const {
         data: { session },
       } = await supabase.auth.getSession();
-      if (session?.user) {
-        setUser(session.user);
-        fetchData(session.user.id);
+      const currentUser = session?.user;
+      setUser(currentUser);
+
+      // 2. 로그인 상태라면 DB에서 데이터 가져오기
+      if (currentUser) {
+        const { data, error } = await supabase
+          .from("pulse_data")
+          .select("*")
+          .eq("id", currentUser.id)
+          .single();
+
+        if (data) {
+          if (data.user_name) setUserName(data.user_name);
+          if (data.currency) setCurrency(data.currency);
+          if (data.annual_income) setAnnualIncome(data.annual_income);
+          if (data.target_date) setTargetDate(data.target_date);
+          if (data.ledger) setLedger(data.ledger);
+          if (data.visions) setVisions(data.visions);
+          if (data.bps_traits) setBpsTraits(data.bps_traits);
+          if (data.vak_profile) setVakProfile(data.vak_profile);
+          if (data.tci_profile) setTciProfile(data.tci_profile);
+          if (data.archived_visions) setArchivedVisions(data.archived_visions);
+          if (data.trash_visions) setTrashVisions(data.trash_visions);
+          if (data.signature) setSignature(data.signature);
+          if (data.signed_date) setSignedDate(data.signed_date);
+        } else if (error && error.code !== "PGRST116") {
+          console.error("데이터 로딩 실패:", error);
+        }
       }
+      setLoading(false);
     };
+
     initSession();
 
+    // 3. 실시간 로그인 상태 감지
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (session?.user) {
-        setUser(session.user);
-        fetchData(session.user.id);
-      } else {
-        setUser(null);
+      setUser(session?.user ?? null);
+      if (!session) {
+        setLoading(false); // 로그아웃 시 로딩 해제
       }
     });
+
     return () => subscription.unsubscribe();
   }, []);
-
-  const fetchData = async (userId) => {
-    setLoading(true);
-    const { data, error } = await supabase
-      .from("pulse_data")
-      .select("*")
-      .eq("id", userId)
-      .single();
-
-    if (error && error.code !== "PGRST116") {
-      console.error("데이터 로딩 실패:", error);
-    } else if (data) {
-      if (data.user_name) setUserName(data.user_name);
-      if (data.currency) setCurrency(data.currency);
-      if (data.annual_income) setAnnualIncome(data.annual_income);
-      if (data.target_date) setTargetDate(data.target_date);
-      if (data.ledger) setLedger(data.ledger);
-      if (data.visions) setVisions(data.visions);
-      if (data.bps_traits) setBpsTraits(data.bps_traits);
-      if (data.vak_profile) setVakProfile(data.vak_profile);
-      if (data.tci_profile) setTciProfile(data.tci_profile);
-      if (data.archived_visions) setArchivedVisions(data.archived_visions);
-      if (data.trash_visions) setTrashVisions(data.trash_visions);
-      if (data.signature) setSignature(data.signature);
-      if (data.signed_date) setSignedDate(data.signed_date);
-    }
-    setLoading(false);
-  };
 
   // [핵심 2] 데이터 자동 저장 (Auto Save)
   useEffect(() => {
@@ -482,59 +471,33 @@ ${visionSummary}
     }
   };
 
-  // 1. 메일 보내기 함수 (수정버전)
-  const handleLogin = async (email) => {
-    if (!email) return alert("이메일을 입력해 주세요!");
-    // [수정] ★ 여기가 핵심입니다! 기존에 입력된 OTP를 초기화합니다.
-    setOtp("");
+  // 1. 메일 보내기 함수 (수정버전)// [수정됨] 이메일 + 비밀번호 회원가입 함수
+  const handleSignUp = async () => {
+    if (!email || !password)
+      return alert("이메일과 비밀번호를 모두 입력해주세요.");
     setLoading(true);
-
-    try {
-      const { error } = await supabase.auth.signInWithOtp({
-        email: email,
-        options: {
-          shouldCreateUser: true, // 신규 유저면 회원가입 허용
-        },
-      });
-
-      if (error) {
-        // 에러가 나면 여기서 멈춤 -> 입력칸 안 생김
-        console.error("로그인 에러:", error);
-        alert("❌ 메일 전송 실패: " + error.message);
-      } else {
-        // 성공해야만 이 줄이 실행됨 -> 입력칸 생김!
-        setIsOtpSent(true);
-        alert(
-          "✅ 인증번호가 발송되었습니다! 메일함의 숫자 8자리를 확인하세요."
-        );
-      }
-    } catch (err) {
-      alert("시스템 에러: " + err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // 2. 인증번호 확인 함수 (새로 추가됨!)
-  const handleVerifyOtp = async () => {
-    if (!otp) return alert("인증번호 6자리를 입력해주세요!");
-    setLoading(true);
-    const {
-      data: { session },
-      error,
-    } = await supabase.auth.verifyOtp({
-      email: email,
-      token: otp,
-      type: "email",
+    const { error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: { data: { user_name: userName } },
     });
     setLoading(false);
+    if (error) alert("회원가입 실패: " + error.message);
+    else alert("회원가입 성공! 이제 로그인을 진행하세요.");
+  };
 
-    if (error) {
-      alert("인증번호가 틀렸거나 만료되었습니다. 다시 시도해주세요.");
-    } else {
-      // 성공하면 알아서 로그인 됨 (useEffect가 감지함)
-      setIsOtpSent(false); // 입력창 닫기
-    }
+  // 2. 인증번호 확인 함수 (새로 추가됨!)// [수정됨] 이메일 + 비밀번호 로그인 함수
+  // 2. 로그인 함수 (기존 handleVerifyOtp 등 대체)
+  const handleSignIn = async () => {
+    if (!email || !password) return alert("이메일과 비밀번호를 입력해주세요.");
+    setLoading(true);
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+    setLoading(false);
+    if (error) alert("로그인 실패: " + error.message);
+    // 성공 시 useEffect가 세션을 감지하여 자동으로 처리합니다.
   };
 
   const fNum = (n) => Math.floor(n).toLocaleString();
@@ -832,80 +795,63 @@ ${visionSummary}
                 ) : (
                   <div className="flex flex-col gap-3 w-full animate-fadeIn">
                     {/* 1단계: 이메일 입력 */}
-                    {!isOtpSent ? (
-                      <>
-                        <input
-                          value={userName}
-                          onChange={(e) => setUserName(e.target.value)}
-                          placeholder="이름(닉네임)을 입력하세요"
-                          className="w-full bg-slate-900/80 border border-white/10 rounded-2xl p-4 text-white outline-none focus:ring-2 focus:ring-amber-500/50"
-                        />
-                        <input
-                          type="email"
-                          value={email}
-                          onChange={(e) => setEmail(e.target.value)}
-                          placeholder="이메일을 입력하세요 (ID로 사용됨)"
-                          className="w-full bg-slate-900/80 border border-white/10 rounded-2xl p-4 text-white outline-none focus:ring-2 focus:ring-blue-500/50"
-                        />
+                    <>
+                      {/* 이름 입력 */}
+                      <input
+                        value={userName}
+                        onChange={(e) => setUserName(e.target.value)}
+                        placeholder="이름(닉네임)을 입력하세요"
+                        className="w-full bg-slate-900/80 border border-white/10 rounded-2xl p-4 text-white outline-none focus:ring-2 focus:ring-amber-500/50"
+                      />
+                      {/* 이메일 입력 */}
+                      <input
+                        type="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        placeholder="이메일 (ID)"
+                        className="w-full bg-slate-900/80 border border-white/10 rounded-2xl p-4 text-white outline-none focus:ring-2 focus:ring-blue-500/50"
+                      />
+                      {/* [추가됨] 비밀번호 입력 */}
+                      <input
+                        type="password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        placeholder="비밀번호 (6자리 이상)"
+                        className="w-full bg-slate-900/80 border border-white/10 rounded-2xl p-4 text-white outline-none focus:ring-2 focus:ring-emerald-500/50"
+                      />
+                      {/* 버튼 그룹 */}
+
+                      <div className="flex gap-2 mt-2">
                         <button
-                          onClick={() => handleLogin(email)}
+                          onClick={handleSignIn}
                           disabled={loading}
-                          className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-4 rounded-2xl transition-all shadow-lg shadow-blue-500/20 disabled:opacity-50"
+                          className="flex-1 bg-slate-700 hover:bg-slate-600 text-white font-bold py-4 rounded-2xl transition-all shadow-lg"
                         >
-                          {/* [수정] 버튼 텍스트 변경 */}
-                          {loading
-                            ? "전송 중..."
-                            : "인증번호 받기 (회원가입/로그인)"}
-                        </button>
-                        {/* [추가] 신규 유저 안내 문구 */}
-                        <p className="text-center text-[10px] text-slate-500 mt-1 leading-relaxed">
-                          * 별도의 회원가입 절차 없이,{" "}
-                          <span className="text-amber-500 font-bold">
-                            인증번호 확인 시 자동으로 가입
-                          </span>
-                          됩니다.
-                        </p>
-                      </>
-                    ) : (
-                      /* 2단계: 인증번호 입력 (메일 보내고 나면 이 화면이 뜸) */
-                      <div className="space-y-3 animate-fadeIn">
-                        <p className="text-xs text-center text-slate-400">
-                          메일함에 도착한{" "}
-                          <span className="text-amber-500 font-bold">
-                            숫자 8자리
-                          </span>
-                          를 입력해주세요.
-                        </p>
-                        <input
-                          type="text"
-                          value={otp}
-                          onChange={(e) => setOtp(e.target.value)}
-                          placeholder="12345678"
-                          className="w-full bg-slate-900/80 border border-amber-500/50 rounded-2xl p-4 text-center text-2xl font-black text-amber-500 tracking-widest outline-none focus:ring-2 focus:ring-amber-500"
-                          maxLength={8}
-                        />
-                        <button
-                          onClick={handleVerifyOtp}
-                          disabled={loading}
-                          className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-4 rounded-2xl transition-all shadow-lg shadow-emerald-500/20 disabled:opacity-50"
-                        >
-                          {loading ? "확인 중..." : "확인 및 로그인 완료"}
+                          {loading ? "..." : "로그인"}
                         </button>
                         <button
-                          onClick={() => {
-                            setIsOtpSent(false);
-                            setOtp(""); // [수정] ★ 뒤로가기 누를 때도 번호 초기화!
-                          }}
-                          className="w-full text-xs text-slate-500 hover:text-white py-2"
+                          onClick={handleSignUp}
+                          disabled={loading}
+                          className="flex-1 bg-amber-600 hover:bg-amber-500 text-white font-bold py-4 rounded-2xl transition-all shadow-lg"
                         >
-                          이메일 다시 입력하기
+                          {loading ? "..." : "회원가입"}
                         </button>
                       </div>
-                    )}
+
+                      {/* [추가] 신규 유저 안내 문구 */}
+                      <p className="text-center text-[10px] text-slate-500 mt-2">
+                        * 처음이신가요? 이메일과 비밀번호를 입력 후{" "}
+                        <span className="text-amber-500 font-bold">
+                          회원가입
+                        </span>
+                        을 눌러주세요.
+                      </p>
+                    </>
                   </div>
                 )}
               </div>
             </div>
+
             <div className="bg-[#2D3748]/30 p-10 rounded-[3rem] border border-white/5 shadow-xl border-t-4 border-amber-500/50">
               <p className="text-[12px] font-black text-amber-500 uppercase tracking-[0.4em] mb-4 flex items-center gap-2">
                 <Star size={16} /> BPS Character Forge
