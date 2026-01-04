@@ -1291,7 +1291,24 @@ ${visionSummary}
         {/* 시스템 오버레이 (서약 전) */}
         {showOverlay && (
           <div style={overlayStyle} className="bg-slate-950/90 backdrop-blur-xl border border-amber-500/50 p-8 rounded-[3rem] text-center shadow-[0_0_80px_rgba(245,158,11,0.4)] animate-fadeIn">
-            <div className="bg-[#0A0F1E] border border-amber-500/50 p-10 rounded-[3rem] text-center shadow-[0_0_80px_rgba(245,158,11,0.4)] max-w-md">
+            /* renderHub 내부의 {showOverlay && (...)} 부분을 이 코드로 교체하세요 */
+{showOverlay && (
+  <div style={overlayStyle} className="bg-[#0A0F1E]/95 backdrop-blur-2xl border border-amber-500/50 p-8 rounded-[3rem] text-center shadow-[0_0_80px_rgba(245,158,11,0.4)] animate-fadeIn">
+    <ShieldCheck size={32} className="text-slate-600 mb-6 mx-auto" />
+    <h3 className="text-xl font-black text-white uppercase italic mb-2 tracking-tighter">
+      System Preview
+    </h3>
+    <p className="text-slate-400 text-[11px] mb-8 leading-relaxed">
+      서약서에 서명하면 모든 기능이 활성화됩니다.
+    </p>
+    <button
+      onClick={() => setCurrentView("contract")}
+      className="bg-amber-600 hover:bg-amber-500 text-white px-8 py-3.5 rounded-2xl font-black text-[10px] uppercase flex items-center gap-3 mx-auto transition-all active:scale-95"
+    >
+      <PenTool size={14} /> Sign Agreement
+    </button>
+  </div>
+)}
               <ShieldCheck size={32} className="text-slate-600 mb-6 mx-auto" />
               <h3 className="text-2xl font-black text-white uppercase italic mb-2">
                 System Preview
@@ -2994,12 +3011,11 @@ ${visionSummary}
 /* App.js 맨 아래 export default App; 바로 위에 붙여넣으세요 */
 const overlayStyle = {
   position: 'fixed',
-  bottom: '100px', /* 하단 바 높이(약 80px)보다 조금 위 */
+  bottom: '100px', /* 하단 바 바로 위에 위치 */
   left: '50%',
   transform: 'translateX(-50%)',
   width: '90%',
-  maxWidth: '420px',
-  zIndex: 2000,
-  animation: 'fadeIn 0.5s ease-out'
+  maxWidth: '400px',
+  zIndex: 2000
 };
 export default App;
