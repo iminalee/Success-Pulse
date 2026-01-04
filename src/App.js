@@ -2279,7 +2279,8 @@ ${visionSummary}
                 자격 검증 및 선택
               </h3>
               <p className="text-stone-300 text-base md:text-lg font-light tracking-wide pl-2 md:pl-4 border-l-2 border-stone-700">
-              현존 자아(Ver.0)가 갈망하는 모든 성취를 이미 완수하여 잠재력을 100% 개화시킨 완성체, 마스터 자아{" "}
+                현존 자아(Ver.0)가 갈망하는 모든 성취를 이미 완수하여 잠재력을
+                100% 개화시킨 완성체, 마스터 자아{" "}
                 <span className="text-stone-100 font-bold italic px-1">
                   Apex BP {userName}
                 </span>
@@ -2378,7 +2379,10 @@ ${visionSummary}
                 에너지 자원 할당
               </h3>
               <p className="text-stone-300 text-base md:text-lg font-light tracking-wide pl-2 md:pl-4 border-l-2 border-stone-700">
-                무의식 원장인{" "}
+              <span className="text-stone-100 font-bold italic px-1">
+                  Apex BP {userName}
+                </span>
+                는 무의식 원장인{" "}
                 <span className="text-stone-100 font-medium">
                   Mental Bank Balance
                 </span>
@@ -2402,7 +2406,10 @@ ${visionSummary}
                 미션 및 보상
               </h3>
               <p className="text-stone-300 text-base md:text-lg font-light tracking-wide pl-2 md:pl-4 border-l-2 border-stone-700">
-                매일 5단계 이내의 핵심 미션을 설정하고, 설정된 목표 날짜({" "}
+              <span className="text-stone-100 font-bold italic px-1">
+                  {userName} ver.0
+                </span>
+                은 매일 5단계 이내의 핵심 미션을 설정하고, 설정된 목표 날짜({" "}
                 <input
                   type="date"
                   value={targetDate}
