@@ -1514,27 +1514,61 @@ ${visionSummary}
             <div className="flex justify-center mb-1 animate-pulse">
               <div className="w-0 h-0 border-l-[30px] border-l-transparent border-r-[30px] border-r-transparent border-b-[40px] border-b-yellow-500 drop-shadow-[0_0_10px_rgba(234,179,8,0.6)]"></div>
             </div>
-            {[5, 4, 3, 2, 1].map((lv) => (
-              <div
-                key={lv}
-                onClick={() => setActiveLevel(lv)}
-                className={`cursor-pointer relative flex items-center justify-center h-[50px] rounded-2xl mb-2 overflow-hidden transition-all border bg-slate-900/50 ${
-                  widthMap[lv]
-                } ${
-                  activeLevel === lv
-                    ? "border-amber-400 ring-2 ring-amber-500/50 scale-105"
-                    : "border-slate-700/50"
-                }`}
-              >
+            {/* ▼▼▼ [수정 완료] 50% 수치 표시 + 황금색 그라데이션 복구 ▼▼▼ */}
+            {[5, 4, 3, 2, 1].map((lv) => {
+              const isConfigured =
+                visions[lv]?.title && visions[lv]?.title !== "";
+              const isActive = lv === activeLevel;
+
+              // 진행률 계산 (전체 자산 대비)
+              const visualPercent = totalProgress * 100;
+              const displayPercent = visualPercent.toFixed(1);
+
+              // [복구] 설정된 경우 화려한 황금색 그라데이션 적용
+              const barBackground = isConfigured
+                ? "bg-gradient-to-r from-amber-600 via-yellow-400 to-amber-600"
+                : "bg-slate-700/50"; // 설정 안됨: 어두운 색
+
+              // [복구] 테두리 및 그림자 스타일
+              const containerStyle = isActive
+                ? "border-amber-400 ring-2 ring-amber-500/50 shadow-[0_0_30px_rgba(245,158,11,0.6)] z-10 scale-105 brightness-110"
+                : isConfigured
+                ? "border-amber-600/30 opacity-90 hover:brightness-110"
+                : "border-slate-700/50 opacity-60 hover:opacity-80";
+
+              return (
                 <div
-                  className="absolute left-0 top-0 h-full bg-gradient-to-r from-amber-600 to-amber-400 opacity-30"
-                  style={{ width: `${(totalProgress * 100).toFixed(1)}%` }}
-                />
-                <span className="relative z-10 font-black uppercase text-sm text-white tracking-tight">
-                  {levelMap[lv]}
-                </span>
-              </div>
-            ))}
+                  key={lv}
+                  onClick={() => setActiveLevel(lv)}
+                  // 역슬래시(\) 제거하여 문법 오류 해결
+                  className={`cursor-pointer relative flex items-center justify-center h-[50px] rounded-2xl mb-2 overflow-hidden transition-all duration-300 border ${widthMap[lv]} ${containerStyle}`}
+                >
+                  {/* 배경 게이지바 */}
+                  <div
+                    className={`absolute left-0 top-0 h-full transition-all duration-1000 ${barBackground}`}
+                    style={{ width: `${displayPercent}%` }}
+                  />
+
+                  {/* 텍스트 내용 (가운데 정렬) */}
+                  <div className="relative z-10 flex flex-col items-center justify-center leading-none">
+                    <span className="font-black uppercase text-sm tracking-tight text-white drop-shadow-md flex items-center gap-2">
+                      {/* 설정된 단계면 이모지 표시 */}
+                      {isConfigured && (
+                        <span className="text-xs">{visions[lv].emoji}</span>
+                      )}
+                      {levelMap[lv]}
+                    </span>
+
+                    {/* [복구] 퍼센트 수치 표시 */}
+                    <span className="text-[10px] font-bold mt-0.5 text-white/90 drop-shadow-md">
+                      {displayPercent}%
+                    </span>
+                  </div>
+                </div>
+              );
+            })}
+            {/* ▲▲▲ [수정 끝] ▲▲▲ */}
+
             <p className="text-slate-600 text-[10px] font-bold mt-4 uppercase tracking-[0.2em] opacity-40">
               5단계 미션
             </p>
