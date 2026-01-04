@@ -372,6 +372,11 @@ ${visionSummary}
     }
 
     const initSession = async () => {
+      if (data.user_name) {
+        setUserName(data.user_name);
+      } else if (currentUser?.user_metadata?.user_name) {
+        setUserName(currentUser.user_metadata.user_name);
+      }
       setLoading(true);
       const {
         data: { session },
