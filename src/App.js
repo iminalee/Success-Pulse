@@ -287,18 +287,14 @@ ${visionSummary}
   const chartRef = useRef(null);
   const chartInstance = useRef(null);
 
+  // 1. 현재 접속한 유저 이메일 (로그인 시스템에서 가져온다고 가정)
+  const currentUserEmail = "접속한유저@gmail.com";
+  const ADMIN_EMAIL = "5milestones.today@gmail.com";
 
-// 1. 현재 접속한 유저 이메일 (로그인 시스템에서 가져온다고 가정)
-const currentUserEmail = "접속한유저@gmail.com"; 
-const ADMIN_EMAIL = "5milestones.today@gmail.com";
-
-// 2. [수정 권한] - 입력창 등을 잠글지 여부
-// 예: 관리자가 아니면 잠금(true)
-const isLocked = (currentUserEmail !== ADMIN_EMAIL);
-
-// 3. [AI 접근 권한] - AI 생성 버튼 활성화 여부
-// 예: 관리자만 AI 기능을 사용할 수 있음(true)
-const hasAiAccess = (currentUserEmail === ADMIN_EMAIL);
+  // 2. [수정 권한] - 입력창 등을 잠글지 여부
+  // 권한 상태 관리 (초기값은 둘 다 false로 닫아둠)
+  const [hasEditAccess, setHasEditAccess] = useState(false);
+  const [hasAiAccess, setHasAiAccess] = useState(false);
 
   // [핵심 1] 로그인 체크 및 데이터 불러오기 (Load)
   useEffect(() => {
@@ -333,6 +329,8 @@ const hasAiAccess = (currentUserEmail === ADMIN_EMAIL);
           if (data.trash_visions) setTrashVisions(data.trash_visions);
           if (data.signature) setSignature(data.signature);
           if (data.signed_date) setSignedDate(data.signed_date);
+          setHasEditAccess(data.has_edit_access || false);
+          setHasAiAccess(data.has_ai_access || false);
         } else if (error && error.code !== "PGRST116") {
           console.error("데이터 로딩 실패:", error);
         }
@@ -980,9 +978,14 @@ const hasAiAccess = (currentUserEmail === ADMIN_EMAIL);
                     </p>
                     <button
                       onClick={generateImmersionScript}
-            // [수정 포인트] aiLoading이 true이거나, hasAiAccess가 false이면 비활성화
+                      // 로딩 중이거나 AI 권한이 없으면 버튼 비활성화
                       disabled={aiLoading || !hasAiAccess}
-                      className="bg-amber-600 hover:bg-amber-500 text-white p-3 rounded-xl active:scale-90 shadow-xl transition-all"
+                      // 템플릿 리터럴 `${ }`을 사용하여 조건부 클래스를 정확히 적용
+                      className={`bg-amber-600 hover:bg-amber-500 text-white p-3 rounded-xl active:scale-90 shadow-xl transition-all ${
+                        !hasAiAccess || aiLoading
+                          ? "opacity-50 cursor-not-allowed"
+                          : ""
+                      }`}
                     >
                       {aiLoading ? (
                         <span className="animate-spin inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full" />
@@ -1167,7 +1170,7 @@ const hasAiAccess = (currentUserEmail === ADMIN_EMAIL);
                           />
                           <input
                             type="range"
-                            disabled={isLocked} // isLocked가 true이면 입력을 못 함
+                            disabled={!hasEditAccess}
                             min="0"
                             max="100"
                             value={value}
@@ -1217,7 +1220,7 @@ const hasAiAccess = (currentUserEmail === ADMIN_EMAIL);
                         </span>
                         <input
                           type="number"
-                          disabled={isLocked} // isLocked가 true이면 입력을 못 함
+                          disabled={!hasEditAccess}
                           value={score}
                           onChange={(e) =>
                             setTciProfile({
@@ -1302,21 +1305,29 @@ const hasAiAccess = (currentUserEmail === ADMIN_EMAIL);
     };
     const showOverlay = !user || (user && !signedDate);
 
-   return (
+    return (
       <div className="relative w-full h-full flex-grow flex flex-col overflow-y-auto no-scrollbar pb-24">
         {/* 시스템 오버레이 - 한 겹으로 통합 및 위치 고정 */}
         {showOverlay && (
-          <div style={overlayStyle} className="bg-[#0A0F1E]/95 backdrop-blur-2xl border border-amber-500/50 p-10 rounded-[3rem] text-center shadow-[0_0_80px_rgba(245,158,11,0.4)] animate-fadeIn">
+          <div
+            style={overlayStyle}
+            className="bg-[#0A0F1E]/95 backdrop-blur-2xl border border-amber-500/50 p-10 rounded-[3rem] text-center shadow-[0_0_80px_rgba(245,158,11,0.4)] animate-fadeIn"
+          >
             <ShieldCheck size={32} className="text-slate-600 mb-6 mx-auto" />
             <h3 className="text-xl font-black text-white uppercase italic mb-2 tracking-tighter">
               System Preview
             </h3>
-/* System Preview 박스 내부 수정 예시 */
-<p className="text-slate-400 text-[11px] mb-6 leading-relaxed">
-  현재 정체성 동기화 시스템은 <b>베타 테스터</b>에 한해 선별 운영 중입니다.<br/>
-  모든 기능을 활성화하려면 아래 메일로 문의주세요.<br/>
-  <span className="text-amber-500 font-bold">5milestones.today@gmail.com</span>
-</p>
+
+            <p className="text-slate-400 text-[11px] mb-6 leading-relaxed">
+              현재 정체성 동기화 시스템은 <b>베타 테스터</b>에 한해 선별 운영
+              중입니다.
+              <br />
+              모든 기능을 활성화하려면 아래 메일로 문의주세요.
+              <br />
+              <span className="text-amber-500 font-bold">
+                5milestones.today@gmail.com
+              </span>
+            </p>
             <button
               onClick={() => setCurrentView("contract")}
               className="bg-amber-600 hover:bg-amber-500 text-white px-8 py-4 rounded-2xl font-black text-[10px] uppercase flex items-center gap-3 mx-auto transition-all active:scale-95 shadow-lg"
@@ -1325,7 +1336,6 @@ const hasAiAccess = (currentUserEmail === ADMIN_EMAIL);
             </button>
           </div>
         )}
-            
 
         <div
           className={`flex flex-col md:flex-row items-center justify-center w-full h-full px-2 md:px-10 gap-8 transition-all duration-1000 ${
@@ -3011,12 +3021,12 @@ const hasAiAccess = (currentUserEmail === ADMIN_EMAIL);
 };
 /* App.js 맨 아래 export default App; 바로 위에 붙여넣으세요 */
 const overlayStyle = {
-  position: 'fixed',
-  bottom: '140px', /* 하단 바 바로 위에 위치 */
-  left: '50%',
-  transform: 'translateX(-50%)',
-  width: '90%',
-  maxWidth: '400px',
-  zIndex: 2000
+  position: "fixed",
+  bottom: "140px" /* 하단 바 바로 위에 위치 */,
+  left: "50%",
+  transform: "translateX(-50%)",
+  width: "90%",
+  maxWidth: "400px",
+  zIndex: 2000,
 };
 export default App;
