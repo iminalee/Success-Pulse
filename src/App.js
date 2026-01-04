@@ -1289,11 +1289,10 @@ ${visionSummary}
     return (
       <div className="relative w-full h-full flex-grow flex flex-col overflow-y-auto no-scrollbar pb-24">
         {/* 시스템 오버레이 (서약 전) */}
-        {showOverlay && (
-          <div style={overlayStyle} className="bg-slate-950/90 backdrop-blur-xl border border-amber-500/50 p-8 rounded-[3rem] text-center shadow-[0_0_80px_rgba(245,158,11,0.4)] animate-fadeIn">
+        
             /* renderHub 내부의 {showOverlay && (...)} 부분을 이 코드로 교체하세요 */
 {showOverlay && (
-  <div style={overlayStyle} className="bg-[#0A0F1E]/95 backdrop-blur-2xl border border-amber-500/50 p-8 rounded-[3rem] text-center shadow-[0_0_80px_rgba(245,158,11,0.4)] animate-fadeIn">
+  <div style={overlayStyle} className="bg-[#0A0F1E]/95 backdrop-blur-2xl border border-amber-500/50 p-10 rounded-[3rem] text-center shadow-[0_0_80px_rgba(245,158,11,0.4)] animate-fadeIn">
     <ShieldCheck size={32} className="text-slate-600 mb-6 mx-auto" />
     <h3 className="text-xl font-black text-white uppercase italic mb-2 tracking-tighter">
       System Preview
@@ -1303,28 +1302,13 @@ ${visionSummary}
     </p>
     <button
       onClick={() => setCurrentView("contract")}
-      className="bg-amber-600 hover:bg-amber-500 text-white px-8 py-3.5 rounded-2xl font-black text-[10px] uppercase flex items-center gap-3 mx-auto transition-all active:scale-95"
+      className="bg-amber-600 hover:bg-amber-500 text-white px-8 py-4 rounded-2xl font-black text-[10px] uppercase flex items-center gap-3 mx-auto transition-all active:scale-95 shadow-lg"
     >
       <PenTool size={14} /> Sign Agreement
     </button>
   </div>
 )}
-              <ShieldCheck size={32} className="text-slate-600 mb-6 mx-auto" />
-              <h3 className="text-2xl font-black text-white uppercase italic mb-2">
-                System Preview
-              </h3>
-              <p className="text-slate-400 text-sm mb-8">
-                서약서에 서명하면 모든 기능이 활성화됩니다.
-              </p>
-              <button
-                onClick={() => setCurrentView("contract")}
-                className="bg-amber-600 hover:bg-amber-500 text-white px-8 py-4 rounded-2xl font-black text-xs uppercase flex items-center gap-3 mx-auto"
-              >
-                <PenTool size={14} /> Sign Agreement
-              </button>
-            </div>
-          </div>
-        )}
+            
 
         <div
           className={`flex flex-col md:flex-row items-center justify-center w-full h-full px-2 md:px-10 gap-8 transition-all duration-1000 ${
@@ -3011,7 +2995,7 @@ ${visionSummary}
 /* App.js 맨 아래 export default App; 바로 위에 붙여넣으세요 */
 const overlayStyle = {
   position: 'fixed',
-  bottom: '100px', /* 하단 바 바로 위에 위치 */
+  bottom: '140px', /* 하단 바 바로 위에 위치 */
   left: '50%',
   transform: 'translateX(-50%)',
   width: '90%',
