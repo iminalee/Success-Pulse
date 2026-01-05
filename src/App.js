@@ -424,7 +424,7 @@ ${visionSummary}
         const { data, error } = await supabase
           .from("pulse_data")
           .select("*")
-          .eq("id", currentUser.id)
+          .eq(""user_id", currentUser.id)
           .single();
 
         // 3. DB 데이터를 가져온 '이후'에 로직을 실행해야 에러가 안 납니다.
@@ -441,7 +441,7 @@ ${visionSummary}
             supabase
               .from("pulse_data")
               .update({ user_name: nameFromMeta })
-              .eq("id", currentUser.id)
+              .eq("user_id",currentUser.id)
               .then(({ error }) => {
                 if (error) console.error("이름 DB 저장 실패:", error);
                 else console.log("이름 DB 동기화 완료:", nameFromMeta);
@@ -497,7 +497,7 @@ ${visionSummary}
     if (!user) return;
     const timer = setTimeout(async () => {
       const updates = {
-        id: user.id,
+        user_id: user.id,
         user_name: userName,
         currency,
         annual_income: annualIncome,
@@ -691,7 +691,7 @@ ${visionSummary}
   const handleFactoryReset = async () => {
     if (window.confirm("초기화하시겠습니까? DB의 모든 데이터가 삭제됩니다.")) {
       if (user) {
-        await supabase.from("pulse_data").delete().eq("id", user.id);
+        await supabase.from("pulse_data").delete().eq("user_id", user.id);
       }
       window.location.reload();
     }
@@ -707,7 +707,7 @@ ${visionSummary}
       try {
         setLoading(true);
         // 1. 데이터 삭제
-        await supabase.from("pulse_data").delete().eq("id", user.id);
+        await supabase.from("pulse_data").delete().eq("user_id", user.id);
 
         // 2. 계정 삭제 (아까 만든 SQL 함수 실행)
         const { error } = await supabase.rpc("delete_user");
