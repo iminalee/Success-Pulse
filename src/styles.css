@@ -12,7 +12,7 @@
 .icon-glow {
   filter: drop-shadow(0px 0px 2px rgba(255, 255, 255, 0.8));
 }
-/* styles.css 파일 맨 아래에 있는지 확인 */
+/* 아이콘 그림자 효과 */
 .emoji-shadow {
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5); /* 그림자 진하게 */
+  filter: drop-shadow(0px 0px 5px rgba(255, 255, 255, 0.6));
 }
