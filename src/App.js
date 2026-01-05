@@ -1104,7 +1104,7 @@ ${visionSummary}
               <div className="space-y-6 mb-10">
                 <div className="flex gap-4">
                   <input
-                    value={visions[activeLevel].emoji}
+                    value={visions[activeLevel]?.emoji || ""}
                     onChange={(e) =>
                       updateVision(activeLevel, { emoji: e.target.value })
                     }
@@ -1387,7 +1387,9 @@ ${visionSummary}
               </div>
               <div className="relative z-10 flex flex-col gap-4">
                 {["NS", "HA", "RD", "P", "SD", "C", "ST"].map((key) => {
-                  const score = Number(tciProfile[key.toLowerCase()]?.score || 0);
+                  const score = Number(
+                    tciProfile[key.toLowerCase()]?.score || 0
+                  );
                   const isPositive = score >= 50;
                   const barWidth = Math.abs(score - 50);
                   const barColor = greenGroup.includes(key.toLowerCase())
