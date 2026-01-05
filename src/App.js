@@ -1638,7 +1638,7 @@ ${visionSummary}
                   <h2 className="text-2xl md:text-3xl font-black text-white italic tracking-tighter">
                     {activeLevel === 6
                       ? "APEX BP SYNCHRONIZATION"
-                      : visions[activeLevel].title || "비전을 설정해주세요"}
+                      : visions[activeLevel]?.title || "비전을 설정해주세요"}
                   </h2>
                 </div>
               </div>
@@ -1695,7 +1695,7 @@ ${visionSummary}
                     </h4>
                   </div>
                   <div className="space-y-3 overflow-y-auto pr-2 custom-scrollbar max-h-[350px]">
-                    {visions[activeLevel].events.map((ev) => {
+                    {visions[activeLevel]?.events?.map((ev) => {
                       const mins = eventDurations[ev.id] || 60;
                       return (
                         <div
