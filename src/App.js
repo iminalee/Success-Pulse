@@ -136,7 +136,11 @@ const ResetPasswordUI = () => {
   };
 
   if (!visions || !visions[activeLevel]) {
-    return <div className="text-white text-center mt-20">데이터를 불러오는 중입니다... ⏳</div>;
+    return (
+      <div className="text-white text-center mt-20">
+        데이터를 불러오는 중입니다... ⏳
+      </div>
+    );
   }
 
   return (
@@ -492,7 +496,6 @@ ${visionSummary}
         setLoading(false);
       }
     });
-
 
     return () => subscription.unsubscribe();
   }, []);
@@ -907,7 +910,7 @@ ${visionSummary}
     const greenGroup = ["ns", "ha", "rd", "p"];
     const sdCValue =
       tciProfile.sd_c?.score ??
-      Number(tciProfile.sd.score) + Number(tciProfile.c.score);
+      Number(tciProfile.sd?.score || 0) + Number(tciProfile.c?.score || 0);
     return (
       <div className="flex-grow w-full max-w-7xl mx-auto overflow-y-auto no-scrollbar pb-24 px-4 animate-fadeIn font-sans">
         <div className="flex items-center justify-between mb-8">
@@ -1384,7 +1387,7 @@ ${visionSummary}
               </div>
               <div className="relative z-10 flex flex-col gap-4">
                 {["NS", "HA", "RD", "P", "SD", "C", "ST"].map((key) => {
-                  const score = Number(tciProfile[key.toLowerCase()].score);
+                  const score = Number(tciProfile[key.toLowerCase()]?.score || 0);
                   const isPositive = score >= 50;
                   const barWidth = Math.abs(score - 50);
                   const barColor = greenGroup.includes(key.toLowerCase())
