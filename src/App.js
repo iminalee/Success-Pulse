@@ -251,30 +251,61 @@ ${visionSummary}
   const [isRecoveryMode, setIsRecoveryMode] = useState(false);
 
   // [추가] 로그인 즉시 데이터 불러오기 함수
+  // [Modified] Safe function to auto-fill empty data defaults
   const fetchUserData = async (userId) => {
-    const { data, error } = await supabase
-      .from("pulse_data")
-      .select("*")
-      .eq("user_id", userId) // ✅ "아, 아까 받은 그 userId!"
-      .single();
+    try {
+      const { data, error } = await supabase
+        .from("pulse_data")
+        .select("*")
+        .eq("user_id", userId)
+        .single();
 
-    if (data) {
-      if (data.user_name) setUserName(data.user_name);
-      if (data.currency) setCurrency(data.currency);
-      if (data.annual_income) setAnnualIncome(data.annual_income);
-      if (data.target_date) setTargetDate(data.target_date);
-      if (data.ledger) setLedger(data.ledger);
-      if (data.visions) setVisions(data.visions);
-      if (data.bps_traits) setBpsTraits(data.bps_traits);
-      if (data.vak_profile) setVakProfile(data.vak_profile);
-      if (data.tci_profile) setTciProfile(data.tci_profile);
-      if (data.archived_visions) setArchivedVisions(data.archived_visions);
-      if (data.trash_visions) setTrashVisions(data.trash_visions);
-      if (data.signature) setSignature(data.signature);
-      if (data.signed_date) setSignedDate(data.signed_date);
+      if (error) throw error;
+
+      if (data) {
+        // 1. Fill basic text/number data (default if missing)
+        if (data.user_name) setUserName(data.user_name);
+        setCurrency(data.currency || "₩");
+        setAnnualIncome(data.annual_income || 0);
+        setTargetDate(data.target_date || "2026-12-31");
+        setSignature(data.signature || "");
+        setSignedDate(data.signed_date || null);
+        
+        // 2. [Important] Fill complex object data (Key to preventing blank screens!)
+        // If data exists, use it. If not, insert empty arrays ([]) or objects ({}).
+        setLedger(data.ledger || []);
+        setArchivedVisions(data.archived_visions || []);
+        setTrashVisions(data.trash_visions || []);
+        
+        // 3. Safely fill vision data (Merge with previous state)
+        setVisions(prev => ({ ...prev, ...(data.visions || {}) }));
+        
+        // 4. Safely fill Traits
+        setBpsTraits(data.bps_traits || ["", "", "", "", ""]);
+        
+        // 5. Safely fill VAK profile (Set defaults)
+        setVakProfile(data.vak_profile || { 
+          order: "V-A-K", vPercent: 50, aPercent: 50, kPercent: 50 
+        });
+
+        // 6. Safely fill TCI profile (Initialize to 50 if scores are missing)
+        // This stops the 'score' error!
+        const defaultTci = { 
+          ns: { score: 50 }, ha: { score: 50 }, rd: { score: 50 }, 
+          p: { score: 50 }, sd: { score: 50 }, c: { score: 50 }, 
+          st: { score: 50 }, sd_c: { score: 100 } 
+        };
+        // Merge DB data with defaults.
+        setTciProfile({ ...defaultTci, ...(data.tci_profile || {}) });
+
+        // Load permissions
+        setHasEditAccess(data.has_edit_access || false);
+        setHasAiAccess(data.has_ai_access || false);
+      }
+    } catch (err) {
+      console.error("Error loading data (Auto-recovered):", err);
     }
   };
-
   // [추가] 세션 변경 감지 시 데이터 로드 연결
   useEffect(() => {
     const {
