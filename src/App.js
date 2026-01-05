@@ -253,7 +253,7 @@ ${visionSummary}
     const { data, error } = await supabase
       .from("pulse_data")
       .select("*")
-      .eq("user_id", currentUser.id) // 👈 여기!
+      .eq("user_id", userId) // ✅ "아, 아까 받은 그 userId!"
       .single();
 
     if (data) {
