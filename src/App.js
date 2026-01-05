@@ -513,11 +513,11 @@ ${visionSummary}
         signed_date: signedDate,
         updated_at: new Date(),
       };
-      /* updates 뒤에 내 ID를 추가해서 저장 */
-      const { error } = await supabase.from("pulse_data").upsert({
-        ...updates,
-        user_id: session?.user?.id,
-      });
+/* updates 뒤에 내 ID를 추가해서 저장 */
+const { error } = await supabase.from("pulse_data").upsert({
+  ...updates,
+  user_id: user.id, // ✅ user.id로 바꾸면 해결됩니다!
+});
       if (error) console.error("자동 저장 실패:", error);
     }, 1000);
     return () => clearTimeout(timer);
