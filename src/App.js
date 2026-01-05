@@ -1176,7 +1176,7 @@ ${visionSummary}
                     </button>
                   </div>
                   <AutoTextarea
-                    value={visions[activeLevel].immersionScript}
+                    value={visions[activeLevel]?.immersionScript || ""}
                     onChange={(e) =>
                       updateVision(activeLevel, {
                         immersionScript: e.target.value,
@@ -3270,3 +3270,4 @@ const overlayStyle = {
   zIndex: 2000,
 };
 export default App;
+ㅍ
