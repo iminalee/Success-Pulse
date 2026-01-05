@@ -424,7 +424,7 @@ ${visionSummary}
         const { data, error } = await supabase
           .from("pulse_data")
           .select("*")
-          .eq(""user_id", currentUser.id)
+          .eq("user_id", currentUser.id)
           .single();
 
         // 3. DB 데이터를 가져온 '이후'에 로직을 실행해야 에러가 안 납니다.
@@ -441,7 +441,7 @@ ${visionSummary}
             supabase
               .from("pulse_data")
               .update({ user_name: nameFromMeta })
-              .eq("user_id",currentUser.id)
+              .eq("user_id", currentUser.id)
               .then(({ error }) => {
                 if (error) console.error("이름 DB 저장 실패:", error);
                 else console.log("이름 DB 동기화 완료:", nameFromMeta);
