@@ -135,6 +135,10 @@ const ResetPasswordUI = () => {
     setResetLoading(false);
   };
 
+  if (!visions || !visions[activeLevel]) {
+    return <div className="text-white text-center mt-20">데이터를 불러오는 중입니다... ⏳</div>;
+  }
+
   return (
     <div className="bg-[#1A202C] p-10 rounded-[3rem] border border-white/10 shadow-2xl max-w-sm mx-auto mt-20 animate-fadeIn">
       <div className="text-center mb-6">
@@ -489,6 +493,7 @@ ${visionSummary}
       }
     });
 
+
     return () => subscription.unsubscribe();
   }, []);
 
@@ -548,7 +553,7 @@ ${visionSummary}
   const generateImmersionScript = async () => {
     // 🔴 회원님이 주신 OpenAI 키를 적용했습니다.
     const OPENAI_API_KEY = process.env.REACT_APP_OPENAI_API_KEY;
-    if (!visions[activeLevel].title) {
+    if (!visions[activeLevel]?.title) {
       return alert("⚠️ 비전 제목이 비어있습니다! 제목을 먼저 입력해주세요.");
     }
 
@@ -580,7 +585,7 @@ ${visionSummary}
                 role: "user",
                 content: `
               [목표 정보]
-              - 목표: '${visions[activeLevel].title}'
+              - 목표: '${visions[activeLevel]?.title}'
               - 단계: '${levelMap[activeLevel]}'
 
               [사용자 VAK 감각 비율]
@@ -1104,7 +1109,7 @@ ${visionSummary}
                     placeholder="🏥"
                   />
                   <input
-                    value={visions[activeLevel].title}
+                    value={visions[activeLevel]?.title}
                     onChange={(e) =>
                       updateVision(activeLevel, { title: e.target.value })
                     }
@@ -1134,7 +1139,7 @@ ${visionSummary}
                           : "⚡ Kinesthetic"}
                       </p>
                       <AutoTextarea
-                        value={visions[activeLevel][type]}
+                        value={visions[activeLevel]?.[type]}
                         onChange={(e) =>
                           updateVision(activeLevel, { [type]: e.target.value })
                         }
@@ -1191,7 +1196,7 @@ ${visionSummary}
                     <Plus size={14} /> Add Event
                   </button>
                 </div>
-                {visions[activeLevel].events.map((ev) => (
+                {visions[activeLevel]?.events?.map((ev) => (
                   <div
                     key={ev.id}
                     className="flex items-center gap-4 bg-[#1A202C]/40 p-5 rounded-2xl border border-white/5"
@@ -1217,7 +1222,7 @@ ${visionSummary}
                     <button
                       onClick={() =>
                         updateVision(activeLevel, {
-                          events: visions[activeLevel].events.filter(
+                          events: visions[activeLevel]?.events?.filter(
                             (p) => p.id !== ev.id
                           ),
                         })
@@ -1684,7 +1689,7 @@ ${visionSummary}
                 <div className="flex-grow flex flex-col overflow-hidden">
                   <div className="bg-slate-900/50 p-6 rounded-2xl border border-white/5 mb-8">
                     <p className="text-sm text-slate-300 italic leading-relaxed text-center">
-                      {visions[activeLevel].immersionScript ||
+                      {visions[activeLevel]?.immersionScript ||
                         "My Lab에서 시나리오를 생성해보세요."}
                     </p>
                   </div>
