@@ -485,7 +485,7 @@ ${visionSummary}
     }, 1000);
     return () => clearTimeout(timer);
   }, [
-    user,
+    //user,
     userName,
     currency,
     annualIncome,
