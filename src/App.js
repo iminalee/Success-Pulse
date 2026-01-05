@@ -362,8 +362,8 @@ ${visionSummary}
   const [vakProfile, setVakProfile] = useState({
     order: "V-A-K",
     vPercent: 50,
-    aPercent: 30,
-    kPercent: 20,
+    aPercent: 50,
+    kPercent: 50,
   });
   const [tciProfile, setTciProfile] = useState({
     ns: { score: 50 },
@@ -513,11 +513,11 @@ ${visionSummary}
         signed_date: signedDate,
         updated_at: new Date(),
       };
-/* updates 뒤에 내 ID를 추가해서 저장 */
-const { error } = await supabase.from("pulse_data").upsert({
-  ...updates,
-  user_id: user.id, // ✅ user.id로 바꾸면 해결됩니다!
-});
+      /* updates 뒤에 내 ID를 추가해서 저장 */
+      const { error } = await supabase.from("pulse_data").upsert({
+        ...updates,
+        user_id: user.id, // ✅ user.id로 바꾸면 해결됩니다!
+      });
       if (error) console.error("자동 저장 실패:", error);
     }, 1000);
     return () => clearTimeout(timer);
@@ -1627,7 +1627,7 @@ const { error } = await supabase.from("pulse_data").upsert({
                 <span className="text-5xl">
                   {activeLevel === 6
                     ? "👑"
-                    : visions[activeLevel].emoji || "✨"}
+                    : visions[activeLevel]?.emoji || "✨"}
                 </span>
                 <div>
                   <p className="text-[10px] font-black text-amber-500 uppercase tracking-[0.3em]">
