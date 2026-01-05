@@ -248,6 +248,43 @@ ${visionSummary}
   // 기존 상태 변수들 근처에 추가하세요
   const [isRecoveryMode, setIsRecoveryMode] = useState(false);
 
+  // [추가] 로그인 즉시 데이터 불러오기 함수
+  const fetchUserData = async (userId) => {
+    const { data, error } = await supabase
+      .from("pulse_data")
+      .select("*")
+      .eq("user_id", userId)
+      .single();
+
+    if (data) {
+      if (data.user_name) setUserName(data.user_name);
+      if (data.currency) setCurrency(data.currency);
+      if (data.annual_income) setAnnualIncome(data.annual_income);
+      if (data.target_date) setTargetDate(data.target_date);
+      if (data.ledger) setLedger(data.ledger);
+      if (data.visions) setVisions(data.visions);
+      if (data.bps_traits) setBpsTraits(data.bps_traits);
+      if (data.vak_profile) setVakProfile(data.vak_profile);
+      if (data.tci_profile) setTciProfile(data.tci_profile);
+      if (data.archived_visions) setArchivedVisions(data.archived_visions);
+      if (data.trash_visions) setTrashVisions(data.trash_visions);
+      if (data.signature) setSignature(data.signature);
+      if (data.signed_date) setSignedDate(data.signed_date);
+    }
+  };
+
+  // [추가] 세션 변경 감지 시 데이터 로드 연결
+  useEffect(() => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event, session) => {
+      if (session && (event === "SIGNED_IN" || event === "INITIAL_SESSION")) {
+        fetchUserData(session.user.id);
+      }
+    });
+    return () => subscription.unsubscribe();
+  }, []);
+
   const [currency, setCurrency] = useState("₩");
   const [userName, setUserName] = useState("");
   const [targetDate, setTargetDate] = useState("2026-12-31");
@@ -714,7 +751,7 @@ ${visionSummary}
     const taskHours = taskMinutes / 60;
 
     // 2. 최종 입금액 계산 (기본단가 * 인플레 * 시간)
-    const finalAmount = valueEventAmount * inflationBonus * taskhours;
+    const finalAmount = valueEventAmount * inflationBonus * taskHours;
 
     // 3. 장부(Ledger)에 기록
     // 2. 장부(Ledger)에 기록할 데이터 생성
@@ -1558,7 +1595,9 @@ ${visionSummary}
                     <span className="font-black uppercase text-sm tracking-tight text-white drop-shadow-md flex items-center gap-2">
                       {/* 설정된 단계면 이모지 표시 */}
                       {isConfigured && (
-                        <span className="text-xs emoji-shadow ">
+                        <span className="text-xs emoji-shadow">
+                          {" "}
+                          {/* 여기 클래스 추가 */}
                           {visions[lv].emoji}
                         </span>
                       )}
