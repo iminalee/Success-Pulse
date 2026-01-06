@@ -2931,7 +2931,7 @@ ${visionSummary}
       </div>
     </div>
   );
-          }
+          
 if (!visions || !visions[activeLevel]) {
     return (
       <div className="text-white text-center mt-20">
