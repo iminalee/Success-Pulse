@@ -2931,14 +2931,14 @@ ${visionSummary}
       </div>
     </div>
   );
-
+          }
 if (!visions || !visions[activeLevel]) {
     return (
       <div className="text-white text-center mt-20">
         데이터를 불러오는 중입니다... ⏳
       </div>
-    );
-  }
+    );}
+  
 
   // ▼▼▼ [추가] 복구 모드일 때 변경창만 보여주기 ▼▼▼
   if (isRecoveryMode) {
