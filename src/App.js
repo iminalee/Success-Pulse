@@ -307,14 +307,27 @@ ${visionSummary}
     }
   };
   // [추가] 세션 변경 감지 시 데이터 로드 연결
-  useEffect(() => {
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((event, session) => {
-      if (session && (event === "SIGNED_IN" || event === "INITIAL_SESSION")) {
+useEffect(() => {
+    // 1. [추가] 앱 시작 시 저장된 세션을 강제로 불러옴 (안드로이드 새로고침 대응)
+    const initSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        setUser(session.user);
         fetchUserData(session.user.id);
       }
+    };
+    initSession();
+
+    // 2. 실시간 로그인 상태 변경 감지
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (session && (event === "SIGNED_IN" || event === "INITIAL_SESSION")) {
+        setUser(session.user);
+        fetchUserData(session.user.id);
+      } else if (event === "SIGNED_OUT") {
+        setUser(null);
+      }
     });
+
     return () => subscription.unsubscribe();
   }, []);
 
@@ -2932,12 +2945,7 @@ ${visionSummary}
     </div>
   );
           
-if (!visions || !visions[activeLevel]) {
-    return (
-      <div className="text-white text-center mt-20">
-        데이터를 불러오는 중입니다... ⏳
-      </div>
-    );}
+
   
 
   // ▼▼▼ [추가] 복구 모드일 때 변경창만 보여주기 ▼▼▼
