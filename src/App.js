@@ -1852,6 +1852,9 @@ useEffect(() => {
     // ✍️ 서명 날짜가 있으면 '그 날'을 시작점으로, 없으면 '오늘'을 시작점으로 강제 분리
     const startDate = signedDate ? new Date(signedDate) : new Date(today);
     startDate.setHours(0, 0, 0, 0); // 시작점도 정각으로 고정
+    let startDate;
+    let targetDateObj;
+
     const targetDateObj = new Date(targetDate);
     const startAmount = annualIncome;
     const goalAmount = mbGoalAmount;
@@ -2114,6 +2117,8 @@ useEffect(() => {
             />
             <g transform={`translate(${nowX}, ${chartH - padding.bottom})`}>
               <line
+                x1="0"  // 추가: 가로 시작점을 그룹의 중앙(nowX)으로 고정
+                x2="0"  // 추가: 가로 끝점도 그룹의 중앙(nowX)으로 고정
                 y1="0"
                 y2={-(chartH - padding.bottom - nowY)}
                 stroke="#F59E0B"
