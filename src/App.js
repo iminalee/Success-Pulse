@@ -241,96 +241,15 @@ ${visionSummary}
     return h > 0 ? `${h}h ${m > 0 ? m + "m" : ""}` : `${m}m`;
   };
 
-  // 상태 관리 (DB 동기화용)
+ // 상태 관리 (DB 동기화용)
   const [user, setUser] = useState(null);
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState(""); // 추가
+  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [customTask, setCustomTask] = useState("");
-  // 기존 상태 변수들 근처에 추가하세요
   const [isRecoveryMode, setIsRecoveryMode] = useState(false);
 
-  // [추가] 로그인 즉시 데이터 불러오기 함수
-  // [Modified] Safe function to auto-fill empty data defaults
-  const fetchUserData = async (userId) => {
-    try {
-      const { data, error } = await supabase
-        .from("pulse_data")
-        .select("*")
-        .eq("user_id", userId)
-        .single();
-
-      if (error) throw error;
-
-      if (data) {
-        // 1. Fill basic text/number data (default if missing)
-        if (data.user_name) setUserName(data.user_name);
-        setCurrency(data.currency || "₩");
-        setAnnualIncome(data.annual_income || 0);
-        setTargetDate(data.target_date || "2026-12-31");
-        setSignature(data.signature || "");
-        setSignedDate(data.signed_date || null);
-        
-        // 2. [Important] Fill complex object data (Key to preventing blank screens!)
-        // If data exists, use it. If not, insert empty arrays ([]) or objects ({}).
-        setLedger(data.ledger || []);
-        setArchivedVisions(data.archived_visions || []);
-        setTrashVisions(data.trash_visions || []);
-        
-        // 3. Safely fill vision data (Merge with previous state)
-        setVisions(prev => ({ ...prev, ...(data.visions || {}) }));
-        
-        // 4. Safely fill Traits
-        setBpsTraits(data.bps_traits || ["", "", "", "", ""]);
-        
-        // 5. Safely fill VAK profile (Set defaults)
-        setVakProfile(data.vak_profile || { 
-          order: "V-A-K", vPercent: 50, aPercent: 50, kPercent: 50 
-        });
-
-        // 6. Safely fill TCI profile (Initialize to 50 if scores are missing)
-        // This stops the 'score' error!
-        const defaultTci = { 
-          ns: { score: 50 }, ha: { score: 50 }, rd: { score: 50 }, 
-          p: { score: 50 }, sd: { score: 50 }, c: { score: 50 }, 
-          st: { score: 50 }, sd_c: { score: 100 } 
-        };
-        // Merge DB data with defaults.
-        setTciProfile({ ...defaultTci, ...(data.tci_profile || {}) });
-
-        // Load permissions
-        setHasEditAccess(data.has_edit_access || false);
-        setHasAiAccess(data.has_ai_access || false);
-      }
-    } catch (err) {
-      console.error("Error loading data (Auto-recovered):", err);
-    }
-  };
-  // [추가] 세션 변경 감지 시 데이터 로드 연결
-useEffect(() => {
-    // 1. [추가] 앱 시작 시 저장된 세션을 강제로 불러옴 (안드로이드 새로고침 대응)
-    const initSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session) {
-        setUser(session.user);
-        fetchUserData(session.user.id);
-      }
-    };
-    initSession();
-
-    // 2. 실시간 로그인 상태 변경 감지
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (session && (event === "SIGNED_IN" || event === "INITIAL_SESSION")) {
-        setUser(session.user);
-        fetchUserData(session.user.id);
-      } else if (event === "SIGNED_OUT") {
-        setUser(null);
-      }
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
-
+  // [중요] 데이터 상태 변수들을 먼저 정의합니다 (순서 변경됨)
   const [currency, setCurrency] = useState("₩");
   const [userName, setUserName] = useState("");
   const [targetDate, setTargetDate] = useState("2026-12-31");
@@ -338,88 +257,24 @@ useEffect(() => {
   const [currentAsset, setCurrentAsset] = useState(0);
   const [ledger, setLedger] = useState([]);
   const [signature, setSignature] = useState("");
-  const [signedDate, setSignedDate] = useState(null);
+  const [signedDate, setSignedDate] = useState(null); // 계약 날짜
   const [bpsTraits, setBpsTraits] = useState(["", "", "", "", ""]);
-
+  
+  // Vision 초기값
   const initialLvAsset = 0 / 5;
   const [visions, setVisions] = useState({
-    6: {
-      title: "Apex Identity 확립",
-      emoji: "👑",
-      v: "",
-      a: "",
-      k: "",
-      immersionScript: "",
-      progressAsset: initialLvAsset,
-      events: [],
-    },
-    5: {
-      title: "",
-      emoji: "🧘",
-      v: "",
-      a: "",
-      k: "",
-      immersionScript: "",
-      progressAsset: initialLvAsset,
-      events: [],
-    },
-    4: {
-      title: "",
-      emoji: "🏆",
-      v: "",
-      a: "",
-      k: "",
-      immersionScript: "",
-      progressAsset: initialLvAsset,
-      events: [],
-    },
-    3: {
-      title: "",
-      emoji: "🤝",
-      v: "",
-      a: "",
-      k: "",
-      immersionScript: "",
-      progressAsset: 0,
-      events: [],
-    },
-    2: {
-      title: "",
-      emoji: "🏦",
-      v: "",
-      a: "",
-      k: "",
-      immersionScript: "",
-      progressAsset: 0,
-      events: [],
-    },
-    1: {
-      title: "",
-      emoji: "🏃",
-      v: "",
-      a: "",
-      k: "",
-      immersionScript: "",
-      progressAsset: initialLvAsset,
-      events: [],
-    },
+    6: { title: "Apex Identity 확립", emoji: "👑", v: "", a: "", k: "", immersionScript: "", progressAsset: initialLvAsset, events: [] },
+    5: { title: "", emoji: "🧘", v: "", a: "", k: "", immersionScript: "", progressAsset: initialLvAsset, events: [] },
+    4: { title: "", emoji: "🏆", v: "", a: "", k: "", immersionScript: "", progressAsset: initialLvAsset, events: [] },
+    3: { title: "", emoji: "🤝", v: "", a: "", k: "", immersionScript: "", progressAsset: 0, events: [] },
+    2: { title: "", emoji: "🏦", v: "", a: "", k: "", immersionScript: "", progressAsset: 0, events: [] },
+    1: { title: "", emoji: "🏃", v: "", a: "", k: "", immersionScript: "", progressAsset: initialLvAsset, events: [] },
   });
 
-  const [vakProfile, setVakProfile] = useState({
-    order: "V-A-K",
-    vPercent: 50,
-    aPercent: 50,
-    kPercent: 50,
-  });
+  const [vakProfile, setVakProfile] = useState({ order: "V-A-K", vPercent: 50, aPercent: 50, kPercent: 50 });
   const [tciProfile, setTciProfile] = useState({
-    ns: { score: 50 },
-    ha: { score: 50 },
-    rd: { score: 50 },
-    p: { score: 50 },
-    sd: { score: 50 },
-    c: { score: 50 },
-    st: { score: 50 },
-    sd_c: { score: 100 },
+    ns: { score: 50 }, ha: { score: 50 }, rd: { score: 50 }, p: { score: 50 },
+    sd: { score: 50 }, c: { score: 50 }, st: { score: 50 }, sd_c: { score: 100 },
   });
   const [archivedVisions, setArchivedVisions] = useState([]);
   const [trashVisions, setTrashVisions] = useState([]);
@@ -434,104 +289,83 @@ useEffect(() => {
   const [activeSensory, setActiveSensory] = useState(null);
   const chartRef = useRef(null);
   const chartInstance = useRef(null);
-
-  // 1. 현재 접속한 유저 이메일 (로그인 시스템에서 가져온다고 가정)
-  const currentUserEmail = "접속한유저@gmail.com";
-  const ADMIN_EMAIL = "5milestones.today@gmail.com";
-
-  // 2. [수정 권한] - 입력창 등을 잠글지 여부
-  // 권한 상태 관리 (초기값은 둘 다 false로 닫아둠)
+  
+  // 권한 상태
   const [hasEditAccess, setHasEditAccess] = useState(false);
   const [hasAiAccess, setHasAiAccess] = useState(false);
 
-  // [핵심 1] 로그인 체크 및 데이터 불러오기 (Load)
-  // [핵심 1] 로그인 체크 및 데이터 불러오기 (Load) + 비밀번호 복구 감지
-  useEffect(() => {
-    // 1. 주소창(URL) 분석: 비밀번호 재설정 링크인지 먼저 확인
-    // (Supabase는 링크 뒤에 #type=recovery 라는 표식을 붙여서 보냅니다)
-    const hash = window.location.hash;
-    if (hash && hash.includes("type=recovery")) {
-      setIsRecoveryMode(true);
+  // [함수 정의] 데이터를 DB에서 가져오는 함수
+  const fetchUserData = async (userId, currentUserObject) => {
+    try {
+      const { data, error } = await supabase
+        .from("pulse_data")
+        .select("*")
+        .eq("user_id", userId)
+        .single();
+
+      if (error && error.code !== 'PGRST116') throw error;
+
+      // 이름 결정 로직
+      let finalName = "";
+      if (data && data.user_name) finalName = data.user_name;
+      else if (currentUserObject?.user_metadata?.user_name) finalName = currentUserObject.user_metadata.user_name;
+      else if (currentUserObject?.email) finalName = currentUserObject.email.split('@')[0];
+      
+      setUserName(finalName);
+
+      if (data) {
+        // [핵심 해결] 서약 날짜(signed_date)를 가장 먼저 불러옵니다.
+        setSignedDate(data.signed_date || null);
+        
+        setCurrency(data.currency || "₩");
+        setAnnualIncome(data.annual_income || 0);
+        setTargetDate(data.target_date || "2026-12-31");
+        setSignature(data.signature || "");
+        setLedger(data.ledger || []);
+        setVisions(prev => ({ ...prev, ...(data.visions || {}) }));
+        setBpsTraits(data.bps_traits || ["", "", "", "", ""]);
+        setVakProfile(data.vak_profile || { order: "V-A-K", vPercent: 50, aPercent: 50, kPercent: 50 });
+        setArchivedVisions(data.archived_visions || []);
+        setTrashVisions(data.trash_visions || []);
+        
+        const defaultTci = { ns: { score: 50 }, ha: { score: 50 }, rd: { score: 50 }, p: { score: 50 }, sd: { score: 50 }, c: { score: 50 }, st: { score: 50 }, sd_c: { score: 100 } };
+        setTciProfile({ ...defaultTci, ...(data.tci_profile || {}) });
+        setHasEditAccess(data.has_edit_access || false);
+        setHasAiAccess(data.has_ai_access || false);
+      }
+    } catch (err) {
+      console.error("데이터 로드 중 오류:", err);
     }
+  };
 
-    // [수정된 initSession 함수]
-    const initSession = async () => {
+  // [핵심 1] 로그인 체크 및 데이터 불러오기 (Load)
+  useEffect(() => {
+    const hash = window.location.hash;
+    if (hash && hash.includes("type=recovery")) setIsRecoveryMode(true);
+
+    const initApp = async () => {
       setLoading(true);
-
-      // 1. 먼저 로그인 세션과 유저 정보를 가져옵니다.
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-      const currentUser = session?.user;
-      setUser(currentUser);
-
-      // 2. 유저가 있다면 DB에서 데이터를 가져옵니다.
-      if (currentUser) {
-        const { data, error } = await supabase
-          .from("pulse_data")
-          .select("*")
-          .eq("user_id", currentUser.id)
-          .single();
-
-        // 3. DB 데이터를 가져온 '이후'에 로직을 실행해야 에러가 안 납니다.
-        if (data) {
-          // ▼▼▼ [이름 동기화 로직 위치] ▼▼▼
-          if (data.user_name) {
-            // DB에 이름이 이미 있으면 그걸 씁니다.
-            setUserName(data.user_name);
-          } else if (currentUser?.user_metadata?.user_name) {
-            // DB는 비어있는데, 가입할 때 쓴 이름이 있다면? -> 화면에 보여주고 DB에 저장!
-            const nameFromMeta = currentUser.user_metadata.user_name;
-            setUserName(nameFromMeta);
-
-            supabase
-              .from("pulse_data")
-              .update({ user_name: nameFromMeta })
-              .eq("user_id", currentUser.id)
-              .then(({ error }) => {
-                if (error) console.error("이름 DB 저장 실패:", error);
-                else console.log("이름 DB 동기화 완료:", nameFromMeta);
-              });
-          }
-          // ▲▲▲ [이름 동기화 끝] ▲▲▲
-
-          // 나머지 데이터 불러오기
-          if (data.currency) setCurrency(data.currency);
-          if (data.annual_income) setAnnualIncome(data.annual_income);
-          if (data.target_date) setTargetDate(data.target_date);
-          if (data.ledger) setLedger(data.ledger);
-          if (data.visions) setVisions(data.visions);
-          if (data.bps_traits) setBpsTraits(data.bps_traits);
-          if (data.vak_profile) setVakProfile(data.vak_profile);
-          if (data.tci_profile) setTciProfile(data.tci_profile);
-          if (data.archived_visions) setArchivedVisions(data.archived_visions);
-          if (data.trash_visions) setTrashVisions(data.trash_visions);
-          if (data.signature) setSignature(data.signature);
-          if (data.signed_date) setSignedDate(data.signed_date);
-
-          // 권한 설정 불러오기
-          setHasEditAccess(data.has_edit_access || false);
-          setHasAiAccess(data.has_ai_access || false);
-        }
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user) {
+        setUser(session.user);
+        await fetchUserData(session.user.id, session.user);
       }
       setLoading(false);
     };
 
-    initSession();
+    initApp();
 
-    // 2. 실시간 상태 감지 (이벤트 리스너)
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((event, session) => {
-      setUser(session?.user ?? null);
-
-      // [중요] Supabase가 알려주는 '복구 모드' 이벤트 감지
-      if (event === "PASSWORD_RECOVERY") {
-        setIsRecoveryMode(true);
-      }
-
-      if (!session) {
-        setLoading(false);
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (event === "PASSWORD_RECOVERY") setIsRecoveryMode(true);
+      
+      if (session?.user) {
+        setUser(session.user);
+        if (event === "SIGNED_IN" || event === "INITIAL_SESSION") {
+           await fetchUserData(session.user.id, session.user);
+        }
+      } else {
+        setUser(null);
+        setUserName("");
       }
     });
 
