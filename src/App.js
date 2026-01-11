@@ -252,7 +252,8 @@ ${visionSummary}
 
   // [추가] 로그인 즉시 데이터 불러오기 함수
   // [Modified] Safe function to auto-fill empty data defaults
-  const fetchUserData = async (userId) => {
+// [수정 1] 데이터 로드 함수 (이름 찾기 + 서약 날짜 로딩 완벽 대응)
+  const fetchUserData = async (userId, currentUserObject) => {
     try {
       const { data, error } = await supabase
         .from("pulse_data")
@@ -260,52 +261,48 @@ ${visionSummary}
         .eq("user_id", userId)
         .single();
 
-      if (error) throw error;
+      if (error && error.code !== 'PGRST116') throw error;
+
+      // [핵심] 이름 결정 로직: DB -> 구글 이름 -> 이메일 아이디 순서로 확인
+      let finalName = "";
+      if (data && data.user_name) {
+        finalName = data.user_name;
+      } else if (currentUserObject?.user_metadata?.user_name) {
+        finalName = currentUserObject.user_metadata.user_name;
+      } else if (currentUserObject?.email) {
+        finalName = currentUserObject.email.split('@')[0];
+      }
+      
+      setUserName(finalName); // 이름 설정
 
       if (data) {
-        // 1. Fill basic text/number data (default if missing)
-        if (data.user_name) setUserName(data.user_name);
+        // [중요] 서약 날짜(signed_date)를 가장 먼저 불러옵니다.
+        setSignedDate(data.signed_date || null);
+        
+        // 나머지 데이터 채우기
         setCurrency(data.currency || "₩");
         setAnnualIncome(data.annual_income || 0);
         setTargetDate(data.target_date || "2026-12-31");
         setSignature(data.signature || "");
-        setSignedDate(data.signed_date || null);
         
-        // 2. [Important] Fill complex object data (Key to preventing blank screens!)
-        // If data exists, use it. If not, insert empty arrays ([]) or objects ({}).
         setLedger(data.ledger || []);
         setArchivedVisions(data.archived_visions || []);
         setTrashVisions(data.trash_visions || []);
-        
-        // 3. Safely fill vision data (Merge with previous state)
         setVisions(prev => ({ ...prev, ...(data.visions || {}) }));
-        
-        // 4. Safely fill Traits
         setBpsTraits(data.bps_traits || ["", "", "", "", ""]);
+        setVakProfile(data.vak_profile || { order: "V-A-K", vPercent: 50, aPercent: 50, kPercent: 50 });
         
-        // 5. Safely fill VAK profile (Set defaults)
-        setVakProfile(data.vak_profile || { 
-          order: "V-A-K", vPercent: 50, aPercent: 50, kPercent: 50 
-        });
-
-        // 6. Safely fill TCI profile (Initialize to 50 if scores are missing)
-        // This stops the 'score' error!
-        const defaultTci = { 
-          ns: { score: 50 }, ha: { score: 50 }, rd: { score: 50 }, 
-          p: { score: 50 }, sd: { score: 50 }, c: { score: 50 }, 
-          st: { score: 50 }, sd_c: { score: 100 } 
-        };
-        // Merge DB data with defaults.
+        const defaultTci = { ns: { score: 50 }, ha: { score: 50 }, rd: { score: 50 }, p: { score: 50 }, sd: { score: 50 }, c: { score: 50 }, st: { score: 50 }, sd_c: { score: 100 } };
         setTciProfile({ ...defaultTci, ...(data.tci_profile || {}) });
 
-        // Load permissions
         setHasEditAccess(data.has_edit_access || false);
         setHasAiAccess(data.has_ai_access || false);
       }
     } catch (err) {
-      console.error("Error loading data (Auto-recovered):", err);
+      console.error("데이터 로드 중 오류:", err);
     }
   };
+
   // [추가] 세션 변경 감지 시 데이터 로드 연결
 useEffect(() => {
     // 1. [추가] 앱 시작 시 저장된 세션을 강제로 불러옴 (안드로이드 새로고침 대응)
@@ -446,93 +443,42 @@ useEffect(() => {
 
   // [핵심 1] 로그인 체크 및 데이터 불러오기 (Load)
   // [핵심 1] 로그인 체크 및 데이터 불러오기 (Load) + 비밀번호 복구 감지
+// [수정 2] 로그인 체크 및 데이터 로드 연결
   useEffect(() => {
-    // 1. 주소창(URL) 분석: 비밀번호 재설정 링크인지 먼저 확인
-    // (Supabase는 링크 뒤에 #type=recovery 라는 표식을 붙여서 보냅니다)
     const hash = window.location.hash;
     if (hash && hash.includes("type=recovery")) {
       setIsRecoveryMode(true);
     }
 
-    // [수정된 initSession 함수]
     const initSession = async () => {
       setLoading(true);
-
-      // 1. 먼저 로그인 세션과 유저 정보를 가져옵니다.
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-      const currentUser = session?.user;
-      setUser(currentUser);
-
-      // 2. 유저가 있다면 DB에서 데이터를 가져옵니다.
-      if (currentUser) {
-        const { data, error } = await supabase
-          .from("pulse_data")
-          .select("*")
-          .eq("user_id", currentUser.id)
-          .single();
-
-        // 3. DB 데이터를 가져온 '이후'에 로직을 실행해야 에러가 안 납니다.
-        if (data) {
-          // ▼▼▼ [이름 동기화 로직 위치] ▼▼▼
-          if (data.user_name) {
-            // DB에 이름이 이미 있으면 그걸 씁니다.
-            setUserName(data.user_name);
-          } else if (currentUser?.user_metadata?.user_name) {
-            // DB는 비어있는데, 가입할 때 쓴 이름이 있다면? -> 화면에 보여주고 DB에 저장!
-            const nameFromMeta = currentUser.user_metadata.user_name;
-            setUserName(nameFromMeta);
-
-            supabase
-              .from("pulse_data")
-              .update({ user_name: nameFromMeta })
-              .eq("user_id", currentUser.id)
-              .then(({ error }) => {
-                if (error) console.error("이름 DB 저장 실패:", error);
-                else console.log("이름 DB 동기화 완료:", nameFromMeta);
-              });
-          }
-          // ▲▲▲ [이름 동기화 끝] ▲▲▲
-
-          // 나머지 데이터 불러오기
-          if (data.currency) setCurrency(data.currency);
-          if (data.annual_income) setAnnualIncome(data.annual_income);
-          if (data.target_date) setTargetDate(data.target_date);
-          if (data.ledger) setLedger(data.ledger);
-          if (data.visions) setVisions(data.visions);
-          if (data.bps_traits) setBpsTraits(data.bps_traits);
-          if (data.vak_profile) setVakProfile(data.vak_profile);
-          if (data.tci_profile) setTciProfile(data.tci_profile);
-          if (data.archived_visions) setArchivedVisions(data.archived_visions);
-          if (data.trash_visions) setTrashVisions(data.trash_visions);
-          if (data.signature) setSignature(data.signature);
-          if (data.signed_date) setSignedDate(data.signed_date);
-
-          // 권한 설정 불러오기
-          setHasEditAccess(data.has_edit_access || false);
-          setHasAiAccess(data.has_ai_access || false);
-        }
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (session?.user) {
+        setUser(session.user);
+        // [중요] 여기서 유저 정보를 함수로 넘겨줍니다.
+        await fetchUserData(session.user.id, session.user);
       }
       setLoading(false);
     };
 
     initSession();
 
-    // 2. 실시간 상태 감지 (이벤트 리스너)
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((event, session) => {
-      setUser(session?.user ?? null);
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (event === "PASSWORD_RECOVERY") setIsRecoveryMode(true);
 
-      // [중요] Supabase가 알려주는 '복구 모드' 이벤트 감지
-      if (event === "PASSWORD_RECOVERY") {
-        setIsRecoveryMode(true);
+      if (session?.user) {
+        setUser(session.user);
+        // 로그인 시에도 정보를 넘겨줍니다.
+        if (event === "SIGNED_IN" || event === "INITIAL_SESSION") {
+           await fetchUserData(session.user.id, session.user);
+        }
+      } else {
+        setUser(null);
+        setUserName(""); // 로그아웃 시 이름 초기화
       }
-
-      if (!session) {
-        setLoading(false);
-      }
+      
+      if (!session) setLoading(false);
     });
 
     return () => subscription.unsubscribe();
@@ -1835,75 +1781,121 @@ useEffect(() => {
       </div>
     );
   };
+// [수정 3] 그래프 분석 로직 (서명 여부에 따른 날짜 고정)
   const renderAnalysis = () => {
-    // 1. 데이터 집계: 단계별 사용 시간 합산
-    const distribution = [0, 0, 0, 0, 0]; // 1~5단계 순서
-    ledger.forEach((item) => {
+    // 1. 데이터 정렬
+    const sortedLedger = [...ledger].sort(
+      (a, b) => new Date(a.date) - new Date(b.date)
+    );
+
+    // 2. 단계별 합산
+    const distribution = [0, 0, 0, 0, 0];
+    sortedLedger.forEach((item) => {
       if (item.level >= 1 && item.level <= 5) {
         distribution[item.level - 1] += item.duration || 0;
       }
     });
-
     const totalHours = distribution.reduce((a, b) => a + b, 0);
 
-    const startDate = signedDate ? new Date(signedDate) : new Date();
-    const targetDateObj = new Date(targetDate);
+    // =========================================================================
+    // [핵심] 서명 여부에 따른 X축(시작~끝) 기준 설정
+    // =========================================================================
     const today = new Date();
+    today.setHours(0, 0, 0, 0); // 시간은 00:00:00으로 통일
+
+    let startDate;
+    let targetDateObj;
+
+    if (signedDate) {
+      // (1) 서명 O: [서약일] ~ [목표일]로 고정
+      startDate = new Date(signedDate);
+      startDate.setHours(0, 0, 0, 0);
+      
+      targetDateObj = new Date(targetDate); 
+    } else {
+      // (2) 서명 X: [오늘] ~ [12개월 후]로 자동 롤링
+      startDate = new Date(today);
+      
+      targetDateObj = new Date(today);
+      targetDateObj.setFullYear(today.getFullYear() + 1);
+    }
+    // =========================================================================
+
     const startAmount = annualIncome;
     const goalAmount = mbGoalAmount;
-    const sortedLedger = ledger.sort(
-      (a, b) => new Date(a.date) - new Date(b.date)
-    );
+
+    // 4. 그래프 데이터 포인트 생성
     let currentAccumulated = startAmount;
     const dataPoints = [{ date: startDate, amount: startAmount }];
+    
     sortedLedger.forEach((item) => {
       const itemDate = new Date(item.date);
+      // 시작일 이후의 데이터만 그래프에 반영
       if (itemDate >= startDate) {
         currentAccumulated += item.amount;
         dataPoints.push({ date: itemDate, amount: currentAccumulated });
       }
     });
-    if (dataPoints.length > 0 && dataPoints[dataPoints.length - 1].date < today)
+
+    // 오늘 날짜까지 선 잇기 (그래프가 끊기지 않게)
+    if (dataPoints.length > 0 && dataPoints[dataPoints.length - 1].date < today) {
       dataPoints.push({ date: today, amount: currentAccumulated });
+    }
+
     const chartW = 800;
     const chartH = 400;
     const padding = { top: 60, right: 100, bottom: 60, left: 80 };
     const innerW = chartW - padding.left - padding.right;
     const innerH = chartH - padding.top - padding.bottom;
+    
     const totalTime = targetDateObj - startDate;
-    const getX = (date) =>
-      padding.left +
-      innerW * Math.max(0, Math.min((date - startDate) / totalTime, 1));
+    
+    const getX = (date) => {
+      const timeDiff = date - startDate;
+      const ratio = totalTime > 0 ? Math.max(0, Math.min(timeDiff / totalTime, 1)) : 0;
+      return padding.left + innerW * ratio;
+    };
+
     const minY = startAmount * 0.9;
     const maxY = goalAmount * 1.1;
     const totalAmountRange = maxY - minY;
+    
     const getY = (amount) =>
       chartH - padding.bottom - innerH * ((amount - minY) / totalAmountRange);
+
     const startX = getX(startDate);
     const startY = getY(startAmount);
     const nowX = getX(today);
     const nowY = getY(currentAccumulated);
     const goalX = getX(targetDateObj);
     const goalY = getY(goalAmount);
+
     const xTicks = [];
     let tickDate = new Date(startDate);
-    tickDate.setMonth(tickDate.getMonth() + 1);
-    tickDate.setDate(1);
+    tickDate.setDate(1); 
+    if (tickDate < startDate) tickDate.setMonth(tickDate.getMonth() + 1);
+    
     while (tickDate < targetDateObj) {
-      xTicks.push(new Date(tickDate));
+      if (tickDate >= startDate) {
+        xTicks.push(new Date(tickDate));
+      }
       tickDate.setMonth(tickDate.getMonth() + 1);
     }
-    let pathD =
-      dataPoints.length > 0
+
+    let pathD = dataPoints.length > 0
         ? `M ${getX(dataPoints[0].date)} ${getY(dataPoints[0].amount)}`
         : "";
-    for (let i = 1; i < dataPoints.length; i++)
+    for (let i = 1; i < dataPoints.length; i++) {
       pathD += ` L ${getX(dataPoints[i].date)} ${getY(dataPoints[i].amount)}`;
+    }
+
     const forecastD = `M ${nowX} ${nowY} Q ${
       nowX + (goalX - nowX) * 0.5
     } ${nowY}, ${goalX} ${goalY}`;
+    
     const formatDate = (date) => `${date.getMonth() + 1}.${date.getDate()}`;
 
+    // --- JSX Return (기존 코드와 동일하지만 수정된 변수 사용) ---
     return (
       <div className="flex-grow w-full max-w-6xl mx-auto pb-24 px-4 animate-fadeIn font-sans">
         <div className="flex justify-between items-end mb-6 px-6">
@@ -1931,18 +1923,9 @@ useEffect(() => {
           </div>
         </div>
         <div className="bg-[#0A0F1E] border-2 border-white/5 rounded-[3rem] p-4 relative overflow-visible shadow-2xl">
-          <svg
-            viewBox={`0 0 ${chartW} ${chartH}`}
-            className="w-full h-auto overflow-visible"
-          >
+          <svg viewBox={`0 0 ${chartW} ${chartH}`} className="w-full h-auto overflow-visible">
             <defs>
-              <linearGradient
-                id="realPathGrad"
-                x1="0%"
-                y1="0%"
-                x2="100%"
-                y2="0%"
-              >
+              <linearGradient id="realPathGrad" x1="0%" y1="0%" x2="100%" y2="0%">
                 <stop offset="0%" stopColor="#F59E0B" stopOpacity="0.5" />
                 <stop offset="100%" stopColor="#F59E0B" stopOpacity="1" />
               </linearGradient>
@@ -1954,373 +1937,130 @@ useEffect(() => {
                 </feMerge>
               </filter>
             </defs>
-            <line
-              x1={padding.left}
-              y1={goalY}
-              x2={chartW}
-              y2={goalY}
-              stroke="#F59E0B"
-              strokeWidth="1"
-              strokeDasharray="6,4"
-              opacity="0.4"
-            />
+            <line x1={padding.left} y1={goalY} x2={chartW} y2={goalY} stroke="#F59E0B" strokeWidth="1" strokeDasharray="6,4" opacity="0.4" />
             <g transform={`translate(${goalX}, ${goalY})`}>
               <foreignObject x="-20" y="-45" width="40" height="60">
                 <div className="flex flex-col items-center justify-end animate-bounce h-full pb-2">
-                  <Trophy
-                    size={28}
-                    className="text-amber-500 drop-shadow-[0_0_10px_rgba(245,158,11,0.8)]"
-                    weight="fill"
-                  />
+                  <Trophy size={28} className="text-amber-500 drop-shadow-[0_0_10px_rgba(245,158,11,0.8)]" weight="fill" />
                 </div>
               </foreignObject>
-              <text
-                y="-55"
-                textAnchor="middle"
-                fill="#F59E0B"
-                fontSize="10"
-                fontWeight="900"
-                className="uppercase tracking-widest"
-              >
-                Apex BP
-              </text>
-              <text
-                y="-67"
-                textAnchor="middle"
-                fill="#F59E0B"
-                fontSize="8"
-                opacity="0.7"
-              >
-                TARGET
-              </text>
+              <text y="-55" textAnchor="middle" fill="#F59E0B" fontSize="10" fontWeight="900" className="uppercase tracking-widest">Apex BP</text>
+              <text y="-67" textAnchor="middle" fill="#F59E0B" fontSize="8" opacity="0.7">TARGET</text>
             </g>
-            <line
-              x1={padding.left}
-              y1={chartH - padding.bottom}
-              x2={goalX}
-              y2={chartH - padding.bottom}
-              stroke="#334155"
-              strokeWidth="2"
-            />
+            <line x1={padding.left} y1={chartH - padding.bottom} x2={goalX} y2={chartH - padding.bottom} stroke="#334155" strokeWidth="2" />
             <g transform={`translate(${startX}, ${chartH - padding.bottom})`}>
               <line y1="0" y2="10" stroke="#F59E0B" strokeWidth="2" />
-              <text
-                y="25"
-                textAnchor="middle"
-                fill="#F59E0B"
-                fontSize="10"
-                fontWeight="black"
-              >
-                START
-              </text>
-              <text y="35" textAnchor="middle" fill="#64748B" fontSize="8">
-                {formatDate(startDate)}
-              </text>
+              <text y="25" textAnchor="middle" fill="#F59E0B" fontSize="10" fontWeight="black">START</text>
+              <text y="35" textAnchor="middle" fill="#64748B" fontSize="8">{formatDate(startDate)}</text>
             </g>
             {xTicks.map((tickDate, i) => {
               const tx = getX(tickDate);
               if (tx > goalX - 30) return null;
               const isJan = tickDate.getMonth() === 0;
               return (
-                <g
-                  key={i}
-                  transform={`translate(${tx}, ${chartH - padding.bottom})`}
-                >
-                  <line
-                    y1="0"
-                    y2={isJan ? "10" : "6"}
-                    stroke={isJan ? "#F59E0B" : "#475569"}
-                    strokeWidth={isJan ? "2" : "1"}
-                  />
-                  <text
-                    y="24"
-                    textAnchor="middle"
-                    fill={isJan ? "#F59E0B" : "#64748B"}
-                    fontSize={isJan ? "10" : "9"}
-                    fontWeight={isJan ? "black" : "bold"}
-                  >
-                    {isJan
-                      ? `${tickDate.getFullYear()}. ${tickDate.getMonth() + 1}.`
-                      : `${tickDate.getMonth() + 1}.`}
+                <g key={i} transform={`translate(${tx}, ${chartH - padding.bottom})`}>
+                  <line y1="0" y2={isJan ? "10" : "6"} stroke={isJan ? "#F59E0B" : "#475569"} strokeWidth={isJan ? "2" : "1"} />
+                  <text y="24" textAnchor="middle" fill={isJan ? "#F59E0B" : "#64748B"} fontSize={isJan ? "10" : "9"} fontWeight={isJan ? "black" : "bold"}>
+                    {isJan ? `${tickDate.getFullYear()}. ${tickDate.getMonth() + 1}.` : `${tickDate.getMonth() + 1}.`}
                   </text>
                 </g>
               );
             })}
-            <line
-              x1={padding.left}
-              y1={padding.top}
-              x2={padding.left}
-              y2={chartH - padding.bottom}
-              stroke="#334155"
-              strokeWidth="2"
-            />
-            <text
-              x={padding.left - 15}
-              y={startY}
-              textAnchor="end"
-              fill="#94A3B8"
-              fontSize="10"
-              fontWeight="bold"
-              dominantBaseline="middle"
-            >
-              {currency}
-              {fNum(startAmount)}
-            </text>
-            <text
-              x={padding.left - 15}
-              y={goalY}
-              textAnchor="end"
-              fill="#F59E0B"
-              fontSize="11"
-              fontWeight="black"
-              dominantBaseline="middle"
-            >
-              {currency}
-              {fNum(goalAmount)}
-            </text>
-            <path
-              d={forecastD}
-              fill="none"
-              stroke="#F59E0B"
-              strokeWidth="2"
-              strokeDasharray="4,4"
-              opacity="0.3"
-            />
-            <text
-              x={(nowX + goalX) / 2}
-              y={(nowY + goalY) / 2 - 10}
-              fill="#F59E0B"
-              fontSize="9"
-              opacity="0.5"
-              textAnchor="middle"
-              transform={`rotate(-10, ${(nowX + goalX) / 2}, ${
-                (nowY + goalY) / 2 - 10
-              })`}
-            >
-              EXPECTED PATH
-            </text>
-            <path
-              d={pathD}
-              fill="none"
-              stroke="url(#realPathGrad)"
-              strokeWidth="4"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              filter="url(#neonBlur)"
-            />
+            <line x1={padding.left} y1={padding.top} x2={padding.left} y2={chartH - padding.bottom} stroke="#334155" strokeWidth="2" />
+            <text x={padding.left - 15} y={startY} textAnchor="end" fill="#94A3B8" fontSize="10" fontWeight="bold" dominantBaseline="middle">{currency}{fNum(startAmount)}</text>
+            <text x={padding.left - 15} y={goalY} textAnchor="end" fill="#F59E0B" fontSize="11" fontWeight="black" dominantBaseline="middle">{currency}{fNum(goalAmount)}</text>
+            <path d={forecastD} fill="none" stroke="#F59E0B" strokeWidth="2" strokeDasharray="4,4" opacity="0.3" />
+            <text x={(nowX + goalX) / 2} y={(nowY + goalY) / 2 - 10} fill="#F59E0B" fontSize="9" opacity="0.5" textAnchor="middle" transform={`rotate(-10, ${(nowX + goalX) / 2}, ${(nowY + goalY) / 2 - 10})`}>EXPECTED PATH</text>
+            <path d={pathD} fill="none" stroke="url(#realPathGrad)" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" filter="url(#neonBlur)" />
             <g transform={`translate(${nowX}, ${chartH - padding.bottom})`}>
-              <line
-                y1="0"
-                y2={-(chartH - padding.bottom - nowY)}
-                stroke="#F59E0B"
-                strokeWidth="1"
-                strokeDasharray="2,2"
-                opacity="0.5"
-              />
-              <rect
-                x="-35"
-                y="10"
-                width="70"
-                height="22"
-                rx="6"
-                fill="#F59E0B"
-              />
-              <text
-                x="0"
-                y="24"
-                textAnchor="middle"
-                fill="#000"
-                fontSize="9"
-                fontWeight="black"
-              >
-                NOW ({formatDate(today)})
-              </text>
+              <line y1="0" y2={-(chartH - padding.bottom - nowY)} stroke="#F59E0B" strokeWidth="1" strokeDasharray="2,2" opacity="0.5" />
+              <rect x="-35" y="10" width="70" height="22" rx="6" fill="#F59E0B" />
+              <text x="0" y="24" textAnchor="middle" fill="#000" fontSize="9" fontWeight="black">NOW ({formatDate(today)})</text>
             </g>
             <g transform={`translate(${nowX}, ${nowY})`}>
               <circle r="5" fill="#FFF" filter="url(#neonBlur)" />
               <circle r="10" fill="none" stroke="#FFF" opacity="0.4">
-                <animate
-                  attributeName="r"
-                  values="6;14;6"
-                  dur="2s"
-                  repeatCount="indefinite"
-                />
-                <animate
-                  attributeName="opacity"
-                  values="0.6;0;0.6"
-                  dur="2s"
-                  repeatCount="indefinite"
-                />
+                <animate attributeName="r" values="6;14;6" dur="2s" repeatCount="indefinite" />
+                <animate attributeName="opacity" values="0.6;0;0.6" dur="2s" repeatCount="indefinite" />
               </circle>
             </g>
           </svg>
         </div>
-
         <div className="mt-8 text-center opacity-40">
-          <p className="text-[10px] uppercase tracking-widest">
-            Data reflects actual ledger entries from{" "}
-            {startDate.toLocaleDateString()}
-          </p>
-          <br></br>
-          <br></br> <br></br>
+          <p className="text-[10px] uppercase tracking-widest">Data reflects actual ledger entries from {startDate.toLocaleDateString()}</p>
+          <br /><br /><br />
           <div className="flex justify-between items-end mb-6 mt-4 px-2">
             <div>
               <div className="flex items-center gap-2">
                 <h4 className="text-sm font-black text-white uppercase tracking-widest flex items-center gap-2 mb-6">
-                  <ClipboardList size={18} className="text-emerald-500" />{" "}
-                  Activity Focus
+                  <ClipboardList size={18} className="text-emerald-500" /> Activity Focus
                 </h4>
               </div>
             </div>
             <div className="text-right">
-              <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">
-                Total Identity Hours
-              </p>
-              <span className="text-3xl font-black text-emerald-500 font-mono">
-                {totalHours.toFixed(1)}h
-              </span>
+              <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Total Identity Hours</p>
+              <span className="text-3xl font-black text-emerald-500 font-mono">{totalHours.toFixed(1)}h</span>
             </div>
           </div>
           {/* [차트 섹션] 집중도 분석 (Focus Breakdown) */}
           <div className="bg-[#0A0F1E]/60 border border-white/5 rounded-[3rem] p-8 mb-10 shadow-2xl relative overflow-hidden">
             <div className="flex flex-col md:flex-row items-center gap-10">
-              {/* 시각화 그래픽 (SVG 도넛 차트 형태) */}
               <div className="relative w-48 h-48 shrink-0">
-                <svg
-                  viewBox="0 0 36 36"
-                  className="w-full h-full transform -rotate-90"
-                >
-                  <circle
-                    cx="18"
-                    cy="18"
-                    r="15.9"
-                    fill="transparent"
-                    stroke="#1A202C"
-                    strokeWidth="3"
-                  />
+                <svg viewBox="0 0 36 36" className="w-full h-full transform -rotate-90">
+                  <circle cx="18" cy="18" r="15.9" fill="transparent" stroke="#1A202C" strokeWidth="3" />
                   {distribution.map((val, i) => {
-                    const offset = distribution
-                      .slice(0, i)
-                      .reduce((a, b) => a + b, 0);
+                    const offset = distribution.slice(0, i).reduce((a, b) => a + b, 0);
                     const strokeDash = (val / (totalHours || 1)) * 100;
                     const strokeOffset = (offset / (totalHours || 1)) * 100;
-                    const colors = [
-                      "#F87171",
-                      "#FB923C",
-                      "#FBBF24",
-                      "#34D399",
-                      "#60A5FA",
-                    ];
+                    const colors = ["#F87171", "#FB923C", "#FBBF24", "#34D399", "#60A5FA"];
                     return (
-                      <circle
-                        key={i}
-                        cx="18"
-                        cy="18"
-                        r="15.9"
-                        fill="transparent"
-                        stroke={colors[i]}
-                        strokeWidth="3.2"
-                        strokeDasharray={`${strokeDash} 100`}
-                        strokeDashoffset={`-${strokeOffset}`}
-                        strokeLinecap="round"
-                      />
+                      <circle key={i} cx="18" cy="18" r="15.9" fill="transparent" stroke={colors[i]} strokeWidth="3.2" strokeDasharray={`${strokeDash} 100`} strokeDashoffset={`-${strokeOffset}`} strokeLinecap="round" />
                     );
                   })}
                 </svg>
                 <div className="absolute inset-0 flex flex-col items-center justify-center">
-                  <p className="text-[10px] text-slate-500 font-bold uppercase">
-                    Balance
-                  </p>
+                  <p className="text-[10px] text-slate-500 font-bold uppercase">Balance</p>
                   <TrendingUp size={20} className="text-amber-500" />
                 </div>
               </div>
-              {/* 범례 및 통계 */}
               <div className="flex-grow grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {[1, 2, 3, 4, 5].map((lv) => (
-                  <div
-                    key={lv}
-                    className="flex items-center justify-between p-3 bg-slate-900/40 rounded-2xl border border-white/5"
-                  >
+                  <div key={lv} className="flex items-center justify-between p-3 bg-slate-900/40 rounded-2xl border border-white/5">
                     <div className="flex items-center gap-3">
-                      <div
-                        className={`w-2 h-2 rounded-full ${
-                          [
-                            "bg-rose-500",
-                            "bg-orange-400",
-                            "bg-amber-400",
-                            "bg-emerald-400",
-                            "bg-blue-400",
-                          ][lv - 1]
-                        }`}
-                      />
-                      <span className="text-[11px] font-bold text-slate-300">
-                        {lv}단계: {levelMap[lv]}
-                      </span>
+                      <div className={`w-2 h-2 rounded-full ${["bg-rose-500", "bg-orange-400", "bg-amber-400", "bg-emerald-400", "bg-blue-400"][lv - 1]}`} />
+                      <span className="text-[11px] font-bold text-slate-300">{lv}단계: {levelMap[lv]}</span>
                     </div>
-                    <span className="text-xs font-black text-white">
-                      {(
-                        (distribution[lv - 1] / (totalHours || 1)) *
-                        100
-                      ).toFixed(1)}
-                      %
-                    </span>
+                    <span className="text-xs font-black text-white">{((distribution[lv - 1] / (totalHours || 1)) * 100).toFixed(1)}%</span>
                   </div>
                 ))}
               </div>
             </div>
           </div>
-          {/* [리스트 섹션] 활동 로그 (Identity Log) */}
           <div className="px-2 mb-4">
             <h4 className="text-sm font-black text-white uppercase tracking-widest flex items-center gap-2 mb-6">
-              <ClipboardList size={18} className="text-emerald-500" /> Activity
-              Timeline
+              <ClipboardList size={18} className="text-emerald-500" /> Activity Timeline
             </h4>
             <div className="space-y-4">
               {ledger.length === 0 ? (
-                <div className="text-center py-20 bg-slate-900/20 rounded-[2rem] border border-dashed border-white/5 text-slate-600 text-sm">
-                  기록된 활동 파동이 없습니다.
-                </div>
+                <div className="text-center py-20 bg-slate-900/20 rounded-[2rem] border border-dashed border-white/5 text-slate-600 text-sm">기록된 활동 파동이 없습니다.</div>
               ) : (
                 [...ledger].reverse().map((log, i) => (
                   <div key={i} className="flex items-center gap-4 group">
-                    {/* 날짜 표시 */}
                     <div className="w-16 shrink-0 text-right">
-                      <p className="text-[10px] font-bold text-slate-600 uppercase">
-                        {new Date(log.date).getMonth() + 1}.
-                        {new Date(log.date).getDate()}
-                      </p>
-                      <p className="text-[8px] text-slate-700 font-mono">
-                        {new Date(log.date).getHours()}:
-                        {String(new Date(log.date).getMinutes()).padStart(
-                          2,
-                          "0"
-                        )}
-                      </p>
+                      <p className="text-[10px] font-bold text-slate-600 uppercase">{new Date(log.date).getMonth() + 1}.{new Date(log.date).getDate()}</p>
+                      <p className="text-[8px] text-slate-700 font-mono">{new Date(log.date).getHours()}:{String(new Date(log.date).getMinutes()).padStart(2, "0")}</p>
                     </div>
-
-                    {/* 로그 카드 */}
                     <div className="flex-grow bg-[#1A202C]/40 border border-white/5 p-5 rounded-[2rem] flex items-center justify-between hover:bg-slate-900/60 transition-all">
                       <div>
                         <div className="flex items-center gap-2 mb-1">
-                          <span className="text-[9px] font-black px-2 py-0.5 rounded-full bg-slate-900 border border-white/10 text-slate-500 uppercase tracking-tighter">
-                            LV.{log.level || "?"}
-                          </span>
-                          <h5 className="text-sm font-bold text-slate-200">
-                            {log.desc}
-                          </h5>
+                          <span className="text-[9px] font-black px-2 py-0.5 rounded-full bg-slate-900 border border-white/10 text-slate-500 uppercase tracking-tighter">LV.{log.level || "?"}</span>
+                          <h5 className="text-sm font-bold text-slate-200">{log.desc}</h5>
                         </div>
-                        <p className="text-[10px] text-slate-500 font-medium">
-                          수행 시간: {log.duration || 0}시간
-                        </p>
+                        <p className="text-[10px] text-slate-500 font-medium">수행 시간: {log.duration || 0}시간</p>
                       </div>
                       <div className="text-right">
-                        <p className="text-xs font-black text-amber-500">
-                          +{currency}
-                          {fNum(log.amount)}
-                        </p>
-                        <p className="text-[9px] text-slate-600 font-bold uppercase tracking-widest">
-                          Magnitude
-                        </p>
+                        <p className="text-xs font-black text-amber-500">+{currency}{fNum(log.amount)}</p>
+                        <p className="text-[9px] text-slate-600 font-bold uppercase tracking-widest">Magnitude</p>
                       </div>
                     </div>
                   </div>
