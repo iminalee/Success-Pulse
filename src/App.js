@@ -2109,7 +2109,7 @@ const nowX = getX(dataPoints[dataPoints.length - 1].date); // 📅 가로 위치
               filter="url(#neonBlur)"
             />
             <g transform={`translate(${nowX}, ${chartH - padding.bottom})`}>
-              {/* 1. 박스까지 연결하는 짧은 실선 */}
+{/* [새로운 코드] 박스 윗면(y=10)에서 바닥(y=0)까지 연결하는 짧고 굵은 실선 */}
   <line
     x1="0"
     x2="0"
@@ -2119,19 +2119,18 @@ const nowX = getX(dataPoints[dataPoints.length - 1].date); // 📅 가로 위치
     strokeWidth="2"
     opacity="1"
   />
-                         
-              
-              
-              <line
-                x1="0"  // 추가: 가로 시작점을 그룹의 중앙(nowX)으로 고정
-                x2="0"  // 추가: 가로 끝점도 그룹의 중앙(nowX)으로 고정
-                y1="0"
-                y2={-(chartH - padding.bottom - nowY)}
-                stroke="#F59E0B"
-                strokeWidth="1"
-                strokeDasharray="2,2"
-                opacity="0.5"
-              />
+
+  {/* [새로운 코드] 바닥(y=0)에서 하얀 점 높이까지 올라가는 점선 */}
+  <line
+    x1="0"
+    x2="0"
+    y1="0"
+    y2={-(chartH - padding.bottom - nowY)}
+    stroke="#F59E0B"
+    strokeWidth="1"
+    strokeDasharray="2,2"
+    opacity="0.5"
+  />
               <rect
                 x="-35"
                 y="10"
