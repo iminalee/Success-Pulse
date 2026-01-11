@@ -1881,8 +1881,8 @@ useEffect(() => {
       chartH - padding.bottom - innerH * ((amount - minY) / totalAmountRange);
     const startX = getX(startDate);
     const startY = getY(startAmount);
-    const nowX = getX(today);
-    const nowY = getY(currentAccumulated);
+const nowY = getY(currentAccumulated); // 💰 돈의 높이 (정확한 자산 반영)
+const nowX = getX(dataPoints[dataPoints.length - 1].date); // 📅 가로 위치 (하얀 점과 일치)
     const goalX = getX(targetDateObj);
     const goalY = getY(goalAmount);
     const xTicks = [];
