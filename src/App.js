@@ -265,12 +265,11 @@ ${visionSummary}
       if (data) {
         // 1. Fill basic text/number data (default if missing)
         if (data.user_name) setUserName(data.user_name);
-        setSignedDate(data.signed_date || null);
         setCurrency(data.currency || "₩");
         setAnnualIncome(data.annual_income || 0);
         setTargetDate(data.target_date || "2026-12-31");
         setSignature(data.signature || "");
-        
+        setSignedDate(data.signed_date || null);
         
         // 2. [Important] Fill complex object data (Key to preventing blank screens!)
         // If data exists, use it. If not, insert empty arrays ([]) or objects ({}).
@@ -1846,16 +1845,10 @@ useEffect(() => {
     });
 
     const totalHours = distribution.reduce((a, b) => a + b, 0);
-    
-    const today = new Date();
-    today.setHours(0, 0, 0, 0); // 시간 오차 제거
-    // ✍️ 서명 날짜가 있으면 '그 날'을 시작점으로, 없으면 '오늘'을 시작점으로 강제 분리
-    const startDate = signedDate ? new Date(signedDate) : new Date(today);
-    startDate.setHours(0, 0, 0, 0); // 시작점도 정각으로 고정
-    let startDate;
-    let targetDateObj;
 
+    const startDate = signedDate ? new Date(signedDate) : new Date();
     const targetDateObj = new Date(targetDate);
+    const today = new Date();
     const startAmount = annualIncome;
     const goalAmount = mbGoalAmount;
     const sortedLedger = ledger.sort(
