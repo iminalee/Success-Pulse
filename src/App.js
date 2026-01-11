@@ -2109,6 +2109,19 @@ const nowX = getX(dataPoints[dataPoints.length - 1].date); // 📅 가로 위치
               filter="url(#neonBlur)"
             />
             <g transform={`translate(${nowX}, ${chartH - padding.bottom})`}>
+              {/* (1)번: 박스까지 연결하는 짧은 실선 추가 */}
+              <line
+                x1="0"
+                x2="0"
+                y1="0"        {/* 그래프 바닥선에서 시작 */}
+                y2="10"       {/* 주황색 박스(y=10)가 시작되는 지점까지 내려감 */}
+                stroke="#F59E0B"
+                strokeWidth="2"
+                opacity="1"
+              />
+                         
+              
+              
               <line
                 x1="0"  // 추가: 가로 시작점을 그룹의 중앙(nowX)으로 고정
                 x2="0"  // 추가: 가로 끝점도 그룹의 중앙(nowX)으로 고정
