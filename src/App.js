@@ -177,130 +177,55 @@ const ResetPasswordUI = () => {
 
 // 3. 메인 앱
 const App = () => {
-  // ==================================================================================
-  // 1. 상태(State) 변수 정의 (가장 먼저 선언해야 함)
-  // ==================================================================================
-  
-  // (1) 사용자 인증 및 앱 기본 상태
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [isRecoveryMode, setIsRecoveryMode] = useState(false);
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [otp, setOtp] = useState("");
-  const [isOtpSent, setIsOtpSent] = useState(false);
+  const handleGenerateBPSScenario = () => {
+    // 1-5단계 데이터 수집
+    const activeVisions = [1, 2, 3, 4, 5]
+      .filter((lv) => visions[lv].title !== "")
+      .map((lv) => ({
+        level: levelMap[lv],
+        title: visions[lv].title,
+        // 각 단계에서 강조된 VAK 요소가 있다면 포함 (기존 데이터 구조 기반)
+      }));
 
-  // (2) 핵심 데이터 (DB와 동기화되는 항목들)
-  const [userName, setUserName] = useState("");
-  const [currency, setCurrency] = useState("₩");
-  const [annualIncome, setAnnualIncome] = useState(0);
-  const [targetDate, setTargetDate] = useState("2026-12-31");
-  const [signature, setSignature] = useState("");
-  const [signedDate, setSignedDate] = useState(null); // [중요] 서약 날짜
-  const [currentAsset, setCurrentAsset] = useState(0);
-  const [ledger, setLedger] = useState([]); // [중요] 활동 기록
-  const [bpsTraits, setBpsTraits] = useState(["", "", "", "", ""]);
-  const [archivedVisions, setArchivedVisions] = useState([]);
-  const [trashVisions, setTrashVisions] = useState([]);
-
-  // (3) Vision 데이터 초기값
-  const initialLvAsset = 0 / 5;
-  const [visions, setVisions] = useState({
-    6: { title: "Apex Identity 확립", emoji: "👑", v: "", a: "", k: "", immersionScript: "", progressAsset: initialLvAsset, events: [] },
-    5: { title: "", emoji: "🧘", v: "", a: "", k: "", immersionScript: "", progressAsset: initialLvAsset, events: [] },
-    4: { title: "", emoji: "🏆", v: "", a: "", k: "", immersionScript: "", progressAsset: initialLvAsset, events: [] },
-    3: { title: "", emoji: "🤝", v: "", a: "", k: "", immersionScript: "", progressAsset: 0, events: [] },
-    2: { title: "", emoji: "🏦", v: "", a: "", k: "", immersionScript: "", progressAsset: 0, events: [] },
-    1: { title: "", emoji: "🏃", v: "", a: "", k: "", immersionScript: "", progressAsset: initialLvAsset, events: [] },
-  });
-
-  // (4) 프로필 데이터 (VAK, TCI)
-  const [vakProfile, setVakProfile] = useState({ order: "V-A-K", vPercent: 50, aPercent: 50, kPercent: 50 });
-  const [tciProfile, setTciProfile] = useState({
-    ns: { score: 50 }, ha: { score: 50 }, rd: { score: 50 }, p: { score: 50 },
-    sd: { score: 50 }, c: { score: 50 }, st: { score: 50 }, sd_c: { score: 100 },
-  });
-
-  // (5) UI 및 기타 상태
-  const [activeLevel, setActiveLevel] = useState(5);
-  const [currentView, setCurrentView] = useState("hub");
-  const [chartData, setChartData] = useState([]);
-  const [isAiModalOpen, setIsAiModalOpen] = useState(false);
-  const [isSensoryModalOpen, setIsSensoryModalOpen] = useState(false);
-  const [aiLoading, setAiLoading] = useState(false);
-  const [activeSensory, setActiveSensory] = useState(null);
-  const [customTask, setCustomTask] = useState("");
-  const [duration, setDuration] = useState(1);
-  const [eventDurations, setEventDurations] = useState({});
-  
-  // 권한 상태
-  const [hasEditAccess, setHasEditAccess] = useState(false);
-  const [hasAiAccess, setHasAiAccess] = useState(false);
-
-  // 차트 참조
-  const chartRef = useRef(null);
-  const chartInstance = useRef(null);
-
-  // ==================================================================================
-  // 2. 핵심 함수 정의 (변수 선언 후에 와야 함)
-  // ==================================================================================
-
-  // (1) 데이터 불러오기 함수
-  const fetchUserData = async (userId, currentUserObject) => {
-    try {
-      const { data, error } = await supabase
-        .from("pulse_data")
-        .select("*")
-        .eq("user_id", userId)
-        .single();
-
-      if (error && error.code !== 'PGRST116') throw error;
-
-      // 이름 결정 로직 (DB > 가입정보 > 이메일)
-      let finalName = "";
-      if (data && data.user_name) finalName = data.user_name;
-      else if (currentUserObject?.user_metadata?.user_name) finalName = currentUserObject.user_metadata.user_name;
-      else if (currentUserObject?.email) finalName = currentUserObject.email.split('@')[0];
-      setUserName(finalName);
-
-      if (data) {
-        // [그래프 문제 해결 핵심] 서약 날짜를 확실하게 로드
-        setSignedDate(data.signed_date || null);
-        
-        setCurrency(data.currency || "₩");
-        setAnnualIncome(data.annual_income || 0);
-        setTargetDate(data.target_date || "2026-12-31");
-        setSignature(data.signature || "");
-        
-        // 빈 배열/객체 방지 처리
-        setLedger(data.ledger || []);
-        setArchivedVisions(data.archived_visions || []);
-        setTrashVisions(data.trash_visions || []);
-        setVisions(prev => ({ ...prev, ...(data.visions || {}) }));
-        setBpsTraits(data.bps_traits || ["", "", "", "", ""]);
-        
-        setVakProfile(data.vak_profile || { order: "V-A-K", vPercent: 50, aPercent: 50, kPercent: 50 });
-        
-        const defaultTci = { ns: { score: 50 }, ha: { score: 50 }, rd: { score: 50 }, p: { score: 50 }, sd: { score: 50 }, c: { score: 50 }, st: { score: 50 }, sd_c: { score: 100 } };
-        setTciProfile({ ...defaultTci, ...(data.tci_profile || {}) });
-
-        setHasEditAccess(data.has_edit_access || false);
-        setHasAiAccess(data.has_ai_access || false);
-      }
-    } catch (err) {
-      console.error("데이터 로드 중 오류:", err);
+    if (activeVisions.length === 0 && bpsTraits.every((t) => t === "Empty")) {
+      showToast(
+        "데이터가 부족합니다. 하위 단계의 비전과 Traits를 먼저 설정하세요."
+      );
+      return;
     }
+
+    const traitsStr = bpsTraits.filter((t) => t !== "Empty").join(", ");
+    const visionSummary = activeVisions
+      .map((v) => `${v.level}: ${v.title}`)
+      .join("\n");
+
+    // AI 시나리오 생성 템플릿
+    const aiScript = `[통합 정체성 동기화 완료]
+당신은 이제 '${traitsStr}'의 정체성을 가진 완벽한 존재, Apex BP로 거듭났습니다.
+
+당신의 내면에는 다음과 같은 하위 자아들의 성취가 하나의 거대한 흐름으로 요동칩니다:
+${visionSummary}
+
+당신이 눈을 뜨면(Visual) 그토록 갈망하던 성공의 풍경이 초고화질의 현실로 펼쳐지며, 당신의 내면에서는(Auditory) "나는 이미 모든 것을 이루었다"는 확신의 목소리가 웅장하게 울려 퍼집니다. 
+
+지금 느껴지는 이 전율(Kinesthetic)은 단순한 상상이 아니라, 당신의 세포 하나하나에 새겨진 미래의 기억입니다. 당신의 모든 행동은 이제 이 통합된 정체성으로부터 자연스럽게 흘러나오는 위대한 서사가 될 것입니다.`;
+
+    // Level 6의 immersionScript에 저장
+    updateVision(6, { immersionScript: aiScript });
+    showToast("AI가 통합 마스터 시나리오를 생성했습니다.");
   };
 
-  // (2) 시간(분) 포맷팅 함수
-  const formatDuration = (totalMinutes) => {
-    if (totalMinutes === 0) return "0m";
-    const h = Math.floor(totalMinutes / 60);
-    const m = totalMinutes % 60;
-    return h > 0 ? `${h}h ${m > 0 ? m + "m" : ""}` : `${m}m`;
-  };
+  // 기존 코드들 아래에 추가하세요
+  const [otp, setOtp] = useState(""); // 인증번호 저장할 곳
+  const [isOtpSent, setIsOtpSent] = useState(false); // 메일 보냈는지 확인하는 스위치
 
-  // (3) 시간 조절 함수
+  // ▼▼▼ [추가] 시간(Duration) 상태 관리 (기본값 1시간) ▼▼▼
+  const [duration, setDuration] = useState(1);
+
+  // 1. 개별 항목의 시간을 저장할 객체 상태 (기본값 1시간)
+  const [eventDurations, setEventDurations] = useState({});
+
+  // 2. 특정 항목의 시간을 조절하는 전용 함수. // [수정] 내부 단위를 '분'으로 변경 (10분 단위)
   const updateSpecificDuration = (id, delta) => {
     setEventDurations((prev) => ({
       ...prev,
@@ -308,48 +233,314 @@ const App = () => {
     }));
   };
 
-  // ==================================================================================
-  // 3. useEffect (실행 로직)
-  // ==================================================================================
+  // [추가] 분을 "1h 20m" 형태로 예쁘게 바꿔주는 변환 함수
+  const formatDuration = (totalMinutes) => {
+    if (totalMinutes === 0) return "0m";
+    const h = Math.floor(totalMinutes / 60);
+    const m = totalMinutes % 60;
+    return h > 0 ? `${h}h ${m > 0 ? m + "m" : ""}` : `${m}m`;
+  };
 
-  // (1) 초기 로그인 체크 및 데이터 로드
-  useEffect(() => {
-    const hash = window.location.hash;
-    if (hash && hash.includes("type=recovery")) setIsRecoveryMode(true);
+  // 상태 관리 (DB 동기화용)
+  const [user, setUser] = useState(null);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState(""); // 추가
+  const [loading, setLoading] = useState(false);
+  const [customTask, setCustomTask] = useState("");
+  // 기존 상태 변수들 근처에 추가하세요
+  const [isRecoveryMode, setIsRecoveryMode] = useState(false);
 
-    const initApp = async () => {
-      setLoading(true);
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session?.user) {
-        setUser(session.user);
-        await fetchUserData(session.user.id, session.user);
+  // [추가] 로그인 즉시 데이터 불러오기 함수
+  // [Modified] Safe function to auto-fill empty data defaults
+  const fetchUserData = async (userId) => {
+    try {
+      const { data, error } = await supabase
+        .from("pulse_data")
+        .select("*")
+        .eq("user_id", userId)
+        .single();
+
+      if (error) throw error;
+
+      if (data) {
+        // 1. Fill basic text/number data (default if missing)
+        if (data.user_name) setUserName(data.user_name);
+        setCurrency(data.currency || "₩");
+        setAnnualIncome(data.annual_income || 0);
+        setTargetDate(data.target_date || "2026-12-31");
+        setSignature(data.signature || "");
+        setSignedDate(data.signed_date || null);
+        
+        // 2. [Important] Fill complex object data (Key to preventing blank screens!)
+        // If data exists, use it. If not, insert empty arrays ([]) or objects ({}).
+        setLedger(data.ledger || []);
+        setArchivedVisions(data.archived_visions || []);
+        setTrashVisions(data.trash_visions || []);
+        
+        // 3. Safely fill vision data (Merge with previous state)
+        setVisions(prev => ({ ...prev, ...(data.visions || {}) }));
+        
+        // 4. Safely fill Traits
+        setBpsTraits(data.bps_traits || ["", "", "", "", ""]);
+        
+        // 5. Safely fill VAK profile (Set defaults)
+        setVakProfile(data.vak_profile || { 
+          order: "V-A-K", vPercent: 50, aPercent: 50, kPercent: 50 
+        });
+
+        // 6. Safely fill TCI profile (Initialize to 50 if scores are missing)
+        // This stops the 'score' error!
+        const defaultTci = { 
+          ns: { score: 50 }, ha: { score: 50 }, rd: { score: 50 }, 
+          p: { score: 50 }, sd: { score: 50 }, c: { score: 50 }, 
+          st: { score: 50 }, sd_c: { score: 100 } 
+        };
+        // Merge DB data with defaults.
+        setTciProfile({ ...defaultTci, ...(data.tci_profile || {}) });
+
+        // Load permissions
+        setHasEditAccess(data.has_edit_access || false);
+        setHasAiAccess(data.has_ai_access || false);
       }
-      setLoading(false);
-    };
-
-    initApp();
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (event === "PASSWORD_RECOVERY") setIsRecoveryMode(true);
-      
-      if (session?.user) {
+    } catch (err) {
+      console.error("Error loading data (Auto-recovered):", err);
+    }
+  };
+  // [추가] 세션 변경 감지 시 데이터 로드 연결
+useEffect(() => {
+    // 1. [추가] 앱 시작 시 저장된 세션을 강제로 불러옴 (안드로이드 새로고침 대응)
+    const initSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
         setUser(session.user);
-        if (event === "SIGNED_IN" || event === "INITIAL_SESSION") {
-           await fetchUserData(session.user.id, session.user);
-        }
-      } else {
+        fetchUserData(session.user.id);
+      }
+    };
+    initSession();
+
+    // 2. 실시간 로그인 상태 변경 감지
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (session && (event === "SIGNED_IN" || event === "INITIAL_SESSION")) {
+        setUser(session.user);
+        fetchUserData(session.user.id);
+      } else if (event === "SIGNED_OUT") {
         setUser(null);
-        setUserName("");
       }
     });
 
     return () => subscription.unsubscribe();
   }, []);
 
-  // (2) 데이터 자동 저장 (로딩 중엔 저장 안 함)
-  useEffect(() => {
-    if (!user || loading) return;
+  const [currency, setCurrency] = useState("₩");
+  const [userName, setUserName] = useState("");
+  const [targetDate, setTargetDate] = useState("2026-12-31");
+  const [annualIncome, setAnnualIncome] = useState(0);
+  const [currentAsset, setCurrentAsset] = useState(0);
+  const [ledger, setLedger] = useState([]);
+  const [signature, setSignature] = useState("");
+  const [signedDate, setSignedDate] = useState(null);
+  const [bpsTraits, setBpsTraits] = useState(["", "", "", "", ""]);
 
+  const initialLvAsset = 0 / 5;
+  const [visions, setVisions] = useState({
+    6: {
+      title: "Apex Identity 확립",
+      emoji: "👑",
+      v: "",
+      a: "",
+      k: "",
+      immersionScript: "",
+      progressAsset: initialLvAsset,
+      events: [],
+    },
+    5: {
+      title: "",
+      emoji: "🧘",
+      v: "",
+      a: "",
+      k: "",
+      immersionScript: "",
+      progressAsset: initialLvAsset,
+      events: [],
+    },
+    4: {
+      title: "",
+      emoji: "🏆",
+      v: "",
+      a: "",
+      k: "",
+      immersionScript: "",
+      progressAsset: initialLvAsset,
+      events: [],
+    },
+    3: {
+      title: "",
+      emoji: "🤝",
+      v: "",
+      a: "",
+      k: "",
+      immersionScript: "",
+      progressAsset: 0,
+      events: [],
+    },
+    2: {
+      title: "",
+      emoji: "🏦",
+      v: "",
+      a: "",
+      k: "",
+      immersionScript: "",
+      progressAsset: 0,
+      events: [],
+    },
+    1: {
+      title: "",
+      emoji: "🏃",
+      v: "",
+      a: "",
+      k: "",
+      immersionScript: "",
+      progressAsset: initialLvAsset,
+      events: [],
+    },
+  });
+
+  const [vakProfile, setVakProfile] = useState({
+    order: "V-A-K",
+    vPercent: 50,
+    aPercent: 50,
+    kPercent: 50,
+  });
+  const [tciProfile, setTciProfile] = useState({
+    ns: { score: 50 },
+    ha: { score: 50 },
+    rd: { score: 50 },
+    p: { score: 50 },
+    sd: { score: 50 },
+    c: { score: 50 },
+    st: { score: 50 },
+    sd_c: { score: 100 },
+  });
+  const [archivedVisions, setArchivedVisions] = useState([]);
+  const [trashVisions, setTrashVisions] = useState([]);
+
+  // UI 상태
+  const [activeLevel, setActiveLevel] = useState(5);
+  const [currentView, setCurrentView] = useState("hub");
+  const [chartData, setChartData] = useState([]);
+  const [isAiModalOpen, setIsAiModalOpen] = useState(false);
+  const [isSensoryModalOpen, setIsSensoryModalOpen] = useState(false);
+  const [aiLoading, setAiLoading] = useState(false);
+  const [activeSensory, setActiveSensory] = useState(null);
+  const chartRef = useRef(null);
+  const chartInstance = useRef(null);
+
+  // 1. 현재 접속한 유저 이메일 (로그인 시스템에서 가져온다고 가정)
+  const currentUserEmail = "접속한유저@gmail.com";
+  const ADMIN_EMAIL = "5milestones.today@gmail.com";
+
+  // 2. [수정 권한] - 입력창 등을 잠글지 여부
+  // 권한 상태 관리 (초기값은 둘 다 false로 닫아둠)
+  const [hasEditAccess, setHasEditAccess] = useState(false);
+  const [hasAiAccess, setHasAiAccess] = useState(false);
+
+  // [핵심 1] 로그인 체크 및 데이터 불러오기 (Load)
+  // [핵심 1] 로그인 체크 및 데이터 불러오기 (Load) + 비밀번호 복구 감지
+  useEffect(() => {
+    // 1. 주소창(URL) 분석: 비밀번호 재설정 링크인지 먼저 확인
+    // (Supabase는 링크 뒤에 #type=recovery 라는 표식을 붙여서 보냅니다)
+    const hash = window.location.hash;
+    if (hash && hash.includes("type=recovery")) {
+      setIsRecoveryMode(true);
+    }
+
+    // [수정된 initSession 함수]
+    const initSession = async () => {
+      setLoading(true);
+
+      // 1. 먼저 로그인 세션과 유저 정보를 가져옵니다.
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      const currentUser = session?.user;
+      setUser(currentUser);
+
+      // 2. 유저가 있다면 DB에서 데이터를 가져옵니다.
+      if (currentUser) {
+        const { data, error } = await supabase
+          .from("pulse_data")
+          .select("*")
+          .eq("user_id", currentUser.id)
+          .single();
+
+        // 3. DB 데이터를 가져온 '이후'에 로직을 실행해야 에러가 안 납니다.
+        if (data) {
+          // ▼▼▼ [이름 동기화 로직 위치] ▼▼▼
+          if (data.user_name) {
+            // DB에 이름이 이미 있으면 그걸 씁니다.
+            setUserName(data.user_name);
+          } else if (currentUser?.user_metadata?.user_name) {
+            // DB는 비어있는데, 가입할 때 쓴 이름이 있다면? -> 화면에 보여주고 DB에 저장!
+            const nameFromMeta = currentUser.user_metadata.user_name;
+            setUserName(nameFromMeta);
+
+            supabase
+              .from("pulse_data")
+              .update({ user_name: nameFromMeta })
+              .eq("user_id", currentUser.id)
+              .then(({ error }) => {
+                if (error) console.error("이름 DB 저장 실패:", error);
+                else console.log("이름 DB 동기화 완료:", nameFromMeta);
+              });
+          }
+          // ▲▲▲ [이름 동기화 끝] ▲▲▲
+
+          // 나머지 데이터 불러오기
+          if (data.currency) setCurrency(data.currency);
+          if (data.annual_income) setAnnualIncome(data.annual_income);
+          if (data.target_date) setTargetDate(data.target_date);
+          if (data.ledger) setLedger(data.ledger);
+          if (data.visions) setVisions(data.visions);
+          if (data.bps_traits) setBpsTraits(data.bps_traits);
+          if (data.vak_profile) setVakProfile(data.vak_profile);
+          if (data.tci_profile) setTciProfile(data.tci_profile);
+          if (data.archived_visions) setArchivedVisions(data.archived_visions);
+          if (data.trash_visions) setTrashVisions(data.trash_visions);
+          if (data.signature) setSignature(data.signature);
+          if (data.signed_date) setSignedDate(data.signed_date);
+
+          // 권한 설정 불러오기
+          setHasEditAccess(data.has_edit_access || false);
+          setHasAiAccess(data.has_ai_access || false);
+        }
+      }
+      setLoading(false);
+    };
+
+    initSession();
+
+    // 2. 실시간 상태 감지 (이벤트 리스너)
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event, session) => {
+      setUser(session?.user ?? null);
+
+      // [중요] Supabase가 알려주는 '복구 모드' 이벤트 감지
+      if (event === "PASSWORD_RECOVERY") {
+        setIsRecoveryMode(true);
+      }
+
+      if (!session) {
+        setLoading(false);
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  // [핵심 2] 데이터 자동 저장 (Auto Save)
+  useEffect(() => {
+    if (!user) return;
     const timer = setTimeout(async () => {
       const updates = {
         user_id: user.id,
@@ -365,19 +556,41 @@ const App = () => {
         archived_visions: archivedVisions,
         trash_visions: trashVisions,
         signature,
-        signed_date: signedDate, // [중요] 날짜 저장
+        signed_date: signedDate,
         updated_at: new Date(),
       };
-
-      const { error } = await supabase.from("pulse_data").upsert(updates);
+      /* updates 뒤에 내 ID를 추가해서 저장 */
+      const { error } = await supabase.from("pulse_data").upsert({
+        ...updates,
+        user_id: user.id, // ✅ user.id로 바꾸면 해결됩니다!
+      });
       if (error) console.error("자동 저장 실패:", error);
     }, 1000);
-
     return () => clearTimeout(timer);
-  }, [user, loading, userName, currency, annualIncome, targetDate, ledger, visions, bpsTraits, vakProfile, tciProfile, archivedVisions, trashVisions, signature, signedDate]);
+  }, [
+    //user,
+    userName,
+    currency,
+    annualIncome,
+    targetDate,
+    ledger,
+    visions,
+    bpsTraits,
+    vakProfile,
+    tciProfile,
+    archivedVisions,
+    trashVisions,
+    signature,
+    signedDate,
+  ]);
 
-
-
+  // [핵심 3] Gemini API 호출 (VAK 반영)
+  // [수리용] 에러 원인을 팝업으로 상세히 알려주는 함수
+  // [수정] 가장 안정적인 'gemini-pro' 모델을 사용하는 함수
+  // [수정] 최신 모델(1.5-flash)과 새 키를 사용하는 함수
+  // [수정] 새 API 키 + 최신 1.5 Flash 모델 적용
+  // [옵션 1] Gemini 무료 (안정적인 gemini-pro 모델 사용)
+  // [최종] OpenAI (ChatGPT) 연동 함수 (VAK 최적화 적용)
   const generateImmersionScript = async () => {
     // 🔴 회원님이 주신 OpenAI 키를 적용했습니다.
     const OPENAI_API_KEY = process.env.REACT_APP_OPENAI_API_KEY;
@@ -1633,38 +1846,14 @@ const App = () => {
 
     const totalHours = distribution.reduce((a, b) => a + b, 0);
 
-// =========================================================================
-    // [핵심 수정] 서명 여부에 따른 X축(시작~끝) 기준 설정
-    // =========================================================================
+    const startDate = signedDate ? new Date(signedDate) : new Date();
+    const targetDateObj = new Date(targetDate);
     const today = new Date();
-    today.setHours(0, 0, 0, 0); // 시간은 00:00:00으로 통일
-
-    let startDate;
-    let targetDateObj;
-
-    if (signedDate) {
-      // 1. 서명한 경우: [서명일] ~ [설정한 목표일]로 고정
-      startDate = new Date(signedDate);
-      startDate.setHours(0, 0, 0, 0); 
-      
-      targetDateObj = new Date(targetDate); 
-    } else {
-      // 2. 서명 안 한 경우: [오늘] ~ [12개월 후]로 자동 설정 (롤링)
-      startDate = new Date(today);
-      
-      // 오늘로부터 1년 뒤 계산
-      targetDateObj = new Date(today);
-      targetDateObj.setFullYear(today.getFullYear() + 1);
-    }
-
     const startAmount = annualIncome;
     const goalAmount = mbGoalAmount;
-    
-    // 날짜순 정렬 보장
     const sortedLedger = ledger.sort(
       (a, b) => new Date(a.date) - new Date(b.date)
     );
-    // =========================================================================
     let currentAccumulated = startAmount;
     const dataPoints = [{ date: startDate, amount: startAmount }];
     sortedLedger.forEach((item) => {
