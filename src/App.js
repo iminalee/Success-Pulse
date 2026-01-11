@@ -373,8 +373,11 @@ ${visionSummary}
   }, []);
 
   // [핵심 2] 데이터 자동 저장 (Auto Save)
+// [핵심 2] 데이터 자동 저장 (Auto Save) - 수정됨 (안전장치 추가)
   useEffect(() => {
-    if (!user) return;
+    // 1. 유저가 없거나, 아직 데이터를 불러오는 중(loading)이면 절대 저장하지 않음 (덮어쓰기 방지)
+    if (!user || loading) return;
+
     const timer = setTimeout(async () => {
       const updates = {
         user_id: user.id,
@@ -390,19 +393,20 @@ ${visionSummary}
         archived_visions: archivedVisions,
         trash_visions: trashVisions,
         signature,
-        signed_date: signedDate,
+        // [중요] 서약 날짜가 덮어씌워지지 않도록 확실히 포함
+        signed_date: signedDate, 
         updated_at: new Date(),
       };
-      /* updates 뒤에 내 ID를 추가해서 저장 */
-      const { error } = await supabase.from("pulse_data").upsert({
-        ...updates,
-        user_id: user.id, // ✅ user.id로 바꾸면 해결됩니다!
-      });
+
+      const { error } = await supabase.from("pulse_data").upsert(updates);
+      
       if (error) console.error("자동 저장 실패:", error);
-    }, 1000);
+    }, 1000); // 1초 뒤 저장
+
     return () => clearTimeout(timer);
   }, [
-    //user,
+    user,
+    loading, // 로딩 상태가 바뀌면 다시 체크
     userName,
     currency,
     annualIncome,
@@ -415,7 +419,7 @@ ${visionSummary}
     archivedVisions,
     trashVisions,
     signature,
-    signedDate,
+    signedDate, // 날짜가 변경될 때도 저장 트리거
   ]);
 
   // [핵심 3] Gemini API 호출 (VAK 반영)
