@@ -2003,7 +2003,6 @@ const nowX = getX(dataPoints[dataPoints.length - 1].date); // 📅 가로 위치
               strokeWidth="2"
             />
             <g transform={`translate(${startX}, ${chartH - padding.bottom})`}>
-              <line y1="0" y2="10" stroke="#F59E0B" strokeWidth="2" />
               <text
                 y="25"
                 textAnchor="middle"
