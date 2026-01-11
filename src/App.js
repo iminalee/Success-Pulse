@@ -1633,14 +1633,38 @@ const App = () => {
 
     const totalHours = distribution.reduce((a, b) => a + b, 0);
 
-    const startDate = signedDate ? new Date(signedDate) : new Date();
-    const targetDateObj = new Date(targetDate);
+// =========================================================================
+    // [핵심 수정] 서명 여부에 따른 X축(시작~끝) 기준 설정
+    // =========================================================================
     const today = new Date();
+    today.setHours(0, 0, 0, 0); // 시간은 00:00:00으로 통일
+
+    let startDate;
+    let targetDateObj;
+
+    if (signedDate) {
+      // 1. 서명한 경우: [서명일] ~ [설정한 목표일]로 고정
+      startDate = new Date(signedDate);
+      startDate.setHours(0, 0, 0, 0); 
+      
+      targetDateObj = new Date(targetDate); 
+    } else {
+      // 2. 서명 안 한 경우: [오늘] ~ [12개월 후]로 자동 설정 (롤링)
+      startDate = new Date(today);
+      
+      // 오늘로부터 1년 뒤 계산
+      targetDateObj = new Date(today);
+      targetDateObj.setFullYear(today.getFullYear() + 1);
+    }
+
     const startAmount = annualIncome;
     const goalAmount = mbGoalAmount;
+    
+    // 날짜순 정렬 보장
     const sortedLedger = ledger.sort(
       (a, b) => new Date(a.date) - new Date(b.date)
     );
+    // =========================================================================
     let currentAccumulated = startAmount;
     const dataPoints = [{ date: startDate, amount: startAmount }];
     sortedLedger.forEach((item) => {
