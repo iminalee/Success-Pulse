@@ -793,11 +793,16 @@ useEffect(() => {
     if (progressRate >= 80) inflationBonus += 0.1;
     if (progressRate >= 90) inflationBonus += 0.1;
 
+    // [inflationBonus 계산 아래에 추가]
+    const activeVisionsCount = [1, 2, 3, 4, 5].filter(lv => visions[lv]?.title).length;
+    // 시너지 보너스: 1개면 1.0배, 5개면 1.2배 (비전 하나당 5%씩 보너스)
+    const synergyBonus = 1 + (activeVisionsCount - 1) * 0.05; 
+
     // [수정] 분을 시간으로 환산 (예: 70분 -> 1.166...시간) 하여 금액 계산
     const taskHours = taskMinutes / 60;
 
     // 2. 최종 입금액 계산 (기본단가 * 인플레 * 시간)
-    const finalAmount = valueEventAmount * inflationBonus * taskHours;
+     const finalAmount = valueEventAmount * inflationBonus * synergyBonus * taskHours;
 
     // 3. 장부(Ledger)에 기록
     // 2. 장부(Ledger)에 기록할 데이터 생성
@@ -1515,8 +1520,10 @@ useEffect(() => {
 
   const renderHub = () => {
     const activeTraits = bpsTraits;
-    const totalProgress =
-      mbGoalAmount > 0 ? Math.min(currentAsset / mbGoalAmount, 1) : 0;
+    // [1517~1519행 교체]
+    const activeLevels = [1, 2, 3, 4, 5].filter(lv => visions[lv]?.title && visions[lv]?.title !== "");
+    const activeCount = activeLevels.length || 1; 
+    const perLevelTarget = (mbGoalAmount - annualIncome) / activeCount; // 개별 노력 구간
     const widthMap = {
       5: "w-[130px]",
       4: "w-[170px]",
@@ -1610,8 +1617,11 @@ useEffect(() => {
               const isActive = lv === activeLevel;
 
               // 진행률 계산 (전체 자산 대비)
-              const visualPercent = totalProgress * 100;
-              const displayPercent = visualPercent.toFixed(1);
+              // [1612~1614행 교체]
+              const levelProgress = visions[lv]?.progressAsset || 0;
+              // 50%(연봉 지분)에서 시작하여, 할당된 목표(perLevelTarget)를 얼마나 채웠는지 계산
+              const visualPercent = 50 + (levelProgress / perLevelTarget) * 50; 
+              const displayPercent = Math.min(visualPercent, 100).toFixed(1);
 
               // [복구] 설정된 경우 화려한 황금색 그라데이션 적용
               const barBackground = isConfigured
@@ -2993,7 +3003,7 @@ const nowX = getX(dataPoints[dataPoints.length - 1].date); // 📅 가로 위치
     @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
   `}</style>
-  
+
       {/* 헤더 */}
       <header className="flex justify-between items-start md:items-center mb-8 px-4 max-w-7xl mx-auto w-full shrink-0 pt-4">
         {/* ▼▼▼ 여기를 수정했습니다 (클릭하면 홈으로 이동) ▼▼▼ */}
