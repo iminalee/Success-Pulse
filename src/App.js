@@ -2179,7 +2179,7 @@ const nowX = getX(dataPoints[dataPoints.length - 1].date); // 📅 가로 위치
           </svg>
         </div>
 
-        <div className="mt-8 text-center opacity-40">
+        <div className="mt-8 text-center opacity-80">
           <p className="text-[10px] uppercase tracking-widest">
             Data reflects actual ledger entries from{" "}
             {startDate.toLocaleDateString()}
@@ -2190,16 +2190,16 @@ const nowX = getX(dataPoints[dataPoints.length - 1].date); // 📅 가로 위치
             <div>
               <div className="flex items-center gap-2">
                 <h4 className="text-sm font-black text-white uppercase tracking-widest flex items-center gap-2 mb-6">
-                  <ClipboardList size={18} className="text-emerald-500" />{" "}
+                  <ClipboardList size={18} className="text-emerald-300" />{" "}
                   Activity Focus
                 </h4>
               </div>
             </div>
             <div className="text-right">
-              <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">
+              <p className="text-[10px] text-slate-300 font-bold uppercase tracking-widest">
                 Total Identity Hours
               </p>
-              <span className="text-3xl font-black text-emerald-500 font-mono">
+              <span className="text-3xl font-black text-emerald-300 font-mono">
                 {totalHours.toFixed(1)}h
               </span>
             </div>
@@ -2251,10 +2251,10 @@ const nowX = getX(dataPoints[dataPoints.length - 1].date); // 📅 가로 위치
                   })}
                 </svg>
                 <div className="absolute inset-0 flex flex-col items-center justify-center">
-                  <p className="text-[10px] text-slate-500 font-bold uppercase">
+                  <p className="text-[10px] text-slate-300 font-bold uppercase">
                     Balance
                   </p>
-                  <TrendingUp size={20} className="text-amber-500" />
+                  <TrendingUp size={20} className="text-amber-300" />
                 </div>
               </div>
               {/* 범례 및 통계 */}
@@ -2295,7 +2295,7 @@ const nowX = getX(dataPoints[dataPoints.length - 1].date); // 📅 가로 위치
           {/* [리스트 섹션] 활동 로그 (Identity Log) */}
           <div className="px-2 mb-4">
             <h4 className="text-sm font-black text-white uppercase tracking-widest flex items-center gap-2 mb-6">
-              <ClipboardList size={18} className="text-emerald-500" /> Activity
+              <ClipboardList size={18} className="text-emerald-300" /> Activity
               Timeline
             </h4>
             <div className="space-y-4">
@@ -2308,11 +2308,11 @@ const nowX = getX(dataPoints[dataPoints.length - 1].date); // 📅 가로 위치
                   <div key={i} className="flex items-center gap-4 group">
                     {/* 날짜 표시 */}
                     <div className="w-16 shrink-0 text-right">
-                      <p className="text-[10px] font-bold text-slate-600 uppercase">
+                      <p className="text-[10px] font-bold text-slate-400 uppercase">
                         {new Date(log.date).getMonth() + 1}.
                         {new Date(log.date).getDate()}
                       </p>
-                      <p className="text-[8px] text-slate-700 font-mono">
+                      <p className="text-[8px] text-slate-500 font-mono">
                         {new Date(log.date).getHours()}:
                         {String(new Date(log.date).getMinutes()).padStart(
                           2,
@@ -2332,16 +2332,16 @@ const nowX = getX(dataPoints[dataPoints.length - 1].date); // 📅 가로 위치
                             {log.desc}
                           </h5>
                         </div>
-                        <p className="text-[10px] text-slate-500 font-medium">
+                        <p className="text-[10px] text-slate-300 font-medium">
                           수행 시간: {log.duration || 0}시간
                         </p>
                       </div>
                       <div className="text-right">
-                        <p className="text-xs font-black text-amber-500">
+                        <p className="text-xs font-black text-amber-300">
                           +{currency}
                           {fNum(log.amount)}
                         </p>
-                        <p className="text-[9px] text-slate-600 font-bold uppercase tracking-widest">
+                        <p className="text-[9px] text-slate-400 font-bold uppercase tracking-widest">
                           Magnitude
                         </p>
                       </div>
@@ -2405,7 +2405,7 @@ const nowX = getX(dataPoints[dataPoints.length - 1].date); // 📅 가로 위치
           )}
         </div>
         <div
-          className={`bg-[#0A0F1E] border-2 rounded-[2rem] md:rounded-[3.5rem] p-6 md:p-16 relative overflow-hidden shadow-2xl transition-all duration-500 ${
+          className={`bg-[#0A0F1E] border-2 rounded-[2rem] md:rounded-[3.5rem] px-3 py-10 md:p-16 relative overflow-hidden shadow-2xl transition-all duration-500 ${
             isLocked
               ? "border-emerald-500/30 shadow-[0_0_50px_rgba(16,185,129,0.1)]"
               : "border-white/10"
@@ -2422,7 +2422,7 @@ const nowX = getX(dataPoints[dataPoints.length - 1].date); // 📅 가로 위치
               The Bond of Essential Identity
             </p>
           </div>
-          <div className="relative z-10 p-8 md:p-12 space-y-12 text-justify leading-relaxed font-sans">
+          <div className="relative z-10 px-2 py-8 md:p-12 space-y-12 text-justify leading-relaxed font-sans">
             {/* 제1조 */}
             <div className="group">
               <h3 className="text-lg md:text-xl font-bold text-amber-500/90 mb-4 flex items-center gap-3 font-serif">
