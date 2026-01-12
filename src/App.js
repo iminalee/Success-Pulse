@@ -2333,7 +2333,7 @@ const nowX = getX(dataPoints[dataPoints.length - 1].date); // 📅 가로 위치
                           </h5>
                         </div>
                         <p className="text-[10px] text-slate-300 font-medium">
-                          수행 시간: {log.duration || 0}시간
+                          수행 시간: {(log.duration || 0).toFixed(1)}시간
                         </p>
                       </div>
                       <div className="text-right">
