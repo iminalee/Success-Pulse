@@ -870,6 +870,21 @@ useEffect(() => {
     setDuration(1); // 시간 초기화
   };
 
+// [추가] 활동 기록 삭제 함수
+const deleteLedgerEntry = (logToDelete) => {
+  if (window.confirm("이 활동 기록을 삭제하시겠습니까? 관련 자산도 함께 차감됩니다.")) {
+    // 1. 해당 레벨의 누적 자산에서 금액 차감
+    if (logToDelete.level && visions[logToDelete.level]) {
+      updateVision(logToDelete.level, {
+        progressAsset: Math.max(0, visions[logToDelete.level].progressAsset - logToDelete.amount)
+      });
+    }
+    // 2. 장부(ledger)에서 해당 항목 제거
+    setLedger(prev => prev.filter(log => log !== logToDelete));
+    showToast("기록이 삭제되었습니다.");
+  }
+};
+
   const archiveVision = (lv) => {
     const lvGoal = mbGoalAmount / 5;
     const isOverTarget = visions[lv].progressAsset >= lvGoal;
@@ -2377,15 +2392,25 @@ const nowX = getX(dataPoints[dataPoints.length - 1].date); // 📅 가로 위치
                           수행 시간: {(log.duration || 0).toFixed(1)}시간
                         </p>
                       </div>
-                      <div className="text-right">
-                        <p className="text-xs font-black text-amber-300">
-                          +{currency}
-                          {fNum(log.amount)}
-                        </p>
-                        <p className="text-[9px] text-slate-400 font-bold uppercase tracking-widest">
-                          Magnitude
-                        </p>
-                      </div>
+                      <div className="flex items-center gap-4">
+  <div className="text-right">
+    <p className="text-xs font-black text-amber-500">
+      +{currency}
+      {fNum(log.amount)}
+    </p>
+    <p className="text-[9px] text-slate-400 font-bold uppercase tracking-widest">
+      Magnitude
+    </p>
+  </div>
+  {/* 삭제 버튼 추가 */}
+  <button
+    onClick={() => deleteLedgerEntry(log)}
+    className="p-2 text-slate-600 hover:text-rose-500 transition-colors"
+    title="기록 삭제"
+  >
+    <Trash2 size={14} />
+  </button>
+</div>
                     </div>
                   </div>
                 ))
