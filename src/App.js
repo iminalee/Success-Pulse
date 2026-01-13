@@ -1519,10 +1519,11 @@ useEffect(() => {
   };
 
   const renderHub = () => {
+    const todayStr = new Date().toLocaleDateString(); // [추가] 오늘 날짜 기준점
     const activeTraits = bpsTraits;
     // [1517~1519행 교체]
     const activeLevels = [1, 2, 3, 4, 5].filter(lv => visions[lv]?.title && visions[lv]?.title !== "");
-    const activeCount = activeLevels.length || 1; 
+    const activeCount = activeLevels.length || 1;
     const perLevelTarget = (mbGoalAmount - annualIncome) / activeCount; // 개별 노력 구간
     const widthMap = {
       5: "w-[130px]",
@@ -1623,10 +1624,19 @@ useEffect(() => {
               const visualPercent = 50 + (levelProgress / perLevelTarget) * 50; 
               const displayPercent = Math.min(visualPercent, 100).toFixed(1);
 
-              // [복구] 설정된 경우 화려한 황금색 그라데이션 적용
-              const barBackground = isConfigured
-                ? "bg-gradient-to-r from-amber-600 via-yellow-400 to-amber-600"
-                : "bg-slate-700/50"; // 설정 안됨: 어두운 색
+              // [핵심 추가] 오늘 이 단계를 실천했는지 장부(ledger)에서 확인
+              const hasProgressToday = ledger.some(log => 
+                log.level === lv && 
+                new Date(log.date).toLocaleDateString() === todayStr
+              );
+
+              // [색상 로직 교체] 오늘 실천 여부에 따라 그린 -> 황금색
+               const barBackground = isConfigured
+                 ? hasProgressToday
+                   ? "bg-gradient-to-r from-amber-600 via-yellow-400 to-amber-600" // 오늘 실천: 황금색
+                   : "bg-gradient-to-r from-emerald-600 via-teal-400 to-emerald-600" // 오늘 미실천: 그린색
+                   : "bg-slate-700/50";
+
 
               // [복구] 테두리 및 그림자 스타일
               const containerStyle = isActive
