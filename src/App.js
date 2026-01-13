@@ -427,6 +427,7 @@ useEffect(() => {
   // UI 상태
   const [activeLevel, setActiveLevel] = useState(5);
   const [currentView, setCurrentView] = useState("hub");
+  const [celebration, setCelebration] = useState({ show: false, levelName: "" });
   const [chartData, setChartData] = useState([]);
   const [isAiModalOpen, setIsAiModalOpen] = useState(false);
   const [isSensoryModalOpen, setIsSensoryModalOpen] = useState(false);
@@ -836,6 +837,36 @@ useEffect(() => {
         finalAmount
       )} 입금 완료`
     );
+    // [추가] 데일리 올-클리어 체크 로직
+    const today = new Date().toLocaleDateString();
+    const activeLevelsList = [1, 2, 3, 4, 5].filter(lv => visions[lv]?.title);
+    
+    // 현재 입금을 포함한 오늘 전체 기록 확인
+    const updatedLedger = [...ledger, newEntry];
+    const todayEntries = updatedLedger.filter(e => new Date(e.date).toLocaleDateString() === today);
+    const completedLevelsToday = new Set(todayEntries.map(e => e.level));
+
+    // 설정된 모든 비전 단계를 오늘 다 수행했는지 확인
+    const isAllClearedToday = activeLevelsList.every(lv => completedLevelsToday.has(Number(lv)));
+    
+    // 이미 오늘 보너스를 받았는지 확인 (중복 팝업 방지)
+    const alreadyRewarded = todayEntries.some(e => e.desc.includes("Daily All-Clear Bonus"));
+
+    if (isAllClearedToday && !alreadyRewarded) {
+      // 1. 보너스 금액 적립 (연봉의 0.1% 등 설정 가능)
+      const dailyBonusAmount = annualIncome * 0.001; 
+      const bonusEntry = {
+        date: new Date(),
+        amount: dailyBonusAmount,
+        desc: "🎉 Daily All-Clear Bonus (시너지 보상)",
+        level: activeLevel,
+        duration: 0
+      };
+      setLedger(prev => [...prev, bonusEntry]);
+      
+      // 2. 축하 메시지 상태 업데이트 (state 추가 필요)
+      setCelebration({ show: true, levelName: "All Levels" });
+    }
     setDuration(1); // 시간 초기화
   };
 
@@ -3333,6 +3364,27 @@ const nowX = getX(dataPoints[dataPoints.length - 1].date); // 📅 가로 위치
           </div>
         </div>
       )}
+      {celebration.show && (
+        <div className="fixed inset-0 z-[10000] flex items-center justify-center bg-black/90 backdrop-blur-xl animate-fadeIn">
+          <div className="text-center p-10 border-2 border-amber-500/50 rounded-[4rem] bg-slate-900 shadow-[0_0_100px_rgba(245,158,11,0.4)]">
+            <div className="text-8xl mb-6 animate-bounce">✨</div>
+            <h2 className="text-4xl font-black text-white mb-2 uppercase italic tracking-tighter">
+              Daily <span className="text-amber-500">Perfect Clear!</span>
+            </h2>
+            <p className="text-slate-400 mb-8 leading-relaxed">
+              오늘 설정하신 모든 비전 단계를 실천하셨습니다!<br/>
+              특별 시너지 보너스가 장부에 예치되었습니다.
+            </p>
+            <button 
+              onClick={() => setCelebration({ show: false, levelName: "" })}
+              className="w-full bg-amber-600 hover:bg-amber-500 text-white font-black py-4 rounded-2xl transition-all shadow-lg uppercase tracking-widest text-xs"
+            >
+              Keep Going, Apex BP
+            </button>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 };
