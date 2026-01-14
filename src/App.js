@@ -1565,6 +1565,8 @@ const deleteLedgerEntry = (logToDelete) => {
   };
 
   const renderHub = () => {
+    // [renderHub 함수 맨 윗부분 변수들 사이에 추가]
+    const totalPercent = mbGoalAmount > 0 ? (currentAsset / mbGoalAmount) * 100 : 0;
     const todayStr = new Date().toLocaleDateString(); // [추가] 오늘 날짜 기준점
     // [추가] 각 단계별 상세 가이드 문구
     const missionMap = {
@@ -1631,117 +1633,127 @@ const deleteLedgerEntry = (logToDelete) => {
           }`}
         >
           {/* [좌측 패널] 성취 피라미드 */}
+            {/* [좌측 패널] 온도계 + 성취 피라미드 통합 섹션 */}
           <div className="w-full md:w-1/2 flex flex-col items-center justify-center relative z-10 pt-10">
-            <div className="relative flex justify-center items-end mb-4 z-20 w-full">
-              <div
-                onClick={() => setActiveLevel(6)}
-                className="relative flex flex-col items-center justify-end cursor-pointer group w-full"
-              >
-                <div className="flex justify-between items-center w-full max-w-md px-4 mb-4">
-                  {activeTraits.map((trait, i) => (
-                    <span
-                      key={i}
-                      className={`text-[10px] font-black px-3 py-1.5 rounded-full bg-slate-900/90 border border-amber-500/40 animate-pulse ${
-                        activeLevel === 6
-                          ? "text-amber-400"
-                          : "text-slate-400 opacity-70"
-                      }`}
-                    >
-                      {trait || "Empty"}
-                    </span>
-                  ))}
+            
+            {/* 1. 가로 정렬 컨테이너: (좌) 온도계 | (우) 피라미드 */}
+            <div className="flex flex-row items-end justify-center gap-6 md:gap-8 w-full">
+              
+              {/* [NEW] 왼쪽 세로형 온도계 (TOTAL PROGRESS) */}
+              <div className="flex flex-col items-center justify-end h-[340px] pb-1 animate-fadeIn">
+                {/* 상단 퍼센트 숫자 */}
+                <div className="mb-2 text-center">
+                  <span className="text-2xl font-black text-amber-500 italic tracking-tighter drop-shadow-[0_0_15px_rgba(245,158,11,0.5)]">
+                    {/* totalPercent 변수가 상단에 선언되어 있어야 함 */}
+                    {(mbGoalAmount > 0 ? (currentAsset / mbGoalAmount) * 100 : 0).toFixed(1)}%
+                  </span>
                 </div>
-                <h4
-                  className={`text-xl font-black transition-all ${
-                    activeLevel === 6
-                      ? "text-amber-400 scale-110"
-                      : "text-slate-600"
-                  }`}
-                >
-                  BPS
-                </h4>
-              </div>
-            </div>
-            <div className="flex justify-center mb-1 animate-pulse">
-              <div className="w-0 h-0 border-l-[30px] border-l-transparent border-r-[30px] border-r-transparent border-b-[40px] border-b-yellow-500 drop-shadow-[0_0_10px_rgba(234,179,8,0.6)]"></div>
-            </div>
-            {/* ▼▼▼ [수정 완료] 50% 수치 표시 + 황금색 그라데이션 복구 ▼▼▼ */}
-            {[5, 4, 3, 2, 1].map((lv) => {
-              const isConfigured =
-                visions[lv]?.title && visions[lv]?.title !== "";
-              const isActive = lv === activeLevel;
-
-              // 진행률 계산 (전체 자산 대비)
-              // [1612~1614행 교체]
-              const levelProgress = visions[lv]?.progressAsset || 0;
-              // 50%(연봉 지분)에서 시작하여, 할당된 목표(perLevelTarget)를 얼마나 채웠는지 계산
-              const visualPercent = 50 + (levelProgress / perLevelTarget) * 50; 
-              const displayPercent = Math.min(visualPercent, 100).toFixed(1);
-
-              // [핵심 추가] 오늘 이 단계를 실천했는지 장부(ledger)에서 확인
-              const hasProgressToday = ledger.some(log => 
-                log.level === lv && 
-                new Date(log.date).toLocaleDateString() === todayStr
-              );
-
-              // [색상 로직 교체] 오늘 실천 여부에 따라 그린 -> 황금색
-               const barBackground = isConfigured
-                 ? hasProgressToday
-                   ? "bg-gradient-to-r from-amber-600 via-yellow-400 to-amber-600" // 오늘 실천: 황금색
-                   : "bg-gradient-to-r from-emerald-600 via-teal-400 to-emerald-600" // 오늘 미실천: 그린색
-                   : "bg-slate-700/50";
-
-
-              // [복구] 테두리 및 그림자 스타일
-              const containerStyle = isActive
-                ? "border-amber-400 ring-2 ring-amber-500/50 shadow-[0_0_30px_rgba(245,158,11,0.6)] z-10 scale-105 brightness-110"
-                : isConfigured
-                ? "border-amber-600/30 opacity-90 hover:brightness-110"
-                : "border-slate-700/50 opacity-60 hover:opacity-80";
-
-              return (
-                <div
-                  key={lv}
-                  onClick={() => setActiveLevel(lv)}
-                  // 역슬래시(\) 제거하여 문법 오류 해결
-                  className={`cursor-pointer relative flex items-center justify-center h-[50px] rounded-2xl mb-2 overflow-hidden transition-all duration-300 border ${widthMap[lv]} ${containerStyle}`}
-                >
-                  {/* 배경 게이지바 */}
-                  <div
-                    className={`absolute left-0 top-0 h-full transition-all duration-1000 ${barBackground}`}
-                    style={{ width: `${displayPercent}%` }}
+                
+                {/* 게이지 바 몸통 (좁은 디자인) */}
+                <div className="relative w-3 md:w-4 h-[280px] bg-slate-900 rounded-full border border-white/10 shadow-inner overflow-hidden group">
+                  {/* 차오르는 그래디언트 바 */}
+                  <div 
+                    className="absolute bottom-0 w-full bg-gradient-to-t from-rose-600 via-amber-500 to-yellow-300 transition-all duration-1000 ease-out group-hover:brightness-110"
+                    style={{ height: `${Math.min((mbGoalAmount > 0 ? (currentAsset / mbGoalAmount) * 100 : 0), 100)}%` }}
                   />
+                  {/* 눈금선 (50%) */}
+                  <div className="absolute bottom-1/2 w-full h-[1px] bg-white/30"></div>
+                </div>
+              </div>
 
-                  {/* 텍스트 내용 (가운데 정렬) */}
-                  <div className="relative z-10 flex flex-col items-center justify-center leading-none">
-                    <span className="font-black uppercase text-sm tracking-tight text-white drop-shadow-md flex items-center gap-2">
-                      {/* 설정된 단계면 이모지 표시 */}
-                      {isConfigured && (
-                        <span className="text-xs emoji-shadow">
-                          {" "}
-                          {/* 여기 클래스 추가 */}
-                          {visions[lv].emoji}
+              {/* [기존] 피라미드 구조물 (오른쪽 배치) */}
+              <div className="flex flex-col items-center justify-end w-full max-w-md">
+                {/* BPS 헤더 */}
+                <div className="relative flex justify-center items-end mb-4 z-20 w-full">
+                  <div
+                    onClick={() => setActiveLevel(6)}
+                    className="relative flex flex-col items-center justify-end cursor-pointer group w-full"
+                  >
+                    <div className="flex justify-between items-center w-full max-w-md px-4 mb-4">
+                      {activeTraits.map((trait, i) => (
+                        <span
+                          key={i}
+                          className={`text-[10px] font-black px-3 py-1.5 rounded-full bg-slate-900/90 border border-amber-500/40 animate-pulse ${
+                            activeLevel === 6 ? "text-amber-400" : "text-slate-400 opacity-70"
+                          }`}
+                        >
+                          {trait || "Empty"}
                         </span>
-                      )}
-                      {levelMap[lv]}
-                    </span>
-
-                    {/* [복구] 퍼센트 수치 표시 */}
-                    <span className="text-[10px] font-bold mt-0.5 text-white/90 drop-shadow-md">
-                      {displayPercent}%
-                    </span>
+                      ))}
+                    </div>
+                    <h4 className={`text-xl font-black transition-all ${activeLevel === 6 ? "text-amber-400 scale-110" : "text-slate-600"}`}>
+                      BPS
+                    </h4>
                   </div>
                 </div>
-              );
-            })}
-            {/* ▲▲▲ [수정 끝] ▲▲▲ */}
 
-            <p className="text-slate-600 text-[10px] font-bold mt-4 uppercase tracking-[0.2em] opacity-40">
+                {/* 삼각형 꼭지점 */}
+                <div className="flex justify-center mb-1 animate-pulse">
+                  <div className="w-0 h-0 border-l-[30px] border-l-transparent border-r-[30px] border-r-transparent border-b-[40px] border-b-yellow-500 drop-shadow-[0_0_10px_rgba(234,179,8,0.6)]"></div>
+                </div>
+
+                {/* 1~5단계 바 루프 */}
+                {[5, 4, 3, 2, 1].map((lv) => {
+                  const isConfigured = visions[lv]?.title && visions[lv]?.title !== "";
+                  const isActive = lv === activeLevel;
+
+                  // [기능 유지 1] 1/N 개별 진행도 계산
+                  const levelProgress = visions[lv]?.progressAsset || 0;
+                  const visualPercent = 50 + (levelProgress / perLevelTarget) * 50; 
+                  const displayPercent = Math.min(visualPercent, 100).toFixed(1);
+
+                  // [기능 유지 2] 자정 리셋 & 오늘 실천 여부 확인
+                  const hasProgressToday = ledger.some(log => 
+                    log.level === lv && 
+                    new Date(log.date).toLocaleDateString() === new Date().toLocaleDateString()
+                  );
+
+                  // [기능 유지 3] 색상 로직 (오늘 함: 황금색 / 안함: 그린색)
+                  const barBackground = isConfigured
+                    ? hasProgressToday
+                      ? "bg-gradient-to-r from-amber-600 via-yellow-400 to-amber-600"
+                      : "bg-gradient-to-r from-emerald-600 via-teal-400 to-emerald-600"
+                    : "bg-slate-700/50";
+
+                  const containerStyle = isActive
+                    ? "border-amber-400 ring-2 ring-amber-500/50 shadow-[0_0_30px_rgba(245,158,11,0.6)] z-10 scale-105 brightness-110"
+                    : isConfigured
+                    ? "border-amber-600/30 opacity-90 hover:brightness-110"
+                    : "border-slate-700/50 opacity-60 hover:opacity-80";
+
+                  return (
+                    <div
+                      key={lv}
+                      onClick={() => setActiveLevel(lv)}
+                      className={`cursor-pointer relative flex items-center justify-center h-[50px] rounded-2xl mb-2 overflow-hidden transition-all duration-300 border ${widthMap[lv]} ${containerStyle}`}
+                    >
+                      <div
+                        className={`absolute left-0 top-0 h-full transition-all duration-1000 ${barBackground}`}
+                        style={{ width: `${displayPercent}%` }}
+                      />
+                      <div className="relative z-10 flex flex-col items-center justify-center leading-none">
+                        <span className="font-black uppercase text-sm tracking-tight text-white drop-shadow-md flex items-center gap-2">
+                          {isConfigured && (
+                            <span className="text-xs emoji-shadow">{visions[lv].emoji}</span>
+                          )}
+                          {levelMap[lv]}
+                        </span>
+                        <span className="text-[10px] font-bold mt-0.5 text-white/90 drop-shadow-md">
+                          {displayPercent}%
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* 하단 설명 문구 (기존 위치 유지) */}
+            <p className="text-slate-600 text-[10px] font-bold mt-6 uppercase tracking-[0.2em] opacity-40">
               5단계 미션
             </p>
-                 
-            {/* 🌟 여기에 붙여넣기: 피라미드 하단 동적 미션 가이드 */}
-            <div className="mt-4 px-6 max-w-[340px] mx-auto animate-fadeIn">
+            {/* [기능 유지 4] 동적 미션 가이드 */}
+            <div className="mt-2 px-6 max-w-[340px] mx-auto animate-fadeIn">
               <p className="text-[11px] text-slate-400 font-medium leading-relaxed text-center italic">
                 {activeLevel === 6 
                   ? "모든 하위 자아가 통합된 최종 정체성 상태입니다. 당신의 모든 행동은 이제 이 통합된 존재로부터 자연스럽게 흘러나옵니다." 
