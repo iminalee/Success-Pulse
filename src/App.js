@@ -1852,7 +1852,41 @@ const deleteLedgerEntry = (logToDelete) => {
                     </h4>
                   </div>
                    {/* --- [수정 시작] Value Events 섹션 전체 --- */}
-                  
+                 {/* 3. [NEW] 오늘의 성취 기록 (Today's Log) */}
+                  <div className="border-t border-white/10 pt-4 animate-fadeIn">
+                    <p className="text-[10px] font-black text-emerald-500 uppercase tracking-widest mb-3 flex items-center gap-2">
+                      <CheckCircle size={12} /> Today's Achievements
+                    </p>
+                    <div className="space-y-2 max-h-[200px] overflow-y-auto pr-1 custom-scrollbar">
+                      {ledger.filter(log => 
+                        log.level === activeLevel && 
+                        new Date(log.date).toLocaleDateString() === new Date().toLocaleDateString()
+                      ).length === 0 ? (
+                        <p className="text-xs text-slate-600 italic text-center py-4">오늘의 기록이 비어있습니다.</p>
+                      ) : (
+                        ledger.filter(log => 
+                          log.level === activeLevel && 
+                          new Date(log.date).toLocaleDateString() === new Date().toLocaleDateString()
+                        ).reverse().map((log, idx) => (
+                          <div key={idx} className="flex justify-between items-center p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-xl">
+                            <div>
+                              <p className="text-xs font-bold text-emerald-100">{log.desc}</p>
+                              <p className="text-[9px] text-emerald-500/70 mt-0.5">
+                                +{currency}{fNum(log.amount)}
+                              </p>
+                            </div>
+                            <button 
+                              onClick={() => deleteLedgerEntry(log)}
+                              className="text-emerald-500/40 hover:text-rose-400 transition-colors p-1"
+                              title="기록 취소"
+                            >
+                              <X size={14} />
+                            </button>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </div>
                   {/* 1. 사전 설정 리스트 (아직 안 한 것들) - 약간 흐리게 처리 */}
                   <div className="space-y-3 overflow-y-auto pr-2 custom-scrollbar max-h-[250px] mb-6">
                     {visions[activeLevel]?.events?.map((ev) => {
@@ -1941,41 +1975,7 @@ const deleteLedgerEntry = (logToDelete) => {
                     </div>
                   </div>
 
-                  {/* 3. [NEW] 오늘의 성취 기록 (Today's Log) */}
-                  <div className="border-t border-white/10 pt-4 animate-fadeIn">
-                    <p className="text-[10px] font-black text-emerald-500 uppercase tracking-widest mb-3 flex items-center gap-2">
-                      <CheckCircle size={12} /> Today's Achievements
-                    </p>
-                    <div className="space-y-2 max-h-[200px] overflow-y-auto pr-1 custom-scrollbar">
-                      {ledger.filter(log => 
-                        log.level === activeLevel && 
-                        new Date(log.date).toLocaleDateString() === new Date().toLocaleDateString()
-                      ).length === 0 ? (
-                        <p className="text-xs text-slate-600 italic text-center py-4">오늘의 기록이 비어있습니다.</p>
-                      ) : (
-                        ledger.filter(log => 
-                          log.level === activeLevel && 
-                          new Date(log.date).toLocaleDateString() === new Date().toLocaleDateString()
-                        ).reverse().map((log, idx) => (
-                          <div key={idx} className="flex justify-between items-center p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-xl">
-                            <div>
-                              <p className="text-xs font-bold text-emerald-100">{log.desc}</p>
-                              <p className="text-[9px] text-emerald-500/70 mt-0.5">
-                                +{currency}{fNum(log.amount)}
-                              </p>
-                            </div>
-                            <button 
-                              onClick={() => deleteLedgerEntry(log)}
-                              className="text-emerald-500/40 hover:text-rose-400 transition-colors p-1"
-                              title="기록 취소"
-                            >
-                              <X size={14} />
-                            </button>
-                          </div>
-                        ))
-                      )}
-                    </div>
-                  </div>
+
                   {/* --- [수정 끝] --- */}       
 
                 </div>
