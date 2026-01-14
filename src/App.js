@@ -1853,7 +1853,7 @@ const deleteLedgerEntry = (logToDelete) => {
                   </div>
                    {/* --- [수정 시작] Value Events 섹션 전체 --- */}
                  {/* 3. [NEW] 오늘의 성취 기록 (Today's Log) */}
-                  <div className="border-t border-white/10 pt-4 animate-fadeIn">
+                  <div className="animate-fadeIn mb-4">
                       <div className="space-y-2 max-h-[200px] overflow-y-auto pr-1 custom-scrollbar">
                       {ledger.filter(log => 
                         log.level === activeLevel && 
