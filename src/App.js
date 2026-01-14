@@ -3136,7 +3136,7 @@ const nowX = getX(dataPoints[dataPoints.length - 1].date); // 📅 가로 위치
   
 
       {/* 헤더 */}
-      <header className="flex justify-between items-start md:items-center mb-8 px-4 max-w-7xl mx-auto w-full shrink-0 pt-4">
+      <header className="fixed top-0 left-0 right-0 z-50 flex flex-col md:flex-row justify-between items-center md:items-start p-4 md:px-8 bg-slate-950/80 backdrop-blur-md border-b border-white/5 transition-all duration-300">
         {/* ▼▼▼ 여기를 수정했습니다 (클릭하면 홈으로 이동) ▼▼▼ */}
         <div
           onClick={() => setCurrentView("hub")}
@@ -3151,23 +3151,26 @@ const nowX = getX(dataPoints[dataPoints.length - 1].date); // 📅 가로 위치
         </div>
         {/* ▲▲▲ 여기까지 수정했습니다 ▲▲▲ */}
 
-        {currentView !== "philosophy" && (
-          /* [우측 상단] 자산 대시보드 및 프로그레스 바 (수정됨) */
-          <div className="flex flex-col items-end z-50 animate-fadeIn">
+      {currentView !== "philosophy" && (
+          /* [우측 상단] 자산 대시보드 (반응형 수정 완료) */
+          /* md:items-end -> PC에서는 우측 정렬, 모바일에서는 items-center(중앙 정렬) */
+          /* mt-2 md:mt-0 -> 모바일에서는 로고와 간격을 위해 위쪽 여백 추가 */
+          <div className="flex flex-col items-center md:items-end z-50 animate-fadeIn mt-2 md:mt-0 w-full md:w-auto">
+            
             <p className="text-[10px] font-black text-amber-500/80 uppercase tracking-widest mb-1 flex items-center gap-2">
               <Sparkles size={10} /> Accumulated Magnitude
             </p>
             
-          {/* 메인 큰 숫자: (수정됨) 순수 적립액만 표시 */ }
-            <h2 className="text-4xl font-black text-white mb-2 tracking-tighter drop-shadow-xl">
+            {/* 메인 큰 숫자 */}
+            <h2 className="text-4xl font-black text-white mb-2 tracking-tighter drop-shadow-xl text-center md:text-right">
               <span className="text-amber-500 mr-1">+</span>
               {currency}
-              {/* 전체 자산에서 연봉(기본값)을 뺀 나머지 = 내가 적립한 금액 */}
               {fNum(Math.floor(currentAsset - annualIncome))}
             </h2>
 
             {/* 프로그레스 바 영역 */}
-            <div className="w-[320px] relative">
+            {/* w-[320px] -> w-full max-w-[320px] : 화면이 작으면 알아서 줄어듬 */}
+            <div className="w-full max-w-[320px] relative">
               
               {/* 상단: 퍼센트 및 상태 뱃지 */}
               <div className="flex justify-between items-end mb-1 px-1">
@@ -3181,30 +3184,23 @@ const nowX = getX(dataPoints[dataPoints.length - 1].date); // 📅 가로 위치
 
               {/* 게이지 바 몸통 */}
               <div className="h-3 w-full bg-slate-800 rounded-full overflow-hidden border border-slate-700 shadow-inner relative">
-                {/* 배경 패턴 */}
                 <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-20"></div>
-                {/* 채워지는 바 */}
                 <div
                   className="h-full bg-gradient-to-r from-amber-700 via-amber-500 to-yellow-400 transition-all duration-1000 relative"
                   style={{ width: `${Math.min((mbGoalAmount > 0 ? (currentAsset / mbGoalAmount) * 100 : 0), 100)}%` }}
                 >
-                  {/* 빛나는 효과 */}
                   <div className="absolute right-0 top-0 h-full w-2 bg-white/50 blur-[2px]"></div>
                 </div>
               </div>
 
               {/* 하단: [왼쪽] 현재금액 vs [오른쪽] 목표금액 */}
               <div className="flex justify-between items-end mt-2">
-                
-                {/* [왼쪽] 현재 적립액 (NEW) */}
                 <div className="text-left animate-fadeIn">
                    <p className="text-[9px] text-slate-500 font-bold uppercase tracking-wider mb-0.5">Current</p>
                    <p className="text-sm font-black text-slate-300">
                      {currency}{fNum(Math.floor(currentAsset))}
                    </p>
                 </div>
-
-                {/* [오른쪽] 목표 금액 (글자 크게 키움) */}
                 <div className="text-right">
                   <p className="text-[9px] text-slate-500 font-bold uppercase tracking-wider mb-0.5">Target Goal</p>
                   <p className="text-lg font-black text-amber-500/90 drop-shadow-md">
