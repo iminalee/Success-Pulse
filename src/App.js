@@ -3135,7 +3135,7 @@ const nowX = getX(dataPoints[dataPoints.length - 1].date); // 📅 가로 위치
     
   
       {/* 헤더 */}
-      // [3139행 교체] 헤더 높이 자동 조절(h-auto) 및 패딩 추가
+    
       <header className="sticky top-0 z-50 w-full flex flex-col md:flex-row justify-between items-center px-6 py-4 bg-slate-950/90 backdrop-blur-md border-b border-white/5 h-auto transition-all duration-300">
         {/* ▼▼▼ 여기를 수정했습니다 (클릭하면 홈으로 이동) ▼▼▼ */}
         <div
