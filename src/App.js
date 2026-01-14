@@ -3152,62 +3152,66 @@ const nowX = getX(dataPoints[dataPoints.length - 1].date); // 📅 가로 위치
         {/* ▲▲▲ 여기까지 수정했습니다 ▲▲▲ */}
 
         {currentView !== "philosophy" && (
-          <div className="text-right flex flex-col items-end gap-2 animate-fadeIn">
-            <div className="flex flex-col items-end">
-              <p className="text-[10px] text-amber-500 font-black uppercase mb-0.5 tracking-widest flex items-center gap-1">
-                <Sparkles size={10} /> Accumulated Magnitude
-              </p>
-              <div className="text-3xl md:text-4xl font-black text-white tabular-nums tracking-tighter drop-shadow-[0_0_15px_rgba(245,158,11,0.3)]">
-                <span className="text-amber-500 mr-1 text-2xl">+</span>
-                {currency}
-                {fNum(currentAsset - annualIncome)}
-              </div>
-            </div>
+          /* [우측 상단] 자산 대시보드 및 프로그레스 바 (수정됨) */
+          <div className="hidden md:flex flex-col items-end z-50 animate-fadeIn">
+            <p className="text-[10px] font-black text-amber-500/80 uppercase tracking-widest mb-1 flex items-center gap-2">
+              <Sparkles size={10} /> Accumulated Magnitude
+            </p>
+            
+            {/* 메인 큰 숫자 */}
+            <h2 className="text-4xl font-black text-white mb-2 tracking-tighter drop-shadow-xl">
+              <span className="text-amber-500 mr-1">+</span>
+              {currency}
+              {fNum(Math.floor(currentAsset))}
+            </h2>
 
-            {/* 프로그레스 바 & 로그인 이름표 */}
-            <div className="mt-1 w-48 md:w-64 relative">
-              <div className="flex justify-between items-end mb-1">
-                <span
-                  className={`text-[9px] font-black italic ${
-                    user ? "text-amber-500" : "text-slate-600"
-                  }`}
-                >
-                  {((currentAsset / mbGoalAmount) * 100).toFixed(1)}%
+            {/* 프로그레스 바 영역 */}
+            <div className="w-[320px] relative">
+              
+              {/* 상단: 퍼센트 및 상태 뱃지 */}
+              <div className="flex justify-between items-end mb-1 px-1">
+                <span className="text-xl font-black text-amber-500 italic">
+                  {(mbGoalAmount > 0 ? (currentAsset / mbGoalAmount) * 100 : 0).toFixed(1)}%
                 </span>
-                <span className="text-[8px] text-amber-600 font-bold uppercase tracking-tighter">
-                  GOAL: {currency}
-                  {fNum(mbGoalAmount)}
+                <span className="bg-emerald-600/20 text-emerald-400 border border-emerald-500/30 text-[9px] font-bold px-2 py-0.5 rounded text-center uppercase tracking-wider">
+                  {userName || "USER"} ONLINE
                 </span>
               </div>
 
-              <div className="w-full h-1.5 bg-slate-900/80 rounded-full overflow-visible border border-white/5 shadow-inner relative">
+              {/* 게이지 바 몸통 */}
+              <div className="h-3 w-full bg-slate-800 rounded-full overflow-hidden border border-slate-700 shadow-inner relative">
+                {/* 배경 패턴 */}
+                <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-20"></div>
+                {/* 채워지는 바 */}
                 <div
-                  className={`h-full transition-all duration-1000 ease-out shadow-[0_0_10px_rgba(245,158,11,0.5)] relative ${
-                    user
-                      ? "bg-gradient-to-r from-amber-700 via-amber-500 to-amber-400"
-                      : "bg-slate-700 grayscale opacity-50"
-                  }`}
-                  style={{
-                    width: `${Math.min(
-                      (currentAsset / mbGoalAmount) * 100,
-                      100
-                    )}%`,
-                  }}
+                  className="h-full bg-gradient-to-r from-amber-700 via-amber-500 to-yellow-400 transition-all duration-1000 relative"
+                  style={{ width: `${Math.min((mbGoalAmount > 0 ? (currentAsset / mbGoalAmount) * 100 : 0), 100)}%` }}
                 >
-                  {/* 로그인 상태 이름표 */}
-                  {user && (
-                    <div className="absolute -right-1 -top-6 flex flex-col items-center animate-fadeIn">
-                      <div className="bg-emerald-500 text-[8px] font-black text-slate-950 px-2 py-0.5 rounded-full whitespace-nowrap shadow-lg border border-emerald-400 animate-pulse">
-                        {userName || "USER"} ONLINE
-                      </div>
-                      <div className="w-0 h-0 border-l-[3px] border-l-transparent border-r-[3px] border-r-transparent border-t-[4px] border-t-emerald-500 mt-0.5"></div>
-                    </div>
-                  )}
-                  {user && (
-                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-pulse"></div>
-                  )}
+                  {/* 빛나는 효과 */}
+                  <div className="absolute right-0 top-0 h-full w-2 bg-white/50 blur-[2px]"></div>
                 </div>
               </div>
+
+              {/* 하단: [왼쪽] 현재금액 vs [오른쪽] 목표금액 */}
+              <div className="flex justify-between items-end mt-2">
+                
+                {/* [왼쪽] 현재 적립액 (NEW) */}
+                <div className="text-left animate-fadeIn">
+                   <p className="text-[9px] text-slate-500 font-bold uppercase tracking-wider mb-0.5">Current</p>
+                   <p className="text-sm font-black text-slate-300">
+                     {currency}{fNum(Math.floor(currentAsset))}
+                   </p>
+                </div>
+
+                {/* [오른쪽] 목표 금액 (글자 크게 키움) */}
+                <div className="text-right">
+                  <p className="text-[9px] text-slate-500 font-bold uppercase tracking-wider mb-0.5">Target Goal</p>
+                  <p className="text-lg font-black text-amber-500/90 drop-shadow-md">
+                    {currency}{fNum(mbGoalAmount)}
+                  </p>
+                </div>
+              </div>
+
             </div>
           </div>
         )}
