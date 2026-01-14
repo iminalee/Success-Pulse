@@ -3158,11 +3158,12 @@ const nowX = getX(dataPoints[dataPoints.length - 1].date); // 📅 가로 위치
               <Sparkles size={10} /> Accumulated Magnitude
             </p>
             
-            {/* 메인 큰 숫자 */}
+          {/* 메인 큰 숫자: (수정됨) 순수 적립액만 표시 */ }
             <h2 className="text-4xl font-black text-white mb-2 tracking-tighter drop-shadow-xl">
               <span className="text-amber-500 mr-1">+</span>
               {currency}
-              {fNum(Math.floor(currentAsset))}
+              {/* 전체 자산에서 연봉(기본값)을 뺀 나머지 = 내가 적립한 금액 */}
+              {fNum(Math.floor(currentAsset - annualIncome))}
             </h2>
 
             {/* 프로그레스 바 영역 */}
