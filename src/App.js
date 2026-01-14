@@ -1727,7 +1727,7 @@ const deleteLedgerEntry = (logToDelete) => {
               </div>
 
               {/* [2] 온도계 (오른쪽으로 이동됨) */}
-                {/* [2] 온도계 (오른쪽: 숫자가 게이지 따라 움직임) */}
+              {/* [2] 온도계 (오른쪽: 숫자가 게이지 따라 움직임) */}
               <div className="relative flex flex-col items-center justify-end h-[340px] pb-1 animate-fadeIn">
                 
                 {/* 1. 게이지 바 몸통 */}
