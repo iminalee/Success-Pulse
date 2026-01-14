@@ -1634,34 +1634,13 @@ const deleteLedgerEntry = (logToDelete) => {
         >
           {/* [좌측 패널] 성취 피라미드 */}
             {/* [좌측 패널] 온도계 + 성취 피라미드 통합 섹션 */}
+            {/* [좌측 패널] 성취 피라미드 + 온도계 (우측 배치) */}
           <div className="w-full md:w-1/2 flex flex-col items-center justify-center relative z-10 pt-10">
             
-            {/* 1. 가로 정렬 컨테이너: (좌) 온도계 | (우) 피라미드 */}
+            {/* 1. 가로 정렬 컨테이너: (좌) 피라미드 | (우) 온도계 */}
             <div className="flex flex-row items-end justify-center gap-6 md:gap-8 w-full">
               
-              {/* [NEW] 왼쪽 세로형 온도계 (TOTAL PROGRESS) */}
-              <div className="flex flex-col items-center justify-end h-[340px] pb-1 animate-fadeIn">
-                {/* 상단 퍼센트 숫자 */}
-                <div className="mb-2 text-center">
-                  <span className="text-2xl font-black text-amber-500 italic tracking-tighter drop-shadow-[0_0_15px_rgba(245,158,11,0.5)]">
-                    {/* totalPercent 변수가 상단에 선언되어 있어야 함 */}
-                    {(mbGoalAmount > 0 ? (currentAsset / mbGoalAmount) * 100 : 0).toFixed(1)}%
-                  </span>
-                </div>
-                
-                {/* 게이지 바 몸통 (좁은 디자인) */}
-                <div className="relative w-3 md:w-4 h-[280px] bg-slate-900 rounded-full border border-white/10 shadow-inner overflow-hidden group">
-                  {/* 차오르는 그래디언트 바 */}
-                  <div 
-                    className="absolute bottom-0 w-full bg-gradient-to-t from-rose-600 via-amber-500 to-yellow-300 transition-all duration-1000 ease-out group-hover:brightness-110"
-                    style={{ height: `${Math.min((mbGoalAmount > 0 ? (currentAsset / mbGoalAmount) * 100 : 0), 100)}%` }}
-                  />
-                  {/* 눈금선 (50%) */}
-                  <div className="absolute bottom-1/2 w-full h-[1px] bg-white/30"></div>
-                </div>
-              </div>
-
-              {/* [기존] 피라미드 구조물 (오른쪽 배치) */}
+              {/* [1] 피라미드 구조물 (왼쪽으로 이동됨) */}
               <div className="flex flex-col items-center justify-end w-full max-w-md">
                 {/* BPS 헤더 */}
                 <div className="relative flex justify-center items-end mb-4 z-20 w-full">
@@ -1746,13 +1725,49 @@ const deleteLedgerEntry = (logToDelete) => {
                   );
                 })}
               </div>
+
+              {/* [2] 온도계 (오른쪽으로 이동됨) */}
+                {/* [2] 온도계 (오른쪽: 숫자가 게이지 따라 움직임) */}
+              <div className="relative flex flex-col items-center justify-end h-[340px] pb-1 animate-fadeIn">
+                
+                {/* 1. 게이지 바 몸통 */}
+                <div className="relative w-3 md:w-4 h-full bg-slate-900 rounded-full border border-white/10 shadow-inner overflow-hidden group">
+                  {/* 차오르는 그래디언트 바 */}
+                  <div 
+                    className="absolute bottom-0 w-full bg-gradient-to-t from-rose-600 via-amber-500 to-yellow-300 transition-all duration-1000 ease-out group-hover:brightness-110"
+                    style={{ height: `${Math.min((mbGoalAmount > 0 ? (currentAsset / mbGoalAmount) * 100 : 0), 100)}%` }}
+                  />
+                  {/* 눈금선 (50%) */}
+                  <div className="absolute bottom-1/2 w-full h-[1px] bg-white/30"></div>
+                </div>
+
+                {/* 2. [NEW] 따라다니는 퍼센트 숫자 (Floating Text) */}
+                <div 
+                  className="absolute z-20 pointer-events-none transition-all duration-1000 ease-out whitespace-nowrap"
+                  style={{ 
+                    // 높이(%)에 맞춰 위치 이동 + 살짝 위로 띄우기(mb-3)
+                    bottom: `${Math.min((mbGoalAmount > 0 ? (currentAsset / mbGoalAmount) * 100 : 0), 100)}%`,
+                    marginBottom: "12px" 
+                  }}
+                >
+                  {/* 말풍선 효과를 위한 배경 및 텍스트 */}
+                  <div className="flex flex-col items-center">
+                    <span className="text-xl font-black text-amber-500 italic tracking-tighter drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] bg-slate-950/80 px-2 py-0.5 rounded-lg border border-amber-500/30 backdrop-blur-sm">
+                      {(mbGoalAmount > 0 ? (currentAsset / mbGoalAmount) * 100 : 0).toFixed(1)}%
+                    </span>
+                    {/* 아래쪽 꼬리표 (선택사항 - 더 온도계스럽게) */}
+                    <div className="w-0 h-0 border-l-[4px] border-l-transparent border-r-[4px] border-r-transparent border-t-[6px] border-t-amber-500/50 mt-[-1px]"></div>
+                  </div>
+                </div>
+
+              </div>
+
             </div>
 
             {/* 하단 설명 문구 (기존 위치 유지) */}
             <p className="text-slate-600 text-[10px] font-bold mt-6 uppercase tracking-[0.2em] opacity-40">
               5단계 미션
             </p>
-            {/* [기능 유지 4] 동적 미션 가이드 */}
             <div className="mt-2 px-6 max-w-[340px] mx-auto animate-fadeIn">
               <p className="text-[11px] text-slate-400 font-medium leading-relaxed text-center italic">
                 {activeLevel === 6 
