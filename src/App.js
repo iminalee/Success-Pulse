@@ -3134,9 +3134,9 @@ const nowX = getX(dataPoints[dataPoints.length - 1].date); // 📅 가로 위치
       <style>{`@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css'); * { font-family: 'Pretendard', sans-serif; letter-spacing: -0.02em; } .animate-fadeIn { animation: fadeIn 0.8s ease-out; } .animate-spin-slow { animation: spin 20s linear infinite; } @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } } @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }`}</style>
     
   
-
       {/* 헤더 */}
-      <header className="fixed top-0 left-0 right-0 z-50 flex flex-col md:flex-row justify-between items-center md:items-start p-4 md:px-8 bg-slate-950/80 backdrop-blur-md border-b border-white/5 transition-all duration-300">
+      // [3139행 교체] 헤더 높이 자동 조절(h-auto) 및 패딩 추가
+      <header className="sticky top-0 z-50 w-full flex flex-col md:flex-row justify-between items-center px-6 py-4 bg-slate-950/90 backdrop-blur-md border-b border-white/5 h-auto transition-all duration-300">
         {/* ▼▼▼ 여기를 수정했습니다 (클릭하면 홈으로 이동) ▼▼▼ */}
         <div
           onClick={() => setCurrentView("hub")}
@@ -3155,7 +3155,7 @@ const nowX = getX(dataPoints[dataPoints.length - 1].date); // 📅 가로 위치
           /* [우측 상단] 자산 대시보드 (반응형 수정 완료) */
           /* md:items-end -> PC에서는 우측 정렬, 모바일에서는 items-center(중앙 정렬) */
           /* mt-2 md:mt-0 -> 모바일에서는 로고와 간격을 위해 위쪽 여백 추가 */
-          <div className="flex flex-col items-center md:items-end z-50 animate-fadeIn mt-2 md:mt-0 w-full md:w-auto">
+          <div className="flex flex-col items-center md:items-end z-50 mt-4 md:mt-0 w-full md:w-auto animate-fadeIn">
             
             <p className="text-[10px] font-black text-amber-500/80 uppercase tracking-widest mb-1 flex items-center gap-2">
               <Sparkles size={10} /> Accumulated Magnitude
