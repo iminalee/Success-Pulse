@@ -3153,7 +3153,7 @@ const nowX = getX(dataPoints[dataPoints.length - 1].date); // 📅 가로 위치
 
         {currentView !== "philosophy" && (
           /* [우측 상단] 자산 대시보드 및 프로그레스 바 (수정됨) */
-          <div className="hidden md:flex flex-col items-end z-50 animate-fadeIn">
+          <div className="flex flex-col items-end z-50 animate-fadeIn">
             <p className="text-[10px] font-black text-amber-500/80 uppercase tracking-widest mb-1 flex items-center gap-2">
               <Sparkles size={10} /> Accumulated Magnitude
             </p>
