@@ -1854,10 +1854,7 @@ const deleteLedgerEntry = (logToDelete) => {
                    {/* --- [수정 시작] Value Events 섹션 전체 --- */}
                  {/* 3. [NEW] 오늘의 성취 기록 (Today's Log) */}
                   <div className="border-t border-white/10 pt-4 animate-fadeIn">
-                    <p className="text-[10px] font-black text-emerald-500 uppercase tracking-widest mb-3 flex items-center gap-2">
-                      <CheckCircle size={12} /> Today's Achievements
-                    </p>
-                    <div className="space-y-2 max-h-[200px] overflow-y-auto pr-1 custom-scrollbar">
+                      <div className="space-y-2 max-h-[200px] overflow-y-auto pr-1 custom-scrollbar">
                       {ledger.filter(log => 
                         log.level === activeLevel && 
                         new Date(log.date).toLocaleDateString() === new Date().toLocaleDateString()
