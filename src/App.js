@@ -1848,95 +1848,136 @@ const deleteLedgerEntry = (logToDelete) => {
                   </div>
                   <div className="flex justify-between items-end mb-4 border-b border-white/10 pb-2">
                     <h4 className="text-sm font-black text-white uppercase tracking-widest flex items-center gap-2">
-                      <ListPlus size={16} className="text-amber-500" /> Value
-                      Events
+                      <ListPlus size={16} className="text-amber-500" /> Value Events
                     </h4>
                   </div>
-                  <div className="space-y-3 overflow-y-auto pr-2 custom-scrollbar max-h-[350px]">
+                   {/* --- [수정 시작] Value Events 섹션 전체 --- */}
+                  
+                  {/* 1. 사전 설정 리스트 (아직 안 한 것들) - 약간 흐리게 처리 */}
+                  <div className="space-y-3 overflow-y-auto pr-2 custom-scrollbar max-h-[250px] mb-6">
                     {visions[activeLevel]?.events?.map((ev) => {
                       const mins = eventDurations[ev.id] || 60;
                       return (
                         <div
                           key={ev.id}
-                          className="bg-slate-800/40 border border-white/5 p-4 rounded-xl flex items-center justify-between transition-all hover:bg-slate-800/60"
+                          className="bg-slate-800/30 border border-white/5 p-4 rounded-xl flex items-center justify-between transition-all hover:bg-slate-800/80 hover:border-amber-500/30 hover:shadow-lg group opacity-60 hover:opacity-100"
                         >
-                          <span className="text-sm font-bold text-slate-200">
+                          <span className="text-sm font-bold text-slate-400 group-hover:text-white transition-colors">
                             {ev.name}
                           </span>
                           <div className="flex items-center gap-3">
-                            <div className="flex items-center gap-2 bg-slate-950 rounded-lg p-1 border border-white/10">
+                            {/* 시간 조절 버튼 */}
+                            <div className="flex items-center gap-2 bg-slate-950 rounded-lg p-1 border border-white/10 opacity-0 group-hover:opacity-100 transition-opacity">
                               <button
-                                onClick={() =>
-                                  updateSpecificDuration(ev.id, -10)
-                                }
+                                onClick={() => updateSpecificDuration(ev.id, -10)}
                                 className="w-5 h-5 text-slate-500 hover:text-white font-bold"
                               >
                                 -
                               </button>
-                              <span className="text-[10px] font-black text-white w-12 text-center">
+                              <span className="text-[10px] font-black text-white w-10 text-center">
                                 {formatDuration(mins)}
                               </span>
                               <button
-                                onClick={() =>
-                                  updateSpecificDuration(ev.id, 10)
-                                }
+                                onClick={() => updateSpecificDuration(ev.id, 10)}
                                 className="w-5 h-5 text-slate-500 hover:text-white font-bold"
                               >
                                 +
                               </button>
                             </div>
+                            {/* 입금(실행) 버튼 */}
                             <button
                               onClick={() => handleDepositSubmit(ev.name, mins)}
-                              className="bg-emerald-600 p-2 rounded-lg text-white hover:bg-emerald-500 transition-colors"
+                              className="bg-slate-700 text-slate-400 p-2 rounded-lg hover:bg-emerald-600 hover:text-white transition-all shadow-md group-hover:scale-110"
+                              title="실행 및 적립"
                             >
-                              <Coins size={14} />
+                              <Coins size={16} />
                             </button>
                           </div>
                         </div>
                       );
                     })}
-                    <div className="mt-4 pt-4 border-t border-white/5">
-                      <input
-                        type="text"
-                        value={customTask}
-                        onChange={(e) => setCustomTask(e.target.value)}
-                        placeholder="새로운 활동 직접 입력..."
-                        className="w-full bg-transparent border-b border-slate-700 p-2 text-sm text-slate-300 outline-none focus:border-amber-500 mb-3"
-                      />
-                      <div className="flex justify-between items-center">
-                        <div className="flex items-center gap-2 bg-slate-950 rounded-lg p-1 border border-white/10">
-                          <button
-                            onClick={() => updateSpecificDuration("quick", -10)}
-                            className="w-5 h-5 text-slate-500"
-                          >
-                            -
-                          </button>
-                          <span className="text-[10px] text-white w-12 text-center">
-                            {formatDuration(eventDurations["quick"] || 60)}
-                          </span>
-                          <button
-                            onClick={() => updateSpecificDuration("quick", 10)}
-                            className="w-5 h-5 text-slate-500"
-                          >
-                            +
-                          </button>
-                        </div>
+                  </div>
+
+                  {/* 2. 신규 활동 직접 입력 (Custom Input) */}
+                  <div className="mb-8 p-4 bg-slate-900/50 rounded-2xl border border-white/5">
+                    <input
+                      type="text"
+                      value={customTask}
+                      onChange={(e) => setCustomTask(e.target.value)}
+                      placeholder="새로운 활동 직접 입력..."
+                      className="w-full bg-transparent border-b border-slate-700 p-2 text-sm text-slate-200 outline-none focus:border-amber-500 mb-3 transition-colors"
+                    />
+                    <div className="flex justify-between items-center">
+                      <div className="flex items-center gap-2 bg-slate-950 rounded-lg p-1 border border-white/10">
                         <button
-                          onClick={() => {
-                            if (!customTask.trim()) return;
-                            handleDepositSubmit(
-                              customTask,
-                              eventDurations["quick"] || 60
-                            );
-                            setCustomTask("");
-                          }}
-                          className="bg-amber-600/20 text-amber-500 text-[10px] font-black px-4 py-2 rounded-lg border border-amber-500/20 uppercase tracking-widest"
+                          onClick={() => updateSpecificDuration("quick", -10)}
+                          className="w-6 h-6 text-slate-500 hover:text-white"
                         >
-                          Quick Deposit
+                          -
+                        </button>
+                        <span className="text-xs font-bold text-white w-12 text-center">
+                          {formatDuration(eventDurations["quick"] || 60)}
+                        </span>
+                        <button
+                          onClick={() => updateSpecificDuration("quick", 10)}
+                          className="w-6 h-6 text-slate-500 hover:text-white"
+                        >
+                          +
                         </button>
                       </div>
+                      <button
+                        onClick={() => {
+                          if (!customTask.trim()) return;
+                          handleDepositSubmit(
+                            customTask,
+                            eventDurations["quick"] || 60
+                          );
+                          setCustomTask("");
+                        }}
+                        className="bg-amber-600 hover:bg-amber-500 text-white text-[10px] font-black px-4 py-2 rounded-lg transition-all uppercase tracking-widest shadow-lg"
+                      >
+                        Quick Deposit
+                      </button>
                     </div>
                   </div>
+
+                  {/* 3. [NEW] 오늘의 성취 기록 (Today's Log) */}
+                  <div className="border-t border-white/10 pt-4 animate-fadeIn">
+                    <p className="text-[10px] font-black text-emerald-500 uppercase tracking-widest mb-3 flex items-center gap-2">
+                      <CheckCircle size={12} /> Today's Achievements
+                    </p>
+                    <div className="space-y-2 max-h-[200px] overflow-y-auto pr-1 custom-scrollbar">
+                      {ledger.filter(log => 
+                        log.level === activeLevel && 
+                        new Date(log.date).toLocaleDateString() === new Date().toLocaleDateString()
+                      ).length === 0 ? (
+                        <p className="text-xs text-slate-600 italic text-center py-4">오늘의 기록이 비어있습니다.</p>
+                      ) : (
+                        ledger.filter(log => 
+                          log.level === activeLevel && 
+                          new Date(log.date).toLocaleDateString() === new Date().toLocaleDateString()
+                        ).reverse().map((log, idx) => (
+                          <div key={idx} className="flex justify-between items-center p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-xl">
+                            <div>
+                              <p className="text-xs font-bold text-emerald-100">{log.desc}</p>
+                              <p className="text-[9px] text-emerald-500/70 mt-0.5">
+                                +{currency}{fNum(log.amount)}
+                              </p>
+                            </div>
+                            <button 
+                              onClick={() => deleteLedgerEntry(log)}
+                              className="text-emerald-500/40 hover:text-rose-400 transition-colors p-1"
+                              title="기록 취소"
+                            >
+                              <X size={14} />
+                            </button>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </div>
+                  {/* --- [수정 끝] --- */}       
+
                 </div>
               )}
             </div>
