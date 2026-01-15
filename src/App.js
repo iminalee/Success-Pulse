@@ -1565,6 +1565,23 @@ const deleteLedgerEntry = (logToDelete) => {
   };
 
   const renderHub = () => {
+    // [추가] BPS 황금빛 로직: 설정된 비전(N) 중 오늘 완료한 개수 계산
+    const configuredLevels = [1, 2, 3, 4, 5].filter(lv => visions[lv]?.title).length; // N값
+    const completedLevelsToday = [1, 2, 3, 4, 5].filter(lv => 
+      visions[lv]?.title && 
+      ledger.some(log => log.level === lv && new Date(log.date).toLocaleDateString() === new Date().toLocaleDateString())
+    ).length;
+    
+    // N개 중 몇 개 했는지 비율 (0.3 ~ 1.0 사이로 밝기 조절)
+    // 하나도 안 했을 때 기본 밝기: 0.3 (어두운 앰버)
+    const bpsBrightness = configuredLevels > 0 
+      ? 0.3 + (completedLevelsToday / configuredLevels) * 0.7 
+      : 0.3;
+      
+    const isAllCompleted = configuredLevels > 0 && configuredLevels === completedLevelsToday;
+
+    // [축하 팝업 상태 관리] - 렌더링 함수 안에 useState가 이미 있다면 생략 가능, 없다면 추가 필요
+    // (renderHub는 컴포넌트 내부 함수라고 가정하므로, 이 변수들을 바로 씁니다)
     // [renderHub 함수 맨 윗부분 변수들 사이에 추가]
     const totalPercent = mbGoalAmount > 0 ? (currentAsset / mbGoalAmount) * 100 : 0;
     const todayStr = new Date().toLocaleDateString(); // [추가] 오늘 날짜 기준점
@@ -1635,14 +1652,27 @@ const deleteLedgerEntry = (logToDelete) => {
           {/* [좌측 패널] 성취 피라미드 */}
             {/* [좌측 패널] 온도계 + 성취 피라미드 통합 섹션 */}
             {/* [좌측 패널] 성취 피라미드 + 온도계 (우측 배치) */}
+            {/* [좌측 패널] 성취 피라미드 + 온도계 통합 섹션 */}
           <div className="w-full md:w-1/2 flex flex-col items-center justify-center relative z-10 pt-10">
             
-            {/* 1. 가로 정렬 컨테이너: (좌) 피라미드 | (우) 온도계 */}
+            {/* 🌟 [NEW] 모든 미션 달성 시 축하 폭죽 효과 (화면 중앙 오버레이) */}
+            {isAllCompleted && (
+              <div className="absolute top-0 left-0 right-0 bottom-0 z-50 flex flex-col items-center justify-center pointer-events-none animate-fadeIn">
+                <div className="text-6xl animate-bounce mb-4 drop-shadow-[0_0_20px_rgba(251,191,36,0.8)]">🏆</div>
+                <div className="bg-slate-900/90 border border-amber-500/50 px-6 py-3 rounded-2xl backdrop-blur-md shadow-[0_0_50px_rgba(245,158,11,0.4)] animate-pulse">
+                  <p className="text-amber-400 font-black text-lg text-center">PERFECT DAY!</p>
+                  <p className="text-slate-300 text-xs text-center">모든 비전을 달성하셨습니다.</p>
+                </div>
+              </div>
+            )}
+
+            {/* 가로 정렬 컨테이너: (좌) 피라미드 | (우) 온도계 */}
             <div className="flex flex-row items-end justify-center gap-6 md:gap-8 w-full">
               
-              {/* [1] 피라미드 구조물 (왼쪽으로 이동됨) */}
+              {/* [1] 피라미드 구조물 (왼쪽) */}
               <div className="flex flex-col items-center justify-end w-full max-w-md">
-                {/* BPS 헤더 */}
+                
+                {/* 🌟 [BPS 헤더] 밝기 조절 로직 적용됨 */}
                 <div className="relative flex justify-center items-end mb-4 z-20 w-full">
                   <div
                     onClick={() => setActiveLevel(6)}
@@ -1652,36 +1682,59 @@ const deleteLedgerEntry = (logToDelete) => {
                       {activeTraits.map((trait, i) => (
                         <span
                           key={i}
-                          className={`text-[10px] font-black px-3 py-1.5 rounded-full bg-slate-900/90 border border-amber-500/40 animate-pulse ${
-                            activeLevel === 6 ? "text-amber-400" : "text-slate-400 opacity-70"
+                          style={{ 
+                            // 6단계 선택 시엔 100%, 아니면 진행도(bpsBrightness)에 따라 밝기 조절
+                            opacity: activeLevel === 6 ? 1 : bpsBrightness, 
+                            borderColor: `rgba(245, 158, 11, ${bpsBrightness})` 
+                          }}
+                          className={`text-[10px] font-black px-3 py-1.5 rounded-full bg-slate-900/90 border transition-all duration-700 ${
+                            isAllCompleted 
+                              ? "animate-pulse text-amber-300 shadow-[0_0_10px_rgba(245,158,11,0.5)]" // 만점: 반짝임
+                              : "text-amber-600" // 진행중: 어두운 앰버 ~ 밝은 앰버
                           }`}
                         >
                           {trait || "Empty"}
                         </span>
                       ))}
                     </div>
-                    <h4 className={`text-xl font-black transition-all ${activeLevel === 6 ? "text-amber-400 scale-110" : "text-slate-600"}`}>
+                    <h4 
+                      style={{ opacity: activeLevel === 6 ? 1 : bpsBrightness }}
+                      className={`text-xl font-black transition-all duration-700 ${
+                        isAllCompleted 
+                          ? "text-amber-400 scale-110 drop-shadow-[0_0_15px_rgba(245,158,11,0.8)] animate-pulse" 
+                          : activeLevel === 6 ? "text-amber-400 scale-110" : "text-amber-700"
+                      }`}
+                    >
                       BPS
                     </h4>
                   </div>
                 </div>
 
-                {/* 삼각형 꼭지점 */}
+                {/* 🌟 [삼각형] 밝기 조절 로직 적용됨 */}
                 <div className="flex justify-center mb-1 animate-pulse">
-                  <div className="w-0 h-0 border-l-[30px] border-l-transparent border-r-[30px] border-r-transparent border-b-[40px] border-b-yellow-500 drop-shadow-[0_0_10px_rgba(234,179,8,0.6)]"></div>
+                  <div 
+                    style={{ 
+                      // 삼각형 색상도 밝기에 따라 서서히 차오름
+                      borderBottomColor: `rgba(245, 158, 11, ${activeLevel === 6 ? 1 : bpsBrightness})`, 
+                      filter: isAllCompleted ? "drop-shadow(0 0 10px rgba(245,158,11,0.8))" : "none"
+                    }}
+                    className={`w-0 h-0 border-l-[30px] border-l-transparent border-r-[30px] border-r-transparent border-b-[40px] transition-all duration-700 ${
+                      isAllCompleted ? "animate-pulse scale-110" : ""
+                    }`}
+                  ></div>
                 </div>
 
-                {/* 1~5단계 바 루프 */}
+                {/* 1~5단계 바 루프 (기존 기능 완벽 유지) */}
                 {[5, 4, 3, 2, 1].map((lv) => {
                   const isConfigured = visions[lv]?.title && visions[lv]?.title !== "";
                   const isActive = lv === activeLevel;
 
-                  // [기능 유지 1] 1/N 개별 진행도 계산
+                  // [기능 유지 1] 1/N 개별 진행도
                   const levelProgress = visions[lv]?.progressAsset || 0;
                   const visualPercent = 50 + (levelProgress / perLevelTarget) * 50; 
                   const displayPercent = Math.min(visualPercent, 100).toFixed(1);
 
-                  // [기능 유지 2] 자정 리셋 & 오늘 실천 여부 확인
+                  // [기능 유지 2] 자정 리셋 & 오늘 실천 여부
                   const hasProgressToday = ledger.some(log => 
                     log.level === lv && 
                     new Date(log.date).toLocaleDateString() === new Date().toLocaleDateString()
@@ -1726,45 +1779,34 @@ const deleteLedgerEntry = (logToDelete) => {
                 })}
               </div>
 
-              {/* [2] 온도계 (오른쪽으로 이동됨) */}
-              {/* [2] 온도계 (오른쪽: 숫자가 게이지 따라 움직임) */}
+              {/* [2] 온도계 (오른쪽: 숫자가 게이지 따라 움직임) - 기존 기능 유지 */}
               <div className="relative flex flex-col items-center justify-end h-[340px] pb-1 animate-fadeIn">
-                
-                {/* 1. 게이지 바 몸통 */}
                 <div className="relative w-3 md:w-4 h-full bg-slate-900 rounded-full border border-white/10 shadow-inner overflow-hidden group">
-                  {/* 차오르는 그래디언트 바 */}
                   <div 
                     className="absolute bottom-0 w-full bg-gradient-to-t from-rose-600 via-amber-500 to-yellow-300 transition-all duration-1000 ease-out group-hover:brightness-110"
                     style={{ height: `${Math.min((mbGoalAmount > 0 ? (currentAsset / mbGoalAmount) * 100 : 0), 100)}%` }}
                   />
-                  {/* 눈금선 (50%) */}
                   <div className="absolute bottom-1/2 w-full h-[1px] bg-white/30"></div>
                 </div>
-
-                {/* 2. [NEW] 따라다니는 퍼센트 숫자 (Floating Text) */}
                 <div 
                   className="absolute z-20 pointer-events-none transition-all duration-1000 ease-out whitespace-nowrap"
                   style={{ 
-                    // 높이(%)에 맞춰 위치 이동 + 살짝 위로 띄우기(mb-3)
                     bottom: `${Math.min((mbGoalAmount > 0 ? (currentAsset / mbGoalAmount) * 100 : 0), 100)}%`,
                     marginBottom: "12px" 
                   }}
                 >
-                  {/* 말풍선 효과를 위한 배경 및 텍스트 */}
                   <div className="flex flex-col items-center">
                     <span className="text-xl font-black text-amber-500 italic tracking-tighter drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] bg-slate-950/80 px-2 py-0.5 rounded-lg border border-amber-500/30 backdrop-blur-sm">
                       {(mbGoalAmount > 0 ? (currentAsset / mbGoalAmount) * 100 : 0).toFixed(1)}%
                     </span>
-                    {/* 아래쪽 꼬리표 (선택사항 - 더 온도계스럽게) */}
                     <div className="w-0 h-0 border-l-[4px] border-l-transparent border-r-[4px] border-r-transparent border-t-[6px] border-t-amber-500/50 mt-[-1px]"></div>
                   </div>
                 </div>
-
               </div>
 
             </div>
 
-            {/* 하단 설명 문구 (기존 위치 유지) */}
+            {/* 하단 설명 문구 */}
             <p className="text-slate-600 text-[10px] font-bold mt-6 uppercase tracking-[0.2em] opacity-40">
               5단계 미션
             </p>
