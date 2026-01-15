@@ -1565,18 +1565,17 @@ const deleteLedgerEntry = (logToDelete) => {
   };
 
   const renderHub = () => {
-    // [추가] BPS 황금빛 로직: 설정된 비전(N) 중 오늘 완료한 개수 계산
+// [수정] BPS 황금빛 밝기 로직 (기본 밝기를 0.6으로 상향 조정)
     const configuredLevels = [1, 2, 3, 4, 5].filter(lv => visions[lv]?.title).length; // N값
     const completedLevelsToday = [1, 2, 3, 4, 5].filter(lv => 
       visions[lv]?.title && 
       ledger.some(log => log.level === lv && new Date(log.date).toLocaleDateString() === new Date().toLocaleDateString())
     ).length;
     
-    // N개 중 몇 개 했는지 비율 (0.3 ~ 1.0 사이로 밝기 조절)
-    // 하나도 안 했을 때 기본 밝기: 0.3 (어두운 앰버)
+    // 기본 밝기 0.6(60%)부터 시작해서, 완료율에 따라 최대 1.0(100%)까지 증가
     const bpsBrightness = configuredLevels > 0 
-      ? 0.3 + (completedLevelsToday / configuredLevels) * 0.7 
-      : 0.3;
+      ? 0.6 + (completedLevelsToday / configuredLevels) * 0.4 
+      : 0.6; // 설정된 비전이 하나도 없어도 60% 밝기로 표시
       
     const isAllCompleted = configuredLevels > 0 && configuredLevels === completedLevelsToday;
 
