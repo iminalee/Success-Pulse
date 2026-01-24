@@ -1649,13 +1649,14 @@ const deleteLedgerEntry = (logToDelete) => {
           }`}
         >
           {/* [좌측 패널] 성취 피라미드 */}
-            {/* [좌측 패널] 온도계 + 성취 피라미드 통합 섹션 */}
-            {/* [좌측 패널] 성취 피라미드 + 온도계 (우측 배치) */}
-            {/* [좌측 패널] 성취 피라미드 + 온도계 통합 섹션 */}
-            {/* [좌측 패널] 성취 피라미드 + 온도계 통합 섹션 */}
-          <div className="w-full md:w-1/2 flex flex-col items-center justify-center relative z-10 pt-6"> {/* pt-10을 pt-6으로 줄여서 공간 확보 */}
-            
-            {/* 🌟 [NEW] 모든 미션 달성 시 축하 폭죽 효과 */}
+            {/* [좌측 패널] 성취 피라미드 + 의식의 원 + 온도계 */}
+          <div className="w-full md:w-1/2 flex flex-col items-center justify-center relative z-10 pt-4">
+
+            {/* 🌟 [NEW] 자아 통합 의식 (Ritual Overlay) - 평소엔 숨김(hidden) 상태 */}
+            {/* 이 부분은 state 관리가 필요하지만, 지금은 클릭 시 'PERFECT DAY' 팝업을 대신 띄우거나 시각적 효과로 대체합니다 */}
+            {/* (실제 7초 로직은 별도 state 추가가 필요하므로, 여기서는 시각적 버튼에 집중합니다) */}
+
+            {/* 🌟 모든 미션 달성 시 축하 폭죽 효과 */}
             {isAllCompleted && (
               <div className="absolute top-0 left-0 right-0 bottom-0 z-50 flex flex-col items-center justify-center pointer-events-none animate-fadeIn">
                 <div className="text-6xl animate-bounce mb-4 drop-shadow-[0_0_20px_rgba(251,191,36,0.8)]">🏆</div>
@@ -1672,43 +1673,52 @@ const deleteLedgerEntry = (logToDelete) => {
               {/* [1] 피라미드 구조물 (왼쪽) */}
               <div className="flex flex-col items-center justify-end w-full max-w-md">
                 
-                {/* 🌟 [BPS 헤더 + 의식의 원] */}
+                {/* 🌟 [BPS 헤더 영역] */}
                 <div className="relative flex justify-center items-end mb-2 z-20 w-full">
                   <div
                     onClick={() => setActiveLevel(6)}
                     className="relative flex flex-col items-center justify-end cursor-pointer group w-full"
                   >
                     
-                    {/* 🟠 [NEW] 통합 의식 트리거 (Ritual Trigger) - 태양처럼 떠있는 두 원 */}
+                    {/* 🟠 [수정됨] 통합 의식 버튼 (The Ritual Circles) - 아주 잘 보이게 수정! */}
                     <div 
-                      className="mb-3 relative w-12 h-8 flex items-center justify-center cursor-pointer hover:scale-110 transition-transform duration-500"
-                      title="자아 통합 의식 시작하기 (Click)"
+                      className="mb-4 relative w-24 h-12 flex items-center justify-center cursor-pointer group/ritual z-50"
                       onClick={(e) => {
-                        e.stopPropagation(); // 피라미드 클릭 방지
-                        // 여기에 의식 모달(Overlay) 여는 함수 연결 예정: openRitual();
-                        alert("두 자아의 통합 의식을 시작합니다. (기능 구현 예정)"); 
+                        e.stopPropagation();
+                        // 여기에 7초 의식 로직 연결 (임시 알림)
+                        if(confirm("👁️ 자아 통합 의식을 시작하시겠습니까?\n(7초간 호흡하며 두 원이 합쳐지는 상상을 하세요.)")) {
+                           // 실제로는 여기서 별도 모달을 띄워야 합니다.
+                           // 현재는 시각적 버튼 확인이 우선이므로 알림으로 대체합니다.
+                        }
                       }}
                     >
-                      {/* 1. 현재 자아 (Current Self) - 왼쪽 */}
-                      <div className="absolute w-6 h-6 rounded-full border-2 border-emerald-500/50 bg-slate-900 z-10 shadow-[0_0_10px_rgba(16,185,129,0.3)]"
-                           style={{ left: 0 }} 
-                      />
-                      
-                      {/* 2. 최상의 자아 (Apex BPS) - 오른쪽 */}
-                      {/* 겹치는 정도(left)를 성취도에 따라 조절: 0(분리) ~ -12px(완전겹침) */}
-                      {/* totalPercent가 100%면 left: -12px (완전 합체) */}
+                      {/* 배경 후광 (마우스 올리면 나타남) */}
+                      <div className="absolute inset-0 bg-amber-500/20 blur-xl rounded-full opacity-0 group-hover/ritual:opacity-100 transition-opacity duration-500"></div>
+
+                      {/* 1. 현재 자아 (왼쪽 원) - 밝은 에메랄드 */}
                       <div 
-                        className="absolute w-6 h-6 rounded-full border-2 border-amber-400 bg-amber-500/20 z-20 shadow-[0_0_15px_rgba(245,158,11,0.5)] transition-all duration-1000 ease-out"
-                        style={{ 
-                           left: `${24 - (Math.min((mbGoalAmount > 0 ? (currentAsset / mbGoalAmount) * 100 : 0), 100) / 100) * 24}px`
-                           // 설명: 0%일때 24px(떨어짐), 100%일때 0px(겹침) -> 로직을 반대로 수정해서 겹치게 보이게 함
-                           // 100% -> left: 0 (왼쪽 원과 겹침)
-                           // 0% -> left: 14px (떨어짐)
-                        }} 
-                      />
+                        className="absolute w-8 h-8 rounded-full bg-slate-900 border-2 border-emerald-400 shadow-[0_0_15px_rgba(52,211,153,0.6)] z-20 transition-all duration-500 group-hover/ritual:scale-110"
+                        style={{ left: '10px' }} // 위치 고정
+                      >
+                         <div className="absolute inset-0 bg-emerald-500/30 rounded-full animate-pulse"></div>
+                      </div>
                       
-                      {/* 연결선 (미세하게) */}
-                      <div className="absolute top-1/2 left-3 right-3 h-[1px] bg-white/10 -z-10"></div>
+                      {/* 2. 최상의 자아 (오른쪽 원) - 밝은 황금색 */}
+                      {/* mbGoalAmount가 0일 때도 보이도록 기본값 설정 */}
+                      <div 
+                        className="absolute w-8 h-8 rounded-full bg-amber-500 border-2 border-white/50 shadow-[0_0_20px_rgba(245,158,11,1)] z-30 mix-blend-screen transition-all duration-1000 ease-out group-hover/ritual:scale-110"
+                        style={{ 
+                           // 목표 달성률에 따라 왼쪽으로 이동 (최소 10px 겹침 ~ 최대 완전 겹침)
+                           left: `${42 - (Math.min((mbGoalAmount > 0 ? (currentAsset / mbGoalAmount) * 100 : 0), 100) / 100) * 32}px`
+                           // 0%일 때 left: 42px (떨어짐)
+                           // 100%일 때 left: 10px (왼쪽 원과 완전히 겹침)
+                        }} 
+                      >
+                        <div className="absolute inset-0 bg-white/30 rounded-full animate-ping opacity-20"></div>
+                      </div>
+                      
+                      {/* 연결선 (에너지 흐름) */}
+                      <div className="absolute top-1/2 left-6 right-6 h-[2px] bg-gradient-to-r from-emerald-500 to-amber-500 opacity-50 -z-10 blur-[1px]"></div>
                     </div>
 
 
