@@ -725,7 +725,7 @@ useEffect(() => {
   const mbGoalAmount = annualIncome * 2;
   const mbBalance = mbGoalAmount * 4;
   const livingAllowance = mbBalance * 0.25;
-  const valueEventAmount = mbGoalAmount / 500;
+  const valueEventAmount = mbGoalAmount / 1000;
   const isPhysioSet = !!visions[1]?.title;
   const levelMap = {
     1: "건강",
