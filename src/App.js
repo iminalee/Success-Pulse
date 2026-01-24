@@ -725,7 +725,7 @@ useEffect(() => {
   const mbGoalAmount = annualIncome * 2;
   const mbBalance = mbGoalAmount * 4;
   const livingAllowance = mbBalance * 0.25;
-  const valueEventAmount = mbGoalAmount / 1000;
+  const valueEventAmount = mbGoalAmount / 500;
   const isPhysioSet = !!visions[1]?.title;
   const levelMap = {
     1: "건강",
@@ -1652,9 +1652,10 @@ const deleteLedgerEntry = (logToDelete) => {
             {/* [좌측 패널] 온도계 + 성취 피라미드 통합 섹션 */}
             {/* [좌측 패널] 성취 피라미드 + 온도계 (우측 배치) */}
             {/* [좌측 패널] 성취 피라미드 + 온도계 통합 섹션 */}
-          <div className="w-full md:w-1/2 flex flex-col items-center justify-center relative z-10 pt-10">
+            {/* [좌측 패널] 성취 피라미드 + 온도계 통합 섹션 */}
+          <div className="w-full md:w-1/2 flex flex-col items-center justify-center relative z-10 pt-6"> {/* pt-10을 pt-6으로 줄여서 공간 확보 */}
             
-            {/* 🌟 [NEW] 모든 미션 달성 시 축하 폭죽 효과 (화면 중앙 오버레이) */}
+            {/* 🌟 [NEW] 모든 미션 달성 시 축하 폭죽 효과 */}
             {isAllCompleted && (
               <div className="absolute top-0 left-0 right-0 bottom-0 z-50 flex flex-col items-center justify-center pointer-events-none animate-fadeIn">
                 <div className="text-6xl animate-bounce mb-4 drop-shadow-[0_0_20px_rgba(251,191,36,0.8)]">🏆</div>
@@ -1665,31 +1666,65 @@ const deleteLedgerEntry = (logToDelete) => {
               </div>
             )}
 
-            {/* 가로 정렬 컨테이너: (좌) 피라미드 | (우) 온도계 */}
+            {/* 가로 정렬 컨테이너 */}
             <div className="flex flex-row items-end justify-center gap-6 md:gap-8 w-full">
               
               {/* [1] 피라미드 구조물 (왼쪽) */}
               <div className="flex flex-col items-center justify-end w-full max-w-md">
                 
-                {/* 🌟 [BPS 헤더] 밝기 조절 로직 적용됨 */}
-                <div className="relative flex justify-center items-end mb-4 z-20 w-full">
+                {/* 🌟 [BPS 헤더 + 의식의 원] */}
+                <div className="relative flex justify-center items-end mb-2 z-20 w-full">
                   <div
                     onClick={() => setActiveLevel(6)}
                     className="relative flex flex-col items-center justify-end cursor-pointer group w-full"
                   >
-                    <div className="flex justify-between items-center w-full max-w-md px-4 mb-4">
+                    
+                    {/* 🟠 [NEW] 통합 의식 트리거 (Ritual Trigger) - 태양처럼 떠있는 두 원 */}
+                    <div 
+                      className="mb-3 relative w-12 h-8 flex items-center justify-center cursor-pointer hover:scale-110 transition-transform duration-500"
+                      title="자아 통합 의식 시작하기 (Click)"
+                      onClick={(e) => {
+                        e.stopPropagation(); // 피라미드 클릭 방지
+                        // 여기에 의식 모달(Overlay) 여는 함수 연결 예정: openRitual();
+                        alert("두 자아의 통합 의식을 시작합니다. (기능 구현 예정)"); 
+                      }}
+                    >
+                      {/* 1. 현재 자아 (Current Self) - 왼쪽 */}
+                      <div className="absolute w-6 h-6 rounded-full border-2 border-emerald-500/50 bg-slate-900 z-10 shadow-[0_0_10px_rgba(16,185,129,0.3)]"
+                           style={{ left: 0 }} 
+                      />
+                      
+                      {/* 2. 최상의 자아 (Apex BPS) - 오른쪽 */}
+                      {/* 겹치는 정도(left)를 성취도에 따라 조절: 0(분리) ~ -12px(완전겹침) */}
+                      {/* totalPercent가 100%면 left: -12px (완전 합체) */}
+                      <div 
+                        className="absolute w-6 h-6 rounded-full border-2 border-amber-400 bg-amber-500/20 z-20 shadow-[0_0_15px_rgba(245,158,11,0.5)] transition-all duration-1000 ease-out"
+                        style={{ 
+                           left: `${24 - (Math.min((mbGoalAmount > 0 ? (currentAsset / mbGoalAmount) * 100 : 0), 100) / 100) * 24}px`
+                           // 설명: 0%일때 24px(떨어짐), 100%일때 0px(겹침) -> 로직을 반대로 수정해서 겹치게 보이게 함
+                           // 100% -> left: 0 (왼쪽 원과 겹침)
+                           // 0% -> left: 14px (떨어짐)
+                        }} 
+                      />
+                      
+                      {/* 연결선 (미세하게) */}
+                      <div className="absolute top-1/2 left-3 right-3 h-[1px] bg-white/10 -z-10"></div>
+                    </div>
+
+
+                    {/* Traits (상단 알약들) */}
+                    <div className="flex justify-between items-center w-full max-w-md px-4 mb-2">
                       {activeTraits.map((trait, i) => (
                         <span
                           key={i}
                           style={{ 
-                            // 6단계 선택 시엔 100%, 아니면 진행도(bpsBrightness)에 따라 밝기 조절
                             opacity: activeLevel === 6 ? 1 : bpsBrightness, 
                             borderColor: `rgba(245, 158, 11, ${bpsBrightness})` 
                           }}
                           className={`text-[10px] font-black px-3 py-1.5 rounded-full bg-slate-900/90 border transition-all duration-700 ${
                             isAllCompleted 
-                              ? "animate-pulse text-amber-300 shadow-[0_0_10px_rgba(245,158,11,0.5)]" // 만점: 반짝임
-                              : "text-amber-600" // 진행중: 어두운 앰버 ~ 밝은 앰버
+                              ? "animate-pulse text-amber-300 shadow-[0_0_10px_rgba(245,158,11,0.5)]" 
+                              : "text-amber-600"
                           }`}
                         >
                           {trait || "Empty"}
@@ -1709,11 +1744,10 @@ const deleteLedgerEntry = (logToDelete) => {
                   </div>
                 </div>
 
-                {/* 🌟 [삼각형] 밝기 조절 로직 적용됨 */}
+                {/* 🌟 [삼각형] */}
                 <div className="flex justify-center mb-1 animate-pulse">
                   <div 
                     style={{ 
-                      // 삼각형 색상도 밝기에 따라 서서히 차오름
                       borderBottomColor: `rgba(245, 158, 11, ${activeLevel === 6 ? 1 : bpsBrightness})`, 
                       filter: isAllCompleted ? "drop-shadow(0 0 10px rgba(245,158,11,0.8))" : "none"
                     }}
@@ -1723,23 +1757,18 @@ const deleteLedgerEntry = (logToDelete) => {
                   ></div>
                 </div>
 
-                {/* 1~5단계 바 루프 (기존 기능 완벽 유지) */}
+                {/* 1~5단계 바 루프 (유지) */}
                 {[5, 4, 3, 2, 1].map((lv) => {
                   const isConfigured = visions[lv]?.title && visions[lv]?.title !== "";
                   const isActive = lv === activeLevel;
-
-                  // [기능 유지 1] 1/N 개별 진행도
                   const levelProgress = visions[lv]?.progressAsset || 0;
                   const visualPercent = 50 + (levelProgress / perLevelTarget) * 50; 
                   const displayPercent = Math.min(visualPercent, 100).toFixed(1);
-
-                  // [기능 유지 2] 자정 리셋 & 오늘 실천 여부
                   const hasProgressToday = ledger.some(log => 
                     log.level === lv && 
                     new Date(log.date).toLocaleDateString() === new Date().toLocaleDateString()
                   );
 
-                  // [기능 유지 3] 색상 로직 (오늘 함: 황금색 / 안함: 그린색)
                   const barBackground = isConfigured
                     ? hasProgressToday
                       ? "bg-gradient-to-r from-amber-600 via-yellow-400 to-amber-600"
@@ -1778,7 +1807,7 @@ const deleteLedgerEntry = (logToDelete) => {
                 })}
               </div>
 
-              {/* [2] 온도계 (오른쪽: 숫자가 게이지 따라 움직임) - 기존 기능 유지 */}
+              {/* [2] 온도계 (오른쪽: 유지) */}
               <div className="relative flex flex-col items-center justify-end h-[340px] pb-1 animate-fadeIn">
                 <div className="relative w-3 md:w-4 h-full bg-slate-900 rounded-full border border-white/10 shadow-inner overflow-hidden group">
                   <div 
