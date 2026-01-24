@@ -445,6 +445,58 @@ useEffect(() => {
   const [hasEditAccess, setHasEditAccess] = useState(false);
   const [hasAiAccess, setHasAiAccess] = useState(false);
 
+// ▼▼▼ [1단계] 여기에 붙여넣으세요 (App 함수 내부, 상단 변수 선언부) ▼▼▼
+
+  // 1. [1/1000 법칙] 목표 금액(Goal)에 따른 1회 행동 가치 자동 계산
+  // mbGoalAmount가 계산된 후 사용되어야 하므로, 변수 선언 순서에 주의합니다.
+  // (annualIncome이 state로 관리되므로, 여기서 실시간 계산됩니다)
+  const calculatedMbGoal = annualIncome * 2; 
+  const magicValue = calculatedMbGoal > 0 ? Math.floor(calculatedMbGoal / 1000) : 10000;
+
+  // 2. [자아 통합 의식] 7초 리추얼 상태 관리
+  const [showRitual, setShowRitual] = useState(false);
+  const [ritualProgress, setRitualProgress] = useState(0);
+  const [isHolding, setIsHolding] = useState(false);
+
+  // 3. [의식 타이머 로직] 꾹 누르면 7초 동안 진행도 상승
+  useEffect(() => {
+    let interval;
+    if (isHolding && ritualProgress < 100) {
+      interval = setInterval(() => {
+        setRitualProgress(prev => {
+          if (prev >= 100) return 100;
+          return prev + 0.8; // 속도 조절 (약 7초)
+        });
+      }, 50);
+    } else if (!isHolding && ritualProgress < 100 && ritualProgress > 0) {
+      setRitualProgress(0); // 손 떼면 초기화
+    }
+    return () => clearInterval(interval);
+  }, [isHolding, ritualProgress]);
+
+  // 4. [진동 효과] 완료 시 햅틱 피드백
+  useEffect(() => {
+    if (ritualProgress === 100 && typeof navigator !== "undefined" && navigator.vibrate) {
+      navigator.vibrate([100, 50, 200]);
+    }
+  }, [ritualProgress]);
+
+  // 5. [BPS 황금빛 로직] 밝기 및 달성 여부 계산
+  // (visions와 ledger가 로드된 후 계산됨)
+  const configuredLevels = [1, 2, 3, 4, 5].filter(lv => visions[lv]?.title).length;
+  const completedLevelsToday = [1, 2, 3, 4, 5].filter(lv => 
+    visions[lv]?.title && 
+    ledger.some(log => log.level === lv && new Date(log.date).toLocaleDateString() === new Date().toLocaleDateString())
+  ).length;
+  
+  // 기본 밝기 0.6(60%) ~ 달성 시 1.0(100%)
+  const bpsBrightness = configuredLevels > 0 
+    ? 0.6 + (completedLevelsToday / configuredLevels) * 0.4 
+    : 0.6;
+  const isAllCompleted = configuredLevels > 0 && configuredLevels === completedLevelsToday;
+
+  // ▲▲▲ [1단계 끝] ▲▲▲
+
   // [핵심 1] 로그인 체크 및 데이터 불러오기 (Load)
   // [핵심 1] 로그인 체크 및 데이터 불러오기 (Load) + 비밀번호 복구 감지
   useEffect(() => {
@@ -1678,280 +1730,276 @@ const deleteLedgerEntry = (logToDelete) => {
               : "opacity-100"
           }`}
         >
-          {/* [좌측 패널] 성취 피라미드 */}
-           {/* [좌측 패널] 성취 피라미드 + 자아 통합 의식 */}
-          <div className="w-full md:w-1/2 flex flex-col items-center justify-center relative z-10 pt-4">
 
-            {/* 🌑 [전체 화면 의식 모드] showRitual이 true일 때만 나타남 */}
-            {showRitual && (
-              <div 
-                className="fixed inset-0 z-[100] bg-black/95 flex flex-col items-center justify-center animate-fadeIn select-none touch-none"
-                // 마우스/터치로 꾹 누르기 이벤트 연결
-                onMouseDown={() => ritualProgress < 100 && setIsHolding(true)}
-                onMouseUp={() => setIsHolding(false)}
-                onTouchStart={() => ritualProgress < 100 && setIsHolding(true)}
-                onTouchEnd={() => setIsHolding(false)}
-              >
-                {/* 닫기 버튼 (우측 상단) */}
-                <button 
-                  onClick={() => { setShowRitual(false); setRitualProgress(0); }}
-                  className="absolute top-8 right-8 text-white/50 hover:text-white p-2"
-                >
-                  <X size={32} />
-                </button>
+          {/* [좌측 패널] 성취 피라미드 + 자아 통합 의식 (수정됨) */}
+          <div className="w-full md:w-1/2 flex flex-col items-center justify-center relative z-10 pt-4">
 
-                {/* 중앙 텍스트 안내 */}
-                <div className="absolute top-[15%] text-center animate-pulse px-4">
-                  <h3 className="text-2xl font-black text-amber-500 mb-2 tracking-widest">IDENTITY INTEGRATION</h3>
-                  <p className="text-sm text-slate-400 font-medium">
-                    {ritualProgress === 100 
-                      ? "통합이 완료되었습니다. Apex BPS가 당신과 함께합니다." 
-                      : "두 원이 하나가 될 때까지 화면을 꾹 누르고 계세요."}
-                  </p>
-                </div>
+            {/* 🌑 [전체 화면 의식 모드] showRitual이 true일 때만 나타남 */}
+            {showRitual && (
+              <div 
+                className="fixed inset-0 z-[5000] bg-black/95 flex flex-col items-center justify-center animate-fadeIn select-none touch-none"
+                // 마우스/터치로 꾹 누르기 이벤트 연결
+                onMouseDown={() => ritualProgress < 100 && setIsHolding(true)}
+                onMouseUp={() => setIsHolding(false)}
+                onTouchStart={() => ritualProgress < 100 && setIsHolding(true)}
+                onTouchEnd={() => setIsHolding(false)}
+              >
+                {/* 닫기 버튼 */}
+                <button 
+                  onClick={() => { setShowRitual(false); setRitualProgress(0); }}
+                  className="absolute top-8 right-8 text-white/50 hover:text-white p-4 z-50"
+                >
+                  <X size={32} />
+                </button>
 
-                {/* 🌟 거대한 두 개의 원 (애니메이션 핵심) */}
-                <div className="relative w-full max-w-lg h-80 flex items-center justify-center">
-                  
-                  {/* [왼쪽] 현재 자아 (초록색) */}
-                  <div 
-                    className="absolute w-48 h-48 rounded-full border-4 border-emerald-500 bg-emerald-900/20 shadow-[0_0_50px_rgba(16,185,129,0.3)] backdrop-blur-sm transition-transform duration-75 ease-out flex items-center justify-center"
-                    style={{ 
-                      // 진행도에 따라 오른쪽으로 이동 (최대 중앙까지)
-                      transform: `translateX(-${(100 - ritualProgress) * 1.5}px) scale(${1 + ritualProgress/200})`,
-                      opacity: ritualProgress === 100 ? 0 : 1 // 완료되면 사라지고 합쳐진 원만 남김
-                    }}
-                  >
-                     <span className="text-emerald-500 font-black text-xs opacity-50">CURRENT</span>
-                  </div>
+                {/* 중앙 텍스트 안내 */}
+                <div className="absolute top-[15%] text-center animate-pulse px-4 pointer-events-none">
+                  <h3 className="text-2xl font-black text-amber-500 mb-2 tracking-widest">IDENTITY INTEGRATION</h3>
+                  <p className="text-sm text-slate-400 font-medium">
+                    {ritualProgress === 100 
+                      ? "통합이 완료되었습니다. Apex BPS가 당신과 함께합니다." 
+                      : "두 원이 하나가 될 때까지 화면을 꾹 누르고 계세요."}
+                  </p>
+                </div>
 
-                  {/* [오른쪽] 최상의 자아 (황금색) */}
-                  <div 
-                    className="absolute w-48 h-48 rounded-full border-4 border-amber-500 bg-amber-900/20 shadow-[0_0_50px_rgba(245,158,11,0.3)] backdrop-blur-sm transition-transform duration-75 ease-out flex items-center justify-center"
-                    style={{ 
-                      // 진행도에 따라 왼쪽으로 이동
-                      transform: `translateX(${(100 - ritualProgress) * 1.5}px) scale(${1 + ritualProgress/200})`,
-                      opacity: ritualProgress === 100 ? 0 : 1
-                    }}
-                  >
-                     <span className="text-amber-500 font-black text-xs opacity-50">APEX BPS</span>
-                  </div>
+                {/* 🌟 거대한 두 개의 원 (애니메이션 핵심) */}
+                <div className="relative w-full max-w-lg h-80 flex items-center justify-center pointer-events-none">
+                  
+                  {/* [왼쪽] 현재 자아 (초록색) */}
+                  <div 
+                    className="absolute w-48 h-48 rounded-full border-4 border-emerald-500 bg-emerald-900/20 shadow-[0_0_50px_rgba(16,185,129,0.3)] backdrop-blur-sm transition-transform duration-75 ease-out flex items-center justify-center"
+                    style={{ 
+                      transform: `translateX(-${(100 - ritualProgress) * 1.5}px) scale(${1 + ritualProgress/200})`,
+                      opacity: ritualProgress === 100 ? 0 : 1 
+                    }}
+                  >
+                     <span className="text-emerald-500 font-black text-xs opacity-50">CURRENT</span>
+                  </div>
 
-                  {/* [완료] 통합된 거대한 황금 원 (100%일 때 등장) */}
-                  <div 
-                    className={`absolute w-64 h-64 rounded-full bg-gradient-to-br from-amber-300 via-amber-500 to-yellow-600 shadow-[0_0_100px_rgba(245,158,11,0.8)] flex items-center justify-center transition-all duration-1000 ${
-                      ritualProgress === 100 ? "opacity-100 scale-110 animate-pulse" : "opacity-0 scale-50"
-                    }`}
-                  >
-                    <span className="text-white font-black text-3xl drop-shadow-lg tracking-tighter">ONE</span>
-                  </div>
+                  {/* [오른쪽] 최상의 자아 (황금색) */}
+                  <div 
+                    className="absolute w-48 h-48 rounded-full border-4 border-amber-500 bg-amber-900/20 shadow-[0_0_50px_rgba(245,158,11,0.3)] backdrop-blur-sm transition-transform duration-75 ease-out flex items-center justify-center"
+                    style={{ 
+                      transform: `translateX(${(100 - ritualProgress) * 1.5}px) scale(${1 + ritualProgress/200})`,
+                      opacity: ritualProgress === 100 ? 0 : 1
+                    }}
+                  >
+                     <span className="text-amber-500 font-black text-xs opacity-50">APEX BPS</span>
+                  </div>
 
-                  {/* 진행바 (하단) */}
-                  <div className="absolute -bottom-20 w-64 h-2 bg-slate-800 rounded-full overflow-hidden">
-                    <div 
-                      className="h-full bg-gradient-to-r from-emerald-500 to-amber-500 transition-all duration-75"
-                      style={{ width: `${ritualProgress}%` }}
-                    />
-                  </div>
+                  {/* [완료] 통합된 거대한 황금 원 */}
+                  <div 
+                    className={`absolute w-64 h-64 rounded-full bg-gradient-to-br from-amber-300 via-amber-500 to-yellow-600 shadow-[0_0_100px_rgba(245,158,11,0.8)] flex items-center justify-center transition-all duration-1000 ${
+                      ritualProgress === 100 ? "opacity-100 scale-110 animate-pulse" : "opacity-0 scale-50"
+                    }`}
+                  >
+                    <span className="text-white font-black text-3xl drop-shadow-lg tracking-tighter">ONE</span>
+                  </div>
 
-                </div>
-              </div>
-            )}
+                  {/* 진행바 (하단) */}
+                  <div className="absolute -bottom-20 w-64 h-2 bg-slate-800 rounded-full overflow-hidden">
+                    <div 
+                      className="h-full bg-gradient-to-r from-emerald-500 to-amber-500 transition-all duration-75"
+                      style={{ width: `${ritualProgress}%` }}
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
 
+            {/* 🌟 모든 미션 달성 시 축하 폭죽 */}
+            {isAllCompleted && (
+              <div className="absolute top-0 left-0 right-0 bottom-0 z-50 flex flex-col items-center justify-center pointer-events-none animate-fadeIn">
+                <div className="text-6xl animate-bounce mb-4 drop-shadow-[0_0_20px_rgba(251,191,36,0.8)]">🏆</div>
+                <div className="bg-slate-900/90 border border-amber-500/50 px-6 py-3 rounded-2xl backdrop-blur-md shadow-[0_0_50px_rgba(245,158,11,0.4)] animate-pulse">
+                  <p className="text-amber-400 font-black text-lg text-center">PERFECT DAY!</p>
+                  <p className="text-slate-300 text-xs text-center">모든 비전을 달성하셨습니다.</p>
+                </div>
+              </div>
+            )}
 
-            {/* 🌟 모든 미션 달성 시 축하 폭죽 (기존 유지) */}
-            {isAllCompleted && (
-              <div className="absolute top-0 left-0 right-0 bottom-0 z-50 flex flex-col items-center justify-center pointer-events-none animate-fadeIn">
-                <div className="text-6xl animate-bounce mb-4 drop-shadow-[0_0_20px_rgba(251,191,36,0.8)]">🏆</div>
-                <div className="bg-slate-900/90 border border-amber-500/50 px-6 py-3 rounded-2xl backdrop-blur-md shadow-[0_0_50px_rgba(245,158,11,0.4)] animate-pulse">
-                  <p className="text-amber-400 font-black text-lg text-center">PERFECT DAY!</p>
-                  <p className="text-slate-300 text-xs text-center">모든 비전을 달성하셨습니다.</p>
-                </div>
-              </div>
-            )}
+            {/* 가로 정렬 컨테이너 */}
+            <div className="flex flex-row items-end justify-center gap-6 md:gap-8 w-full">
+              
+              {/* [1] 피라미드 구조물 (왼쪽) */}
+              <div className="flex flex-col items-center justify-end w-full max-w-md">
+                
+                {/* 🌟 [BPS 헤더 영역 & 의식 트리거] */}
+                <div className="relative flex justify-center items-end mb-2 z-20 w-full">
+                  <div
+                    onClick={() => setActiveLevel(6)}
+                    className="relative flex flex-col items-center justify-end cursor-pointer group w-full"
+                  >
+                    
+                    {/* 🟠 [트리거 버튼] 누르면 전체화면 모드 실행 */}
+                    <div 
+                      className="mb-4 relative w-24 h-12 flex items-center justify-center cursor-pointer group/ritual z-40"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setShowRitual(true); // 전체화면 모드 켜기
+                        setRitualProgress(0); // 진행도 초기화
+                      }}
+                    >
+                      {/* 배경 후광 */}
+                      <div className="absolute inset-0 bg-amber-500/20 blur-xl rounded-full opacity-0 group-hover/ritual:opacity-100 transition-opacity duration-500"></div>
 
-            {/* 가로 정렬 컨테이너 */}
-            <div className="flex flex-row items-end justify-center gap-6 md:gap-8 w-full">
-              
-              {/* [1] 피라미드 구조물 (왼쪽) */}
-              <div className="flex flex-col items-center justify-end w-full max-w-md">
-                
-                {/* 🌟 [BPS 헤더 영역] */}
-                <div className="relative flex justify-center items-end mb-2 z-20 w-full">
-                  <div
-                    onClick={() => setActiveLevel(6)}
-                    className="relative flex flex-col items-center justify-end cursor-pointer group w-full"
-                  >
-                    
-                    {/* 🟠 [트리거 버튼] 누르면 전체화면 모드 실행 */}
-                    <div 
-                      className="mb-4 relative w-24 h-12 flex items-center justify-center cursor-pointer group/ritual z-40"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setShowRitual(true); // 전체화면 모드 켜기
-                        setRitualProgress(0); // 진행도 초기화
-                      }}
-                    >
-                      {/* 배경 후광 */}
-                      <div className="absolute inset-0 bg-amber-500/20 blur-xl rounded-full opacity-0 group-hover/ritual:opacity-100 transition-opacity duration-500"></div>
+                      {/* 1. 현재 자아 (왼쪽 원) */}
+                      <div 
+                        className="absolute w-8 h-8 rounded-full bg-slate-900 border-2 border-emerald-400 shadow-[0_0_15px_rgba(52,211,153,0.6)] z-20 transition-all duration-500 group-hover/ritual:scale-110"
+                        style={{ left: '10px' }}
+                      >
+                         <div className="absolute inset-0 bg-emerald-500/30 rounded-full animate-pulse"></div>
+                      </div>
+                      
+                      {/* 2. 최상의 자아 (오른쪽 원) - 달성률에 따라 이동 */}
+                      <div 
+                        className="absolute w-8 h-8 rounded-full bg-amber-500 border-2 border-white/50 shadow-[0_0_20px_rgba(245,158,11,1)] z-30 mix-blend-screen transition-all duration-1000 ease-out group-hover/ritual:scale-110"
+                        style={{ 
+                           // 완료율에 따라 겹침 정도 시각화 (기본값)
+                           left: `${42 - (Math.min((mbGoalAmount > 0 ? (currentAsset / mbGoalAmount) * 100 : 0), 100) / 100) * 32}px`
+                        }} 
+                      >
+                        <div className="absolute inset-0 bg-white/30 rounded-full animate-ping opacity-20"></div>
+                      </div>
+                      
+                      {/* 연결선 */}
+                      <div className="absolute top-1/2 left-6 right-6 h-[2px] bg-gradient-to-r from-emerald-500 to-amber-500 opacity-50 -z-10 blur-[1px]"></div>
+                    </div>
 
-                      {/* 1. 현재 자아 (왼쪽 원) */}
-                      <div 
-                        className="absolute w-8 h-8 rounded-full bg-slate-900 border-2 border-emerald-400 shadow-[0_0_15px_rgba(52,211,153,0.6)] z-20 transition-all duration-500 group-hover/ritual:scale-110"
-                        style={{ left: '10px' }}
-                      >
-                         <div className="absolute inset-0 bg-emerald-500/30 rounded-full animate-pulse"></div>
-                      </div>
-                      
-                      {/* 2. 최상의 자아 (오른쪽 원) */}
-                      <div 
-                        className="absolute w-8 h-8 rounded-full bg-amber-500 border-2 border-white/50 shadow-[0_0_20px_rgba(245,158,11,1)] z-30 mix-blend-screen transition-all duration-1000 ease-out group-hover/ritual:scale-110"
-                        style={{ 
-                           // 완료율에 따라 겹침 정도 시각화 (기본값)
-                           left: `${42 - (Math.min((mbGoalAmount > 0 ? (currentAsset / mbGoalAmount) * 100 : 0), 100) / 100) * 32}px`
-                        }} 
-                      >
-                        <div className="absolute inset-0 bg-white/30 rounded-full animate-ping opacity-20"></div>
-                      </div>
-                      
-                      {/* 연결선 */}
-                      <div className="absolute top-1/2 left-6 right-6 h-[2px] bg-gradient-to-r from-emerald-500 to-amber-500 opacity-50 -z-10 blur-[1px]"></div>
-                    </div>
+                    {/* Traits (상단 알약들) */}
+                    <div className="flex justify-between items-center w-full max-w-md px-4 mb-2">
+                      {activeTraits.map((trait, i) => (
+                        <span
+                          key={i}
+                          style={{ 
+                            opacity: activeLevel === 6 ? 1 : bpsBrightness, 
+                            borderColor: `rgba(245, 158, 11, ${bpsBrightness})` 
+                          }}
+                          className={`text-[10px] font-black px-3 py-1.5 rounded-full bg-slate-900/90 border transition-all duration-700 ${
+                            isAllCompleted 
+                              ? "animate-pulse text-amber-300 shadow-[0_0_10px_rgba(245,158,11,0.5)]" 
+                              : "text-amber-600"
+                          }`}
+                        >
+                          {trait || "Empty"}
+                        </span>
+                      ))}
+                    </div>
+                    <h4 
+                      style={{ opacity: activeLevel === 6 ? 1 : bpsBrightness }}
+                      className={`text-xl font-black transition-all duration-700 ${
+                        isAllCompleted 
+                          ? "text-amber-400 scale-110 drop-shadow-[0_0_15px_rgba(245,158,11,0.8)] animate-pulse" 
+                          : activeLevel === 6 ? "text-amber-400 scale-110" : "text-amber-700"
+                      }`}
+                    >
+                      BPS
+                    </h4>
+                  </div>
+                </div>
 
-                    {/* Traits (상단 알약들) */}
-                    <div className="flex justify-between items-center w-full max-w-md px-4 mb-2">
-                      {activeTraits.map((trait, i) => (
-                        <span
-                          key={i}
-                          style={{ 
-                            opacity: activeLevel === 6 ? 1 : bpsBrightness, 
-                            borderColor: `rgba(245, 158, 11, ${bpsBrightness})` 
-                          }}
-                          className={`text-[10px] font-black px-3 py-1.5 rounded-full bg-slate-900/90 border transition-all duration-700 ${
-                            isAllCompleted 
-                              ? "animate-pulse text-amber-300 shadow-[0_0_10px_rgba(245,158,11,0.5)]" 
-                              : "text-amber-600"
-                          }`}
-                        >
-                          {trait || "Empty"}
-                        </span>
-                      ))}
-                    </div>
-                    <h4 
-                      style={{ opacity: activeLevel === 6 ? 1 : bpsBrightness }}
-                      className={`text-xl font-black transition-all duration-700 ${
-                        isAllCompleted 
-                          ? "text-amber-400 scale-110 drop-shadow-[0_0_15px_rgba(245,158,11,0.8)] animate-pulse" 
-                          : activeLevel === 6 ? "text-amber-400 scale-110" : "text-amber-700"
-                      }`}
-                    >
-                      BPS
-                    </h4>
-                  </div>
-                </div>
+                {/* 🌟 [삼각형] */}
+                <div className="flex justify-center mb-1 animate-pulse">
+                  <div 
+                    style={{ 
+                      borderBottomColor: `rgba(245, 158, 11, ${activeLevel === 6 ? 1 : bpsBrightness})`, 
+                      filter: isAllCompleted ? "drop-shadow(0 0 10px rgba(245,158,11,0.8))" : "none"
+                    }}
+                    className={`w-0 h-0 border-l-[30px] border-l-transparent border-r-[30px] border-r-transparent border-b-[40px] transition-all duration-700 ${
+                      isAllCompleted ? "animate-pulse scale-110" : ""
+                    }`}
+                  ></div>
+                </div>
 
-                {/* 🌟 [삼각형] */}
-                <div className="flex justify-center mb-1 animate-pulse">
-                  <div 
-                    style={{ 
-                      borderBottomColor: `rgba(245, 158, 11, ${activeLevel === 6 ? 1 : bpsBrightness})`, 
-                      filter: isAllCompleted ? "drop-shadow(0 0 10px rgba(245,158,11,0.8))" : "none"
-                    }}
-                    className={`w-0 h-0 border-l-[30px] border-l-transparent border-r-[30px] border-r-transparent border-b-[40px] transition-all duration-700 ${
-                      isAllCompleted ? "animate-pulse scale-110" : ""
-                    }`}
-                  ></div>
-                </div>
+                {/* 1~5단계 바 루프 (유지) */}
+                {[5, 4, 3, 2, 1].map((lv) => {
+                  const isConfigured = visions[lv]?.title && visions[lv]?.title !== "";
+                  const isActive = lv === activeLevel;
+                  const levelProgress = visions[lv]?.progressAsset || 0;
+                  const visualPercent = 50 + (levelProgress / perLevelTarget) * 50; 
+                  const displayPercent = Math.min(visualPercent, 100).toFixed(1);
+                  const hasProgressToday = ledger.some(log => 
+                    log.level === lv && 
+                    new Date(log.date).toLocaleDateString() === new Date().toLocaleDateString()
+                  );
 
-                {/* 1~5단계 바 루프 (유지) */}
-                {[5, 4, 3, 2, 1].map((lv) => {
-                  const isConfigured = visions[lv]?.title && visions[lv]?.title !== "";
-                  const isActive = lv === activeLevel;
-                  const levelProgress = visions[lv]?.progressAsset || 0;
-                  const visualPercent = 50 + (levelProgress / perLevelTarget) * 50; 
-                  const displayPercent = Math.min(visualPercent, 100).toFixed(1);
-                  const hasProgressToday = ledger.some(log => 
-                    log.level === lv && 
-                    new Date(log.date).toLocaleDateString() === new Date().toLocaleDateString()
-                  );
+                  const barBackground = isConfigured
+                    ? hasProgressToday
+                      ? "bg-gradient-to-r from-amber-600 via-yellow-400 to-amber-600"
+                      : "bg-gradient-to-r from-emerald-600 via-teal-400 to-emerald-600"
+                    : "bg-slate-700/50";
 
-                  const barBackground = isConfigured
-                    ? hasProgressToday
-                      ? "bg-gradient-to-r from-amber-600 via-yellow-400 to-amber-600"
-                      : "bg-gradient-to-r from-emerald-600 via-teal-400 to-emerald-600"
-                    : "bg-slate-700/50";
+                  const containerStyle = isActive
+                    ? "border-amber-400 ring-2 ring-amber-500/50 shadow-[0_0_30px_rgba(245,158,11,0.6)] z-10 scale-105 brightness-110"
+                    : isConfigured
+                    ? "border-amber-600/30 opacity-90 hover:brightness-110"
+                    : "border-slate-700/50 opacity-60 hover:opacity-80";
 
-                  const containerStyle = isActive
-                    ? "border-amber-400 ring-2 ring-amber-500/50 shadow-[0_0_30px_rgba(245,158,11,0.6)] z-10 scale-105 brightness-110"
-                    : isConfigured
-                    ? "border-amber-600/30 opacity-90 hover:brightness-110"
-                    : "border-slate-700/50 opacity-60 hover:opacity-80";
+                  return (
+                    <div
+                      key={lv}
+                      onClick={() => setActiveLevel(lv)}
+                      className={`cursor-pointer relative flex items-center justify-center h-[50px] rounded-2xl mb-2 overflow-hidden transition-all duration-300 border ${widthMap[lv]} ${containerStyle}`}
+                    >
+                      <div
+                        className={`absolute left-0 top-0 h-full transition-all duration-1000 ${barBackground}`}
+                        style={{ width: `${displayPercent}%` }}
+                      />
+                      <div className="relative z-10 flex flex-col items-center justify-center leading-none">
+                        <span className="font-black uppercase text-sm tracking-tight text-white drop-shadow-md flex items-center gap-2">
+                          {isConfigured && (
+                            <span className="text-xs emoji-shadow">{visions[lv].emoji}</span>
+                          )}
+                          {levelMap[lv]}
+                        </span>
+                        <span className="text-[10px] font-bold mt-0.5 text-white/90 drop-shadow-md">
+                          {displayPercent}%
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
 
-                  return (
-                    <div
-                      key={lv}
-                      onClick={() => setActiveLevel(lv)}
-                      className={`cursor-pointer relative flex items-center justify-center h-[50px] rounded-2xl mb-2 overflow-hidden transition-all duration-300 border ${widthMap[lv]} ${containerStyle}`}
-                    >
-                      <div
-                        className={`absolute left-0 top-0 h-full transition-all duration-1000 ${barBackground}`}
-                        style={{ width: `${displayPercent}%` }}
-                      />
-                      <div className="relative z-10 flex flex-col items-center justify-center leading-none">
-                        <span className="font-black uppercase text-sm tracking-tight text-white drop-shadow-md flex items-center gap-2">
-                          {isConfigured && (
-                            <span className="text-xs emoji-shadow">{visions[lv].emoji}</span>
-                          )}
-                          {levelMap[lv]}
-                        </span>
-                        <span className="text-[10px] font-bold mt-0.5 text-white/90 drop-shadow-md">
-                          {displayPercent}%
-                        </span>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
+              {/* [2] 온도계 (오른쪽: 유지) */}
+              <div className="relative flex flex-col items-center justify-end h-[340px] pb-1 animate-fadeIn">
+                <div className="relative w-3 md:w-4 h-full bg-slate-900 rounded-full border border-white/10 shadow-inner overflow-hidden group">
+                  <div 
+                    className="absolute bottom-0 w-full bg-gradient-to-t from-rose-600 via-amber-500 to-yellow-300 transition-all duration-1000 ease-out group-hover:brightness-110"
+                    style={{ height: `${Math.min((mbGoalAmount > 0 ? (currentAsset / mbGoalAmount) * 100 : 0), 100)}%` }}
+                  />
+                  <div className="absolute bottom-1/2 w-full h-[1px] bg-white/30"></div>
+                </div>
+                <div 
+                  className="absolute z-20 pointer-events-none transition-all duration-1000 ease-out whitespace-nowrap"
+                  style={{ 
+                    bottom: `${Math.min((mbGoalAmount > 0 ? (currentAsset / mbGoalAmount) * 100 : 0), 100)}%`,
+                    marginBottom: "12px" 
+                  }}
+                >
+                  <div className="flex flex-col items-center">
+                    <span className="text-xl font-black text-amber-500 italic tracking-tighter drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] bg-slate-950/80 px-2 py-0.5 rounded-lg border border-amber-500/30 backdrop-blur-sm">
+                      {(mbGoalAmount > 0 ? (currentAsset / mbGoalAmount) * 100 : 0).toFixed(1)}%
+                    </span>
+                    <div className="w-0 h-0 border-l-[4px] border-l-transparent border-r-[4px] border-r-transparent border-t-[6px] border-t-amber-500/50 mt-[-1px]"></div>
+                  </div>
+                </div>
+              </div>
 
-              {/* [2] 온도계 (오른쪽: 유지) */}
-              <div className="relative flex flex-col items-center justify-end h-[340px] pb-1 animate-fadeIn">
-                <div className="relative w-3 md:w-4 h-full bg-slate-900 rounded-full border border-white/10 shadow-inner overflow-hidden group">
-                  <div 
-                    className="absolute bottom-0 w-full bg-gradient-to-t from-rose-600 via-amber-500 to-yellow-300 transition-all duration-1000 ease-out group-hover:brightness-110"
-                    style={{ height: `${Math.min((mbGoalAmount > 0 ? (currentAsset / mbGoalAmount) * 100 : 0), 100)}%` }}
-                  />
-                  <div className="absolute bottom-1/2 w-full h-[1px] bg-white/30"></div>
-                </div>
-                <div 
-                  className="absolute z-20 pointer-events-none transition-all duration-1000 ease-out whitespace-nowrap"
-                  style={{ 
-                    bottom: `${Math.min((mbGoalAmount > 0 ? (currentAsset / mbGoalAmount) * 100 : 0), 100)}%`,
-                    marginBottom: "12px" 
-                  }}
-                >
-                  <div className="flex flex-col items-center">
-                    <span className="text-xl font-black text-amber-500 italic tracking-tighter drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] bg-slate-950/80 px-2 py-0.5 rounded-lg border border-amber-500/30 backdrop-blur-sm">
-                      {(mbGoalAmount > 0 ? (currentAsset / mbGoalAmount) * 100 : 0).toFixed(1)}%
-                    </span>
-                    <div className="w-0 h-0 border-l-[4px] border-l-transparent border-r-[4px] border-r-transparent border-t-[6px] border-t-amber-500/50 mt-[-1px]"></div>
-                  </div>
-                </div>
-              </div>
+            </div>
 
-            </div>
-
-            {/* 하단 설명 문구 */}
-            <p className="text-slate-600 text-[10px] font-bold mt-6 uppercase tracking-[0.2em] opacity-40">
-              5단계 미션
-            </p>
-            <div className="mt-2 px-6 max-w-[340px] mx-auto animate-fadeIn">
-              <p className="text-[11px] text-slate-400 font-medium leading-relaxed text-center italic">
-                {activeLevel === 6 
-                  ? "모든 하위 자아가 통합된 최종 정체성 상태입니다. 당신의 모든 행동은 이제 이 통합된 존재로부터 자연스럽게 흘러나옵니다." 
-                  : missionMap[activeLevel]}
-              </p>
-            </div>
-          </div>
+            {/* 하단 설명 문구 */}
+            <p className="text-slate-600 text-[10px] font-bold mt-6 uppercase tracking-[0.2em] opacity-40">
+              5단계 미션
+            </p>
+            <div className="mt-2 px-6 max-w-[340px] mx-auto animate-fadeIn">
+              <p className="text-[11px] text-slate-400 font-medium leading-relaxed text-center italic">
+                {activeLevel === 6 
+                  ? "모든 하위 자아가 통합된 최종 정체성 상태입니다. 당신의 모든 행동은 이제 이 통합된 존재로부터 자연스럽게 흘러나옵니다." 
+                  : missionMap[activeLevel]}
+              </p>
+            </div>
+          </div>
 
           {/* [우측 패널] 비전 카드 및 통합 시나리오 제어실 */}
           <div className="w-full md:w-1/2 flex flex-col gap-6 animate-fadeIn h-full justify-center">
