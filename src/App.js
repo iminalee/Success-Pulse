@@ -1782,7 +1782,44 @@ const deleteLedgerEntry = (logToDelete) => {
                     onClick={() => setActiveLevel(6)}
                     className="relative flex flex-col items-center justify-end cursor-pointer group w-full"
                   >
-                    <div className="flex justify-between items-center w-full max-w-md px-4 mb-4">
+                    
+                    {/* 🟠 [트리거 버튼] 누르면 전체화면 모드 실행 */}
+                    <div 
+                      className="mb-4 relative w-24 h-12 flex items-center justify-center cursor-pointer group/ritual z-40"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setShowRitual(true); // 전체화면 모드 켜기
+                        setRitualProgress(0); // 진행도 초기화
+                      }}
+                    >
+                      {/* 배경 후광 */}
+                      <div className="absolute inset-0 bg-amber-500/20 blur-xl rounded-full opacity-0 group-hover/ritual:opacity-100 transition-opacity duration-500"></div>
+
+                      {/* 1. 현재 자아 (왼쪽 원) */}
+                      <div 
+                        className="absolute w-8 h-8 rounded-full bg-slate-900 border-2 border-emerald-400 shadow-[0_0_15px_rgba(52,211,153,0.6)] z-20 transition-all duration-500 group-hover/ritual:scale-110"
+                        style={{ left: '10px' }}
+                      >
+                         <div className="absolute inset-0 bg-emerald-500/30 rounded-full animate-pulse"></div>
+                      </div>
+                      
+                      {/* 2. 최상의 자아 (오른쪽 원) */}
+                      <div 
+                        className="absolute w-8 h-8 rounded-full bg-amber-500 border-2 border-white/50 shadow-[0_0_20px_rgba(245,158,11,1)] z-30 mix-blend-screen transition-all duration-1000 ease-out group-hover/ritual:scale-110"
+                        style={{ 
+                           // 완료율에 따라 겹침 정도 시각화 (기본값)
+                           left: `${42 - (Math.min((mbGoalAmount > 0 ? (currentAsset / mbGoalAmount) * 100 : 0), 100) / 100) * 32}px`
+                        }} 
+                      >
+                        <div className="absolute inset-0 bg-white/30 rounded-full animate-ping opacity-20"></div>
+                      </div>
+                      
+                      {/* 연결선 */}
+                      <div className="absolute top-1/2 left-6 right-6 h-[2px] bg-gradient-to-r from-emerald-500 to-amber-500 opacity-50 -z-10 blur-[1px]"></div>
+                    </div>
+
+                    {/* Traits (상단 알약들) */}
+                    <div className="flex justify-between items-center w-full max-w-md px-4 mb-2">
                       {activeTraits.map((trait, i) => (
                         <span
                           key={i}
