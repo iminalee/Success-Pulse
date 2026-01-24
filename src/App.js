@@ -1565,7 +1565,37 @@ const deleteLedgerEntry = (logToDelete) => {
   };
 
   const renderHub = () => {
-// [수정] BPS 황금빛 밝기 로직 (기본 밝기를 0.6으로 상향 조정)
+    // [추가] 자아 통합 의식(Ritual)을 위한 상태 변수들
+    const [showRitual, setShowRitual] = useState(false); // 전체화면 모드 켜기/끄기
+    const [ritualProgress, setRitualProgress] = useState(0); // 합쳐지는 진행도 (0~100)
+    const [isHolding, setIsHolding] = useState(false); // 꾹 누르고 있는지 여부
+
+    // [로직] 꾹 누르면 7초 동안 서서히 진행도(ritualProgress)가 올라감
+    useEffect(() => {
+      let interval;
+      if (isHolding && ritualProgress < 100) {
+        // 0.05초마다 0.8%씩 증가 (약 7초 소요)
+        interval = setInterval(() => {
+          setRitualProgress(prev => {
+            if (prev >= 100) return 100;
+            return prev + 0.8; 
+          });
+        }, 50);
+      } else if (!isHolding && ritualProgress < 100 && ritualProgress > 0) {
+        // 손을 떼면 다시 0으로 초기화 (의식 실패/취소)
+        setRitualProgress(0);
+      }
+      return () => clearInterval(interval);
+    }, [isHolding, ritualProgress]);
+
+    // [로직] 100% 달성 시 진동 효과 (모바일 지원 시)
+    useEffect(() => {
+      if (ritualProgress === 100 && typeof navigator !== "undefined" && navigator.vibrate) {
+        navigator.vibrate([100, 50, 200]); // 징-지잉- 효과
+      }
+    }, [ritualProgress]);
+
+    // [수정] BPS 황금빛 밝기 로직 (기본 밝기를 0.6으로 상향 조정)
     const configuredLevels = [1, 2, 3, 4, 5].filter(lv => visions[lv]?.title).length; // N값
     const completedLevelsToday = [1, 2, 3, 4, 5].filter(lv => 
       visions[lv]?.title && 
@@ -1649,14 +1679,87 @@ const deleteLedgerEntry = (logToDelete) => {
           }`}
         >
           {/* [좌측 패널] 성취 피라미드 */}
-            {/* [좌측 패널] 성취 피라미드 + 의식의 원 + 온도계 */}
+           {/* [좌측 패널] 성취 피라미드 + 자아 통합 의식 */}
           <div className="w-full md:w-1/2 flex flex-col items-center justify-center relative z-10 pt-4">
 
-            {/* 🌟 [NEW] 자아 통합 의식 (Ritual Overlay) - 평소엔 숨김(hidden) 상태 */}
-            {/* 이 부분은 state 관리가 필요하지만, 지금은 클릭 시 'PERFECT DAY' 팝업을 대신 띄우거나 시각적 효과로 대체합니다 */}
-            {/* (실제 7초 로직은 별도 state 추가가 필요하므로, 여기서는 시각적 버튼에 집중합니다) */}
+            {/* 🌑 [전체 화면 의식 모드] showRitual이 true일 때만 나타남 */}
+            {showRitual && (
+              <div 
+                className="fixed inset-0 z-[100] bg-black/95 flex flex-col items-center justify-center animate-fadeIn select-none touch-none"
+                // 마우스/터치로 꾹 누르기 이벤트 연결
+                onMouseDown={() => ritualProgress < 100 && setIsHolding(true)}
+                onMouseUp={() => setIsHolding(false)}
+                onTouchStart={() => ritualProgress < 100 && setIsHolding(true)}
+                onTouchEnd={() => setIsHolding(false)}
+              >
+                {/* 닫기 버튼 (우측 상단) */}
+                <button 
+                  onClick={() => { setShowRitual(false); setRitualProgress(0); }}
+                  className="absolute top-8 right-8 text-white/50 hover:text-white p-2"
+                >
+                  <X size={32} />
+                </button>
 
-            {/* 🌟 모든 미션 달성 시 축하 폭죽 효과 */}
+                {/* 중앙 텍스트 안내 */}
+                <div className="absolute top-[15%] text-center animate-pulse px-4">
+                  <h3 className="text-2xl font-black text-amber-500 mb-2 tracking-widest">IDENTITY INTEGRATION</h3>
+                  <p className="text-sm text-slate-400 font-medium">
+                    {ritualProgress === 100 
+                      ? "통합이 완료되었습니다. Apex BPS가 당신과 함께합니다." 
+                      : "두 원이 하나가 될 때까지 화면을 꾹 누르고 계세요."}
+                  </p>
+                </div>
+
+                {/* 🌟 거대한 두 개의 원 (애니메이션 핵심) */}
+                <div className="relative w-full max-w-lg h-80 flex items-center justify-center">
+                  
+                  {/* [왼쪽] 현재 자아 (초록색) */}
+                  <div 
+                    className="absolute w-48 h-48 rounded-full border-4 border-emerald-500 bg-emerald-900/20 shadow-[0_0_50px_rgba(16,185,129,0.3)] backdrop-blur-sm transition-transform duration-75 ease-out flex items-center justify-center"
+                    style={{ 
+                      // 진행도에 따라 오른쪽으로 이동 (최대 중앙까지)
+                      transform: `translateX(-${(100 - ritualProgress) * 1.5}px) scale(${1 + ritualProgress/200})`,
+                      opacity: ritualProgress === 100 ? 0 : 1 // 완료되면 사라지고 합쳐진 원만 남김
+                    }}
+                  >
+                     <span className="text-emerald-500 font-black text-xs opacity-50">CURRENT</span>
+                  </div>
+
+                  {/* [오른쪽] 최상의 자아 (황금색) */}
+                  <div 
+                    className="absolute w-48 h-48 rounded-full border-4 border-amber-500 bg-amber-900/20 shadow-[0_0_50px_rgba(245,158,11,0.3)] backdrop-blur-sm transition-transform duration-75 ease-out flex items-center justify-center"
+                    style={{ 
+                      // 진행도에 따라 왼쪽으로 이동
+                      transform: `translateX(${(100 - ritualProgress) * 1.5}px) scale(${1 + ritualProgress/200})`,
+                      opacity: ritualProgress === 100 ? 0 : 1
+                    }}
+                  >
+                     <span className="text-amber-500 font-black text-xs opacity-50">APEX BPS</span>
+                  </div>
+
+                  {/* [완료] 통합된 거대한 황금 원 (100%일 때 등장) */}
+                  <div 
+                    className={`absolute w-64 h-64 rounded-full bg-gradient-to-br from-amber-300 via-amber-500 to-yellow-600 shadow-[0_0_100px_rgba(245,158,11,0.8)] flex items-center justify-center transition-all duration-1000 ${
+                      ritualProgress === 100 ? "opacity-100 scale-110 animate-pulse" : "opacity-0 scale-50"
+                    }`}
+                  >
+                    <span className="text-white font-black text-3xl drop-shadow-lg tracking-tighter">ONE</span>
+                  </div>
+
+                  {/* 진행바 (하단) */}
+                  <div className="absolute -bottom-20 w-64 h-2 bg-slate-800 rounded-full overflow-hidden">
+                    <div 
+                      className="h-full bg-gradient-to-r from-emerald-500 to-amber-500 transition-all duration-75"
+                      style={{ width: `${ritualProgress}%` }}
+                    />
+                  </div>
+
+                </div>
+              </div>
+            )}
+
+
+            {/* 🌟 모든 미션 달성 시 축하 폭죽 (기존 유지) */}
             {isAllCompleted && (
               <div className="absolute top-0 left-0 right-0 bottom-0 z-50 flex flex-col items-center justify-center pointer-events-none animate-fadeIn">
                 <div className="text-6xl animate-bounce mb-4 drop-shadow-[0_0_20px_rgba(251,191,36,0.8)]">🏆</div>
@@ -1680,47 +1783,40 @@ const deleteLedgerEntry = (logToDelete) => {
                     className="relative flex flex-col items-center justify-end cursor-pointer group w-full"
                   >
                     
-                    {/* 🟠 [수정됨] 통합 의식 버튼 (The Ritual Circles) - 아주 잘 보이게 수정! */}
+                    {/* 🟠 [트리거 버튼] 누르면 전체화면 모드 실행 */}
                     <div 
-                      className="mb-4 relative w-24 h-12 flex items-center justify-center cursor-pointer group/ritual z-50"
+                      className="mb-4 relative w-24 h-12 flex items-center justify-center cursor-pointer group/ritual z-40"
                       onClick={(e) => {
                         e.stopPropagation();
-                        // 여기에 7초 의식 로직 연결 (임시 알림)
-                        if(confirm("👁️ 자아 통합 의식을 시작하시겠습니까?\n(7초간 호흡하며 두 원이 합쳐지는 상상을 하세요.)")) {
-                           // 실제로는 여기서 별도 모달을 띄워야 합니다.
-                           // 현재는 시각적 버튼 확인이 우선이므로 알림으로 대체합니다.
-                        }
+                        setShowRitual(true); // 전체화면 모드 켜기
+                        setRitualProgress(0); // 진행도 초기화
                       }}
                     >
-                      {/* 배경 후광 (마우스 올리면 나타남) */}
+                      {/* 배경 후광 */}
                       <div className="absolute inset-0 bg-amber-500/20 blur-xl rounded-full opacity-0 group-hover/ritual:opacity-100 transition-opacity duration-500"></div>
 
-                      {/* 1. 현재 자아 (왼쪽 원) - 밝은 에메랄드 */}
+                      {/* 1. 현재 자아 (왼쪽 원) */}
                       <div 
                         className="absolute w-8 h-8 rounded-full bg-slate-900 border-2 border-emerald-400 shadow-[0_0_15px_rgba(52,211,153,0.6)] z-20 transition-all duration-500 group-hover/ritual:scale-110"
-                        style={{ left: '10px' }} // 위치 고정
+                        style={{ left: '10px' }}
                       >
                          <div className="absolute inset-0 bg-emerald-500/30 rounded-full animate-pulse"></div>
                       </div>
                       
-                      {/* 2. 최상의 자아 (오른쪽 원) - 밝은 황금색 */}
-                      {/* mbGoalAmount가 0일 때도 보이도록 기본값 설정 */}
+                      {/* 2. 최상의 자아 (오른쪽 원) */}
                       <div 
                         className="absolute w-8 h-8 rounded-full bg-amber-500 border-2 border-white/50 shadow-[0_0_20px_rgba(245,158,11,1)] z-30 mix-blend-screen transition-all duration-1000 ease-out group-hover/ritual:scale-110"
                         style={{ 
-                           // 목표 달성률에 따라 왼쪽으로 이동 (최소 10px 겹침 ~ 최대 완전 겹침)
+                           // 완료율에 따라 겹침 정도 시각화 (기본값)
                            left: `${42 - (Math.min((mbGoalAmount > 0 ? (currentAsset / mbGoalAmount) * 100 : 0), 100) / 100) * 32}px`
-                           // 0%일 때 left: 42px (떨어짐)
-                           // 100%일 때 left: 10px (왼쪽 원과 완전히 겹침)
                         }} 
                       >
                         <div className="absolute inset-0 bg-white/30 rounded-full animate-ping opacity-20"></div>
                       </div>
                       
-                      {/* 연결선 (에너지 흐름) */}
+                      {/* 연결선 */}
                       <div className="absolute top-1/2 left-6 right-6 h-[2px] bg-gradient-to-r from-emerald-500 to-amber-500 opacity-50 -z-10 blur-[1px]"></div>
                     </div>
-
 
                     {/* Traits (상단 알약들) */}
                     <div className="flex justify-between items-center w-full max-w-md px-4 mb-2">
