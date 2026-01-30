@@ -3555,21 +3555,24 @@ const nowX = getX(dataPoints[dataPoints.length - 1].date); // 📅 가로 위치
             © 2026 THE PULSE // ACCESS POINT: THEPULSE.MILESTONES.TODAY
           </p>
 
+
+        </div>
+      </footer>
           {/* 🌌 평행세계 동기화 챔버 (Sync Chamber) */}
          {/* 🌌 평행세계 동기화 챔버 - [자연스러운 사람 형상 + 폭발 피날레] */}
+{/* 🌌 평행세계 동기화 챔버 - [자연스러운 사람 형상 + 거대화 피날레] */}
       {showSyncChamber && (
-        // [수정] 상단 여백 pt-32로 대폭 확대
-        <div className="fixed inset-0 z-[10000] bg-[#05070A]/98 backdrop-blur-3xl flex flex-col items-center pt-32 pb-6 px-6 animate-fadeIn select-none touch-none font-sans">
+        <div className="fixed inset-0 z-[99999] bg-[#05070A]/98 backdrop-blur-3xl flex flex-col items-center pt-28 pb-10 px-6 animate-fadeIn select-none touch-none">
           {/* 닫기 버튼 */}
-          <button onClick={() => { setShowSyncChamber(false); setRitualProgress(0); }} className="absolute top-8 right-8 text-slate-600 hover:text-white transition-all p-2 z-[10001]">
+          <button onClick={() => { setShowSyncChamber(false); setRitualProgress(0); }} className="absolute top-8 right-8 text-slate-600 hover:text-white transition-all p-2 z-[100001]">
             <X size={32} />
           </button>
           
-          <div className="max-w-3xl w-full text-center space-y-6">
+          <div className="max-w-3xl w-full text-center space-y-8">
             <h2 className="text-3xl font-black text-white italic tracking-tighter uppercase drop-shadow-[0_0_20px_rgba(245,158,11,0.3)]">Identity Sync Chamber</h2>
 
-            {/* 마스터 시나리오 (6단계 상시 노출) */}
-            <div className="bg-[#111827]/80 p-8 rounded-[2.5rem] border border-amber-500/20 min-h-[200px] flex items-center justify-center relative overflow-hidden">
+            {/* 마스터 시나리오 (6단계 내용 상시 노출) */}
+            <div className="bg-[#111827]/80 p-8 rounded-[2.5rem] border border-amber-500/20 min-h-[200px] flex items-center justify-center relative overflow-hidden shadow-inner">
                <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] opacity-10"></div>
                <p className="relative z-10 text-slate-200 text-base md:text-lg leading-[1.8] font-medium whitespace-pre-line text-left">
                   {visions[6]?.immersionScript || "My Lab의 6단계에서 마스터 시나리오를 먼저 생성해주세요."}
@@ -3585,21 +3588,21 @@ const nowX = getX(dataPoints[dataPoints.length - 1].date); // 📅 가로 위치
               onTouchStart={() => ritualProgress < 100 && setIsHolding(true)}
               onTouchEnd={() => setIsHolding(false)}
             >
-               <p className={`text-[10px] font-bold uppercase tracking-[0.3em] mb-16 transition-all duration-500 ${
+               <p className={`text-[10px] font-bold uppercase tracking-[0.3em] mb-12 transition-all duration-500 ${
                  ritualProgress === 100 ? "text-amber-400 scale-110" : "text-slate-600 animate-pulse"
                }`}>
-                  {ritualProgress === 100 ? "✨ IDENTITY MERGED : APEX BPS ✨" : "두 자아가 하나로 합쳐질 때까지 화면을 꾹 누르세요"}
+                  {ritualProgress === 100 ? "✨ IDENTITY MERGED : APEX BPS ✨" : "두 자아가 하나가 될 때까지 화면을 꾹 누르세요 (7초)"}
                </p>
 
                <div className="relative w-full flex items-center justify-center h-64">
-                  {/* [개선] 머리, 두꺼운 목, 둥근 어깨 라인 사람 형상 SVG 정의 */}
+                  {/* 형상 정의 (머리, 두꺼운 목, 둥근 어깨) */}
                   <svg className="absolute w-0 h-0">
                     <defs>
                       <path id="human-detailed" d="M70,10 C82,10 92,20 92,35 C92,48 85,55 78,58 L78,65 C95,68 120,78 120,105 L20,105 C20,78 45,68 62,65 L62,58 C55,55 48,48 48,35 C48,20 58,10 70,10 Z" />
                     </defs>
                   </svg>
 
-                  {/* 1. Current Self (에메랄드 채움) */}
+                  {/* 1. Current Self (에메랄드 내부 채움) */}
                   <div className="absolute transition-all duration-100 ease-linear"
                        style={{ 
                          transform: `translateX(-${(100 - ritualProgress) * 1.8}px) scale(${1.2 - ritualProgress/300})`, 
@@ -3610,7 +3613,7 @@ const nowX = getX(dataPoints[dataPoints.length - 1].date); // 📅 가로 위치
                     </svg>
                   </div>
 
-                  {/* 2. Apex BPS (안은 투명, 외곽선 점선, 아우라 명멸) */}
+                  {/* 2. Apex BPS (안은 투명, 외곽선 황금빛 아우라) */}
                   <div className="absolute transition-all duration-100 ease-linear"
                        style={{ 
                          transform: `translateX(${(100 - ritualProgress) * 1.8}px) scale(${1.2 - ritualProgress/300})`, 
@@ -3622,20 +3625,16 @@ const nowX = getX(dataPoints[dataPoints.length - 1].date); // 📅 가로 위치
                     </svg>
                   </div>
 
-                  {/* 3. 통합 완료 상태: 거대화(2.5배) + 앰버 채움 + 폭발 효과 */}
+                  {/* 3. 통합 완료 상태: 2.5배 거대화 + 앰버 채움 + 폭발적 아우라 */}
                   <div className={`absolute flex items-center justify-center transition-all duration-1000 ${
                     ritualProgress === 100 ? "opacity-100 scale-[2.5]" : "opacity-0 scale-50"
                   }`}>
-                    {/* 강렬한 폭발 아우라 */}
-                    <div className="absolute -inset-28 bg-amber-500/40 blur-[120px] rounded-full animate-pulse"></div>
+                    {/* 강렬한 폭발 효과 (파파팍!) */}
+                    <div className="absolute inset-0 bg-white rounded-full blur-3xl animate-ping opacity-60"></div>
+                    <div className="absolute -inset-28 bg-amber-500/40 blur-[120px] rounded-full animate-pulse-slow"></div>
                     <div className="absolute -inset-14 bg-yellow-400/30 blur-[80px] rounded-full animate-ping"></div>
-                    
-                    {/* 합체 순간 번쩍임 (파파팍!) */}
-                    {ritualProgress === 100 && (
-                      <div className="absolute inset-0 bg-white rounded-full blur-3xl animate-ping opacity-60"></div>
-                    )}
 
-                    {/* 최종 통합 형상 (앰버색 그라데이션 가득 참) */}
+                    {/* 최종 통합 형상 (앰버색 가득 참) */}
                     <svg width="200" height="170" viewBox="0 0 140 110" className="drop-shadow-[0_0_80px_rgba(245,158,11,1)] z-20">
                       <defs>
                         <linearGradient id="divine-gold" x1="0%" y1="0%" x2="0%" y2="100%">
@@ -3658,9 +3657,6 @@ const nowX = getX(dataPoints[dataPoints.length - 1].date); // 📅 가로 위치
           </div>
         </div>
       )}
-        </div>
-      </footer>
-
       {isSensoryModalOpen && activeSensory && (
         <div className="fixed inset-0 bg-black/98 backdrop-blur-3xl z-[9999] flex items-center justify-center p-6 overflow-y-auto font-sans">
           <div className="bg-slate-900 border border-white/10 w-full max-w-xl rounded-[4rem] p-12 my-auto relative shadow-2xl border-double">
