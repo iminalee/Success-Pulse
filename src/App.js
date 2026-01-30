@@ -3622,13 +3622,13 @@ const nowX = getX(dataPoints[dataPoints.length - 1].date); // 📅 가로 위치
                     </svg>
                   </div>
 
-                  {/* 3. 통합 완료 상태: 거대화(2.5배) + 앰버 채움 + 폭발 효과 */}
+                  {/* 3. 통합 완료 상태: 거대화(3배) + 앰버 채움 + 폭발 효과 */}
                   <div className={`absolute flex items-center justify-center transition-all duration-1000 ${
-                    ritualProgress === 100 ? "opacity-100 scale-[2.5]" : "opacity-0 scale-50"
+                    ritualProgress === 100 ? "opacity-100 scale-[3]" : "opacity-0 scale-50"
                   }`}>
                     {/* 강렬한 폭발 아우라 */}
-                    <div className="absolute -inset-28 bg-amber-500/40 blur-[120px] rounded-full animate-pulse"></div>
-                    <div className="absolute -inset-14 bg-yellow-400/30 blur-[80px] rounded-full animate-ping"></div>
+                    <div className="absolute -inset-28 bg-amber-600/40 blur-[120px] rounded-full animate-pulse"></div>
+                    <div className="absolute -inset-14 bg-yellow-500/30 blur-[80px] rounded-full animate-ping"></div>
                     
                     {/* 합체 순간 번쩍임 (파파팍!) */}
                     {ritualProgress === 100 && (
