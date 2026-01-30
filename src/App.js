@@ -3559,220 +3559,112 @@ const nowX = getX(dataPoints[dataPoints.length - 1].date); // 📅 가로 위치
         </div>
       </footer>
 
-      {/* 🌌 평행세계 동기화 챔버 - [자연스러운 사람 형상 + 거대화 피날레] */}
-{/* 🌌 평행세계 동기화 챔버 - [최종 완성형] 자연스러운 실루엣 + 2.5배 거대화 + 폭발 피날레 */}
+    
+      
+{/* 🛡️ 1~5단계용 팝업 (기존 위치 유지) */}
+      {isSensoryModalOpen && activeSensory && (
+        <div className="fixed inset-0 bg-black/98 backdrop-blur-3xl z-[9999] flex items-center justify-center p-6 overflow-y-auto font-sans">
+          <div className="bg-slate-900 border border-white/10 w-full max-w-xl rounded-[4rem] p-12 my-auto relative shadow-2xl">
+            <button onClick={() => setIsSensoryModalOpen(false)} className="absolute top-12 right-12 text-slate-700 hover:text-white transition-all"><X size={36} /></button>
+            <div className="text-center mb-12">
+              <span className="text-9xl block mb-6 drop-shadow-[0_0_50px_rgba(245,158,11,0.3)]">{activeSensory.emoji}</span>
+              <h4 className="text-4xl font-black text-white tracking-tighter uppercase italic">{activeSensory.title}</h4>
+            </div>
+            <div className="space-y-6 mb-12">
+              <SensoryItem label="The Vision (V)" color="amber" val={activeSensory.v} />
+              <SensoryItem label="The Echo (A)" color="emerald" val={activeSensory.a} />
+              <SensoryItem label="The Sensation (K)" color="rose" val={activeSensory.k} />
+            </div>
+            <div className="flex flex-col gap-4">
+              <button onClick={() => { setIsSensoryModalOpen(false); setCurrentView("lab"); }} className="w-full bg-white/5 border border-white/10 text-white font-black py-6 rounded-[2.5rem] text-xs uppercase tracking-widest">Architect Vision Settings</button>
+              <button onClick={() => archiveVision(activeSensory.level)} className={`w-full font-black py-6 rounded-[2.5rem] shadow-2xl transition-all uppercase tracking-widest text-sm flex items-center justify-center gap-3 ${activeSensory.progressAsset >= mbGoalAmount / 5 ? "bg-emerald-600 text-white" : "bg-slate-800 text-slate-500 opacity-60"}`}><CheckCircle size={20} /> Real-World IPO Completed</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 🌌 [완전 독립] 평행세계 동기화 챔버 - 자연스러운 실루엣 + 2.8배 거대화 피날레 */}
       {showSyncChamber && (
-        // [개선 1] pt-40으로 상단 여백을 대폭 늘려 위쪽 브라우저 바와 겹치지 않게 했습니다.
-        <div className="fixed inset-0 z-[99999] bg-[#05070A]/99 backdrop-blur-3xl flex flex-col items-center pt-40 pb-10 px-6 animate-fadeIn select-none touch-none font-sans">
+        <div className="fixed inset-0 z-[100000] bg-[#05070A]/99 backdrop-blur-3xl flex flex-col items-center pt-40 pb-10 px-6 animate-fadeIn select-none touch-none font-sans overflow-y-auto no-scrollbar">
           
           {/* 닫기 버튼 */}
-          <button 
-            onClick={() => { setShowSyncChamber(false); setRitualProgress(0); }} 
-            className="absolute top-10 right-10 text-slate-500 hover:text-white transition-all p-2 z-[100001]"
-          >
-            <X size={32} />
-          </button>
+          <button onClick={() => { setShowSyncChamber(false); setRitualProgress(0); }} className="absolute top-10 right-10 text-slate-500 hover:text-white transition-all p-2 z-[100001]"><X size={40} /></button>
           
-          <div className="max-w-3xl w-full text-center space-y-8 mt-10">
+          <div className="max-w-3xl w-full text-center space-y-10">
             <div className="space-y-2">
-              <h2 className="text-3xl md:text-4xl font-black text-white italic tracking-tighter uppercase drop-shadow-[0_0_20px_rgba(245,158,11,0.4)]">
-                Identity Sync Chamber
-              </h2>
-              <p className="text-[10px] text-slate-500 font-bold uppercase tracking-[0.4em]">평행세계 동기화 챔버</p>
+              <h2 className="text-4xl font-black text-white italic tracking-tighter uppercase drop-shadow-[0_0_20px_rgba(245,158,11,0.5)]">Identity Sync Chamber</h2>
+              <p className="text-[10px] text-slate-500 font-bold uppercase tracking-[0.4em]">6단계: 마스터 정체성 동기화 리추얼</p>
             </div>
 
-            {/* 마스터 시나리오 (6단계 상시 노출) */}
-            <div className="bg-[#111827]/90 p-8 md:p-10 rounded-[3rem] border border-amber-500/20 min-h-[220px] flex items-center justify-center relative overflow-hidden shadow-[inset_0_0_50px_rgba(0,0,0,0.5)]">
+            {/* 마스터 시나리오 (상단 여백 개선) */}
+            <div className="bg-[#111827]/90 p-10 rounded-[3.5rem] border border-amber-500/20 min-h-[250px] flex items-center justify-center relative overflow-hidden shadow-[inset_0_0_60px_rgba(0,0,0,0.6)]">
                <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] opacity-10"></div>
-               <p className="relative z-10 text-slate-200 text-base md:text-lg leading-[1.8] font-medium whitespace-pre-line text-left drop-shadow-md">
+               <p className="relative z-10 text-slate-200 text-base md:text-lg leading-[1.9] font-medium whitespace-pre-line text-left">
                   {visions[6]?.immersionScript || "My Lab의 6단계에서 마스터 시나리오를 먼저 생성해주세요."}
                </p>
             </div>
 
-            {/* 🌟 리추얼 인터랙션 구역 */}
-            <div 
-              className="relative h-[450px] w-full flex flex-col items-center justify-center cursor-pointer"
-              onMouseDown={() => ritualProgress < 100 && setIsHolding(true)}
-              onMouseUp={() => setIsHolding(false)}
-              onMouseLeave={() => setIsHolding(false)}
-              onTouchStart={() => ritualProgress < 100 && setIsHolding(true)}
-              onTouchEnd={() => setIsHolding(false)}
-            >
-               <p className={`text-[10px] font-bold uppercase tracking-[0.3em] mb-16 transition-all duration-500 ${
-                 ritualProgress === 100 ? "text-amber-400 scale-110" : "text-slate-600 animate-pulse"
-               }`}>
-                  {ritualProgress === 100 ? "✨ IDENTITY CONVERGENCE COMPLETE ✨" : "두 자아가 하나로 합쳐질 때까지 화면을 꾹 누르세요"}
+            {/* 🌟 인터랙션 리추얼 */}
+            <div className="relative h-[500px] w-full flex flex-col items-center justify-center cursor-pointer"
+                 onMouseDown={() => ritualProgress < 100 && setIsHolding(true)}
+                 onMouseUp={() => setIsHolding(false)}
+                 onMouseLeave={() => setIsHolding(false)}
+                 onTouchStart={() => ritualProgress < 100 && setIsHolding(true)}
+                 onTouchEnd={() => setIsHolding(false)}>
+               
+               <p className={`text-[12px] font-bold uppercase tracking-[0.3em] mb-20 transition-all duration-500 ${ritualProgress === 100 ? "text-amber-400 scale-110" : "text-slate-700 animate-pulse"}`}>
+                  {ritualProgress === 100 ? "✨ IDENTITY MERGED : YOU ARE THE APEX ✨" : "화면을 꾹 누르면 두 자아가 하나로 통합됩니다 (7초)"}
                </p>
 
                <div className="relative w-full flex items-center justify-center h-64">
-                  {/* [개선 2] 자연스러운 머리, 두꺼운 목, 둥근 어깨 라인 SVG 정의 */}
+                  {/* 자연스러운 사람 실루엣 정의 (머리, 목, 둥근 어깨) */}
                   <svg className="absolute w-0 h-0">
                     <defs>
-                      <path id="human-pro" d="M70,5 C84,5 95,16 95,32 C95,45 88,52 82,55 L82,65 C102,68 125,80 125,110 L15,110 C15,80 38,68 58,65 L58,55 C52,52 45,45 45,32 C45,16 56,5 70,5 Z" />
+                      <path id="human-pro-v4" d="M70,8 C86,8 96,18 96,35 C96,48 89,55 83,58 L83,64 C104,67 128,80 128,110 L12,110 C12,80 36,67 57,64 L57,58 C51,55 44,48 44,35 C44,18 54,8 70,8 Z" />
                     </defs>
                   </svg>
 
-                  {/* 1. Current Self (내부가 칠해진 에메랄드) */}
+                  {/* 1. Current Self (에메랄드 내부 색상) */}
                   <div className="absolute transition-all duration-100 ease-linear"
-                       style={{ 
-                         transform: `translateX(-${(100 - ritualProgress) * 1.8}px) scale(${1.2 - ritualProgress/300})`, 
-                         opacity: ritualProgress === 100 ? 0 : 0.8 
-                       }}>
-                    <svg width="220" height="190" viewBox="0 0 140 120">
-                      <use href="#human-pro" className="fill-emerald-500/40 stroke-emerald-400" strokeWidth="2" />
+                       style={{ transform: `translateX(-${(100 - ritualProgress) * 2}px) scale(${1.2 - ritualProgress/350})`, opacity: ritualProgress === 100 ? 0 : 0.9 }}>
+                    <svg width="240" height="210" viewBox="0 0 140 120">
+                      <use href="#human-pro-v4" className="fill-emerald-500/40 stroke-emerald-400" strokeWidth="2" />
                     </svg>
                   </div>
 
                   {/* 2. Apex BPS (안은 투명, 외곽 아우라) */}
                   <div className="absolute transition-all duration-100 ease-linear"
-                       style={{ 
-                         transform: `translateX(${(100 - ritualProgress) * 1.8}px) scale(${1.2 - ritualProgress/300})`, 
-                         opacity: ritualProgress === 100 ? 0 : 1 
-                       }}>
-                    <div className="absolute inset-0 bg-amber-500/10 blur-2xl rounded-full scale-125 animate-pulse"></div>
-                    <svg width="220" height="190" viewBox="0 0 140 120">
-                      <use href="#human-pro" className="fill-transparent stroke-amber-400" strokeWidth="2" strokeDasharray="5 3" />
+                       style={{ transform: `translateX(${(100 - ritualProgress) * 2}px) scale(${1.2 - ritualProgress/350})`, opacity: ritualProgress === 100 ? 0 : 1 }}>
+                    <div className="absolute inset-0 bg-amber-500/10 blur-3xl rounded-full scale-125 animate-pulse"></div>
+                    <svg width="240" height="210" viewBox="0 0 140 120">
+                      <use href="#human-pro-v4" className="fill-transparent stroke-amber-400" strokeWidth="2.5" strokeDasharray="6 3" />
                     </svg>
                   </div>
 
-                  {/* 3. 통합 완료 상태: 거대화(2.5배) + 앰버 가득 참 + 폭발 효과 */}
-                  <div className={`absolute flex items-center justify-center transition-all duration-1000 ${
-                    ritualProgress === 100 ? "opacity-100 scale-[2.5]" : "opacity-0 scale-50"
-                  }`}>
-                    {/* 강렬한 폭발 아우라 (진하고 크게 명멸) */}
-                    <div className="absolute -inset-32 bg-amber-500/40 blur-[130px] rounded-full animate-pulse-slow"></div>
-                    <div className="absolute -inset-16 bg-yellow-400/30 blur-[90px] rounded-full animate-ping"></div>
-                    
-                    {/* 합체 순간 번쩍임 (파파팍!) */}
-                    {ritualProgress === 100 && (
-                      <div className="absolute inset-0 bg-white rounded-full blur-3xl animate-ping opacity-60"></div>
-                    )}
+                  {/* 3. 피날레: 2.8배 거대화 + 앰버 채움 + 폭발 효과 */}
+                  <div className={`absolute flex items-center justify-center transition-all duration-1000 ${ritualProgress === 100 ? "opacity-100 scale-[2.8]" : "opacity-0 scale-50"}`}>
+                    <div className="absolute -inset-40 bg-amber-500/40 blur-[150px] rounded-full animate-pulse-slow"></div>
+                    <div className="absolute -inset-20 bg-yellow-400/30 blur-[80px] rounded-full animate-ping"></div>
+                    {ritualProgress === 100 && <div className="absolute inset-0 bg-white rounded-full blur-3xl animate-ping opacity-70"></div>}
 
-                    {/* 최종 통합 형상 (안쪽이 앰버색 그라데이션으로 가득 참) */}
-                    <svg width="220" height="190" viewBox="0 0 140 120" className="drop-shadow-[0_0_80px_rgba(245,158,11,1)] z-20">
+                    <svg width="240" height="210" viewBox="0 0 140 120" className="drop-shadow-[0_0_100px_rgba(245,158,11,1)] z-20">
                       <defs>
-                        <linearGradient id="divine-amber" x1="0%" y1="0%" x2="0%" y2="100%">
-                          <stop offset="0%" stopColor="#FDE68A" />
-                          <stop offset="100%" stopColor="#D97706" />
+                        <linearGradient id="divine-amber-v4" x1="0%" y1="0%" x2="0%" y2="100%">
+                          <stop offset="0%" stopColor="#FDE68A" /><stop offset="100%" stopColor="#D97706" />
                         </linearGradient>
                       </defs>
-                      <use href="#human-pro" fill="url(#divine-amber)" className="stroke-white animate-pulse" strokeWidth="3" />
+                      <use href="#human-pro-v4" fill="url(#divine-amber-v4)" className="stroke-white animate-pulse" strokeWidth="3" />
                     </svg>
                   </div>
                </div>
                
                {/* 하단 진행 바 */}
-               <div className="absolute bottom-4 w-64 h-1 bg-slate-900/50 rounded-full overflow-hidden backdrop-blur-sm">
+               <div className="absolute bottom-4 w-64 h-1 bg-slate-900 rounded-full overflow-hidden backdrop-blur-sm">
                  <div className="h-full bg-gradient-to-r from-emerald-500 via-amber-500 to-yellow-300 transition-all duration-75 ease-linear" style={{ width: `${ritualProgress}%` }}>
                     <div className="absolute right-0 top-0 h-full w-20 bg-white/40 blur-[6px]"></div>
                  </div>
                </div>
             </div>
-          </div>
-        </div>
-      )}
-      {isSensoryModalOpen && activeSensory && (
-        <div className="fixed inset-0 bg-black/98 backdrop-blur-3xl z-[9999] flex items-center justify-center p-6 overflow-y-auto font-sans">
-          <div className="bg-slate-900 border border-white/10 w-full max-w-xl rounded-[4rem] p-12 my-auto relative shadow-2xl border-double">
-            <button
-              onClick={() => setIsSensoryModalOpen(false)}
-              className="absolute top-12 right-12 text-slate-700 hover:text-white transition-all z-50"
-            >
-              <X size={36} />
-            </button>
-            <div className="text-center mb-12">
-              <span className="text-9xl block mb-6 drop-shadow-[0_0_50px_rgba(245,158,11,0.3)] animate-pulse">
-                {activeSensory.emoji}
-              </span>
-              <h4 className="text-4xl font-black text-white tracking-tighter uppercase italic leading-tight">
-                {activeSensory.title}
-              </h4>
-            </div>
-            <div className="space-y-6 mb-12">
-              <SensoryItem
-                label="The Vision (V)"
-                color="amber"
-                val={activeSensory.v}
-              />
-              <SensoryItem
-                label="The Echo (A)"
-                color="emerald"
-                val={activeSensory.a}
-              />
-              <SensoryItem
-                label="The Sensation (K)"
-                color="rose"
-                val={activeSensory.k}
-              />
-            </div>
-            <div className="flex flex-col gap-4">
-              <button
-                onClick={() => {
-                  setIsSensoryModalOpen(false);
-                  setCurrentView("lab");
-                }}
-                className="w-full bg-white/5 border border-white/10 text-white font-black py-6 rounded-[2.5rem] hover:bg-white/10 transition-all uppercase tracking-[0.3em] text-xs font-bold"
-              >
-                Architect Vision Settings
-              </button>
-              <button
-                onClick={() => archiveVision(activeSensory.level)}
-                className={`w-full font-black py-6 rounded-[2.5rem] shadow-2xl transition-all active:scale-95 uppercase tracking-[0.3em] text-sm flex items-center justify-center gap-3 ${
-                  activeSensory.progressAsset >= mbGoalAmount / 5
-                    ? "bg-emerald-600 text-white hover:bg-emerald-500"
-                    : "bg-slate-800 text-slate-500 opacity-60"
-                }`}
-              >
-                <CheckCircle size={20} /> Real-World IPO Completed
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {isAiModalOpen && (
-        <div className="fixed inset-0 bg-black/95 backdrop-blur-3xl z-[500] flex items-center justify-center p-6 text-center animate-fadeIn">
-          <div className="bg-slate-900 border border-white/10 w-full max-w-sm rounded-[4rem] p-16 shadow-2xl">
-            <div className="text-8xl mb-8">🔮</div>
-            <h4 className="text-2xl font-black text-white mb-4 uppercase tracking-widest italic font-serif">
-              Potential Undefined
-            </h4>
-            <p className="text-sm text-slate-500 mb-10 leading-relaxed font-medium">
-              BP {userName}의 미래 기억이 아직 설계되지 않았습니다.
-              <br />
-              마이 랩(My Lab)으로 이동하여 비전을 설계하고
-              <br />
-              기본 달성률 50%를 확보하십시오.
-            </p>
-            <button
-              onClick={() => {
-                setIsAiModalOpen(false);
-                setCurrentView("lab");
-              }}
-              className="w-full bg-emerald-600 text-white font-black py-6 rounded-3xl text-sm uppercase tracking-widest shadow-xl hover:bg-emerald-500 transition-all mb-4"
-            >
-              Initialize Design
-            </button>
-          </div>
-        </div>
-      )}
-      {celebration.show && (
-        <div className="fixed inset-0 z-[10000] flex items-center justify-center bg-black/90 backdrop-blur-xl animate-fadeIn">
-          <div className="text-center p-10 border-2 border-amber-500/50 rounded-[4rem] bg-slate-900 shadow-[0_0_100px_rgba(245,158,11,0.4)]">
-            <div className="text-8xl mb-6 animate-bounce">✨</div>
-            <h2 className="text-4xl font-black text-white mb-2 uppercase italic tracking-tighter">
-              Daily <span className="text-amber-500">Perfect Clear!</span>
-            </h2>
-            <p className="text-slate-400 mb-8 leading-relaxed">
-              오늘 설정하신 모든 비전 단계를 실천하셨습니다!<br/>
-              특별 시너지 보너스가 장부에 예치되었습니다.
-            </p>
-            <button 
-              onClick={() => setCelebration({ show: false, levelName: "" })}
-              className="w-full bg-amber-600 hover:bg-amber-500 text-white font-black py-4 rounded-2xl transition-all shadow-lg uppercase tracking-widest text-xs"
-            >
-              Keep Going, Apex BP
-            </button>
           </div>
         </div>
       )}
