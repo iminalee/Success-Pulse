@@ -3634,15 +3634,15 @@ const nowX = getX(dataPoints[dataPoints.length - 1].date); // 📅 가로 위치
 
                     {/* 최종 통합 형상 (완전 불투명 리치 골드) */}
 
-                    <svg width="240" height="210" viewBox="0 0 140 120" className="drop-shadow-[0_0_120px_rgba(251,191,36,1)] z-30 relative">
+                    <svg width="270" height="240" viewBox="0 0 140 120" className="drop-shadow-[0_0_120px_rgba(251,191,36,1)] z-30 relative">
                       <defs>
                         <linearGradient id="divine-gold-solid-final" x1="0%" y1="0%" x2="0%" y2="100%">
                           <stop offset="0%" stopColor="#FCD34D" /> {/* 리치 골드 */}
                           <stop offset="100%" stopColor="#B45309" /> {/* 진한 앰버 */}
                         </linearGradient>
                       </defs>
-                      {/* fillOpacity="1"로 내부를 불투명하게 꽉 채움 */}
-                      <use href="#human-pro-v5" fill="url(#divine-gold-solid-final)" fillOpacity="1" className="stroke-yellow-50 animate-pulse" strokeWidth="4" />
+                      
+                      <use href="#human-pro-v5" className="fill-amber-500/40 stroke-emerald-400 animate-pulse"  strokeWidth="4" />
                     </svg>
                   </div>
                </div>
