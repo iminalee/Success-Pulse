@@ -3323,7 +3323,21 @@ const nowX = getX(dataPoints[dataPoints.length - 1].date); // 📅 가로 위치
           /* md:items-end -> PC에서는 우측 정렬, 모바일에서는 items-center(중앙 정렬) */
           /* mt-2 md:mt-0 -> 모바일에서는 로고와 간격을 위해 위쪽 여백 추가 */
           <div className="flex flex-col items-center md:items-end z-50 mt-4 md:mt-0 w-full md:w-auto animate-fadeIn">
-            
+            {/* 🌟 [NEW] 상단 사람 모양 아이콘 추가 (아까 썼던 자연스러운 형상) */}
+            <div className="mb-1">
+              <svg width="24" height="20" viewBox="0 0 140 120">
+                <defs>
+                  {/* 자연스러운 머리, 목, 어깨 라인 경로 (human-pro-v8) */}
+                  <path id="human-pro-header" d="M70,8 C86,8 96,18 96,35 C96,48 89,55 83,58 L83,64 C104,67 128,80 128,110 L12,110 C12,80 36,67 57,64 L57,58 C51,55 44,48 44,35 C44,18 54,8 70,8 Z" />
+                  {/* 은은한 앰버 그라데이션 */}
+                  <linearGradient id="header-human-grad" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" stopColor="#FBBF24" stopOpacity="0.8" /> {/* 밝은 앰버 */}
+                    <stop offset="100%" stopColor="#D97706" stopOpacity="0.8" /> {/* 진한 앰버 */}
+                  </linearGradient>
+                </defs>
+                <use href="#human-pro-header" fill="url(#header-human-grad)" className="stroke-amber-300/50" strokeWidth="1.5" />
+              </svg>
+            </div>
             <p className="text-[10px] font-black text-amber-500/80 uppercase tracking-widest mb-1 flex items-center gap-2">
               <Sparkles size={10} /> Accumulated Magnitude
             </p>
