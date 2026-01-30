@@ -3622,36 +3622,28 @@ const nowX = getX(dataPoints[dataPoints.length - 1].date); // 📅 가로 위치
                     </svg>
                   </div>
 
-                 {/* 3. 피날레: 2.8배 거대화 + 완전 불투명 앰버 + 초강력 폭발 효과 */}
+                  {/* 3. 통합 완료 상태: 거대화(2.5배) + 앰버 채움 + 폭발 효과 */}
                   <div className={`absolute flex items-center justify-center transition-all duration-1000 ${
-                    ritualProgress === 100 ? "opacity-100 scale-[2.8]" : "opacity-0 scale-50"
+                    ritualProgress === 100 ? "opacity-100 scale-[2.5]" : "opacity-0 scale-50"
                   }`}>
-                    {/* [강화 1] 더 넓고 진한 배경 아우라 (opacity 40% -> 70%, blur 증가) */}
-                    <div className="absolute -inset-48 bg-amber-600/70 blur-[150px] rounded-full animate-pulse-slow"></div>
+                    {/* 강렬한 폭발 아우라 */}
+                    <div className="absolute -inset-28 bg-amber-500/40 blur-[120px] rounded-full animate-pulse"></div>
+                    <div className="absolute -inset-14 bg-yellow-400/30 blur-[80px] rounded-full animate-ping"></div>
                     
-                    {/* [강화 2] 더 밝고 강하게 퍼져나가는 빛 (opacity 30% -> 60%, blur 증가) */}
-                    <div className="absolute -inset-24 bg-yellow-300/60 blur-[100px] rounded-full animate-ping"></div>
-                    
-                    {/* [신규 추가] 형상 바로 뒤의 가장 밝은 코어 광원 (눈부심 효과) */}
-                    <div className="absolute inset-0 bg-yellow-100/90 blur-[60px] rounded-full z-10"></div>
-
-                    {/* 합체 순간 번쩍임 (파파팍!) - 강도 증가 */}
+                    {/* 합체 순간 번쩍임 (파파팍!) */}
                     {ritualProgress === 100 && (
-                      <div className="absolute inset-0 bg-white rounded-full blur-[100px] animate-ping opacity-80 z-20" style={{animationDuration: '0.6s'}}></div>
+                      <div className="absolute inset-0 bg-white rounded-full blur-3xl animate-ping opacity-60"></div>
                     )}
 
-                    {/* 최종 통합 형상 (완전히 불투명한 앰버색) */}
-                    {/* [강화 3] drop-shadow를 더 밝고 넓게 변경 */}
-                    <svg width="240" height="210" viewBox="0 0 140 120" className="drop-shadow-[0_0_120px_rgba(251,191,36,1)] z-30 relative">
+                    {/* 최종 통합 형상 (앰버색 그라데이션 가득 참) */}
+                    <svg width="200" height="170" viewBox="0 0 140 110" className="drop-shadow-[0_0_80px_rgba(245,158,11,1)] z-20">
                       <defs>
-                        {/* [수정] 더 풍부하고 진한 골드-앰버 그라데이션 */}
-                        <linearGradient id="divine-gold-solid" x1="0%" y1="0%" x2="0%" y2="100%">
-                          <stop offset="0%" stopColor="#FCD34D" /> {/* 더 진한 리치 골드 */}
-                          <stop offset="100%" stopColor="#B45309" /> {/* 진한 앰버 */}
+                        <linearGradient id="divine-gold" x1="0%" y1="0%" x2="0%" y2="100%">
+                          <stop offset="0%" stopColor="#FDE68A" />
+                          <stop offset="100%" stopColor="#B45309" />
                         </linearGradient>
                       </defs>
-                      {/* [핵심] fillOpacity="1"로 완전 불투명 설정, 테두리 색상 밝게 변경 */}
-                      <use href="#human-pro-v4" fill="url(#divine-gold-solid)" fillOpacity="1" className="stroke-yellow-50 animate-pulse" strokeWidth="3" />
+                      <use href="#human-detailed" fill="url(#divine-gold)" className="stroke-white animate-pulse" strokeWidth="3" />
                     </svg>
                   </div>
                </div>
