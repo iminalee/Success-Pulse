@@ -2813,7 +2813,7 @@ const nowX = getX(dataPoints[dataPoints.length - 1].date); // 📅 가로 위치
                       2.
                     </span>
                     <span>{" "}
-                    Apex의 현 자아는 Apex 자아 내 가장 깊고 안전한 내면으로 귀속시켜 안전하게 보호한다. 어떠한 경우에도 다시 주도권을 주장하지 않는다.
+                    <span class="item-content font-bold italic px-1 text-stone-100"> Apex BPS</span>의 현 자아는 Apex BPS의 가장 깊고 안전한 내면으로 귀속시켜 안전하게 보호한다. 현 자아는 어떠한 경우에도 다시 주도권을 주장하지 않는다.
                     </span>
                   </li>
                   <li className="flex gap-4 items-start">
@@ -2822,7 +2822,7 @@ const nowX = getX(dataPoints[dataPoints.length - 1].date); // 📅 가로 위치
                     </span>
                     <span>
                       {" "}
-                      Apex는 자아의 기억(두려움)이 불쑥 튀어나올 경우, 이를 "과거 데이터의 잔상(System Cache)"으로 간주하고 즉시 삭제한다.
+                      <span class="item-content font-bold italic px-1 text-stone-100"> Apex BPS</span>는 현 자아의 기억(두려움)이 불쑥 튀어나올 경우, 이를 "과거 데이터의 잔상(System Cache)"으로 간주하고 즉시 삭제한다.
                     </span>
                   </li>
                 </ul>
