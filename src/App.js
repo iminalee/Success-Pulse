@@ -2774,6 +2774,54 @@ const nowX = getX(dataPoints[dataPoints.length - 1].date); // 📅 가로 위치
               </h3>
               <p className="text-stone-300 text-base md:text-lg font-light tracking-wide pl-2 md:pl-4 border-l-2 border-stone-700">
                 
+                 <ul className="space-y-3 mt-4 text-sm md:text-base">
+                  <li className="flex gap-4 items-start">
+                    <span className="text-amber-600 font-serif font-bold whitespace-nowrap pt-1">
+                      1.
+                    </span>
+                    {/* 요청하신 '엷은 amber' (amber-200) 적용 */}
+                    <span>
+                      {" "}
+                     <span class="item-content font-bold italic px-1 text-stone-100"> Apex BPS</span>는 매일 5단계 이내의 핵심 미션을 설정하고, 설정된 목표 날짜({" "}
+                  <input
+                  type="date"
+                  value={targetDate}
+                  disabled={isLocked}
+                  onChange={(e) => setTargetDate(e.target.value)}
+                  className={`mx-2 px-2 py-1 rounded-md text-sm font-bold border outline-none shadow-inner transition-all ${
+                    isLocked
+                      ? "bg-emerald-900/20 text-emerald-400 border-emerald-500/30 cursor-not-allowed"
+                      : "bg-slate-900 text-amber-500 border-white/5 focus:border-amber-500"
+                  }`}
+                />{" "} )를 기준으로 이를 수행한다. 실행 밀도가 높아질수록 시간당 가치 전환보상(
+                <span className="text-stone-200 border-b border-stone-600 font-mono mx-1">
+                  {currency}
+                  {fNum(valueEventAmount)}
+                </span>
+                )은 기하급수적으로 증폭되며, 발생한 모든 보상은 Mental Bank에 즉시 예치되어 두 세계 사이의 동기화 속도를 가속한다.
+                 
+                    </span>
+                  </li>
+                  <li className="flex gap-4 items-start">
+                    <span className="text-amber-600 font-serif font-bold whitespace-nowrap pt-1">
+                      2.
+                    </span>
+                    <span>{" "}
+                    Apex의 현 자아는 Apex 자아 내 가장 깊고 안전한 내면으로 귀속시켜 안전하게 보호한다. 어떠한 경우에도 다시 주도권을 주장하지 않는다.
+                    </span>
+                  </li>
+                  <li className="flex gap-4 items-start">
+                    <span className="text-amber-600 font-serif font-bold whitespace-nowrap pt-1">
+                      3.
+                    </span>
+                    <span>
+                      {" "}
+                      Apex는 자아의 기억(두려움)이 불쑥 튀어나올 경우, 이를 "과거 데이터의 잔상(System Cache)"으로 간주하고 즉시 삭제한다.
+                    </span>
+                  </li>
+                </ul>
+
+                
                 <div class="numbered-item">
                       <span class="item-number">1.</span>
                      <span class="item-content font-bold italic px-1 text-stone-100"> Apex BPS</span>는 매일 5단계 이내의 핵심 미션을 설정하고, 설정된 목표 날짜({" "}
