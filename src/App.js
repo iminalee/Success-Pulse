@@ -2662,7 +2662,7 @@ const nowX = getX(dataPoints[dataPoints.length - 1].date); // 📅 가로 위치
                     </span>
                     <span>
                       {" "}
-                      이제 육체의 이름은 같으나, 그 안에 깃든 운영체제(OS)는 Apex BPS의 것이다
+                      이제 육체의 이름은 같으나, 그 안에 깃든 운영체제(OS)는 Apex BPS의 것이다.
                     </span>
                   </li>
                 </ul>
@@ -2681,10 +2681,14 @@ const nowX = getX(dataPoints[dataPoints.length - 1].date); // 📅 가로 위치
               <ul className="space-y-3 mt-4 text-sm md:text-base">
                   <li className="flex gap-4 items-start"> 본 계약의 목적은 내면의 씨앗을 발화시켜, 현존 세계를 Apex BPS가 실존하는 알파세계와 완전히 합치(Merging)시키는 데 있다.</li>
                   <li className="flex gap-4 items-start">              
-                    <span className="text-stone-200 font-semibold">Apex BPS</span>는 현 자아가 살고 있는 본 차원에 이미 내재되었으나, 현 자아로부터 승계받은 이 육체(하드웨어)가 '초기 구동 속도 저하', '에너지 효율 낮음' 등의 고질적인 버그를 가진 구형모델임을 충분히 인지하고 인수한다. 
+                    <span className="text-amber-600 font-serif font-bold whitespace-nowrap pt-1">
+                      1.
+                    </span>Apex BPS는 현 자아가 살고 있는 본 차원에 이미 내재되었으나, 현 자아로부터 승계받은 이 육체(하드웨어)가 '초기 구동 속도 저하', '에너지 효율 낮음' 등의 고질적인 버그를 가진 구형모델임을 충분히 인지하고 인수한다. 
                   </li> 
                   <li className="flex gap-4 items-start">
-                    따라서 육체가 무기력하거나 다운될 때, Apex은 이를 '나의 우울함'으로 착각하지 않으며, '하드웨어의 Lag'를 알아차리고 즉각적인 물리적 부팅 (스쿼트, 수분공급, 산책)을 실행하여 전압을 공급한다. 
+                    <span className="text-amber-600 font-serif font-bold whitespace-nowrap pt-1">
+                      2.
+                    </span>따라서 육체가 무기력하거나 다운될 때, Apex BPS는 이를 '나의 우울함'으로 착각하지 않으며, '하드웨어의 Lag'를 알아차리고 즉각적인 물리적 부팅 (스쿼트, 수분공급, 산책)을 실행하여 전압을 공급한다. 
                   </li>
                   </ul>
               </p>
