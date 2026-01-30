@@ -3770,7 +3770,7 @@ const nowX = getX(dataPoints[dataPoints.length - 1].date); // 📅 가로 위치
     </div>
   );
 };
-/* App.js 맨 아래 export default App; 바로 위에 붙여넣으세요 */
+/* App.js 맨 아래 export default App; 바로 위에 붙여넣으세요 -*/
 const overlayStyle = {
   position: "fixed",
   bottom: "140px" /* 하단 바 바로 위에 위치 */,
