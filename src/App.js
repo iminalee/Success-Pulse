@@ -2618,25 +2618,54 @@ const nowX = getX(dataPoints[dataPoints.length - 1].date); // 📅 가로 위치
                 <span className="text-sm border border-amber-500/50 px-2 py-0.5 rounded text-amber-500">
                   Article 01
                 </span>
-                자격 검증 및 선택
+                정체성의 교체
               </h3>
               <p className="text-stone-300 text-base md:text-lg font-light tracking-wide pl-2 md:pl-4 border-l-2 border-stone-700">
                 현존 자아(Ver.0)가 갈망하는 모든 성취를 이미 완수하여 잠재력을
                 100% 개화시킨 완성체, 마스터 자아{" "}
                 <span className="text-stone-100 font-bold italic px-1">
-                  Apex BP {userName}
+                  Apex BPS
                 </span>
-                는, 무한한 평행세계 중 본 차원의 대리인인{" "}
+                는, 무한한 평행세계 중 <span className="text-amber-300 font-bold italic px-1">알파세계</span>에 거주하고 있으며, 평행세계중  본 차원의 대리인인{" "}
                 <span className="text-stone-100 font-bold underline underline-offset-4 decoration-stone-500">
                   {userName} ver.0
                 </span>
-                이 보유한 고유한 Pulse(기질적 진동)가 Apex BP와 가장 높은
-                일치율을 보임을 확인하였다. 이에 Apex BP는 현존 자아를 자신의
+                이 보유한 고유한 Pulse(기질적 진동)가 Apex BPS와 가장 높은
+                일치율을 보임을 확인하였다. 이에 Apex BPS는 현존 자아를 자신의
                 유일한 현실 파트너로 선택하고{" "}
                 <span className="text-amber-400 font-bold">
                   ‘존재적 상장(Existential IPO)’
                 </span>
-                을 승인한다.
+                을 승인한다. 
+                 <ul className="space-y-3 mt-4 text-sm md:text-base">
+                  <li className="flex gap-4 items-start">
+                    <span className="text-amber-600 font-serif font-bold whitespace-nowrap pt-1">
+                      1.
+                    </span>
+                    {/* 요청하신 '엷은 amber' (amber-200) 적용 */}
+                    <span>
+                      {" "}
+                     현 자아는 계약일로부터 자신의 불안, 의심, 무기력에 대한 소유권을 포기하며, 의식의 무대에서 퇴장한다.
+                    </span>
+                  </li>
+                  <li className="flex gap-4 items-start">
+                    <span className="text-amber-600 font-serif font-bold whitespace-nowrap pt-1">
+                      2.
+                    </span>
+                    <span>{" "}
+                      Apex BPS는 즉시 현 자아의 육체에 다운로드되며, 이 시점부터 이 육체의 유일한 법적/영적 소유주가 된다.
+                    </span>
+                  </li>
+                  <li className="flex gap-4 items-start">
+                    <span className="text-amber-600 font-serif font-bold whitespace-nowrap pt-1">
+                      3.
+                    </span>
+                    <span>
+                      {" "}
+                      이제 육체의 이름은 같으나, 그 안에 깃든 운영체제(OS)는 Apex BPS의 것이다
+                    </span>
+                  </li>
+                </ul>
               </p>
             </div>
 
@@ -2646,16 +2675,15 @@ const nowX = getX(dataPoints[dataPoints.length - 1].date); // 📅 가로 위치
                 <span className="text-sm border border-stone-600 px-2 py-0.5 rounded text-stone-500">
                   Article 02
                 </span>
-                현존 상태 및 합치의 목적
+                현존 상태의 이해 및 합치
               </h3>
               <p className="text-stone-300 text-base md:text-lg font-light tracking-wide pl-2 md:pl-4 border-l-2 border-stone-700">
                 <span className="text-stone-200 font-semibold">
-                  {userName} ver.0
+                 Apex BPS
                 </span>
-                의 소환에 응하여 Apex BP의 영혼은 이미 본 차원에 내재되었으나,
-                현재의 신체와 사고 회로는 완전히 동기화되지 않은 상태이다. 본
-                계약의 목적은 내면의 씨앗을 발화시켜, 현존 세계를 Apex BP가
-                실존하는 고차원 평행세계와 완전히 합치(Merging)시키는 데 있다.
+                는 현 자아가 살고 있는 본 차원에 이미 내재되었으나, 현 자아로부터 승계받은 이 육체(하드웨어)가 '초기 구동 속도 저하', '에너지 효율 낮음' 등의 고질적인 버그를 가진 구형모델임을 충분히 인지하고 인수한다.  <br></br>
+                따라서 육체가 무기력하거나 다운될 때, Apex은 이를 '나의 우울함'으로 착각하지 않으며, '하드웨어의 Lag'를 알아차리고 즉각적인 물리적 부팅 (스쿼트, 수분공급, 산책)을 실행하여 전압을 공급한다. <br></br> 
+                이에 본 계약의 목적은 내면의 씨앗을 발화시켜, 현존 세계를 Apex BPS가 실존하는 알파세계와 완전히 합치(Merging)시키는 데 있다.
               </p>
             </div>
 
@@ -2667,10 +2695,9 @@ const nowX = getX(dataPoints[dataPoints.length - 1].date); // 📅 가로 위치
               <div className="space-y-4 text-stone-300 text-base md:text-lg">
                 <p>
                   <span className="text-stone-100 font-bold">
-                    {userName} ver.0
+                    Apex BPS
                   </span>
-                  은 이미 내재된 Apex BP의 리드에 따라 다음과 같은 절차를
-                  수행한다.
+                  앞으로 계약기간 동안 이 육체를 가지고 본 차원에서 미션을 수행한다.
                 </p>
                 <ul className="space-y-3 mt-4 text-sm md:text-base">
                   <li className="flex gap-4 items-start">
@@ -2682,8 +2709,7 @@ const nowX = getX(dataPoints[dataPoints.length - 1].date); // 📅 가로 위치
                       <strong className="text-amber-200 font-medium">
                         일간 실행 (Day):
                       </strong>{" "}
-                      낮 시간 동안 ver.0는 Apex BP의 생각과 품성을 채택하여
-                      행동한다.
+                      APEX BPS의 알파 구역과 합치되는 구체적인 행동을 5단계 목표에 따라 수행한다.   
                     </span>
                   </li>
                   <li className="flex gap-4 items-start">
@@ -2694,7 +2720,7 @@ const nowX = getX(dataPoints[dataPoints.length - 1].date); // 📅 가로 위치
                       <strong className="text-amber-200 font-medium">
                         야간 접속 (Night):
                       </strong>{" "}
-                      취침 전, 하루의 감각을 복기하며 미래 차원과 접속한다.
+                      취침 전, 알파 구역의 채널을 열고 실천 행동을 기록하여 동기화 시키고, 수면 중 알파 구역에 머문다. 
                     </span>
                   </li>
                   <li className="flex gap-4 items-start">
@@ -2703,9 +2729,9 @@ const nowX = getX(dataPoints[dataPoints.length - 1].date); // 📅 가로 위치
                     </span>
                     <span>
                       <strong className="text-amber-200 font-medium">
-                        지속적 유지:
+                        불가역적 진행:
                       </strong>{" "}
-                      수면 중 무의식 영역에서 정체성을 고착화한다.
+                      현 자아는 Apex의 가장 깊고 안전한 내면으로 귀속되며, 어떠한 경우에도 다시 주도권을 주장하지 않는다.<br></br>현 자아의 기억(두려움)이 불쑥 튀어나올 경우, Apex BPS는 이를 "과거 데이터의 잔상(System Cache)"으로 간주하고 즉시 삭제한다.
                     </span>
                   </li>
                 </ul>
@@ -2722,21 +2748,20 @@ const nowX = getX(dataPoints[dataPoints.length - 1].date); // 📅 가로 위치
               </h3>
               <p className="text-stone-300 text-base md:text-lg font-light tracking-wide pl-2 md:pl-4 border-l-2 border-stone-700">
                 <span className="text-stone-100 font-bold italic px-1">
-                  Apex BP {userName}
+                  Apex BPS
                 </span>
-                는 무의식 원장인{" "}
+                는 현 자아의 무의식 은행잔액{" "}
                 <span className="text-stone-100 font-medium">
                   Mental Bank Balance
                 </span>
-                의 <span className="text-amber-500 font-bold">25%</span>에
+                 인 현 연수입의 8배를 보유 중이며, 이 중 <span className="text-amber-500 font-bold">25%</span>에
                 해당하는 금액인{" "}
                 <span className="text-stone-200 border-b border-stone-600 font-mono mx-1">
                   {currency}
                   {fNum(livingAllowance)}
                 </span>
-                를 활동 에너지로 즉시 부여한다. 이 에너지는 현실의 마찰력을
-                상쇄하는 강력한 추진력이 된다.
-              </p>
+                를 본 차원의 활동 에너지로 대여한다. 이는 아래와 같이 행동을 실천할 때마다 현금화되어 적립된다. 
+               </p>
             </div>
 
             {/* 제5조 (넓게 배치) */}
@@ -2748,11 +2773,11 @@ const nowX = getX(dataPoints[dataPoints.length - 1].date); // 📅 가로 위치
                 미션 및 보상
               </h3>
               <p className="text-stone-300 text-base md:text-lg font-light tracking-wide pl-2 md:pl-4 border-l-2 border-stone-700">
-                <span className="text-stone-100 font-bold italic px-1">
-                  {userName} ver.0
-                </span>
-                은 매일 5단계 이내의 핵심 미션을 설정하고, 설정된 목표 날짜({" "}
-                <input
+                
+                <div class="numbered-item">
+                      <span class="item-number">1.</span>
+                     <span class="item-content font-bold italic px-1 text-stone-100"> Apex BPS</span>는 매일 5단계 이내의 핵심 미션을 설정하고, 설정된 목표 날짜({" "}
+                  <input
                   type="date"
                   value={targetDate}
                   disabled={isLocked}
@@ -2762,16 +2787,24 @@ const nowX = getX(dataPoints[dataPoints.length - 1].date); // 📅 가로 위치
                       ? "bg-emerald-900/20 text-emerald-400 border-emerald-500/30 cursor-not-allowed"
                       : "bg-slate-900 text-amber-500 border-white/5 focus:border-amber-500"
                   }`}
-                />{" "}
-                )를 기준으로 이를 수행한다. 실행 밀도가 높아질수록 시간당 가치
-                보상(
+                />{" "} )를 기준으로 이를 수행한다. 실행 밀도가 높아질수록 시간당 가치 전환보상(
                 <span className="text-stone-200 border-b border-stone-600 font-mono mx-1">
                   {currency}
                   {fNum(valueEventAmount)}
                 </span>
-                )은 기하급수적으로 증폭되며, 발생한 모든 보상은 Mental Bank에
-                즉시 예치되어 두 자아 사이의 동기화 속도를 가속한다.
+                )은 기하급수적으로 증폭되며, 발생한 모든 보상은 Mental Bank에 즉시 예치되어 두 세계 사이의 동기화 속도를 가속한다.
+                 </div> 
+                <div class="numbered-item">
+                   <span class="item-number">2.</span>
+                    <span class="item-content font-bold italic px-1 text-stone-100">Apex의 현 자아는 Apex 자아 내 가장 깊고 안전한 내면으로 귀속시켜 안전하게 보호한다. 어떠한 경우에도 다시 주도권을 주장하지 않는다.</span>
+                </div>
+                <div class="numbered-item">
+                   <span class="item-number">3.</span>
+                    <span class="item-content font-bold italic px-1 text-stone-100">Apex는 자아의 기억(두려움)이 불쑥 튀어나올 경우, 이를 "과거 데이터의 잔상(System Cache)"으로 간주하고 즉시 삭제한다.</span>
+                </div>
               </p>
+                            
+                
             </div>
           </div>
 
@@ -2831,14 +2864,14 @@ const nowX = getX(dataPoints[dataPoints.length - 1].date); // 📅 가로 위치
               </div>
               <div className="flex flex-col items-center md:items-end gap-4 w-full md:w-auto relative">
                 <p className="text-[10px] font-bold text-amber-700/60 uppercase tracking-widest mb-2">
-                  AUTHORIZED BY APEX BP{userName}(FUTURE SELF)
+                  AUTHORIZED BY APEX BPS{userName}(FUTURE SELF)
                 </p>
                 <div className="relative inline-block mt-2">
                   <div
                     className="text-4xl md:text-5xl font-black text-amber-800 select-none opacity-30 font-serif italic pr-6"
                     style={{ textShadow: "-1px -1px 0 rgba(0,0,0,0.5)" }}
                   >
-                    BP {userName}
+                    BPS {userName}
                   </div>
                   <div className="absolute top-1 -right-6 w-32 h-32 border-4 border-rose-600/80 rounded-full flex flex-col items-center justify-center -rotate-12 animate-pulse opacity-90 mix-blend-screen pointer-events-none shadow-[0_0_15px_rgba(225,29,72,0.5)] bg-rose-500/10 backdrop-blur-[1px]">
                     <div className="w-28 h-28 border border-rose-600/50 rounded-full flex flex-col items-center justify-center p-2 text-rose-600">
@@ -2858,7 +2891,7 @@ const nowX = getX(dataPoints[dataPoints.length - 1].date); // 📅 가로 위치
             </div>
           </div>
         </div>
-      </div>
+      );</div>
     );
   };
 
