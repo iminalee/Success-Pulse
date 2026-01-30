@@ -3555,8 +3555,8 @@ const nowX = getX(dataPoints[dataPoints.length - 1].date); // 📅 가로 위치
           {/* 🌌 평행세계 동기화 챔버 (Sync Chamber) */}
          {/* 🌌 평행세계 동기화 챔버 - [자연스러운 사람 형상 + 폭발 피날레] */}
       {showSyncChamber && (
-        // [수정] 상단 여백 pt-32로 대폭 확대
-        <div className="fixed inset-0 z-[10000] bg-[#05070A]/98 backdrop-blur-3xl flex flex-col items-center pt-32 pb-6 px-6 animate-fadeIn select-none touch-none font-sans">
+        // [수정] 상단 여백 pt-20로 대폭 확대
+        <div className="fixed inset-0 z-[10000] bg-[#05070A]/98 backdrop-blur-3xl flex flex-col items-center pt-15 pb-6 px-6 animate-fadeIn select-none touch-none font-sans">
           {/* 닫기 버튼 */}
           <button onClick={() => { setShowSyncChamber(false); setRitualProgress(0); }} className="absolute top-8 right-8 text-slate-600 hover:text-white transition-all p-2 z-[10001]">
             <X size={32} />
