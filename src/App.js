@@ -1865,7 +1865,7 @@ const deleteLedgerEntry = (logToDelete) => {
                       updateVision(6, { immersionScript: e.target.value })
                     }
                     placeholder="AI SYNC 버튼을 누르거나 마스터 시나리오를 직접 작성하세요..."
-                    className="flex-grow bg-slate-950/40 rounded-[2rem] p-8 border border-white/5 text-slate-300 leading-[1.8] text-[15px] italic outline-none focus:border-amber-500/30 transition-all resize-none no-scrollbar font-serif"
+                    className="flex-grow bg-slate-950/40 rounded-[2rem] p-8 border border-white/5 text-slate-300 leading-[1.8] text-base outline-none focus:border-amber-500/30 transition-all resize-none no-scrollbar font-sans"
                   />
                   <div className="mt-6 flex flex-wrap gap-2 opacity-50">
                     {activeTraits.map((t, i) => (
