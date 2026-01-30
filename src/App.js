@@ -3573,7 +3573,7 @@ const nowX = getX(dataPoints[dataPoints.length - 1].date); // 📅 가로 위치
                </p>
             </div>
 
-{/* 🌟 리추얼 인터랙션 구역 - [황금빛 압도 및 거대화 피날레] */}
+{/* 🌟 리추얼 인터랙션 구역 - [최종 수정] 간격 좁힘 + 완전 불투명 앰버 발광 */}
             <div 
               className="relative h-[500px] w-full flex flex-col items-center justify-center cursor-pointer"
               onMouseDown={() => ritualProgress < 100 && setIsHolding(true)}
@@ -3584,81 +3584,74 @@ const nowX = getX(dataPoints[dataPoints.length - 1].date); // 📅 가로 위치
             >
                {/* 상태 안내 문구 */}
                <p className={`text-[12px] font-bold uppercase tracking-[0.3em] mb-20 transition-all duration-500 ${
-                 ritualProgress === 100 ? "text-amber-400 scale-110" : "text-slate-700 animate-pulse"
+                 ritualProgress === 100 ? "text-amber-400 scale-110" : "text-amber-700/50 animate-pulse"
                }`}>
-                  {ritualProgress === 100 ? "✨ IDENTITY MERGED : YOU ARE THE APEX ✨" : "두 자아가 하나로 통합될 때까지 화면을 꾹 누르세요 (7초)"}
+                  {ritualProgress === 100 ? "✨ IDENTITY MERGED : THE GOLDEN SOUL ✨" : "가까워진 두 자아를 하나로 합치세요 (꾹 누르기)"}
                </p>
 
                <div className="relative w-full flex items-center justify-center h-64">
-                  {/* [개선] 머리, 두꺼운 목, 둥근 어깨 라인 사람 형상 SVG 정의 */}
                   <svg className="absolute w-0 h-0">
                     <defs>
-                      <path id="human-pro-final" d="M70,8 C86,8 96,18 96,35 C96,48 89,55 83,58 L83,64 C104,67 128,80 128,110 L12,110 C12,80 36,67 57,64 L57,58 C51,55 44,48 44,35 C44,18 54,8 70,8 Z" />
+                      {/* 자연스러운 사람 실루엣 경로 */}
+                      <path id="human-pro-close" d="M70,8 C86,8 96,18 96,35 C96,48 89,55 83,58 L83,64 C104,67 128,80 128,110 L12,110 C12,80 36,67 57,64 L57,58 C51,55 44,48 44,35 C44,18 54,8 70,8 Z" />
                       
                       {/* [핵심] 완전 불투명 리치 골드 그라데이션 설계 */}
-                      <linearGradient id="divine-gold-opaque" x1="0%" y1="0%" x2="0%" y2="100%">
-                        <stop offset="0%" stopColor="#FDE68A" /> {/* 밝은 골드 */}
-                        <stop offset="100%" stopColor="#B45309" /> {/* 진한 앰버 */}
+                      <linearGradient id="divine-gold-solid-close" x1="0%" y1="0%" x2="0%" y2="100%">
+                        <stop offset="0%" stopColor="#FCD34D" /> {/* 리치 골드 (상단) */}
+                        <stop offset="100%" stopColor="#B45309" /> {/* 진한 앰버 (하단) */}
                       </linearGradient>
                     </defs>
                   </svg>
 
-                  {/* 1. Current Self (에메랄드 제거 -> 투명한 화이트/회색 외곽선만 존재) */}
+                  {/* 1. Current Self (에메랄드 제거됨, 빈 외곽선) */}
+                  {/* [수정] translateX 배수를 1.2로 줄여 간격을 좁힘 */}
                   <div className="absolute transition-all duration-100 ease-linear"
-                       style={{ 
-                         transform: `translateX(-${(100 - ritualProgress) * 2}px) scale(${1.2 - ritualProgress/350})`, 
-                         opacity: ritualProgress === 100 ? 0 : 0.6 
-                       }}>
+                       style={{ transform: `translateX(-${(100 - ritualProgress) * 1.2}px) scale(${1.2 - ritualProgress/350})`, opacity: ritualProgress === 100 ? 0 : 0.6 }}>
                     <svg width="240" height="210" viewBox="0 0 140 120">
-                      <use href="#human-pro-final" className="fill-transparent stroke-slate-600" strokeWidth="1.5" />
+                      <use href="#human-pro-close" className="fill-transparent stroke-slate-600" strokeWidth="1.5" />
                     </svg>
+                    <span className="block mt-4 text-[8px] font-bold text-slate-600 uppercase tracking-widest text-center">Vessel (빈 그릇)</span>
                   </div>
 
-                  {/* 2. Apex BPS (안은 투명, 외곽 황금빛 아우라 주도권) */}
+                  {/* 2. Apex BPS (황금빛 아우라 주도권) */}
+                  {/* [수정] translateX 배수를 1.2로 줄여 간격을 좁힘 */}
                   <div className="absolute transition-all duration-100 ease-linear"
-                       style={{ 
-                         transform: `translateX(${(100 - ritualProgress) * 2}px) scale(${1.2 - ritualProgress/350})`, 
-                         opacity: ritualProgress === 100 ? 0 : 1 
-                       }}>
-                    <div className="absolute inset-0 bg-amber-500/20 blur-3xl rounded-full scale-125 animate-pulse"></div>
+                       style={{ transform: `translateX(${(100 - ritualProgress) * 1.2}px) scale(${1.2 - ritualProgress/350})`, opacity: ritualProgress === 100 ? 0 : 1 }}>
+                    <div className="absolute inset-0 bg-amber-500/30 blur-3xl rounded-full scale-125 animate-pulse"></div>
                     <svg width="240" height="210" viewBox="0 0 140 120" className="drop-shadow-[0_0_30px_rgba(245,158,11,0.8)]">
-                      <use href="#human-pro-final" className="fill-transparent stroke-amber-400" strokeWidth="2.5" strokeDasharray="6 3" />
+                      <use href="#human-pro-close" className="fill-amber-500/10 stroke-amber-400" strokeWidth="3" strokeDasharray="8 4" />
                     </svg>
+                    <span className="block mt-4 text-[8px] font-black text-amber-500 uppercase tracking-[0.3em] text-center">Apex Identity</span>
                   </div>
 
-                  {/* 3. 통합 완료 상태: 2.8배 거대화 + 앰버 꽉 채움 + 폭발 효과 */}
-                  <div className={`absolute flex items-center justify-center transition-all duration-1000 ${
-                    ritualProgress === 100 ? "opacity-100 scale-[2.8]" : "opacity-0 scale-50"
-                  }`}>
-                    {/* (A) 초강력 폭발 아우라 (명멸 강화) */}
-                    <div className="absolute -inset-40 bg-amber-500/50 blur-[150px] rounded-full animate-pulse-slow"></div>
-                    <div className="absolute -inset-20 bg-yellow-300/30 blur-[80px] rounded-full animate-ping"></div>
-                    
-                    {/* (B) 합체 순간 번쩍임 (파파팍!) */}
+                  {/* 3. 피날레: 2.8배 거대화 + 불투명 앰버 꽉 채움 + 눈부신 폭발 */}
+                  <div className={`absolute flex items-center justify-center transition-all duration-1000 ${ritualProgress === 100 ? "opacity-100 scale-[2.8]" : "opacity-0 scale-50"}`}>
+                    {/* 배경 아우라 및 폭발 이펙트 */}
+                    <div className="absolute -inset-60 bg-amber-600/60 blur-[180px] rounded-full animate-pulse-slow"></div>
+                    <div className="absolute -inset-30 bg-yellow-300/40 blur-[100px] rounded-full animate-ping"></div>
+                    <div className="absolute inset-0 bg-yellow-100/90 blur-[70px] rounded-full z-10"></div>
                     {ritualProgress === 100 && (
-                      <div className="absolute inset-0 bg-white rounded-full blur-3xl animate-ping opacity-70 z-10"></div>
+                      <div className="absolute inset-0 bg-white rounded-full blur-[100px] animate-ping opacity-90 z-20" style={{animationDuration: '0.5s'}}></div>
                     )}
 
-                    {/* (C) 최종 통합 형상 (완전 불투명 앰버 그라데이션) */}
-                    <svg width="240" height="210" viewBox="0 0 140 120" className="drop-shadow-[0_0_100px_rgba(245,158,11,1)] z-20 relative">
+                    {/* [핵심] 최종 통합 형상 (완전 불투명 리치 골드) */}
+                    {/* drop-shadow로 강렬한 빛 발산 */}
+                    <svg width="240" height="210" viewBox="0 0 140 120" className="drop-shadow-[0_0_120px_rgba(251,191,36,1)] z-30 relative">
                       <use 
-                        href="#human-pro-final" 
-                        fill="url(#divine-gold-opaque)" 
-                        fillOpacity="1" 
-                        className="stroke-white animate-pulse" 
-                        strokeWidth="3" 
+                        href="#human-pro-close" 
+                        fill="url(#divine-gold-solid-close)" 
+                        fillOpacity="1" /* <--- 이 부분이 불투명하게 만듭니다 */
+                        className="stroke-yellow-50 animate-pulse" 
+                        strokeWidth="4" 
                       />
                     </svg>
-                    
-                    {/* 외곽 링 효과 */}
-                    <div className="absolute -inset-10 border-2 border-amber-300/30 rounded-full animate-ping"></div>
                   </div>
                </div>
                
-               {/* 하단 진행 바 (황금색 그라데이션) */}
+               {/* 하단 진행 바 (황금색) */}
                <div className="absolute bottom-4 w-64 h-1 bg-slate-900 rounded-full overflow-hidden backdrop-blur-sm">
                  <div className="h-full bg-gradient-to-r from-amber-800 via-amber-500 to-yellow-300 transition-all duration-75 ease-linear relative" style={{ width: `${ritualProgress}%` }}>
-                    <div className="absolute right-0 top-0 h-full w-20 bg-white/40 blur-[6px]"></div>
+                    <div className="absolute right-0 top-0 h-full w-20 bg-white/50 blur-[6px]"></div>
                  </div>
                </div>
             </div>
