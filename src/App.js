@@ -33,6 +33,8 @@ import {
   Info,
   TrendingUp,
   Star,
+  Eye,        // 추가
+  Headphones, // 추가
 } from "lucide-react";
 import { createClient } from "@supabase/supabase-js";
 
@@ -178,10 +180,33 @@ const ResetPasswordUI = () => {
 // 3. 메인 앱
 const App = () => {
 // --- [추가] 동기화 챔버 및 통합 리추얼 상태 관리 ---
+// --- [2단계] 동기화 챔버 핵심 로직 ---
   const [showSyncChamber, setShowSyncChamber] = useState(false); // 챔버 팝업 여부
   const [nlpMode, setNlpMode] = useState("v"); // VAK 모드 선택 (기본: 시각)
   const [ritualProgress, setRitualProgress] = useState(0); // 합쳐지는 정도 (0~100)
   const [isHolding, setIsHolding] = useState(false); // 꾹 누름 감지
+
+  
+
+  // 7초 동안 원이 합쳐지게 만드는 타이머
+  useEffect(() => {
+    let interval;
+    if (isHolding && ritualProgress < 100) {
+      interval = setInterval(() => {
+        setRitualProgress(prev => (prev >= 100 ? 100 : prev + 0.8)); // 약 7초 소요
+      }, 50);
+    } else if (!isHolding && ritualProgress < 100 && ritualProgress > 0) {
+      setRitualProgress(0); // 중간에 손 떼면 리셋
+    }
+    return () => clearInterval(interval);
+  }, [isHolding, ritualProgress]);
+
+  // 완료 시 진동 효과
+  useEffect(() => {
+    if (ritualProgress === 100 && typeof navigator !== "undefined" && navigator.vibrate) {
+      navigator.vibrate([100, 50, 200]);
+    }
+  }, [ritualProgress]);
 
 
   const handleGenerateBPSScenario = () => {
@@ -3258,24 +3283,24 @@ const nowX = getX(dataPoints[dataPoints.length - 1].date); // 📅 가로 위치
         </div>
         {/* ▲▲▲ 여기까지 수정했습니다 ▲▲▲ */}
         
-        {/* 헤더 중앙: 동기화 트리거 아이콘 */}
-      <div className="flex items-center gap-4">
-        {/* 두 원 아이콘: 현재 달성률만큼 겹쳐진 상태로 표시 */}
+       {/* 헤더 중앙: 동기화 트리거 아이콘 */}
         <div 
-          onClick={() => setShowSyncChamber(true)}
-          className="relative w-12 h-8 flex items-center justify-center cursor-pointer group hover:scale-110 transition-transform"
-          title="평행세계 동기화 챔버"
+          onClick={() => {
+            setShowSyncChamber(true);
+            setRitualProgress(0); // 열 때마다 초기화
+          }}
+          className="relative w-16 h-10 flex items-center justify-center cursor-pointer group hover:scale-110 transition-transform z-[60]"
         >
-          <div className="absolute w-6 h-6 rounded-full border border-emerald-500/50 left-0 bg-slate-900 z-10 shadow-sm" />
+          {/* 현재 달성률만큼 겹쳐진 두 원 */}
+          <div className="absolute w-7 h-7 rounded-full border border-emerald-500/50 bg-slate-900 left-0 shadow-[0_0_10px_rgba(16,185,129,0.2)]" />
           <div 
-            className="absolute w-6 h-6 rounded-full border border-amber-500 bg-amber-500/20 z-20 transition-all duration-1000"
+            className="absolute w-7 h-7 rounded-full border border-amber-500 bg-amber-500/20 z-20 transition-all duration-1000"
             style={{ 
-              left: `${20 - (Math.min((mbGoalAmount > 0 ? (currentAsset / mbGoalAmount) * 100 : 0), 100) / 100) * 20}px` 
+              left: `${24 - (Math.min((mbGoalAmount > 0 ? (currentAsset / mbGoalAmount) * 100 : 0), 100) / 100) * 24}px` 
             }} 
           />
           <Sparkles size={10} className="absolute -top-1 -right-1 text-amber-500 animate-pulse" />
         </div>
-      </div>
 
 
       {currentView !== "philosophy" && (
@@ -3511,6 +3536,64 @@ const nowX = getX(dataPoints[dataPoints.length - 1].date); // 📅 가로 위치
           <p className="text-[7px] text-slate-400/50 font-bold uppercase tracking-[0.3em] leading-none">
             © 2026 THE PULSE // ACCESS POINT: THEPULSE.MILESTONES.TODAY
           </p>
+
+          {/* 🌌 평행세계 동기화 챔버 (Sync Chamber) */}
+      {showSyncChamber && (
+        <div className="fixed inset-0 z-[10000] bg-slate-950/98 backdrop-blur-3xl flex flex-col items-center justify-center p-6 animate-fadeIn select-none touch-none">
+          <button onClick={() => { setShowSyncChamber(false); setRitualProgress(0); }} className="absolute top-8 right-8 text-white/30 hover:text-white p-4"><X size={32} /></button>
+          
+          <div className="max-w-2xl w-full text-center space-y-10">
+            <h2 className="text-3xl font-black text-white italic tracking-tighter uppercase">Identity Sync Chamber</h2>
+
+            {/* V-A-K 모드 전환 버튼 */}
+            <div className="flex justify-center gap-3">
+              {[ {id: 'v', label: '시각 (V)', icon: <Eye size={14}/>}, 
+                 {id: 'a', label: '청각 (A)', icon: <Headphones size={14}/>}, 
+                 {id: 'k', label: '신체감각 (K)', icon: <Activity size={14}/>} 
+              ].map(mode => (
+                <button key={mode.id} onClick={() => setNlpMode(mode.id)}
+                  className={`flex items-center gap-2 px-6 py-3 rounded-full text-[10px] font-black uppercase tracking-widest border transition-all ${
+                    nlpMode === mode.id ? "bg-amber-600 text-white border-amber-500 shadow-lg scale-105" : "bg-slate-900 text-slate-500 border-white/5"
+                  }`}>{mode.icon} {mode.label}</button>
+              ))}
+            </div>
+
+            {/* My Lab에서 쓴 시나리오 연동 */}
+            <div className="bg-slate-900/50 p-10 rounded-[3rem] border border-white/5 min-h-[200px] flex items-center justify-center relative">
+               <div className="absolute w-64 h-64 bg-amber-500/5 rounded-full blur-3xl animate-pulse" />
+               <p className="relative z-10 text-slate-200 text-xl leading-relaxed italic font-medium">
+                  {visions[activeLevel]?.[nlpMode] || "My Lab에서 해당 단계의 VAK 묘사를 입력해주세요."}
+               </p>
+            </div>
+
+            {/* 🌟 원 합쳐지는 리추얼 */}
+            <div className="relative h-64 flex flex-col items-center justify-center"
+                 onMouseDown={() => ritualProgress < 100 && setIsHolding(true)}
+                 onMouseUp={() => setIsHolding(false)}
+                 onTouchStart={() => ritualProgress < 100 && setIsHolding(true)}
+                 onTouchEnd={() => setIsHolding(false)}>
+               
+               <p className="text-[10px] text-amber-500 font-bold uppercase tracking-widest mb-10 animate-pulse">
+                  {ritualProgress === 100 ? "통합 완료 : ONE" : "화면을 꾹 눌러 두 자아를 하나로 합치십시오"}
+               </p>
+
+               <div className="relative w-full flex items-center justify-center pointer-events-none">
+                  <div className="absolute w-40 h-40 rounded-full border-4 border-emerald-500/40 shadow-[0_0_50px_rgba(16,185,129,0.2)]"
+                       style={{ transform: `translateX(-${(100 - ritualProgress)}px) scale(${1 + ritualProgress/200})`, opacity: ritualProgress === 100 ? 0 : 1 }} />
+                  <div className="absolute w-40 h-40 rounded-full border-4 border-amber-500 shadow-[0_0_50px_rgba(245,158,11,0.3)]"
+                       style={{ transform: `translateX(${(100 - ritualProgress)}px) scale(${1 + ritualProgress/200})`, opacity: ritualProgress === 100 ? 0 : 1 }} />
+                  <div className={`absolute w-56 h-56 rounded-full bg-gradient-to-br from-amber-300 via-amber-500 to-yellow-600 shadow-[0_0_100px_rgba(245,158,11,0.8)] flex items-center justify-center transition-all duration-1000 ${ritualProgress === 100 ? "opacity-100 scale-110 animate-pulse" : "opacity-0 scale-50"}`}>
+                    <span className="text-white font-black text-4xl tracking-tighter">ONE</span>
+                  </div>
+               </div>
+               
+               <div className="absolute -bottom-10 w-64 h-1.5 bg-white/5 rounded-full overflow-hidden">
+                 <div className="h-full bg-gradient-to-r from-emerald-500 to-amber-500 transition-all duration-75" style={{ width: `${ritualProgress}%` }} />
+               </div>
+            </div>
+          </div>
+        </div>
+      )}
         </div>
       </footer>
 
