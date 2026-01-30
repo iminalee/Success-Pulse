@@ -180,15 +180,12 @@ const ResetPasswordUI = () => {
 // 3. 메인 앱
 const App = () => {
 // --- [추가] 동기화 챔버 및 통합 리추얼 상태 관리 ---
-// --- [2단계] 동기화 챔버 핵심 로직 ---
-  const [showSyncChamber, setShowSyncChamber] = useState(false); // 챔버 팝업 여부
-  const [nlpMode, setNlpMode] = useState("v"); // VAK 모드 선택 (기본: 시각)
-  const [ritualProgress, setRitualProgress] = useState(0); // 합쳐지는 정도 (0~100)
-  const [isHolding, setIsHolding] = useState(false); // 꾹 누름 감지
+// --- [1단계] 동기화 챔버 및 통합 리추얼 핵심 로직 ---
+  const [showSyncChamber, setShowSyncChamber] = useState(false); 
+  const [ritualProgress, setRitualProgress] = useState(0); 
+  const [isHolding, setIsHolding] = useState(false); 
 
-  
-
-  // 7초 동안 원이 합쳐지게 만드는 타이머
+  // 7초간의 동기화 타이머 로직
   useEffect(() => {
     let interval;
     if (isHolding && ritualProgress < 100) {
@@ -196,7 +193,7 @@ const App = () => {
         setRitualProgress(prev => (prev >= 100 ? 100 : prev + 0.8)); // 약 7초 소요
       }, 50);
     } else if (!isHolding && ritualProgress < 100 && ritualProgress > 0) {
-      setRitualProgress(0); // 중간에 손 떼면 리셋
+      setRitualProgress(0); // 손을 떼면 즉시 초기화
     }
     return () => clearInterval(interval);
   }, [isHolding, ritualProgress]);
@@ -3559,18 +3556,16 @@ const nowX = getX(dataPoints[dataPoints.length - 1].date); // 📅 가로 위치
           </p>
 
           {/* 🌌 평행세계 동기화 챔버 (Sync Chamber) */}
-          {/* 🌌 평행세계 동기화 챔버 - [최종 강화형] 각진 어깨 + 폭발적 아우라 */}
-{/* 🌌 평행세계 동기화 챔버 - [최종 강화형] 자연스러운 사람 형상 + 상단 여백 개선 */}
+         {/* 🌌 평행세계 동기화 챔버 - [자연스러운 사람 형상 + 폭발 피날레] */}
       {showSyncChamber && (
-        // [수정 1] 상단 여백 개선을 위해 justify-center를 제거하고 padding-top을 늘렸습니다.
-        <div className="fixed inset-0 z-[10000] bg-[#05070A]/98 backdrop-blur-3xl flex flex-col items-center pt-20 pb-6 px-6 animate-fadeIn select-none touch-none font-sans">
+        // [수정] 상단 여백 pt-32로 대폭 확대
+        <div className="fixed inset-0 z-[10000] bg-[#05070A]/98 backdrop-blur-3xl flex flex-col items-center pt-32 pb-6 px-6 animate-fadeIn select-none touch-none font-sans">
           {/* 닫기 버튼 */}
           <button onClick={() => { setShowSyncChamber(false); setRitualProgress(0); }} className="absolute top-8 right-8 text-slate-600 hover:text-white transition-all p-2 z-[10001]">
             <X size={32} />
           </button>
           
-          {/* [수정 1] 상단 여백(mt-12) 추가하여 전체적인 위치를 아래로 내렸습니다. */}
-          <div className="max-w-3xl w-full text-center space-y-4 mt-12">
+          <div className="max-w-3xl w-full text-center space-y-6">
             <h2 className="text-3xl font-black text-white italic tracking-tighter uppercase drop-shadow-[0_0_20px_rgba(245,158,11,0.3)]">Identity Sync Chamber</h2>
 
             {/* 마스터 시나리오 (6단계 상시 노출) */}
@@ -3583,77 +3578,72 @@ const nowX = getX(dataPoints[dataPoints.length - 1].date); // 📅 가로 위치
 
             {/* 🌟 리추얼 인터랙션 구역 */}
             <div 
-              className="relative h-[450px] w-full flex flex-col items-center justify-center cursor-pointer"
+              className="relative h-[400px] w-full flex flex-col items-center justify-center cursor-pointer"
               onMouseDown={() => ritualProgress < 100 && setIsHolding(true)}
               onMouseUp={() => setIsHolding(false)}
               onMouseLeave={() => setIsHolding(false)}
               onTouchStart={() => ritualProgress < 100 && setIsHolding(true)}
               onTouchEnd={() => setIsHolding(false)}
             >
-               <p className={`text-[10px] font-bold uppercase tracking-[0.3em] mb-12 transition-all duration-500 ${
+               <p className={`text-[10px] font-bold uppercase tracking-[0.3em] mb-16 transition-all duration-500 ${
                  ritualProgress === 100 ? "text-amber-400 scale-110" : "text-slate-600 animate-pulse"
                }`}>
                   {ritualProgress === 100 ? "✨ IDENTITY MERGED : APEX BPS ✨" : "두 자아가 하나로 합쳐질 때까지 화면을 꾹 누르세요"}
                </p>
 
                <div className="relative w-full flex items-center justify-center h-64">
-                  {/* [수정 2] 더 자연스러운 머리, 두꺼운 목, 둥근 어깨의 사람 형상으로 변경 */}
+                  {/* [개선] 머리, 두꺼운 목, 둥근 어깨 라인 사람 형상 SVG 정의 */}
                   <svg className="absolute w-0 h-0">
                     <defs>
-                      <path id="human-rounded" d="M 70 10 C 85 10 95 20 95 35 C 95 45 88 52 80 55 L 80 65 C 100 68 120 80 120 105 L 20 105 C 20 80 40 68 60 65 L 60 55 C 52 52 45 45 45 35 C 45 20 55 10 70 10 Z" />
+                      <path id="human-detailed" d="M70,10 C82,10 92,20 92,35 C92,48 85,55 78,58 L78,65 C95,68 120,78 120,105 L20,105 C20,78 45,68 62,65 L62,58 C55,55 48,48 48,35 C48,20 58,10 70,10 Z" />
                     </defs>
                   </svg>
 
                   {/* 1. Current Self (에메랄드 채움) */}
                   <div className="absolute transition-all duration-100 ease-linear"
                        style={{ 
-                         transform: `translateX(-${(100 - ritualProgress) * 1.6}px) scale(${1 - ritualProgress/300})`, 
+                         transform: `translateX(-${(100 - ritualProgress) * 1.8}px) scale(${1.2 - ritualProgress/300})`, 
                          opacity: ritualProgress === 100 ? 0 : 0.8 
                        }}>
-                    <svg width="180" height="150" viewBox="0 0 140 110">
-                      {/* href를 새로운 경로 ID로 변경 */}
-                      <use href="#human-rounded" className="fill-emerald-500/30 stroke-emerald-400" strokeWidth="2" />
+                    <svg width="200" height="170" viewBox="0 0 140 110">
+                      <use href="#human-detailed" className="fill-emerald-500/40 stroke-emerald-400" strokeWidth="2" />
                     </svg>
-                    <span className="block mt-2 text-[8px] font-black text-emerald-500/50 uppercase tracking-widest text-center">Current</span>
                   </div>
 
-                  {/* 2. Apex BPS (안은 투명, 외곽선 점선, 은은한 아우라) */}
+                  {/* 2. Apex BPS (안은 투명, 외곽선 점선, 아우라 명멸) */}
                   <div className="absolute transition-all duration-100 ease-linear"
                        style={{ 
-                         transform: `translateX(${(100 - ritualProgress) * 1.6}px) scale(${1 - ritualProgress/300})`, 
+                         transform: `translateX(${(100 - ritualProgress) * 1.8}px) scale(${1.2 - ritualProgress/300})`, 
                          opacity: ritualProgress === 100 ? 0 : 1 
                        }}>
                     <div className="absolute inset-0 bg-amber-500/10 blur-xl rounded-full scale-125 animate-pulse"></div>
-                    <svg width="180" height="150" viewBox="0 0 140 110">
-                      {/* href를 새로운 경로 ID로 변경 */}
-                      <use href="#human-rounded" className="fill-transparent stroke-amber-400" strokeWidth="2" strokeDasharray="4 2" />
+                    <svg width="200" height="170" viewBox="0 0 140 110">
+                      <use href="#human-detailed" className="fill-transparent stroke-amber-400" strokeWidth="2" strokeDasharray="5 3" />
                     </svg>
-                    <span className="block mt-2 text-[8px] font-black text-amber-500/60 uppercase tracking-widest text-center">Apex BPS</span>
                   </div>
 
-                  {/* 3. 통합 완료 상태: 거대화 + 앰버 채움 + 폭발 효과 */}
-                  <div className={`absolute flex items-center justify-center transition-all duration-700 ${
-                    ritualProgress === 100 ? "opacity-100 scale-[2.0]" : "opacity-0 scale-50"
+                  {/* 3. 통합 완료 상태: 거대화(2.5배) + 앰버 채움 + 폭발 효과 */}
+                  <div className={`absolute flex items-center justify-center transition-all duration-1000 ${
+                    ritualProgress === 100 ? "opacity-100 scale-[2.5]" : "opacity-0 scale-50"
                   }`}>
-                    {/* (A) 폭발적 아우라 (진하고 크게 명멸) */}
-                    <div className="absolute -inset-24 bg-amber-500/30 blur-[100px] rounded-full animate-pulse"></div>
-                    <div className="absolute -inset-12 bg-yellow-400/20 blur-[60px] rounded-full animate-ping"></div>
+                    {/* 강렬한 폭발 아우라 */}
+                    <div className="absolute -inset-28 bg-amber-500/40 blur-[120px] rounded-full animate-pulse"></div>
+                    <div className="absolute -inset-14 bg-yellow-400/30 blur-[80px] rounded-full animate-ping"></div>
                     
-                    {/* (B) 합체 순간의 번쩍임 (파파팍!) */}
+                    {/* 합체 순간 번쩍임 (파파팍!) */}
                     {ritualProgress === 100 && (
-                      <div className="absolute inset-0 bg-white rounded-full blur-3xl animate-ping opacity-40"></div>
+                      <div className="absolute inset-0 bg-white rounded-full blur-3xl animate-ping opacity-60"></div>
                     )}
 
-                    {/* (C) 최종 통합 형상 (앰버색 가득 참) */}
-                    <svg width="180" height="150" viewBox="0 0 140 110" className="drop-shadow-[0_0_50px_rgba(245,158,11,1)] z-20">
+                    {/* 최종 통합 형상 (앰버색 그라데이션 가득 참) */}
+                    <svg width="200" height="170" viewBox="0 0 140 110" className="drop-shadow-[0_0_80px_rgba(245,158,11,1)] z-20">
                       <defs>
-                        <linearGradient id="gold-fill" x1="0%" y1="0%" x2="0%" y2="100%">
+                        <linearGradient id="divine-gold" x1="0%" y1="0%" x2="0%" y2="100%">
                           <stop offset="0%" stopColor="#FDE68A" />
                           <stop offset="100%" stopColor="#B45309" />
                         </linearGradient>
                       </defs>
-                      {/* href를 새로운 경로 ID로 변경 */}
-                      <use href="#human-rounded" fill="url(#gold-fill)" className="stroke-white animate-pulse" strokeWidth="3" />
+                      <use href="#human-detailed" fill="url(#divine-gold)" className="stroke-white animate-pulse" strokeWidth="3" />
                     </svg>
                   </div>
                </div>
@@ -3661,7 +3651,7 @@ const nowX = getX(dataPoints[dataPoints.length - 1].date); // 📅 가로 위치
                {/* 하단 진행 바 */}
                <div className="absolute bottom-4 w-64 h-1 bg-slate-900 rounded-full overflow-hidden">
                  <div className="h-full bg-gradient-to-r from-emerald-500 via-amber-500 to-yellow-300 transition-all duration-75 ease-linear" style={{ width: `${ritualProgress}%` }}>
-                    <div className="absolute right-0 top-0 h-full w-20 bg-white/30 blur-[5px]"></div>
+                    <div className="absolute right-0 top-0 h-full w-20 bg-white/40 blur-[6px]"></div>
                  </div>
                </div>
             </div>
