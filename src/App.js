@@ -2622,8 +2622,8 @@ const nowX = getX(dataPoints[dataPoints.length - 1].date); // 📅 가로 위치
               </h3>
               <p className="text-stone-300 text-base md:text-lg font-light tracking-wide pl-2 md:pl-4 border-l-2 border-stone-700">
                 무한한 평행세계 <span className="text-amber-300 font-bold italic px-1">알파 구역</span>의 정점에서 모든 성취를 완수한 마스터 자아{" "}
-                <span className="text-stone-100 font-bold italic px-1">
-                  Apex Best Possible Self
+                <span className="text-stone-100 font-bold underline underline-offset-4 decoration-stone-500">
+                  Apex Best Possible Self (이하 "Apex BPS")
                 </span>
                 는, 본 차원의 대리인인{" "}
                 <span className="text-stone-100 font-bold underline underline-offset-4 decoration-stone-500">
