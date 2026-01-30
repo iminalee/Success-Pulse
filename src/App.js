@@ -3555,95 +3555,86 @@ const nowX = getX(dataPoints[dataPoints.length - 1].date); // 📅 가로 위치
           {/* 🌌 평행세계 동기화 챔버 (Sync Chamber) */}
          {/* 🌌 평행세계 동기화 챔버 - [자연스러운 사람 형상 + 폭발 피날레] */}
       {showSyncChamber && (
-        // [수정] 상단 여백 pt-20로 대폭 확대
-        <div className="fixed inset-0 z-[10000] bg-[#05070A]/98 backdrop-blur-3xl flex flex-col items-center pt-15 pb-6 px-6 animate-fadeIn select-none touch-none font-sans">
-          {/* 닫기 버튼 */}
-          <button onClick={() => { setShowSyncChamber(false); setRitualProgress(0); }} className="absolute top-8 right-8 text-slate-600 hover:text-white transition-all p-2 z-[10001]">
-            <X size={32} />
-          </button>
+        <div className="fixed inset-0 z-[100000] bg-[#020406]/99 backdrop-blur-3xl flex flex-col items-center pt-24 pb-10 px-6 animate-fadeIn select-none touch-none font-sans overflow-y-auto no-scrollbar">
           
-          <div className="max-w-3xl w-full text-center space-y-6">
-            <h2 className="text-3xl font-black text-white italic tracking-tighter uppercase drop-shadow-[0_0_20px_rgba(245,158,11,0.3)]">Identity Sync Chamber</h2>
-
-            {/* 마스터 시나리오 (6단계 상시 노출) */}
-            <div className="bg-[#111827]/80 p-8 rounded-[2.5rem] border border-amber-500/20 min-h-[200px] flex items-center justify-center relative overflow-hidden">
-               <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] opacity-10"></div>
-               <p className="relative z-10 text-slate-200 text-base md:text-lg leading-[1.8] font-medium whitespace-pre-line text-left">
-                  {visions[6]?.immersionScript || "My Lab의 6단계에서 마스터 시나리오를 먼저 생성해주세요."}
-               </p>
+          {/* 닫기 버튼 */}
+          <button onClick={() => { setShowSyncChamber(false); setRitualProgress(0); }} className="absolute top-10 right-10 text-slate-600 hover:text-white transition-all p-2 z-[100001]"><X size={40} /></button>
+          
+          <div className="max-w-3xl w-full text-center flex flex-col gap-8">
+            {/* 1. 상단 제목 */}
+            <div className="space-y-1">
+              <h2 className="text-3xl md:text-4xl font-black text-white italic tracking-tighter uppercase drop-shadow-[0_0_20px_rgba(245,158,11,0.5)]">Identity Sync Chamber</h2>
+              <p className="text-[10px] text-amber-500/50 font-bold uppercase tracking-[0.4em]">정체성 주파수 동기화 리추얼</p>
             </div>
 
-{/* 🌟 리추얼 인터랙션 구역 - [최종 수정] 간격 좁힘 + 완전 불투명 앰버 발광 */}
+            {/* 2. [위치 변경] 리추얼 인터랙션 구역 (사람 형상 - TOP) */}
             <div 
-              className="relative h-[500px] w-full flex flex-col items-center justify-center cursor-pointer"
+              className="relative h-[400px] w-full flex flex-col items-center justify-center cursor-pointer"
               onMouseDown={() => ritualProgress < 100 && setIsHolding(true)}
               onMouseUp={() => setIsHolding(false)}
               onMouseLeave={() => setIsHolding(false)}
               onTouchStart={() => ritualProgress < 100 && setIsHolding(true)}
               onTouchEnd={() => setIsHolding(false)}
             >
-               {/* 상태 안내 문구 */}
-               <p className={`text-[12px] font-bold uppercase tracking-[0.3em] mb-20 transition-all duration-500 ${
-                 ritualProgress === 100 ? "text-amber-400 scale-110" : "text-amber-700/50 animate-pulse"
+               <p className={`text-[11px] font-bold uppercase tracking-[0.3em] mb-12 transition-all duration-500 ${
+                 ritualProgress === 100 ? "text-amber-400 scale-110" : "text-amber-700/40 animate-pulse"
                }`}>
-                  {ritualProgress === 100 ? "✨ IDENTITY MERGED : THE GOLDEN SOUL ✨" : "가까워진 두 자아를 하나로 합치세요 (꾹 누르기)"}
+                  {ritualProgress === 100 ? "✨ IDENTITY MERGED : YOU ARE THE APEX ✨" : "황금빛 정체성이 합쳐질 때까지 화면을 꾹 누르세요"}
                </p>
 
                <div className="relative w-full flex items-center justify-center h-64">
                   <svg className="absolute w-0 h-0">
                     <defs>
-                      {/* 자연스러운 사람 실루엣 경로 */}
-                      <path id="human-pro-close" d="M70,8 C86,8 96,18 96,35 C96,48 89,55 83,58 L83,64 C104,67 128,80 128,110 L12,110 C12,80 36,67 57,64 L57,58 C51,55 44,48 44,35 C44,18 54,8 70,8 Z" />
+                      {/* [개선] 머리, 목, 둥근 어깨가 있는 리얼한 실루엣 */}
+                      <path id="human-pro-v6" d="M70,8 C86,8 96,18 96,35 C96,48 89,55 83,58 L83,64 C104,67 128,80 128,110 L12,110 C12,80 36,67 57,64 L57,58 C51,55 44,48 44,35 C44,18 54,8 70,8 Z" />
                       
-                      {/* [핵심] 완전 불투명 리치 골드 그라데이션 설계 */}
-                      <linearGradient id="divine-gold-solid-close" x1="0%" y1="0%" x2="0%" y2="100%">
-                        <stop offset="0%" stopColor="#FCD34D" /> {/* 리치 골드 (상단) */}
-                        <stop offset="100%" stopColor="#B45309" /> {/* 진한 앰버 (하단) */}
+                      {/* 최종 통합을 위한 완전 불투명 리치 골드 그라데이션 */}
+                      <linearGradient id="divine-gold-final-v6" x1="0%" y1="0%" x2="0%" y2="100%">
+                        <stop offset="0%" stopColor="#FDE68A" />
+                        <stop offset="100%" stopColor="#B45309" />
                       </linearGradient>
                     </defs>
                   </svg>
 
-                  {/* 1. Current Self (에메랄드 제거됨, 빈 외곽선) */}
-                  {/* [수정] translateX 배수를 1.2로 줄여 간격을 좁힘 */}
+                  {/* A. Current Self (에메랄드 제거 -> 희미한 앰버 틴트 그릇) */}
                   <div className="absolute transition-all duration-100 ease-linear"
-                       style={{ transform: `translateX(-${(100 - ritualProgress) * 1.2}px) scale(${1.2 - ritualProgress/350})`, opacity: ritualProgress === 100 ? 0 : 0.6 }}>
-                    <svg width="240" height="210" viewBox="0 0 140 120">
-                      <use href="#human-pro-close" className="fill-transparent stroke-slate-600" strokeWidth="1.5" />
+                       style={{ 
+                         transform: `translateX(-${(100 - ritualProgress) * 1.2}px) scale(${1.2 - ritualProgress/350})`, 
+                         opacity: ritualProgress === 100 ? 0 : 0.6 
+                       }}>
+                    <svg width="220" height="190" viewBox="0 0 140 120">
+                      <use href="#human-pro-v6" className="fill-amber-500/5 stroke-slate-700" strokeWidth="1.5" />
                     </svg>
-                    <span className="block mt-4 text-[8px] font-bold text-slate-600 uppercase tracking-widest text-center">Vessel (빈 그릇)</span>
                   </div>
 
-                  {/* 2. Apex BPS (황금빛 아우라 주도권) */}
-                  {/* [수정] translateX 배수를 1.2로 줄여 간격을 좁힘 */}
+                  {/* B. Apex BPS (강력한 황금빛 아우라) */}
                   <div className="absolute transition-all duration-100 ease-linear"
-                       style={{ transform: `translateX(${(100 - ritualProgress) * 1.2}px) scale(${1.2 - ritualProgress/350})`, opacity: ritualProgress === 100 ? 0 : 1 }}>
-                    <div className="absolute inset-0 bg-amber-500/30 blur-3xl rounded-full scale-125 animate-pulse"></div>
-                    <svg width="240" height="210" viewBox="0 0 140 120" className="drop-shadow-[0_0_30px_rgba(245,158,11,0.8)]">
-                      <use href="#human-pro-close" className="fill-amber-500/10 stroke-amber-400" strokeWidth="3" strokeDasharray="8 4" />
+                       style={{ 
+                         transform: `translateX(${(100 - ritualProgress) * 1.2}px) scale(${1.2 - ritualProgress/350})`, 
+                         opacity: ritualProgress === 100 ? 0 : 1 
+                       }}>
+                    <div className="absolute inset-0 bg-amber-500/20 blur-3xl rounded-full scale-125 animate-pulse"></div>
+                    <svg width="220" height="190" viewBox="0 0 140 120" className="drop-shadow-[0_0_35px_rgba(245,158,11,0.8)]">
+                      <use href="#human-pro-v6" className="fill-transparent stroke-amber-400" strokeWidth="2.5" strokeDasharray="6 3" />
                     </svg>
-                    <span className="block mt-4 text-[8px] font-black text-amber-500 uppercase tracking-[0.3em] text-center">Apex Identity</span>
                   </div>
 
-                  {/* 3. 피날레: 2.8배 거대화 + 불투명 앰버 꽉 채움 + 눈부신 폭발 */}
-                  <div className={`absolute flex items-center justify-center transition-all duration-1000 ${ritualProgress === 100 ? "opacity-100 scale-[2.8]" : "opacity-0 scale-50"}`}>
-                    {/* 배경 아우라 및 폭발 이펙트 */}
-                    <div className="absolute -inset-60 bg-amber-600/60 blur-[180px] rounded-full animate-pulse-slow"></div>
-                    <div className="absolute -inset-30 bg-yellow-300/40 blur-[100px] rounded-full animate-ping"></div>
-                    <div className="absolute inset-0 bg-yellow-100/90 blur-[70px] rounded-full z-10"></div>
+                  {/* C. 통합 완료 피날레: 3.0배 거대화 + 불투명 앰버 + 폭발 */}
+                  <div className={`absolute flex items-center justify-center transition-all duration-1000 ${
+                    ritualProgress === 100 ? "opacity-100 scale-[3.0]" : "opacity-0 scale-50"
+                  }`}>
+                    {/* 초강력 폭발 아우라 */}
+                    <div className="absolute -inset-40 bg-amber-500/50 blur-[150px] rounded-full animate-pulse-slow"></div>
+                    <div className="absolute -inset-20 bg-yellow-400/30 blur-[80px] rounded-full animate-ping"></div>
+                    
+                    {/* 번쩍임 이펙트 (파파팍!) */}
                     {ritualProgress === 100 && (
-                      <div className="absolute inset-0 bg-white rounded-full blur-[100px] animate-ping opacity-90 z-20" style={{animationDuration: '0.5s'}}></div>
+                      <div className="absolute inset-0 bg-white rounded-full blur-3xl animate-ping opacity-70 z-10"></div>
                     )}
 
-                    {/* [핵심] 최종 통합 형상 (완전 불투명 리치 골드) */}
-                    {/* drop-shadow로 강렬한 빛 발산 */}
-                    <svg width="240" height="210" viewBox="0 0 140 120" className="drop-shadow-[0_0_120px_rgba(251,191,36,1)] z-30 relative">
-                      <use 
-                        href="#human-pro-close" 
-                        fill="url(#divine-gold-solid-close)" 
-                        fillOpacity="1" /* <--- 이 부분이 불투명하게 만듭니다 */
-                        className="stroke-yellow-50 animate-pulse" 
-                        strokeWidth="4" 
-                      />
+                    {/* 최종 통합 형상 (완전 불투명 앰버 채움) */}
+                    <svg width="220" height="190" viewBox="0 0 140 120" className="drop-shadow-[0_0_100px_rgba(245,158,11,1)] z-20 relative">
+                      <use href="#human-pro-v6" fill="url(#divine-gold-final-v6)" fillOpacity="1" className="stroke-white animate-pulse" strokeWidth="3" />
                     </svg>
                   </div>
                </div>
@@ -3651,9 +3642,18 @@ const nowX = getX(dataPoints[dataPoints.length - 1].date); // 📅 가로 위치
                {/* 하단 진행 바 (황금색) */}
                <div className="absolute bottom-4 w-64 h-1 bg-slate-900 rounded-full overflow-hidden backdrop-blur-sm">
                  <div className="h-full bg-gradient-to-r from-amber-800 via-amber-500 to-yellow-300 transition-all duration-75 ease-linear relative" style={{ width: `${ritualProgress}%` }}>
-                    <div className="absolute right-0 top-0 h-full w-20 bg-white/50 blur-[6px]"></div>
+                    <div className="absolute right-0 top-0 h-full w-20 bg-white/40 blur-[6px]"></div>
                  </div>
                </div>
+            </div>
+
+            {/* 3. [위치 변경] 마스터 시나리오 (Scenario - BOTTOM) */}
+            {/* 글자색을 앰버 계열(text-amber-200/80)로 변경하여 테마를 통일했습니다. */}
+            <div className="bg-[#111827]/90 p-10 rounded-[3.5rem] border border-amber-500/20 min-h-[220px] flex items-center justify-center relative overflow-hidden shadow-[inset_0_0_60px_rgba(0,0,0,0.8)]">
+               <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] opacity-10"></div>
+               <p className="relative z-10 text-amber-200/80 text-base md:text-lg leading-[1.9] font-medium whitespace-pre-line text-left drop-shadow-md italic">
+                  {visions[6]?.immersionScript || "마스터 시나리오를 먼저 생성해주세요."}
+               </p>
             </div>
           </div>
         </div>
