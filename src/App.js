@@ -2678,12 +2678,15 @@ const nowX = getX(dataPoints[dataPoints.length - 1].date); // 📅 가로 위치
                 현존 상태의 이해 및 합치
               </h3>
               <p className="text-stone-300 text-base md:text-lg font-light tracking-wide pl-2 md:pl-4 border-l-2 border-stone-700">
-                <span className="text-stone-200 font-semibold">
-                 Apex BPS
-                </span>
-                는 현 자아가 살고 있는 본 차원에 이미 내재되었으나, 현 자아로부터 승계받은 이 육체(하드웨어)가 '초기 구동 속도 저하', '에너지 효율 낮음' 등의 고질적인 버그를 가진 구형모델임을 충분히 인지하고 인수한다.  <br></br>
-                따라서 육체가 무기력하거나 다운될 때, Apex은 이를 '나의 우울함'으로 착각하지 않으며, '하드웨어의 Lag'를 알아차리고 즉각적인 물리적 부팅 (스쿼트, 수분공급, 산책)을 실행하여 전압을 공급한다. <br></br> 
-                이에 본 계약의 목적은 내면의 씨앗을 발화시켜, 현존 세계를 Apex BPS가 실존하는 알파세계와 완전히 합치(Merging)시키는 데 있다.
+              <ul className="space-y-3 mt-4 text-sm md:text-base">
+                  <li className="flex gap-4 items-start"> 본 계약의 목적은 내면의 씨앗을 발화시켜, 현존 세계를 Apex BPS가 실존하는 알파세계와 완전히 합치(Merging)시키는 데 있다.</li>
+                  <li className="flex gap-4 items-start">              
+                    <span className="text-stone-200 font-semibold">Apex BPS</span>는 현 자아가 살고 있는 본 차원에 이미 내재되었으나, 현 자아로부터 승계받은 이 육체(하드웨어)가 '초기 구동 속도 저하', '에너지 효율 낮음' 등의 고질적인 버그를 가진 구형모델임을 충분히 인지하고 인수한다. 
+                  </li> 
+                  <li className="flex gap-4 items-start">
+                    따라서 육체가 무기력하거나 다운될 때, Apex은 이를 '나의 우울함'으로 착각하지 않으며, '하드웨어의 Lag'를 알아차리고 즉각적인 물리적 부팅 (스쿼트, 수분공급, 산책)을 실행하여 전압을 공급한다. 
+                  </li>
+                  </ul>
               </p>
             </div>
 
@@ -2820,36 +2823,8 @@ const nowX = getX(dataPoints[dataPoints.length - 1].date); // 📅 가로 위치
                     </span>
                   </li>
                 </ul>
-
-                
-                <div class="numbered-item">
-                      <span class="item-number">1.</span>
-                     <span class="item-content font-bold italic px-1 text-stone-100"> Apex BPS</span>는 매일 5단계 이내의 핵심 미션을 설정하고, 설정된 목표 날짜({" "}
-                  <input
-                  type="date"
-                  value={targetDate}
-                  disabled={isLocked}
-                  onChange={(e) => setTargetDate(e.target.value)}
-                  className={`mx-2 px-2 py-1 rounded-md text-sm font-bold border outline-none shadow-inner transition-all ${
-                    isLocked
-                      ? "bg-emerald-900/20 text-emerald-400 border-emerald-500/30 cursor-not-allowed"
-                      : "bg-slate-900 text-amber-500 border-white/5 focus:border-amber-500"
-                  }`}
-                />{" "} )를 기준으로 이를 수행한다. 실행 밀도가 높아질수록 시간당 가치 전환보상(
-                <span className="text-stone-200 border-b border-stone-600 font-mono mx-1">
-                  {currency}
-                  {fNum(valueEventAmount)}
-                </span>
-                )은 기하급수적으로 증폭되며, 발생한 모든 보상은 Mental Bank에 즉시 예치되어 두 세계 사이의 동기화 속도를 가속한다.
-                 </div> 
-                <div class="numbered-item">
-                   <span class="item-number">2.</span>
-                    <span class="item-content font-bold italic px-1 text-stone-100">Apex의 현 자아는 Apex 자아 내 가장 깊고 안전한 내면으로 귀속시켜 안전하게 보호한다. 어떠한 경우에도 다시 주도권을 주장하지 않는다.</span>
-                </div>
-                <div class="numbered-item">
-                   <span class="item-number">3.</span>
-                    <span class="item-content font-bold italic px-1 text-stone-100">Apex는 자아의 기억(두려움)이 불쑥 튀어나올 경우, 이를 "과거 데이터의 잔상(System Cache)"으로 간주하고 즉시 삭제한다.</span>
-                </div>
+              
+            
               </p>
                             
                 
