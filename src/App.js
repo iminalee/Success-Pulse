@@ -180,25 +180,25 @@ const ResetPasswordUI = () => {
 // 3. 메인 앱
 const App = () => {
 // --- [추가] 동기화 챔버 및 통합 리추얼 상태 관리 ---
-// --- [1단계] 동기화 챔버 및 통합 리추얼 핵심 로직 ---
+// --- [1단계] 동기화 챔버 핵심 로직 (중복 제거 통합본) ---
   const [showSyncChamber, setShowSyncChamber] = useState(false); 
   const [ritualProgress, setRitualProgress] = useState(0); 
   const [isHolding, setIsHolding] = useState(false); 
 
-  // 7초간의 동기화 타이머 로직
+  // 7초 타이머 로직
   useEffect(() => {
     let interval;
     if (isHolding && ritualProgress < 100) {
       interval = setInterval(() => {
-        setRitualProgress(prev => (prev >= 100 ? 100 : prev + 0.8)); // 약 7초 소요
+        setRitualProgress(prev => (prev >= 100 ? 100 : prev + 0.8)); // 약 7초
       }, 50);
     } else if (!isHolding && ritualProgress < 100 && ritualProgress > 0) {
-      setRitualProgress(0); // 손을 떼면 즉시 초기화
+      setRitualProgress(0); // 손 떼면 리셋
     }
     return () => clearInterval(interval);
   }, [isHolding, ritualProgress]);
 
-  // 완료 시 진동 효과
+  // 완료 진동
   useEffect(() => {
     if (ritualProgress === 100 && typeof navigator !== "undefined" && navigator.vibrate) {
       navigator.vibrate([100, 50, 200]);
