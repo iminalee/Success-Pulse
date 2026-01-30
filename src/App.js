@@ -177,6 +177,13 @@ const ResetPasswordUI = () => {
 
 // 3. 메인 앱
 const App = () => {
+// --- [추가] 동기화 챔버 및 통합 리추얼 상태 관리 ---
+  const [showSyncChamber, setShowSyncChamber] = useState(false); // 챔버 팝업 여부
+  const [nlpMode, setNlpMode] = useState("v"); // VAK 모드 선택 (기본: 시각)
+  const [ritualProgress, setRitualProgress] = useState(0); // 합쳐지는 정도 (0~100)
+  const [isHolding, setIsHolding] = useState(false); // 꾹 누름 감지
+
+
   const handleGenerateBPSScenario = () => {
     // 1-5단계 데이터 수집
     const activeVisions = [1, 2, 3, 4, 5]
@@ -3250,6 +3257,26 @@ const nowX = getX(dataPoints[dataPoints.length - 1].date); // 📅 가로 위치
           </p>
         </div>
         {/* ▲▲▲ 여기까지 수정했습니다 ▲▲▲ */}
+        
+        {/* 헤더 중앙: 동기화 트리거 아이콘 */}
+      <div className="flex items-center gap-4">
+        {/* 두 원 아이콘: 현재 달성률만큼 겹쳐진 상태로 표시 */}
+        <div 
+          onClick={() => setShowSyncChamber(true)}
+          className="relative w-12 h-8 flex items-center justify-center cursor-pointer group hover:scale-110 transition-transform"
+          title="평행세계 동기화 챔버"
+        >
+          <div className="absolute w-6 h-6 rounded-full border border-emerald-500/50 left-0 bg-slate-900 z-10 shadow-sm" />
+          <div 
+            className="absolute w-6 h-6 rounded-full border border-amber-500 bg-amber-500/20 z-20 transition-all duration-1000"
+            style={{ 
+              left: `${20 - (Math.min((mbGoalAmount > 0 ? (currentAsset / mbGoalAmount) * 100 : 0), 100) / 100) * 20}px` 
+            }} 
+          />
+          <Sparkles size={10} className="absolute -top-1 -right-1 text-amber-500 animate-pulse" />
+        </div>
+      </div>
+
 
       {currentView !== "philosophy" && (
           /* [우측 상단] 자산 대시보드 (반응형 수정 완료) */
