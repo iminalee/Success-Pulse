@@ -3553,8 +3553,9 @@ const nowX = getX(dataPoints[dataPoints.length - 1].date); // 📅 가로 위치
           </p>
 
           {/* 🌌 평행세계 동기화 챔버 (Sync Chamber) */}
-          {/* 🌌 평행세계 동기화 챔버 - [최종 완결형] 사람 상단 / 앰버 텍스트 하단 / 초강력 폭발 */}
-        {showSyncChamber && (
+          {/* 🌌 평행세계 동기화 챔버 - [완성판] Apex 내부 채움 + 초강력 파파팍 폭발 */}
+         {/* 🌌 평행세계 동기화 챔버 - [최종 완결] 전체 화면 화이트 플래시 + 초강력 피날레 */}
+      {showSyncChamber && (
         <div className="fixed inset-0 z-[100000] bg-[#020406]/99 backdrop-blur-3xl flex flex-col items-center pt-24 pb-10 px-6 animate-fadeIn select-none touch-none font-sans overflow-hidden">
           
           {/* 닫기 버튼 */}
@@ -3565,11 +3566,11 @@ const nowX = getX(dataPoints[dataPoints.length - 1].date); // 📅 가로 위치
           <div className="max-w-3xl w-full text-center flex flex-col h-full gap-4">
             {/* 1. 헤더 */}
             <div className="space-y-1">
-              <h2 className="text-3xl md:text-4xl font-black text-white italic tracking-tighter uppercase drop-shadow-[0_0_20px_rgba(245,158,11,0.5)]">Identity Sync Chamber</h2>
-              <p className="text-[10px] text-amber-500/50 font-bold uppercase tracking-[0.4em]">6단계: 마스터 정체성 동기화 리추얼</p>
+              <h2 className="text-3xl md:text-4xl font-black text-white italic tracking-tighter uppercase drop-shadow-[0_0_20px_rgba(245,158,11,0.6)]">Identity Sync Chamber</h2>
+              <p className="text-[10px] text-amber-500/50 font-bold uppercase tracking-[0.4em]">정체성 주파수 동기화 리추얼</p>
             </div>
 
-            {/* 2. [위치 변경] 리추얼 인터랙션 구역 (사람 형상 - TOP) */}
+            {/* 2. 리추얼 인터랙션 구역 (사람 형상 - TOP) */}
             <div 
               className="relative h-[420px] w-full flex flex-col items-center justify-center cursor-pointer"
               onMouseDown={() => ritualProgress < 100 && setIsHolding(true)}
@@ -3581,63 +3582,73 @@ const nowX = getX(dataPoints[dataPoints.length - 1].date); // 📅 가로 위치
                <p className={`text-[11px] font-bold uppercase tracking-[0.3em] mb-12 transition-all duration-500 ${
                  ritualProgress === 100 ? "text-amber-400 scale-110" : "text-amber-700/40 animate-pulse"
                }`}>
-                  {ritualProgress === 100 ? "✨ IDENTITY MERGED : YOU ARE THE APEX ✨" : "두 자아가 합쳐질 때까지 화면을 꾹 누르세요"}
+                  {ritualProgress === 100 ? "✨ IDENTITY MERGED : YOU ARE THE APEX ✨" : "황금빛 정체성이 합쳐질 때까지 화면을 꾹 누르세요"}
                </p>
 
                <div className="relative w-full flex items-center justify-center h-64">
                   <svg className="absolute w-0 h-0">
                     <defs>
-                      <path id="human-pro-v7" d="M70,8 C86,8 96,18 96,35 C96,48 89,55 83,58 L83,64 C104,67 128,80 128,110 L12,110 C12,80 36,67 57,64 L57,58 C51,55 44,48 44,35 C44,18 54,8 70,8 Z" />
-                      {/* [개선] 훨씬 더 진하고 불투명한 골드-앰버 그라데이션 */}
-                      <linearGradient id="divine-gold-v7" x1="0%" y1="0%" x2="0%" y2="100%">
-                        <stop offset="0%" stopColor="#FFD700" /> {/* 순수 골드 */}
-                        <stop offset="100%" stopColor="#92400E" /> {/* 딥 앰버 */}
+                      <path id="human-pro-final" d="M70,8 C86,8 96,18 96,35 C96,48 89,55 83,58 L83,64 C104,67 128,80 128,110 L12,110 C12,80 36,67 57,64 L57,58 C51,55 44,48 44,35 C44,18 54,8 70,8 Z" />
+                      {/* [합체 전] Apex 내부를 채울 반투명 앰버 그라데이션 */}
+                      <linearGradient id="apex-pre-fill" x1="0%" y1="0%" x2="0%" y2="100%">
+                        <stop offset="0%" stopColor="#FBBF24" stopOpacity="0.7" />
+                        <stop offset="100%" stopColor="#D97706" stopOpacity="0.7" />
+                      </linearGradient>
+                      {/* [합체 후] 최종 형상을 위한 완전 불투명 & 눈부신 골드 그라데이션 */}
+                      <linearGradient id="divine-gold-final" x1="0%" y1="0%" x2="0%" y2="100%">
+                        <stop offset="0%" stopColor="#FFF59D" /> {/* 눈부신 상단 */}
+                        <stop offset="40%" stopColor="#FFD700" /> {/* 리치 골드 */}
+                        <stop offset="100%" stopColor="#B45309" /> {/* 딥 앰버 */}
                       </linearGradient>
                     </defs>
                   </svg>
 
-                  {/* A. Current Self (에메랄드 제거 -> 희미한 은색 외곽선 그릇) */}
+                  {/* A. Current Self (투명한 빈 그릇) */}
                   <div className="absolute transition-all duration-100 ease-linear"
                        style={{ 
-                         transform: `translateX(-${(100 - ritualProgress) * 1.2}px) scale(${1 + (ritualProgress/200)})`, 
-                         opacity: ritualProgress === 100 ? 0 : 0.5 
+                         transform: `translateX(-${(100 - ritualProgress) * 1.2}px) scale(${1 + (ritualProgress/250)})`, 
+                         opacity: ritualProgress === 100 ? 0 : 0.4 
                        }}>
                     <svg width="240" height="210" viewBox="0 0 140 120">
-                      <use href="#human-pro-v7" className="fill-transparent stroke-slate-500" strokeWidth="1" />
+                      <use href="#human-pro-final" className="fill-transparent stroke-slate-600" strokeWidth="1" />
                     </svg>
                   </div>
 
-                  {/* B. Apex BPS (주도적인 황금빛 아우라) */}
+                  {/* B. Apex BPS (안쪽이 앰버색으로 채워진 주도적 형상) */}
                   <div className="absolute transition-all duration-100 ease-linear"
                        style={{ 
-                         transform: `translateX(${(100 - ritualProgress) * 1.2}px) scale(${1 + (ritualProgress/200)})`, 
+                         transform: `translateX(${(100 - ritualProgress) * 1.2}px) scale(${1 + (ritualProgress/250)})`, 
                          opacity: ritualProgress === 100 ? 0 : 1 
                        }}>
-                    <div className="absolute inset-0 bg-amber-500/20 blur-3xl rounded-full scale-125 animate-pulse"></div>
-                    <svg width="240" height="210" viewBox="0 0 140 120" className="drop-shadow-[0_0_30px_rgba(245,158,11,0.8)]">
-                      <use href="#human-pro-v7" className="fill-transparent stroke-amber-400" strokeWidth="2.5" strokeDasharray="6 3" />
+                    <div className="absolute inset-0 bg-amber-500/40 blur-3xl rounded-full scale-125 animate-pulse"></div>
+                    <svg width="240" height="210" viewBox="0 0 140 120" className="drop-shadow-[0_0_40px_rgba(245,158,11,0.9)]">
+                      {/* [핵심] fill 속성에 프리-필 그라데이션 적용 */}
+                      <use href="#human-pro-final" fill="url(#apex-pre-fill)" className="stroke-amber-400" strokeWidth="2.5" strokeDasharray="6 3" />
                     </svg>
                   </div>
 
-                  {/* C. [초강력] 통합 피날레: 3.0배 거대화 + 완전 불투명 앰버 + 파파팍 폭발 */}
-                  <div className={`absolute flex items-center justify-center transition-all duration-700 ${
+                  {/* C. [초강력 피날레] 3.0배 거대화 + 불투명 골드 + 전체 화면 플래시 */}
+                  <div className={`absolute flex items-center justify-center transition-all duration-500 ${
                     ritualProgress === 100 ? "opacity-100 scale-[3.0]" : "opacity-0 scale-50"
                   }`}>
-                    {/* (1) 충격적인 파파팍 효과 (순간 하얀 플래시) */}
+                    {/* (1) [핵심] 전체 화면 화이트 플래시 (파파팍!) */}
                     {ritualProgress === 100 && (
                       <>
-                        <div className="fixed inset-0 bg-white animate-ping opacity-40 z-[99999] pointer-events-none"></div>
-                        <div className="absolute -inset-20 bg-yellow-100 rounded-full blur-3xl animate-ping opacity-80 z-10"></div>
+                        {/* 화면 전체를 덮는 가장 강력한 플래시 레이어 */}
+                        <div className="fixed inset-0 bg-white animate-flash z-[99999] pointer-events-none"></div>
+                        
+                        {/* 형상 중심에서 터지는 추가 폭발 섬광 */}
+                        <div className="absolute -inset-40 bg-white rounded-full blur-[120px] animate-flash opacity-80 z-10"></div>
                       </>
                     )}
 
-                    {/* (2) 거대한 황금빛 아우라 (폭발적 확장) */}
-                    <div className="absolute -inset-60 bg-amber-600/50 blur-[180px] rounded-full animate-pulse-slow"></div>
-                    <div className="absolute -inset-24 bg-yellow-400/40 blur-[100px] rounded-full animate-ping"></div>
+                    {/* (2) 거대한 황금빛 아우라 (배경) */}
+                    <div className="absolute -inset-80 bg-amber-600/50 blur-[200px] rounded-full animate-pulse-slow"></div>
+                    <div className="absolute -inset-30 bg-yellow-400/40 blur-[120px] rounded-full animate-ping"></div>
 
-                    {/* (3) 최종 통합 형상 (완전 불투명 앰버 꽉 채움) */}
-                    <svg width="240" height="210" viewBox="0 0 140 120" className="drop-shadow-[0_0_120px_rgba(251,191,36,1)] z-20 relative">
-                      <use href="#human-pro-v7" fill="url(#divine-gold-v7)" fillOpacity="1" className="stroke-white animate-pulse" strokeWidth="3" />
+                    {/* (3) 최종 통합 형상 (완전 불투명 & 눈부신 골드) */}
+                    <svg width="240" height="210" viewBox="0 0 140 120" className="drop-shadow-[0_0_150px_rgba(251,191,36,1)] z-20 relative">
+                      <use href="#human-pro-final" fill="url(#divine-gold-final)" fillOpacity="1" className="stroke-white animate-pulse" strokeWidth="3" />
                     </svg>
                   </div>
                </div>
@@ -3650,8 +3661,7 @@ const nowX = getX(dataPoints[dataPoints.length - 1].date); // 📅 가로 위치
                </div>
             </div>
 
-            {/* 3. [위치 변경] 마스터 시나리오 (Scenario - BOTTOM) */}
-            {/* 글자색을 진한 앰버(text-amber-300)로 변경하여 테마를 통일했습니다. */}
+            {/* 3. 마스터 시나리오 (Scenario - BOTTOM) */}
             <div className="flex-grow bg-[#111827]/90 p-8 md:p-10 rounded-[3.5rem] border border-amber-500/20 flex items-center justify-center relative overflow-hidden shadow-[inset_0_0_60px_rgba(0,0,0,0.8)] mb-4">
                <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] opacity-10"></div>
                <p className="relative z-10 text-amber-300/90 text-sm md:text-base leading-[1.8] font-medium whitespace-pre-line text-left drop-shadow-md italic">
