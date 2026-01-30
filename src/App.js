@@ -2622,11 +2622,11 @@ const nowX = getX(dataPoints[dataPoints.length - 1].date); // 📅 가로 위치
               </h3>
               <p className="text-stone-300 text-base md:text-lg font-light tracking-wide pl-2 md:pl-4 border-l-2 border-stone-700">
                 무한한 평행세계 <span className="text-amber-300 font-bold italic px-1">알파 구역</span>의 정점에서 모든 성취를 완수한 마스터 자아{" "}
-                <span className="text-stone-100 font-bold underline underline-offset-4 decoration-stone-500">
+                <span className="text-stone-100 font-bold italic underline underline-offset-4 decoration-stone-500">
                   Apex Best Possible Self (이하 "Apex BPS")
                 </span>
                 는, 본 차원의 대리인인{" "}
-                <span className="text-stone-100 font-bold underline underline-offset-4 decoration-stone-500">
+                <span className="text-stone-100 font-bold italic underline underline-offset-4 decoration-stone-500">
                   {userName} ver.0 (이하 "현 자아")
                 </span>
                 이 일시적인 주파수 교란으로 인해 예정된 성공 궤도에서 미세하게 이탈했음을 감지하였다. 
