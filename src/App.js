@@ -3560,14 +3560,17 @@ const nowX = getX(dataPoints[dataPoints.length - 1].date); // 📅 가로 위치
 
           {/* 🌌 평행세계 동기화 챔버 (Sync Chamber) */}
           {/* 🌌 평행세계 동기화 챔버 - [최종 강화형] 각진 어깨 + 폭발적 아우라 */}
+{/* 🌌 평행세계 동기화 챔버 - [최종 강화형] 자연스러운 사람 형상 + 상단 여백 개선 */}
       {showSyncChamber && (
-        <div className="fixed inset-0 z-[10000] bg-[#05070A]/98 backdrop-blur-3xl flex flex-col items-center justify-center p-6 animate-fadeIn select-none touch-none font-sans">
+        // [수정 1] 상단 여백 개선을 위해 justify-center를 제거하고 padding-top을 늘렸습니다.
+        <div className="fixed inset-0 z-[10000] bg-[#05070A]/98 backdrop-blur-3xl flex flex-col items-center pt-20 pb-6 px-6 animate-fadeIn select-none touch-none font-sans">
           {/* 닫기 버튼 */}
           <button onClick={() => { setShowSyncChamber(false); setRitualProgress(0); }} className="absolute top-8 right-8 text-slate-600 hover:text-white transition-all p-2 z-[10001]">
             <X size={32} />
           </button>
           
-          <div className="max-w-3xl w-full text-center space-y-4">
+          {/* [수정 1] 상단 여백(mt-12) 추가하여 전체적인 위치를 아래로 내렸습니다. */}
+          <div className="max-w-3xl w-full text-center space-y-4 mt-12">
             <h2 className="text-3xl font-black text-white italic tracking-tighter uppercase drop-shadow-[0_0_20px_rgba(245,158,11,0.3)]">Identity Sync Chamber</h2>
 
             {/* 마스터 시나리오 (6단계 상시 노출) */}
@@ -3594,10 +3597,10 @@ const nowX = getX(dataPoints[dataPoints.length - 1].date); // 📅 가로 위치
                </p>
 
                <div className="relative w-full flex items-center justify-center h-64">
-                  {/* 각진 어깨를 가진 사람 형상 SVG 정의 */}
+                  {/* [수정 2] 더 자연스러운 머리, 두꺼운 목, 둥근 어깨의 사람 형상으로 변경 */}
                   <svg className="absolute w-0 h-0">
                     <defs>
-                      <path id="human-squared" d="M70 5 C 82 5 92 15 92 28 C 92 41 82 51 70 51 C 58 51 48 41 48 28 C 48 15 58 5 70 5 M 70 51 L 70 58 M 70 58 L 25 58 L 25 105 L 115 105 L 115 58 L 70 58 Z" />
+                      <path id="human-rounded" d="M 70 10 C 85 10 95 20 95 35 C 95 45 88 52 80 55 L 80 65 C 100 68 120 80 120 105 L 20 105 C 20 80 40 68 60 65 L 60 55 C 52 52 45 45 45 35 C 45 20 55 10 70 10 Z" />
                     </defs>
                   </svg>
 
@@ -3608,7 +3611,8 @@ const nowX = getX(dataPoints[dataPoints.length - 1].date); // 📅 가로 위치
                          opacity: ritualProgress === 100 ? 0 : 0.8 
                        }}>
                     <svg width="180" height="150" viewBox="0 0 140 110">
-                      <use href="#human-squared" className="fill-emerald-500/30 stroke-emerald-400" strokeWidth="2" />
+                      {/* href를 새로운 경로 ID로 변경 */}
+                      <use href="#human-rounded" className="fill-emerald-500/30 stroke-emerald-400" strokeWidth="2" />
                     </svg>
                     <span className="block mt-2 text-[8px] font-black text-emerald-500/50 uppercase tracking-widest text-center">Current</span>
                   </div>
@@ -3621,7 +3625,8 @@ const nowX = getX(dataPoints[dataPoints.length - 1].date); // 📅 가로 위치
                        }}>
                     <div className="absolute inset-0 bg-amber-500/10 blur-xl rounded-full scale-125 animate-pulse"></div>
                     <svg width="180" height="150" viewBox="0 0 140 110">
-                      <use href="#human-squared" className="fill-transparent stroke-amber-400" strokeWidth="2" strokeDasharray="4 2" />
+                      {/* href를 새로운 경로 ID로 변경 */}
+                      <use href="#human-rounded" className="fill-transparent stroke-amber-400" strokeWidth="2" strokeDasharray="4 2" />
                     </svg>
                     <span className="block mt-2 text-[8px] font-black text-amber-500/60 uppercase tracking-widest text-center">Apex BPS</span>
                   </div>
@@ -3647,7 +3652,8 @@ const nowX = getX(dataPoints[dataPoints.length - 1].date); // 📅 가로 위치
                           <stop offset="100%" stopColor="#B45309" />
                         </linearGradient>
                       </defs>
-                      <use href="#human-squared" fill="url(#gold-fill)" className="stroke-white animate-pulse" strokeWidth="3" />
+                      {/* href를 새로운 경로 ID로 변경 */}
+                      <use href="#human-rounded" fill="url(#gold-fill)" className="stroke-white animate-pulse" strokeWidth="3" />
                     </svg>
                   </div>
                </div>
