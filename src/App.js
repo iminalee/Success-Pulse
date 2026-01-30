@@ -3553,7 +3553,7 @@ const nowX = getX(dataPoints[dataPoints.length - 1].date); // 📅 가로 위치
           </p>
 
           {/* 🌌 평행세계 동기화 챔버 (Sync Chamber) */}
-         {/* 🌌 평행세계 동기화 챔버 - [자연스러운 사람 형상 + 폭발 피날레] */}
+         {/* 🌌 평행세계 동기화 챔버 - [위치 반전] 사람 형상 Top / 시나리오 Bottom + 앰버 텍스트 */}
       {showSyncChamber && (
         <div className="fixed inset-0 z-[100000] bg-[#020406]/99 backdrop-blur-3xl flex flex-col items-center pt-24 pb-10 px-6 animate-fadeIn select-none touch-none font-sans overflow-y-auto no-scrollbar">
           
