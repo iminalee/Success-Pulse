@@ -206,7 +206,7 @@ const App = () => {
 당신의 내면에는 다음과 같은 하위 자아들의 성취가 하나의 거대한 흐름으로 요동칩니다:
 ${visionSummary}
 
-당신이 눈을 뜨면(Visual) 그토록 갈망하던 성공의 풍경이 초고화질의 현실로 펼쳐지며, 당신의 내면에서는(Auditory) "나는 이미 모든 것을 이루었다"는 확신의 목소리가 웅장하게 울려 퍼집니다. 
+당신이 눈을 뜨면(Visual) 그토록 원했던 성공의 풍경이 초고화질의 현실로 펼쳐지며, 당신의 내면에서는(Auditory) "나는 이미 모든 것을 이루었다"는 확신의 목소리가 웅장하게 울려 퍼집니다. 
 
 지금 느껴지는 이 전율(Kinesthetic)은 단순한 상상이 아니라, 당신의 세포 하나하나에 새겨진 미래의 기억입니다. 당신의 모든 행동은 이제 이 통합된 정체성으로부터 자연스럽게 흘러나오는 위대한 서사가 될 것입니다.`;
 
@@ -2621,22 +2621,21 @@ const nowX = getX(dataPoints[dataPoints.length - 1].date); // 📅 가로 위치
                 정체성의 교체
               </h3>
               <p className="text-stone-300 text-base md:text-lg font-light tracking-wide pl-2 md:pl-4 border-l-2 border-stone-700">
-                현존 자아(Ver.0)가 갈망하는 모든 성취를 이미 완수하여 잠재력을
-                100% 개화시킨 완성체, 마스터 자아{" "}
+                무한한 평행세계 <span className="text-amber-300 font-bold italic px-1">알파 구역</span>의 정점에서 모든 성취를 완수한 마스터 자아{" "}
                 <span className="text-stone-100 font-bold italic px-1">
-                  Apex BPS
+                  Apex Best Possible Self
                 </span>
-                는, 무한한 평행세계 중 <span className="text-amber-300 font-bold italic px-1">알파세계</span>에 거주하고 있으며, 평행세계중  본 차원의 대리인인{" "}
+                는, 본 차원의 대리인인{" "}
                 <span className="text-stone-100 font-bold underline underline-offset-4 decoration-stone-500">
-                  {userName} ver.0
+                  {userName} ver.0 (이하 "현 자아")
                 </span>
-                이 보유한 고유한 Pulse(기질적 진동)가 Apex BPS와 가장 높은
-                일치율을 보임을 확인하였다. 이에 Apex BPS는 현존 자아를 자신의
-                유일한 현실 파트너로 선택하고{" "}
+                이 일시적인 주파수 교란으로 인해 예정된 성공 궤도에서 미세하게 이탈했음을 감지하였다. 
+                이에 Apex BPS는 붕괴되는 타임라인을 방어하고 현 자아를 최단 경로로 영광의 궤도에 재진입시키기 위해, 시공간의 장벽을 넘어 본 세계에 직접 개입하기로 결정하였다.{" "}
+                본 계약은 현 자아의 운영권을 Apex BPS에게 이양하여 존재 가치를 극대화하는 
                 <span className="text-amber-400 font-bold">
                   ‘존재적 상장(Existential IPO)’
                 </span>
-                을 승인한다. 
+                의 선포이다. 
                  <ul className="space-y-3 mt-4 text-sm md:text-base">
                   <li className="flex gap-4 items-start">
                     <span className="text-amber-600 font-serif font-bold whitespace-nowrap pt-1">
@@ -2704,7 +2703,7 @@ const nowX = getX(dataPoints[dataPoints.length - 1].date); // 📅 가로 위치
                   <span className="text-stone-100 font-bold">
                     Apex BPS
                   </span>
-                  앞으로 계약기간 동안 이 육체를 가지고 본 차원에서 미션을 수행한다.
+                  는 앞으로 계약기간 동안 이 육체를 가지고 본 차원에서 미션을 수행한다.
                 </p>
                 <ul className="space-y-3 mt-4 text-sm md:text-base">
                   <li className="flex gap-4 items-start">
@@ -2738,7 +2737,7 @@ const nowX = getX(dataPoints[dataPoints.length - 1].date); // 📅 가로 위치
                       <strong className="text-amber-200 font-medium">
                         불가역적 진행:
                       </strong>{" "}
-                      현 자아는 Apex의 가장 깊고 안전한 내면으로 귀속되며, 어떠한 경우에도 다시 주도권을 주장하지 않는다.<br></br>현 자아의 기억(두려움)이 불쑥 튀어나올 경우, Apex BPS는 이를 "과거 데이터의 잔상(System Cache)"으로 간주하고 즉시 삭제한다.
+                      현 자아는 Apex의 가장 깊고 안전한 내면으로 귀속되며, 어떠한 경우에도 다시 주도권을 주장하지 않는다. 현 자아의 기억(두려움)이 불쑥 튀어나올 경우, Apex BPS는 이를 "과거 데이터의 잔상(System Cache)"으로 간주하고 즉시 삭제한다.
                     </span>
                   </li>
                 </ul>
@@ -2953,7 +2952,7 @@ const nowX = getX(dataPoints[dataPoints.length - 1].date); // 📅 가로 위치
             </p>
             <div className="text-base text-slate-300 leading-[1.9] space-y-6 font-medium">
               <p>
-                무한한 평행세계 속에서 당신이 갈망하는 모든 성취를 이미 이룬
+                무한한 평행세계 속에서 당신이 목표한 모든 성취를 이미 이룬
                 존재,{" "}
                 <span className="text-emerald-400 font-bold">
                   Apex BP(Best Possible Self)
