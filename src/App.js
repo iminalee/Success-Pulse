@@ -33,151 +33,19 @@ import {
   Info,
   TrendingUp,
   Star,
-  Eye,        // 추가
-  Headphones, // 추가
+  Eye,
+  Headphones,
 } from "lucide-react";
-import { createClient } from "@supabase/supabase-js";
 
-// 1. Supabase 연결
 import { supabase } from "./supabaseClient";
+import showToast from "./utils/toast";
+import AutoTextarea from "./components/AutoTextarea";
+import NavBtn from "./components/NavBtn";
+import DiscoverJourney from "./components/discover/DiscoverJourney";
+import SensoryItem from "./components/SensoryItem";
+import ResetPasswordUI from "./components/ResetPasswordUI";
 
-// 2. 유틸리티
-const AutoTextarea = ({
-  value,
-  onChange,
-  placeholder,
-  className,
-  disabled = false,
-}) => {
-  const textareaRef = useRef(null);
-  useEffect(() => {
-    if (textareaRef.current) {
-      textareaRef.current.style.height = "auto";
-      textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
-    }
-  }, [value]);
-  return (
-    <textarea
-      ref={textareaRef}
-      value={value}
-      onChange={onChange}
-      placeholder={placeholder}
-      disabled={disabled}
-      className={`${className} overflow-hidden resize-none transition-[height] duration-200 font-sans`}
-      rows={1}
-    />
-  );
-};
-
-const NavBtn = ({ active, onClick, icon, label }) => (
-  <button
-    onClick={onClick}
-    className={`flex flex-col items-center gap-1.5 transition-all duration-300 ${
-      active
-        ? "text-amber-500 scale-110 drop-shadow-lg"
-        : "text-slate-600 hover:text-slate-400"
-    }`}
-  >
-    {icon}
-    <span className="text-[9px] font-black tracking-widest uppercase">
-      {label}
-    </span>
-  </button>
-);
-
-const SensoryItem = ({ label, color, val }) => (
-  <div
-    className={`bg-[#1A202C]/40 p-5 rounded-[2rem] border-l-8 border-${
-      color === "amber"
-        ? "amber-600"
-        : color === "emerald"
-        ? "emerald-600"
-        : "rose-600"
-    } shadow-xl transition-all hover:bg-slate-900/60`}
-  >
-    <p
-      className={`text-[10px] text-${
-        color === "amber"
-          ? "text-amber-500"
-          : color === "emerald"
-          ? "text-emerald-500"
-          : "text-rose-500"
-      } font-black uppercase mb-2 tracking-widest`}
-    >
-      {label}
-    </p>
-    <p className="text-[12px] text-slate-300 leading-relaxed font-medium">
-      {val || "설정된 내용이 없습니다."}
-    </p>
-  </div>
-);
-
-// --- [추가] 비밀번호 재설정 UI 컴포넌트 ---
-const ResetPasswordUI = () => {
-  const [newPassword, setNewPassword] = useState("");
-  const [resetLoading, setResetLoading] = useState(false);
-
-  const handleUpdatePassword = async () => {
-    if (newPassword.length < 6)
-      return alert("비밀번호는 6자리 이상이어야 합니다.");
-    setResetLoading(true);
-
-    // Supabase 비밀번호 업데이트 API
-    const { error } = await supabase.auth.updateUser({ password: newPassword });
-
-    if (error) {
-      alert("업데이트 실패: " + error.message);
-    } else {
-      alert(
-        "비밀번호가 성공적으로 변경되었습니다! 이제 새 비밀번호로 로그인하세요."
-      );
-      // 변경 후 메인 화면으로 이동 (해시 제거)
-      window.location.href = "/";
-    }
-    setResetLoading(false);
-  };
-
-  
-
-  return (
-    <div className="bg-[#1A202C] p-10 rounded-[3rem] border border-white/10 shadow-2xl max-w-sm mx-auto mt-20 animate-fadeIn">
-      <div className="text-center mb-6">
-        <ShieldCheck size={48} className="text-amber-500 mx-auto mb-4" />
-        <h2 className="text-2xl font-black text-white italic tracking-tighter uppercase">
-          Update <span className="text-amber-500">Identity Key</span>
-        </h2>
-        <p className="text-[10px] text-slate-500 mt-2 font-bold uppercase tracking-widest">
-          새로운 비밀번호를 설정하세요
-        </p>
-      </div>
-
-      <input
-        type="password"
-        value={newPassword}
-        onChange={(e) => setNewPassword(e.target.value)}
-        placeholder="New Password (6+ characters)"
-        className="w-full bg-slate-900 border border-white/10 rounded-2xl p-4 text-white outline-none focus:ring-2 focus:ring-amber-500 mb-4 font-mono"
-      />
-
-      <button
-        onClick={handleUpdatePassword}
-        disabled={resetLoading}
-        className="w-full bg-amber-600 hover:bg-amber-500 text-white font-black py-4 rounded-2xl transition-all shadow-lg uppercase tracking-widest text-[10px] flex items-center justify-center gap-2"
-      >
-        {resetLoading ? (
-          <span className="animate-spin inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full" />
-        ) : (
-          <>
-            <PenTool size={14} /> Confirm New Key
-          </>
-        )}
-      </button>
-    </div>
-  );
-};
-// --- [추가 끝] ---
-
-// 3. 메인 앱
+// 메인 앱
 const App = () => {
 // --- [추가] 동기화 챔버 및 통합 리추얼 상태 관리 ---
 // --- [1단계] 동기화 챔버 및 통합 리추얼 핵심 로직 ---
@@ -273,28 +141,6 @@ const App = () => {
   const [password, setPassword] = useState(""); // 추가
   const [loading, setLoading] = useState(false);
   const [customTask, setCustomTask] = useState("");
-  // --- [1단계] 동기화 챔버 및 통합 리추얼 핵심 로직 ---
-
-  // 7초간의 동기화 타이머 로직
-  useEffect(() => {
-    let interval;
-    if (isHolding && ritualProgress < 100) {
-      interval = setInterval(() => {
-        setRitualProgress(prev => (prev >= 100 ? 100 : prev + 0.8)); // 약 7초 소요
-      }, 50);
-    } else if (!isHolding && ritualProgress < 100 && ritualProgress > 0) {
-      setRitualProgress(0); // 손을 떼면 즉시 초기화
-    }
-    return () => clearInterval(interval);
-  }, [isHolding, ritualProgress]);
-
-  // 완료 시 진동 효과 (모바일 전용)
-  useEffect(() => {
-    if (ritualProgress === 100 && typeof navigator !== "undefined" && navigator.vibrate) {
-      navigator.vibrate([100, 50, 200]);
-    }
-  }, [ritualProgress]);
-  // 기존 상태 변수들 근처에 추가하세요
   const [isRecoveryMode, setIsRecoveryMode] = useState(false);
 
   // [추가] 로그인 즉시 데이터 불러오기 함수
@@ -348,6 +194,12 @@ const App = () => {
         // Load permissions
         setHasEditAccess(data.has_edit_access || false);
         setHasAiAccess(data.has_ai_access || false);
+
+        // 기존 가입자 자동 온보딩 완료 처리
+        if (data.signed_date || data.signature) {
+          localStorage.setItem("pulse_onboarding_complete", "true");
+          setIsOnboardingComplete(true);
+        }
       }
     } catch (err) {
       console.error("Error loading data (Auto-recovered):", err);
@@ -377,6 +229,67 @@ useEffect(() => {
 
     return () => subscription.unsubscribe();
   }, []);
+
+  // ── Act 1 온보딩 완료 여부 (localStorage로 디바이스 캐싱, 추후 Supabase 동기화) ──
+  // ?reset 파라미터가 있으면 플래그를 지우고 처음부터 시작
+  const [isOnboardingComplete, setIsOnboardingComplete] = useState(() => {
+    if (new URLSearchParams(window.location.search).has("reset")) {
+      localStorage.removeItem("pulse_onboarding_complete");
+      return false;
+    }
+    return localStorage.getItem("pulse_onboarding_complete") === "true";
+  });
+
+  const handleOnboardingComplete = (journeyData) => {
+    localStorage.setItem("pulse_onboarding_complete", "true");
+    setIsOnboardingComplete(true);
+
+    // 이름 반영
+    if (journeyData.userName) {
+      setUserName(journeyData.userName);
+    }
+
+    // VAK 프로파일 반영
+    if (journeyData.vakProfile) {
+      setVakProfile(journeyData.vakProfile);
+    }
+
+    // TCI 기질 → 기존 tciProfile 구조로 매핑
+    if (journeyData.tciQuickProfile) {
+      const q = journeyData.tciQuickProfile;
+      setTciProfile((prev) => ({
+        ...prev,
+        ns: { score: q.ns },
+        ha: { score: q.ha },
+        rd: { score: q.rd },
+        p:  { score: q.p },
+      }));
+    }
+
+    // BPS → 선택한 단계의 visions에 저장
+    if (journeyData.generatedBPS && journeyData.selectedNeedLevel) {
+      const bps = journeyData.generatedBPS;
+      const lv  = journeyData.selectedNeedLevel;
+      setVisions((prev) => ({
+        ...prev,
+        [lv]: {
+          ...prev[lv],
+          title: bps.title,
+          v: bps.vision_v,
+          a: bps.vision_a,
+          k: bps.vision_k,
+          immersionScript: bps.immersionScript,
+        },
+      }));
+    }
+
+    // 서명 & 날짜
+    if (journeyData.signature) {
+      setSignature(journeyData.signature);
+      setSignedDate(new Date().toISOString().split("T")[0]);
+    }
+    // 기존 auto-save useEffect가 변경된 상태를 Supabase에 자동 저장함
+  };
 
   const [currency, setCurrency] = useState("₩");
   const [userName, setUserName] = useState("");
@@ -480,6 +393,8 @@ useEffect(() => {
   const [isSensoryModalOpen, setIsSensoryModalOpen] = useState(false);
   const [aiLoading, setAiLoading] = useState(false);
   const [activeSensory, setActiveSensory] = useState(null);
+  const [showNightDeposit, setShowNightDeposit] = useState(false);
+  const [nightSentences, setNightSentences] = useState(["", "", ""]);
   const chartRef = useRef(null);
   const chartInstance = useRef(null);
 
@@ -556,6 +471,12 @@ useEffect(() => {
           if (data.trash_visions) setTrashVisions(data.trash_visions);
           if (data.signature) setSignature(data.signature);
           if (data.signed_date) setSignedDate(data.signed_date);
+
+          // 기존 가입자 자동 온보딩 완료 처리
+          if (data.signed_date || data.signature) {
+            localStorage.setItem("pulse_onboarding_complete", "true");
+            setIsOnboardingComplete(true);
+          }
 
           // 권한 설정 불러오기
           setHasEditAccess(data.has_edit_access || false);
@@ -643,7 +564,7 @@ useEffect(() => {
     // 🔴 회원님이 주신 OpenAI 키를 적용했습니다.
     const OPENAI_API_KEY = process.env.REACT_APP_OPENAI_API_KEY;
     if (!visions[activeLevel]?.title) {
-      return alert("⚠️ 비전 제목이 비어있습니다! 제목을 먼저 입력해주세요.");
+      return showToast("비전 제목이 비어있습니다. 제목을 먼저 입력해주세요.");
     }
 
     setAiLoading(true);
@@ -707,13 +628,11 @@ useEffect(() => {
       if (data.choices && data.choices[0]) {
         const script = data.choices[0].message.content;
         updateVision(activeLevel, { immersionScript: script });
-        alert("✨ 성공! OpenAI가 VAK 맞춤형 시나리오를 작성했습니다.");
+        showToast("✨ OpenAI가 VAK 맞춤형 시나리오를 작성했습니다.");
       }
     } catch (error) {
       console.error(error);
-      alert(
-        `[OpenAI 오류]\n${error.message}\n\n(참고: OpenAI는 카드 등록 및 최소 $5 충전이 되어있어야 작동합니다.)`
-      );
+      showToast(`OpenAI 오류: ${error.message}`);
     } finally {
       setAiLoading(false);
     }
@@ -722,7 +641,7 @@ useEffect(() => {
   // 1. 메일 보내기 함수 (수정버전)// [수정됨] 이메일 + 비밀번호 회원가입 함수
   const handleSignUp = async () => {
     if (!email || !password)
-      return alert("이메일과 비밀번호를 모두 입력해주세요.");
+      return showToast("이메일과 비밀번호를 모두 입력해주세요.");
     setLoading(true);
     const { error } = await supabase.auth.signUp({
       email,
@@ -730,27 +649,27 @@ useEffect(() => {
       options: { data: { user_name: userName } },
     });
     setLoading(false);
-    if (error) alert("회원가입 실패: " + error.message);
-    else alert("회원가입 성공! 이제 로그인을 진행하세요.");
+    if (error) showToast("회원가입 실패: " + error.message);
+    else showToast("회원가입 성공! 이제 로그인을 진행하세요.");
   };
 
   // 2. 인증번호 확인 함수 (새로 추가됨!)// [수정됨] 이메일 + 비밀번호 로그인 함수
   // 2. 로그인 함수 (기존 handleVerifyOtp 등 대체)
   const handleSignIn = async () => {
-    if (!email || !password) return alert("이메일과 비밀번호를 입력해주세요.");
+    if (!email || !password) return showToast("이메일과 비밀번호를 입력해주세요.");
     setLoading(true);
     const { error } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
     setLoading(false);
-    if (error) alert("로그인 실패: " + error.message);
+    if (error) showToast("로그인 실패: " + error.message);
     // 성공 시 useEffect가 세션을 감지하여 자동으로 처리합니다.
   };
 
   // 비밀번호 재설정 메일 발송 함수
   const handleResetPassword = async () => {
-    if (!email) return alert("비밀번호를 재설정할 이메일을 입력해주세요.");
+    if (!email) return showToast("비밀번호를 재설정할 이메일을 입력해주세요.");
 
     setLoading(true);
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
@@ -759,11 +678,9 @@ useEffect(() => {
     });
 
     if (error) {
-      alert("메일 발송 실패: " + error.message);
+      showToast("메일 발송 실패: " + error.message);
     } else {
-      alert(
-        "비밀번호 재설정 링크가 메일로 발송되었습니다. 메일함을 확인해주세요!"
-      );
+      showToast("비밀번호 재설정 링크가 메일로 발송되었습니다.");
     }
     setLoading(false);
   };
@@ -774,6 +691,39 @@ useEffect(() => {
   const livingAllowance = mbBalance * 0.25;
   const valueEventAmount = mbGoalAmount / 500;
   const isPhysioSet = !!visions[1]?.title;
+
+  // ── 스트릭 (연속 활동일) 계산 ──────────────────────────────
+  const calculateStreak = () => {
+    const uniqueDates = [...new Set(
+      ledger.map(e => new Date(e.date).toLocaleDateString("ko-KR"))
+    )].sort();
+    if (!uniqueDates.length) return 0;
+    const today = new Date().toLocaleDateString("ko-KR");
+    const yesterday = new Date(Date.now() - 86400000).toLocaleDateString("ko-KR");
+    const lastDate = uniqueDates[uniqueDates.length - 1];
+    if (lastDate !== today && lastDate !== yesterday) return 0;
+    let streak = 1;
+    for (let i = uniqueDates.length - 1; i > 0; i--) {
+      const diff = Math.round(
+        (new Date(uniqueDates[i]) - new Date(uniqueDates[i - 1])) / 86400000
+      );
+      if (diff === 1) streak++;
+      else break;
+    }
+    return streak;
+  };
+  const currentStreak = calculateStreak();
+
+  // ── 레벨 시스템 ─────────────────────────────────────────────
+  const PULSE_LEVELS = [
+    { min: 0,  name: "입문자",   subtitle: "Initiate",  emoji: "🌱", color: "text-slate-400" },
+    { min: 10, name: "탐험가",   subtitle: "Explorer",  emoji: "🔭", color: "text-emerald-400" },
+    { min: 25, name: "건축가",   subtitle: "Architect", emoji: "🏗️", color: "text-blue-400" },
+    { min: 50, name: "마스터",   subtitle: "Master",    emoji: "⚡", color: "text-amber-400" },
+    { min: 80, name: "Apex BPS", subtitle: "Apex",      emoji: "👑", color: "text-yellow-300" },
+  ];
+  const totalProgressPct = mbGoalAmount > 0 ? (currentAsset / mbGoalAmount) * 100 : 0;
+  const currentLevel = [...PULSE_LEVELS].reverse().find(l => totalProgressPct >= l.min) || PULSE_LEVELS[0];
   const levelMap = {
     1: "건강",
     2: "안전",
@@ -808,24 +758,15 @@ useEffect(() => {
 
         if (error) throw error;
 
-        alert("탈퇴가 완료되었습니다. 이용해 주셔서 감사합니다.");
+        showToast("탈퇴가 완료되었습니다. 이용해 주셔서 감사합니다.");
         await supabase.auth.signOut();
         window.location.reload();
       } catch (error) {
-        alert("탈퇴 실패: " + error.message);
+        showToast("탈퇴 실패: " + error.message);
       } finally {
         setLoading(false);
       }
     }
-  };
-
-  const showToast = (msg) => {
-    const toast = document.createElement("div");
-    toast.className =
-      "fixed top-10 left-1/2 -translate-x-1/2 bg-amber-500 text-slate-900 px-8 py-3 rounded-full font-black shadow-2xl z-[5000] animate-bounce text-xs";
-    toast.innerText = msg;
-    document.body.appendChild(toast);
-    setTimeout(() => toast.remove(), 2500);
   };
 
   // [수정] 개별 아이템 입금 처리 함수
@@ -879,11 +820,6 @@ useEffect(() => {
     const newProgress = visions[activeLevel].progressAsset + finalAmount;
     updateVision(activeLevel, { progressAsset: newProgress });
 
-    showToast(
-      `[${eventName}] ${duration}시간 수행! ${currency}${fNum(
-        finalAmount
-      )} 입금 완료`
-    );
     // [추가] 데일리 올-클리어 체크 로직
     const today = new Date().toLocaleDateString();
     const activeLevelsList = [1, 2, 3, 4, 5].filter(lv => visions[lv]?.title);
@@ -915,6 +851,30 @@ useEffect(() => {
       setCelebration({ show: true, levelName: "All Levels" });
     }
     setDuration(1); // 시간 초기화
+  };
+
+  // ── 야간 입금 루틴 핸들러 ────────────────────────────────────
+  const handleNightDeposit = () => {
+    const filled = nightSentences.filter(s => s.trim()).length;
+    if (filled === 0) {
+      showToast("최소 1문장을 입력해주세요.");
+      return;
+    }
+    const streak = calculateStreak();
+    const streakMultiplier = 1 + Math.min(streak * 0.05, 0.5); // 연속 1일당 5%, 최대 50%
+    const nightAmount = valueEventAmount * filled * streakMultiplier;
+    const streakLabel = streak > 1 ? ` · ${streak}일 연속 ×${streakMultiplier.toFixed(2)}` : "";
+    const newEntry = {
+      date: new Date(),
+      amount: nightAmount,
+      desc: `🌙 야간 입금 루틴 (${filled}문장${streakLabel})`,
+      duration: 0,
+      level: activeLevel,
+    };
+    setLedger(prev => [...prev, newEntry]);
+    setShowNightDeposit(false);
+    setNightSentences(["", "", ""]);
+    showToast(`🌙 야간 입금 완료! +${currency}${fNum(nightAmount)}`);
   };
 
 // [추가] 활동 기록 삭제 함수
@@ -1174,6 +1134,20 @@ const deleteLedgerEntry = (logToDelete) => {
                         </span>
                         을 눌러주세요.
                       </p>
+
+                      {/* ACT 1 체험 유도 */}
+                      <div className="mt-4 border-t border-white/5 pt-4 text-center">
+                        <p className="text-[10px] text-slate-600 mb-2">계정 없이 먼저 체험해보고 싶으신가요?</p>
+                        <button
+                          onClick={() => {
+                            localStorage.removeItem("pulse_onboarding_complete");
+                            setIsOnboardingComplete(false);
+                          }}
+                          className="text-[11px] font-black text-amber-500/70 hover:text-amber-400 uppercase tracking-widest transition-colors"
+                        >
+                          ✦ ACT 1 — Discover 체험하기
+                        </button>
+                      </div>
                     </>
                   </div>
                 )}
@@ -1367,6 +1341,7 @@ const deleteLedgerEntry = (logToDelete) => {
                         })
                       }
                       className="text-rose-500/20 hover:text-rose-500"
+                      aria-label="이벤트 삭제"
                     >
                       <Trash2 size={18} />
                     </button>
@@ -1661,27 +1636,55 @@ const deleteLedgerEntry = (logToDelete) => {
             style={overlayStyle}
             className="bg-[#0A0F1E]/95 backdrop-blur-2xl border border-amber-500/50 p-10 rounded-[3rem] text-center shadow-[0_0_80px_rgba(245,158,11,0.4)] animate-fadeIn"
           >
-            <ShieldCheck size={32} className="text-slate-600 mb-6 mx-auto" />
-            <h3 className="text-xl font-black text-white uppercase italic mb-2 tracking-tighter">
-              System Preview
-            </h3>
-
-            <p className="text-slate-400 text-[11px] mb-6 leading-relaxed">
-              현재 정체성 동기화 시스템은 <b>베타 테스터</b>에 한해 선별 운영
-              중입니다.
-              <br />
-              모든 기능을 활성화하려면 아래 메일로 문의주세요.
-              <br />
-              <span className="text-amber-500 font-bold">
-                5milestones.today@gmail.com
-              </span>
-            </p>
-            <button
-              onClick={() => setCurrentView("contract")}
-              className="bg-amber-600 hover:bg-amber-500 text-white px-8 py-4 rounded-2xl font-black text-[10px] uppercase flex items-center gap-3 mx-auto transition-all active:scale-95 shadow-lg"
-            >
-              <PenTool size={14} /> Sign Agreement
-            </button>
+            {!user ? (
+              <>
+                <User size={32} className="text-slate-500 mb-6 mx-auto" />
+                <h3 className="text-xl font-black text-white uppercase italic mb-2 tracking-tighter">
+                  로그인이 필요합니다
+                </h3>
+                <p className="text-slate-400 text-[11px] mb-6 leading-relaxed">
+                  시스템에 접근하려면 먼저 로그인 또는 회원가입이 필요합니다.
+                </p>
+                <button
+                  onClick={() => setCurrentView("lab")}
+                  className="bg-amber-600 hover:bg-amber-500 text-white px-8 py-4 rounded-2xl font-black text-[10px] uppercase flex items-center gap-3 mx-auto transition-all active:scale-95 shadow-lg"
+                >
+                  <User size={14} /> 로그인 / 회원가입
+                </button>
+              </>
+            ) : (
+              <>
+                <ShieldCheck size={32} className="text-slate-500 mb-4 mx-auto" />
+                <h3 className="text-xl font-black text-white uppercase italic mb-2 tracking-tighter">
+                  시스템 활성화 필요
+                </h3>
+                <div className="flex items-center justify-center gap-3 mb-4">
+                  <div className="flex flex-col items-center gap-1">
+                    <div className="w-7 h-7 rounded-full bg-emerald-500 flex items-center justify-center text-white font-black text-xs">✓</div>
+                    <span className="text-[9px] text-emerald-400 font-bold uppercase tracking-widest">로그인</span>
+                  </div>
+                  <div className="w-8 h-px bg-amber-500/50" />
+                  <div className="flex flex-col items-center gap-1">
+                    <div className="w-7 h-7 rounded-full border-2 border-amber-500 flex items-center justify-center text-amber-500 font-black text-xs">2</div>
+                    <span className="text-[9px] text-amber-400 font-bold uppercase tracking-widest">계약</span>
+                  </div>
+                  <div className="w-8 h-px bg-slate-700" />
+                  <div className="flex flex-col items-center gap-1">
+                    <div className="w-7 h-7 rounded-full border border-slate-600 flex items-center justify-center text-slate-600 font-black text-xs">3</div>
+                    <span className="text-[9px] text-slate-600 font-bold uppercase tracking-widest">활성화</span>
+                  </div>
+                </div>
+                <p className="text-slate-400 text-[11px] mb-6 leading-relaxed">
+                  계약서에 서명하면 모든 기능이 즉시 활성화됩니다.
+                </p>
+                <button
+                  onClick={() => setCurrentView("contract")}
+                  className="bg-amber-600 hover:bg-amber-500 text-white px-8 py-4 rounded-2xl font-black text-[10px] uppercase flex items-center gap-3 mx-auto transition-all active:scale-95 shadow-lg"
+                >
+                  <PenTool size={14} /> 계약서 서명하기
+                </button>
+              </>
+            )}
           </div>
         )}
 
@@ -1711,6 +1714,24 @@ const deleteLedgerEntry = (logToDelete) => {
                 </div>
               </div>
             )}
+
+            {/* ── 스트릭 & 레벨 배지 ── */}
+            <div className="flex items-center justify-center gap-3 mb-4 w-full">
+              {/* 연속 스트릭 */}
+              <div className="flex items-center gap-1.5 bg-slate-900/80 border border-amber-500/20 px-3 py-1.5 rounded-full">
+                <span className="text-base leading-none">🔥</span>
+                <span className="text-xs font-black text-amber-400">{currentStreak}일 연속</span>
+                {currentStreak >= 7 && (
+                  <span className="text-[9px] font-bold text-amber-500/60 uppercase tracking-wider">+{Math.min(currentStreak * 5, 50)}%</span>
+                )}
+              </div>
+              {/* 레벨 */}
+              <div className="flex items-center gap-1.5 bg-slate-900/80 border border-white/10 px-3 py-1.5 rounded-full">
+                <span className="text-base leading-none">{currentLevel.emoji}</span>
+                <span className={`text-xs font-black ${currentLevel.color}`}>{currentLevel.name}</span>
+                <span className="text-[9px] text-slate-600 font-bold uppercase tracking-wider">{currentLevel.subtitle}</span>
+              </div>
+            </div>
 
             {/* 가로 정렬 컨테이너: (좌) 피라미드 | (우) 온도계 */}
             <div className="flex flex-row items-end justify-center gap-6 md:gap-8 w-full">
@@ -1960,10 +1981,11 @@ const deleteLedgerEntry = (logToDelete) => {
                                 +{currency}{fNum(log.amount)}
                               </p>
                             </div>
-                            <button 
+                            <button
                               onClick={() => deleteLedgerEntry(log)}
                               className="text-emerald-500/40 hover:text-rose-400 transition-colors p-1"
                               title="기록 취소"
+                              aria-label="기록 취소"
                             >
                               <X size={14} />
                             </button>
@@ -2008,6 +2030,7 @@ const deleteLedgerEntry = (logToDelete) => {
                               onClick={() => handleDepositSubmit(ev.name, mins)}
                               className="bg-slate-700 text-slate-400 p-2 rounded-lg hover:bg-emerald-600 hover:text-white transition-all shadow-md group-hover:scale-110"
                               title="실행 및 적립"
+                              aria-label="실행 및 적립"
                             >
                               <Coins size={16} />
                             </button>
@@ -2061,7 +2084,18 @@ const deleteLedgerEntry = (logToDelete) => {
                   </div>
 
 
-                  {/* --- [수정 끝] --- */}       
+                  {/* ── 야간 입금 루틴 버튼 ── */}
+                  <button
+                    onClick={() => setShowNightDeposit(true)}
+                    className="w-full mt-4 flex items-center justify-center gap-2 bg-slate-900/60 border border-indigo-500/25 hover:border-indigo-400/50 hover:bg-indigo-900/20 text-indigo-300 font-black py-3 rounded-2xl text-xs uppercase tracking-widest transition-all active:scale-[0.98]"
+                  >
+                    🌙 야간 입금 루틴
+                    {currentStreak > 0 && (
+                      <span className="text-[9px] text-amber-500/70 font-bold normal-case tracking-normal">
+                        🔥 {currentStreak}일 연속
+                      </span>
+                    )}
+                  </button>
 
                 </div>
               )}
@@ -2577,6 +2611,7 @@ const nowX = getX(dataPoints[dataPoints.length - 1].date); // 📅 가로 위치
     onClick={() => deleteLedgerEntry(log)}
     className="p-2 text-slate-600 hover:text-rose-500 transition-colors"
     title="기록 삭제"
+    aria-label="기록 삭제"
   >
     <Trash2 size={14} />
   </button>
@@ -3276,6 +3311,18 @@ const nowX = getX(dataPoints[dataPoints.length - 1].date); // 📅 가로 위치
     );
   }
   // ▲▲▲ 추가 끝 ▲▲▲
+
+  // ── Act 1: Discover — 온보딩 미완료 시 전체 화면으로 진입 (로그인 여부 무관) ──
+  if (!isOnboardingComplete) {
+    return (
+      <DiscoverJourney
+        onComplete={handleOnboardingComplete}
+        userName={userName}
+        isLoggedIn={!!user}
+      />
+    );
+  }
+
   return (
     <div className="min-h-screen bg-slate-950 text-slate-200 p-4 md:p-10 font-sans overflow-hidden flex flex-col selection:bg-amber-500/30">
       <style>{`@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css'); * { font-family: 'Pretendard', sans-serif; letter-spacing: -0.02em; } .animate-fadeIn { animation: fadeIn 0.8s ease-out; } .animate-spin-slow { animation: spin 20s linear infinite; } @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } } @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }`}</style>
@@ -3470,6 +3517,7 @@ const nowX = getX(dataPoints[dataPoints.length - 1].date); // 📅 가로 위치
                         showToast("Potential Restored.");
                       }}
                       className="p-3 bg-emerald-500/10 text-emerald-500 rounded-2xl hover:bg-emerald-500/20 transition-all shadow-lg"
+                      aria-label="비전 복원"
                     >
                       <RotateCcw size={20} />
                     </button>
@@ -3481,6 +3529,7 @@ const nowX = getX(dataPoints[dataPoints.length - 1].date); // 📅 가로 위치
                         showToast("Permanently Purged.");
                       }}
                       className="p-3 bg-rose-500/10 text-rose-500 rounded-2xl hover:bg-rose-500/20 transition-all shadow-lg"
+                      aria-label="비전 영구 삭제"
                     >
                       <Trash2 size={20} />
                     </button>
@@ -3559,7 +3608,7 @@ const nowX = getX(dataPoints[dataPoints.length - 1].date); // 📅 가로 위치
         <div className="fixed inset-0 z-[100000] bg-[#020406]/99 backdrop-blur-3xl flex flex-col items-center pt-24 pb-10 px-6 animate-fadeIn select-none touch-none font-sans overflow-hidden">
           
           {/* 닫기 버튼 */}
-          <button onClick={() => { setShowSyncChamber(false); setRitualProgress(0); }} className="absolute top-10 right-10 text-slate-600 hover:text-white transition-all p-2 z-[100002]">
+          <button onClick={() => { setShowSyncChamber(false); setRitualProgress(0); }} className="absolute top-10 right-10 text-slate-600 hover:text-white transition-all p-2 z-[100002]" aria-label="동기화 챔버 닫기">
             <X size={40} />
           </button>
           
@@ -3671,6 +3720,85 @@ const nowX = getX(dataPoints[dataPoints.length - 1].date); // 📅 가로 위치
           </div>
         </div>
       )}
+
+      {/* ── 야간 입금 루틴 모달 ────────────────────────────────── */}
+      {showNightDeposit && (
+        <div className="fixed inset-0 z-[100000] bg-[#020406]/97 backdrop-blur-3xl flex flex-col items-center justify-center px-6 animate-fadeIn font-sans">
+          <button
+            onClick={() => { setShowNightDeposit(false); setNightSentences(["", "", ""]); }}
+            className="absolute top-10 right-10 text-slate-600 hover:text-white transition-all p-2 z-10"
+          >
+            <X size={36} />
+          </button>
+
+          <div className="w-full max-w-md text-center">
+            {/* 헤더 */}
+            <div className="mb-8">
+              <p className="text-4xl mb-3">🌙</p>
+              <h2 className="text-2xl font-black text-white italic tracking-tighter uppercase">
+                야간 입금 루틴
+              </h2>
+              <p className="text-[10px] text-indigo-400/60 font-bold uppercase tracking-[0.4em] mt-1">
+                Night Deposit Ritual
+              </p>
+              <p className="text-xs text-slate-500 mt-3 leading-relaxed" style={{ wordBreak: "keep-all" }}>
+                잠들기 전, 오늘 미래의 나에게 지불한 임대료를 기록하세요.
+                <br />뇌가 알파파로 내려가는 지금이 잠재의식에 각인되는 최적의 시간입니다.
+              </p>
+            </div>
+
+            {/* 스트릭 보너스 안내 */}
+            {currentStreak > 0 && (
+              <div className="flex items-center justify-center gap-2 bg-amber-500/10 border border-amber-500/25 rounded-2xl px-4 py-2 mb-6">
+                <span>🔥</span>
+                <span className="text-xs font-black text-amber-400">{currentStreak}일 연속</span>
+                <span className="text-[10px] text-amber-500/60">
+                  → ×{(1 + Math.min(currentStreak * 0.05, 0.5)).toFixed(2)} 스트릭 보너스 적용
+                </span>
+              </div>
+            )}
+
+            {/* 3문장 입력 */}
+            <div className="space-y-3 mb-8">
+              {[
+                "오늘 미래의 나를 위해 한 일은?",
+                "오늘 느낀 성장이나 변화는?",
+                "내일의 나에게 하고 싶은 말은?",
+              ].map((placeholder, i) => (
+                <div key={i} className="relative">
+                  <span className="absolute left-4 top-3.5 text-[10px] font-black text-indigo-500/60 uppercase">{i + 1}</span>
+                  <input
+                    type="text"
+                    value={nightSentences[i]}
+                    onChange={e => {
+                      const next = [...nightSentences];
+                      next[i] = e.target.value;
+                      setNightSentences(next);
+                    }}
+                    placeholder={placeholder}
+                    className="w-full bg-slate-900/60 border border-white/8 hover:border-indigo-500/30 focus:border-indigo-400/50 rounded-2xl px-4 py-3.5 pl-8 text-sm text-slate-200 outline-none transition-colors placeholder:text-slate-600"
+                  />
+                </div>
+              ))}
+            </div>
+
+            {/* 입금 버튼 */}
+            <button
+              onClick={handleNightDeposit}
+              className="w-full bg-indigo-600 hover:bg-indigo-500 active:scale-[0.98] text-white font-black py-4 rounded-2xl text-sm uppercase tracking-widest transition-all shadow-[0_0_30px_rgba(99,102,241,0.3)]"
+            >
+              잠재의식에 각인하기 →
+            </button>
+            <p className="text-[10px] text-slate-600 mt-3">
+              {nightSentences.filter(s => s.trim()).length}문장 작성됨 · {currency}{fNum(
+                valueEventAmount * nightSentences.filter(s => s.trim()).length *
+                (1 + Math.min(currentStreak * 0.05, 0.5))
+              )} 예정
+            </p>
+          </div>
+        </div>
+      )}
+
         </div>
       </footer>
 
@@ -3680,6 +3808,7 @@ const nowX = getX(dataPoints[dataPoints.length - 1].date); // 📅 가로 위치
             <button
               onClick={() => setIsSensoryModalOpen(false)}
               className="absolute top-12 right-12 text-slate-700 hover:text-white transition-all z-50"
+              aria-label="모달 닫기"
             >
               <X size={36} />
             </button>

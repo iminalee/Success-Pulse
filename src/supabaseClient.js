@@ -6,11 +6,10 @@ const supabaseAnonKey =
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
-    storage: window.localStorage, // 👈 브라우저에 로그인 정보를 저장합니다.
+    storage: window.localStorage,
     persistSession: true,
     storageKey: "pulse-auth-token",
-    storage: window.localStorage,
     autoRefreshToken: true,
-    detectSessionInUrl: true
+    detectSessionInUrl: true,
   },
 });
