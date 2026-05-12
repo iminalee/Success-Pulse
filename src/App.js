@@ -407,6 +407,11 @@ useEffect(() => {
   const [hasEditAccess, setHasEditAccess] = useState(false);
   const [hasAiAccess, setHasAiAccess] = useState(false);
 
+  // [Tonight v2] Tonight 흐름 전용 state — 기존 state 절대 수정 금지
+  const [tonightStep, setTonightStep] = useState("intro"); // "intro" | "chat" | "draft" | "sealed"
+  const [pulseDraft, setPulseDraft] = useState(null);       // { date, events, affirmation, daily_affirmation, investment, note, source } | null
+  const [draftRawText, setDraftRawText] = useState("");     // 사용자가 붙여넣은 원본 텍스트 (디버깅용)
+
   // [핵심 1] 로그인 체크 및 데이터 불러오기 (Load)
   // [핵심 1] 로그인 체크 및 데이터 불러오기 (Load) + 비밀번호 복구 감지
   useEffect(() => {
@@ -689,7 +694,10 @@ useEffect(() => {
   const mbGoalAmount = annualIncome * 2;
   const mbBalance = mbGoalAmount * 4;
   const livingAllowance = mbBalance * 0.25;
-  const valueEventAmount = mbGoalAmount / 500;
+  // [Tonight v2] 계산 기준을 1/1000으로 통일 (기존 코드 호환용 alias)
+  const goalAmount = mbGoalAmount;
+  const hourlyRate = goalAmount / 1000;
+  const valueEventAmount = hourlyRate; // 기존 코드 호환 alias — 절대 삭제 금지
   const isPhysioSet = !!visions[1]?.title;
 
   // ── 스트릭 (연속 활동일) 계산 ──────────────────────────────
@@ -890,6 +898,185 @@ const deleteLedgerEntry = (logToDelete) => {
     setLedger(prev => prev.filter(log => log !== logToDelete));
     showToast("기록이 삭제되었습니다.");
   }
+};
+
+// ─────────────────────────────────────────────────────────
+// [Tonight v2] PULSE_DRAFT 파싱 및 Seal 함수
+// 절대 규칙:
+//  - [PULSE_DRAFT] ~ [/PULSE_DRAFT] 사이만 읽는다
+//  - JSON.parse 사용 금지 (텍스트 블록 포맷이기 때문)
+//  - Dify 내부 ```json 블록은 무시 (코드블록 마커만 안전 제거)
+//  - events 아래 "- 제목 | 분" 라인만 파싱
+//  - daily_affirmation, investment, note는 optional 파싱
+//  - 금액은 PULSE_DRAFT에서 가져오지 않고 The Pulse가 hourlyRate로 직접 계산
+// ─────────────────────────────────────────────────────────
+const parsePulseDraft = (rawText) => {
+  if (!rawText || typeof rawText !== "string") {
+    showToast("붙여넣은 내용이 비어 있습니다.");
+    return null;
+  }
+
+  // 1) 코드블록 마커만 안전 제거 (```json, ``` 등)
+  let cleaned = rawText.replace(/```[a-zA-Z]*\n?/g, "").replace(/```/g, "");
+
+  // 2) [PULSE_DRAFT] ~ [/PULSE_DRAFT] 사이만 추출
+  const blockMatch = cleaned.match(/\[PULSE_DRAFT\]([\s\S]*?)\[\/PULSE_DRAFT\]/);
+  if (!blockMatch) {
+    showToast("[PULSE_DRAFT] 블록을 찾을 수 없습니다. Apex 응답을 다시 확인하세요.");
+    return null;
+  }
+  const block = blockMatch[1];
+
+  // 3) 라인 단위 파싱
+  const rawLines = block.split("\n");
+  let date = null;
+  let affirmation = null;
+  let dailyAffirmation = null;
+  let investment = null;
+  let note = null;
+  const events = [];
+
+  // 섹션 추적: events / note 등 다중라인 섹션
+  let section = null; // null | "events" | "note"
+  const noteLines = [];
+
+  for (const rawLine of rawLines) {
+    const line = rawLine.trim();
+    if (!line) {
+      // 빈 줄은 섹션 유지하되 note의 줄바꿈으로 인정
+      if (section === "note") noteLines.push("");
+      continue;
+    }
+
+    // 키:값 라인 감지 (events:, note: 같은 섹션 헤더는 별도 처리)
+    const kvMatch = line.match(/^([a-zA-Z_]+)\s*:\s*(.*)$/);
+
+    if (kvMatch) {
+      const key = kvMatch[1].toLowerCase();
+      const value = kvMatch[2].trim();
+
+      // 섹션 헤더 처리
+      if (key === "events") {
+        section = "events";
+        continue;
+      }
+      if (key === "note") {
+        section = "note";
+        if (value) noteLines.push(value);
+        continue;
+      }
+
+      // 단일 값 키
+      if (key === "date") {
+        date = value;
+        section = null;
+        continue;
+      }
+      if (key === "affirmation") {
+        affirmation = value;
+        section = null;
+        continue;
+      }
+      if (key === "daily_affirmation") {
+        dailyAffirmation = value;
+        section = null;
+        continue;
+      }
+      if (key === "investment") {
+        investment = value;
+        section = null;
+        continue;
+      }
+      // 알 수 없는 키는 무시
+      section = null;
+      continue;
+    }
+
+    // 섹션 본문 라인
+    if (section === "events" && line.startsWith("-")) {
+      const body = line.replace(/^-\s*/, "");
+      const parts = body.split("|").map(s => s.trim());
+      if (parts.length >= 2) {
+        const title = parts[0];
+        const durationMinutes = parseInt(parts[1], 10);
+        if (title && Number.isFinite(durationMinutes) && durationMinutes > 0) {
+          events.push({ title, durationMinutes });
+        }
+      }
+      continue;
+    }
+    if (section === "note") {
+      noteLines.push(line);
+      continue;
+    }
+  }
+
+  if (noteLines.length > 0) {
+    note = noteLines.join("\n").trim();
+  }
+
+  if (events.length === 0) {
+    showToast("events에서 '- 제목 | 분' 형식의 항목을 찾지 못했습니다.");
+    return null;
+  }
+
+  const draft = {
+    date: date || new Date().toISOString().slice(0, 10),
+    events,
+    affirmation: affirmation || null,
+    daily_affirmation: dailyAffirmation || null,
+    investment: investment || null,
+    note: note || null,
+    source: "apex_dify_v1",
+  };
+
+  setPulseDraft(draft);
+  setTonightStep("draft");
+  return draft;
+};
+
+// Seal: pulseDraft.events를 ledger에 그대로 쌓는다
+// 기존 ledger 필드(date, amount, desc, duration, level)는 반드시 유지
+// 새 필드(source, sealed, affirmation 등)는 optional metadata로만 부착
+const handleSealPulse = () => {
+  if (!pulseDraft || !Array.isArray(pulseDraft.events) || pulseDraft.events.length === 0) {
+    showToast("Seal 할 Pulse Draft가 없습니다.");
+    return;
+  }
+
+  const now = new Date();
+  const sealAffirmation = pulseDraft.daily_affirmation || pulseDraft.affirmation || null;
+
+  const newEntries = pulseDraft.events.map(ev => {
+    const taskHours = ev.durationMinutes / 60;
+    const amount = hourlyRate * taskHours; // [Tonight v2] 단일 계산 기준
+    return {
+      // ── 기존 필수 필드 (절대 변경 금지) ──
+      date: now,
+      amount,
+      desc: `🌙 ${ev.title} (${formatDuration(ev.durationMinutes)})`,
+      duration: taskHours,
+      level: activeLevel,
+      // ── 신규 optional metadata ──
+      source: "tonight_seal",
+      sealed: true,
+      affirmation: sealAffirmation,
+    };
+  });
+
+  // ledger 누적 — 기존 자동저장 useEffect가 알아서 Supabase에 반영
+  setLedger(prev => [...prev, ...newEntries]);
+
+  // visions[activeLevel].progressAsset 업데이트 (Milestone/Stream 정확성 유지)
+  const totalAmount = newEntries.reduce((acc, e) => acc + e.amount, 0);
+  if (visions[activeLevel]) {
+    updateVision(activeLevel, {
+      progressAsset: (visions[activeLevel].progressAsset || 0) + totalAmount,
+    });
+  }
+
+  setTonightStep("sealed");
+  showToast(`🌙 오늘의 Pulse가 봉인됐습니다. +${currency}${fNum(totalAmount)}`);
 };
 
   const archiveVision = (lv) => {
@@ -3003,6 +3190,255 @@ const nowX = getX(dataPoints[dataPoints.length - 1].date); // 📅 가로 위치
     );
   };
 
+  // ─────────────────────────────────────────────────────────
+  // [Tonight v2] Tonight 화면 — 4단계 (intro / chat / draft / sealed)
+  // ─────────────────────────────────────────────────────────
+  const renderTonight = () => {
+    const difyUrl = process.env.REACT_APP_DIFY_EMBED_URL;
+
+    return (
+      <div className="flex-grow w-full max-w-2xl mx-auto overflow-y-auto no-scrollbar pb-32 px-6 animate-fadeIn">
+
+        {/* ─── intro 단계 ─── */}
+        {tonightStep === "intro" && (
+          <div className="flex flex-col items-center justify-center min-h-[70vh] text-center">
+            <div className="text-amber-500/80 text-[10px] font-black uppercase tracking-[0.5em] mb-6">
+              Tonight
+            </div>
+            <h2 className="text-4xl md:text-5xl font-black text-white uppercase italic tracking-tighter mb-4">
+              오늘 Apex와<br/>만날 시간입니다.
+            </h2>
+            <p className="text-slate-400 text-sm mb-12 leading-relaxed">
+              하루를 말하고, 오늘의 Pulse를 받아<br/>
+              손글씨로 옮겨 적은 뒤 Seal 하세요.
+            </p>
+            <button
+              onClick={() => setTonightStep("chat")}
+              className="bg-amber-600 hover:bg-amber-500 text-white px-10 py-5 rounded-2xl font-black text-xs uppercase tracking-widest transition-all active:scale-95 shadow-[0_0_40px_rgba(245,158,11,0.4)]"
+            >
+              Apex와 대화 시작
+            </button>
+            <button
+              onClick={() => setCurrentView("hub")}
+              className="mt-8 text-[10px] font-black text-slate-600 hover:text-white transition-colors uppercase tracking-[0.3em]"
+            >
+              어제의 Pulse 보기 →
+            </button>
+          </div>
+        )}
+
+        {/* ─── chat 단계 (Dify iframe) ─── */}
+        {tonightStep === "chat" && (
+          <div className="flex flex-col h-[80vh]">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-xl font-black text-white uppercase italic tracking-tighter">
+                Apex Room
+              </h3>
+              <button
+                onClick={() => setTonightStep("intro")}
+                className="text-[10px] font-black text-slate-500 hover:text-white uppercase tracking-widest"
+              >
+                ← 뒤로
+              </button>
+            </div>
+
+            {difyUrl ? (
+              <iframe
+                src={difyUrl}
+                title="Apex Chat"
+                className="flex-grow w-full rounded-3xl border border-white/10 bg-[#0A0F1E]"
+                allow="microphone"
+              />
+            ) : (
+              <div className="flex-grow flex items-center justify-center rounded-3xl border border-amber-500/30 bg-[#0A0F1E] p-8 text-center">
+                <div>
+                  <p className="text-amber-400 text-sm font-bold mb-3">
+                    Apex 채팅 주소가 아직 연결되지 않았습니다.
+                  </p>
+                  <p className="text-slate-500 text-xs leading-relaxed">
+                    Vercel 환경변수에<br/>
+                    <code className="text-amber-300">REACT_APP_DIFY_EMBED_URL</code><br/>
+                    을 추가하고 재배포하세요.
+                  </p>
+                </div>
+              </div>
+            )}
+
+            <div className="mt-4 p-4 rounded-2xl bg-[#0A0F1E]/80 border border-white/5">
+              <p className="text-[10px] text-slate-500 uppercase tracking-widest font-bold mb-2">
+                대화 종료 후
+              </p>
+              <p className="text-xs text-slate-300 mb-3 leading-relaxed">
+                Apex가 마지막에 준 <span className="text-amber-400 font-bold">[PULSE_DRAFT]</span> 블록을 복사해서 아래로 진행하세요.
+              </p>
+              <button
+                onClick={() => setTonightStep("draft")}
+                className="w-full bg-amber-600 hover:bg-amber-500 text-white py-3 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all active:scale-95"
+              >
+                오늘의 Pulse 붙여넣기 →
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* ─── draft 단계 (붙여넣기 & 프리뷰) ─── */}
+        {tonightStep === "draft" && (
+          <div className="py-8">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-xl font-black text-white uppercase italic tracking-tighter">
+                오늘의 Pulse Draft
+              </h3>
+              <button
+                onClick={() => setTonightStep("chat")}
+                className="text-[10px] font-black text-slate-500 hover:text-white uppercase tracking-widest"
+              >
+                ← 대화로
+              </button>
+            </div>
+
+            {!pulseDraft && (
+              <>
+                <p className="text-slate-400 text-xs mb-3 leading-relaxed">
+                  Apex 응답을 통째로 붙여넣어도 괜찮습니다.<br/>
+                  The Pulse는 <span className="text-amber-400">[PULSE_DRAFT]</span> 블록만 읽습니다.
+                </p>
+                <textarea
+                  value={draftRawText}
+                  onChange={(e) => setDraftRawText(e.target.value)}
+                  placeholder={"[PULSE_DRAFT]\ndate: 2026-01-07\nevents:\n- 블로그 작성 | 60\n- 책 읽기 | 30\ndaily_affirmation: 나는 내 생각을 현실의 구조로 옮기는 사람이다.\ninvestment: 내일을 위한 정리\nnote: 손글씨로 옮길 정리본 전문\n[/PULSE_DRAFT]"}
+                  className="w-full h-56 p-4 rounded-2xl bg-[#0A0F1E] border border-white/10 text-slate-200 text-xs font-mono leading-relaxed focus:outline-none focus:border-amber-500/50"
+                />
+                <button
+                  onClick={() => parsePulseDraft(draftRawText)}
+                  className="w-full mt-4 bg-amber-600 hover:bg-amber-500 text-white py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all active:scale-95"
+                >
+                  Pulse 생성하기
+                </button>
+              </>
+            )}
+
+            {pulseDraft && (
+              <>
+                <div className="bg-[#0A0F1E]/80 border border-amber-500/20 rounded-3xl p-6 mb-6 shadow-[0_0_40px_rgba(245,158,11,0.1)]">
+                  <p className="text-[10px] text-slate-500 uppercase tracking-[0.3em] font-bold mb-1">
+                    📅 {pulseDraft.date}
+                  </p>
+                  <p className="text-[10px] text-amber-400 uppercase tracking-widest font-bold mb-5 border-b border-white/10 pb-4">
+                    오늘의 가치 사건
+                  </p>
+                  <ul className="space-y-3 mb-5">
+                    {pulseDraft.events.map((ev, i) => {
+                      const amt = hourlyRate * (ev.durationMinutes / 60);
+                      return (
+                        <li key={i} className="flex justify-between items-baseline text-sm">
+                          <span className="text-slate-200">
+                            {i+1}. {ev.title} <span className="text-slate-500 text-xs">({formatDuration(ev.durationMinutes)})</span>
+                          </span>
+                          <span className="text-amber-400 font-black">
+                            +{currency}{fNum(amt)}
+                          </span>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                  <div className="flex justify-between items-baseline border-t border-white/10 pt-4 mb-3">
+                    <span className="text-[10px] uppercase tracking-widest text-slate-500 font-bold">
+                      오늘 적립 합계
+                    </span>
+                    <span className="text-amber-300 font-black text-lg">
+                      +{currency}{fNum(pulseDraft.events.reduce((a, ev) => a + hourlyRate * (ev.durationMinutes / 60), 0))}
+                    </span>
+                  </div>
+
+                  {pulseDraft.investment && (
+                    <div className="mt-5 pt-4 border-t border-white/10">
+                      <p className="text-[10px] text-slate-500 uppercase tracking-widest font-bold mb-2">
+                        오늘의 투자 항목
+                      </p>
+                      <p className="text-slate-300 text-sm leading-relaxed">
+                        {pulseDraft.investment}
+                      </p>
+                    </div>
+                  )}
+
+                  {(pulseDraft.daily_affirmation || pulseDraft.affirmation) && (
+                    <div className="mt-5 pt-4 border-t border-white/10">
+                      <p className="text-[10px] text-slate-500 uppercase tracking-widest font-bold mb-2">
+                        오늘의 확언
+                      </p>
+                      <p className="text-slate-300 text-sm italic leading-relaxed">
+                        "{pulseDraft.daily_affirmation || pulseDraft.affirmation}"
+                      </p>
+                    </div>
+                  )}
+
+                  {pulseDraft.note && (
+                    <div className="mt-5 pt-4 border-t border-white/10">
+                      <p className="text-[10px] text-slate-500 uppercase tracking-widest font-bold mb-2">
+                        손글씨 정리본
+                      </p>
+                      <p className="text-slate-300 text-xs leading-relaxed whitespace-pre-wrap">
+                        {pulseDraft.note}
+                      </p>
+                    </div>
+                  )}
+                </div>
+
+                <p className="text-center text-slate-400 text-xs mb-6 leading-relaxed">
+                  위 내용을 손글씨로 옮겨 적은 뒤<br/>아래 버튼으로 오늘을 봉인하세요.
+                </p>
+
+                <button
+                  onClick={handleSealPulse}
+                  className="w-full bg-amber-600 hover:bg-amber-500 text-white py-5 rounded-2xl font-black text-xs uppercase tracking-widest transition-all active:scale-95 shadow-[0_0_40px_rgba(245,158,11,0.4)]"
+                >
+                  손글씨로 옮겨 적었어요 · Seal
+                </button>
+                <button
+                  onClick={() => { setPulseDraft(null); setDraftRawText(""); }}
+                  className="w-full mt-3 text-[10px] font-black text-slate-500 hover:text-white uppercase tracking-widest py-2"
+                >
+                  다시 붙여넣기
+                </button>
+              </>
+            )}
+          </div>
+        )}
+
+        {/* ─── sealed 단계 (완료) ─── */}
+        {tonightStep === "sealed" && (
+          <div className="flex flex-col items-center justify-center min-h-[70vh] text-center">
+            <div className="text-amber-500 text-[10px] font-black uppercase tracking-[0.5em] mb-6">
+              Sealed
+            </div>
+            <h2 className="text-4xl md:text-5xl font-black text-white uppercase italic tracking-tighter mb-4">
+              오늘의 Pulse가<br/>봉인됐습니다.
+            </h2>
+            <p className="text-slate-400 text-sm mb-12 leading-relaxed">
+              이 하루는 이제 당신의<br/>시스템 안에 남았습니다.<br/>바로 쉬어도 됩니다.
+            </p>
+            <button
+              onClick={() => {
+                setTonightStep("intro");
+                setPulseDraft(null);
+                setDraftRawText("");
+              }}
+              className="bg-amber-600 hover:bg-amber-500 text-white px-10 py-5 rounded-2xl font-black text-xs uppercase tracking-widest transition-all active:scale-95"
+            >
+              오늘 닫기
+            </button>
+            <button
+              onClick={() => setCurrentView("hub")}
+              className="mt-6 text-[10px] font-black text-slate-600 hover:text-white transition-colors uppercase tracking-[0.3em]"
+            >
+              오늘의 기록 보기 →
+            </button>
+          </div>
+        )}
+      </div>
+    );
+  };
+
   const renderPhilosophy = () => (
     <div className="flex-grow w-full max-w-5xl mx-auto overflow-y-auto no-scrollbar pb-24 px-6 animate-fadeIn font-sans text-left">
       {/* Header Section */}
@@ -3430,6 +3866,7 @@ const nowX = getX(dataPoints[dataPoints.length - 1].date); // 📅 가로 위치
 
       {/* 메인 뷰 */}
       <div className="flex-grow flex flex-col overflow-hidden">
+        {currentView === "tonight" && renderTonight()}
         {currentView === "hub" && renderHub()}
         {currentView === "contract" && renderContract()}
         {currentView === "analysis" && renderAnalysis()}
@@ -3551,6 +3988,13 @@ const nowX = getX(dataPoints[dataPoints.length - 1].date); // 📅 가로 위치
       {/* 하단 네비게이션 (Ledger를 맨 앞으로 이동!) */}
       <footer className="fixed bottom-6 left-0 right-0 z-[1000] px-4 animate-fadeIn">
         <nav className="max-w-xl mx-auto flex justify-between md:justify-around items-center bg-[#0A0F1E]/90 backdrop-blur-xl rounded-full py-3 px-3 border border-white/10 shadow-[0_10px_40px_rgba(0,0,0,0.8)] mb-1 overflow-x-auto no-scrollbar gap-1">
+          {/* 0. Tonight — 매일 밤의 단일 진입점 */}
+          <NavBtn
+            active={currentView === "tonight"}
+            onClick={() => setCurrentView("tonight")}
+            icon={<Sparkles size={20} className="md:w-6 md:h-6" />}
+            label="Tonight"
+          />
           {/* 1. Ledger (홈) - 맨 앞으로 이동 완료! */}
           <NavBtn
             active={currentView === "hub"}
