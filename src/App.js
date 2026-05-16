@@ -1,4 +1,3 @@
-// trigger Vercel preview rebuild after env update
 import React, { useState, useEffect, useRef } from "react";
 import Chart from "chart.js/auto";
 import {
@@ -412,6 +411,11 @@ useEffect(() => {
   const [tonightStep, setTonightStep] = useState("intro"); // "intro" | "chat" | "draft" | "sealed"
   const [pulseDraft, setPulseDraft] = useState(null);       // { date, events, affirmation, daily_affirmation, investment, note, source } | null
   const [draftRawText, setDraftRawText] = useState("");     // 사용자가 붙여넣은 원본 텍스트 (디버깅용)
+  // [Tonight v2] Dify 대화 연속성 — Supabase에 저쥐/불러오기
+  const [apexConversationId, setApexConversationId] = useState(null);
+  const [apexMessages, setApexMessages] = useState([]);
+  const [apexInput, setApexInput] = useState("");
+  const [apexLoading, setApexLoading] = useState(false);
 
   // [핵심 1] 로그인 체크 및 데이터 불러오기 (Load)
   // [핵심 1] 로그인 체크 및 데이터 불러오기 (Load) + 비밀번호 복구 감지
@@ -487,6 +491,8 @@ useEffect(() => {
           // 권한 설정 불러오기
           setHasEditAccess(data.has_edit_access || false);
           setHasAiAccess(data.has_ai_access || false);
+          // [Tonight v2] Dify conversation_id 불러오기
+          if (data.apex_conversation_id) setApexConversationId(data.apex_conversation_id);
         }
       }
       setLoading(false);
@@ -532,6 +538,7 @@ useEffect(() => {
         trash_visions: trashVisions,
         signature,
         signed_date: signedDate,
+        apex_conversation_id: apexConversationId,
         updated_at: new Date(),
       };
       /* updates 뒤에 내 ID를 추가해서 저장 */
@@ -557,6 +564,7 @@ useEffect(() => {
     trashVisions,
     signature,
     signedDate,
+    apexConversationId,
   ]);
 
   // [핵심 3] Gemini API 호출 (VAK 반영)
@@ -994,7 +1002,8 @@ const parsePulseDraft = (rawText) => {
     }
 
     // 섹션 본문 라인
-    if (section === "events" && line.startsWith("-")) {
+    // - 있어도 없어도 OK: "- 제목 | 분" 또는 "제목 | 분" 둘 다 인식
+    if (section === "events" && line.includes("|")) {
       const body = line.replace(/^-\s*/, "");
       const parts = body.split("|").map(s => s.trim());
       if (parts.length >= 2) {
@@ -1017,7 +1026,7 @@ const parsePulseDraft = (rawText) => {
   }
 
   if (events.length === 0) {
-    showToast("events에서 '- 제목 | 분' 형식의 항목을 찾지 못했습니다.");
+    showToast("events에서 '제목 | 분' 형식의 항목을 찾지 못했습니다.");
     return null;
   }
 
@@ -3195,7 +3204,7 @@ const nowX = getX(dataPoints[dataPoints.length - 1].date); // 📅 가로 위치
   // [Tonight v2] Tonight 화면 — 4단계 (intro / chat / draft / sealed)
   // ─────────────────────────────────────────────────────────
   const renderTonight = () => {
-    const difyUrl = process.env.REACT_APP_DIFY_EMBED_URL;
+    // REACT_APP_DIFY_EMBED_URL 변수는 iframe 방식 폐지 후 미사용
 
     return (
       <div className="flex-grow w-full max-w-2xl mx-auto overflow-y-auto no-scrollbar pb-32 px-6 animate-fadeIn">
@@ -3228,55 +3237,173 @@ const nowX = getX(dataPoints[dataPoints.length - 1].date); // 📅 가로 위치
           </div>
         )}
 
-        {/* ─── chat 단계 (Dify iframe) ─── */}
+        {/* ─── chat 단계 (Dify API 직접 연결 — conversation_id로 대화 이어짐) ─── */}
         {tonightStep === "chat" && (
-          <div className="flex flex-col h-[80vh]">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-xl font-black text-white uppercase italic tracking-tighter">
-                Apex Room
-              </h3>
+          <div className="flex flex-col" style={{height: "80vh"}}>
+            {/* 헤더 */}
+            <div className="flex items-center justify-between mb-3 flex-shrink-0">
+              <div>
+                <h3 className="text-xl font-black text-white uppercase italic tracking-tighter">
+                  Apex Room
+                </h3>
+                {apexConversationId && (
+                  <p className="text-[9px] text-amber-500/60 mt-0.5 uppercase tracking-widest">
+                    ● 이전 대화 이어짐
+                  </p>
+                )}
+              </div>
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => {
+                    if (window.confirm("새 대화를 시작하면 이전 대화 연결이 끊깁니다. 계속할까요?")) {
+                      setApexConversationId(null);
+                      setApexMessages([]);
+                    }
+                  }}
+                  className="text-[9px] font-black text-slate-600 hover:text-slate-400 uppercase tracking-widest"
+                >
+                  새 대화
+                </button>
+                <button
+                  onClick={() => setTonightStep("intro")}
+                  className="text-[10px] font-black text-slate-500 hover:text-white uppercase tracking-widest"
+                >
+                  ← 뒤로
+                </button>
+              </div>
+            </div>
+
+            {/* 메시지 영역 */}
+            <div
+              id="apex-messages"
+              className="flex-grow overflow-y-auto no-scrollbar rounded-3xl bg-[#0A0F1E] border border-white/10 p-4 space-y-4 mb-3"
+            >
+              {apexMessages.length === 0 && (
+                <div className="flex items-center justify-center h-full">
+                  <p className="text-slate-600 text-xs text-center leading-relaxed">
+                    오늘 하루를 Apex에게 말해보세요.<br/>
+                    <span className="text-slate-700">무엇이든 괜찮습니다.</span>
+                  </p>
+                </div>
+              )}
+              {apexMessages.map((msg, i) => (
+                <div
+                  key={i}
+                  className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
+                >
+                  <div
+                    className={`max-w-[85%] px-4 py-3 rounded-2xl text-sm leading-relaxed whitespace-pre-wrap ${
+                      msg.role === "user"
+                        ? "bg-amber-600/80 text-white rounded-br-sm"
+                        : "bg-white/5 text-slate-200 rounded-bl-sm border border-white/10"
+                    }`}
+                  >
+                    {msg.content}
+                  </div>
+                </div>
+              ))}
+              {apexLoading && (
+                <div className="flex justify-start">
+                  <div className="bg-white/5 border border-white/10 px-4 py-3 rounded-2xl rounded-bl-sm">
+                    <div className="flex gap-1.5 items-center">
+                      <span className="w-1.5 h-1.5 bg-amber-400 rounded-full animate-bounce" style={{animationDelay:"0ms"}}></span>
+                      <span className="w-1.5 h-1.5 bg-amber-400 rounded-full animate-bounce" style={{animationDelay:"150ms"}}></span>
+                      <span className="w-1.5 h-1.5 bg-amber-400 rounded-full animate-bounce" style={{animationDelay:"300ms"}}></span>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* 입력창 */}
+            <div className="flex gap-2 flex-shrink-0">
+              <textarea
+                value={apexInput}
+                onChange={(e) => setApexInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && !e.shiftKey) {
+                    e.preventDefault();
+                    if (!apexInput.trim() || apexLoading) return;
+                    const userMsg = apexInput.trim();
+                    setApexInput("");
+                    setApexMessages(prev => [...prev, { role: "user", content: userMsg }]);
+                    setApexLoading(true);
+                    fetch("/api/apex-chat", {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({ message: userMsg, conversation_id: apexConversationId }),
+                    })
+                      .then(r => r.json())
+                      .then(data => {
+                        if (data.error) {
+                          setApexMessages(prev => [...prev, { role: "assistant", content: "오류: " + data.error }]);
+                        } else {
+                          setApexMessages(prev => [...prev, { role: "assistant", content: data.answer }]);
+                          if (data.conversation_id && data.conversation_id !== apexConversationId) {
+                            setApexConversationId(data.conversation_id);
+                          }
+                        }
+                        setTimeout(() => {
+                          const el = document.getElementById("apex-messages");
+                          if (el) el.scrollTop = el.scrollHeight;
+                        }, 50);
+                      })
+                      .catch(() => {
+                        setApexMessages(prev => [...prev, { role: "assistant", content: "연결 오류가 발생했습니다. 잠시 후 다시 시도해주세요." }]);
+                      })
+                      .finally(() => setApexLoading(false));
+                  }
+                }}
+                placeholder="Apex에게 오늘 하루를 말해보세요... (Enter로 전송, Shift+Enter 줄바꿈)"
+                rows={2}
+                className="flex-grow p-3 rounded-2xl bg-[#0A0F1E] border border-white/10 text-slate-200 text-xs leading-relaxed focus:outline-none focus:border-amber-500/50 resize-none"
+              />
               <button
-                onClick={() => setTonightStep("intro")}
-                className="text-[10px] font-black text-slate-500 hover:text-white uppercase tracking-widest"
+                onClick={() => {
+                  if (!apexInput.trim() || apexLoading) return;
+                  const userMsg = apexInput.trim();
+                  setApexInput("");
+                  setApexMessages(prev => [...prev, { role: "user", content: userMsg }]);
+                  setApexLoading(true);
+                  fetch("/api/apex-chat", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ message: userMsg, conversation_id: apexConversationId }),
+                  })
+                    .then(r => r.json())
+                    .then(data => {
+                      if (data.error) {
+                        setApexMessages(prev => [...prev, { role: "assistant", content: "오류: " + data.error }]);
+                      } else {
+                        setApexMessages(prev => [...prev, { role: "assistant", content: data.answer }]);
+                        if (data.conversation_id && data.conversation_id !== apexConversationId) {
+                          setApexConversationId(data.conversation_id);
+                        }
+                      }
+                      setTimeout(() => {
+                        const el = document.getElementById("apex-messages");
+                        if (el) el.scrollTop = el.scrollHeight;
+                      }, 50);
+                    })
+                    .catch(() => {
+                      setApexMessages(prev => [...prev, { role: "assistant", content: "연결 오류가 발생했습니다. 잠시 후 다시 시도해주세요." }]);
+                    })
+                    .finally(() => setApexLoading(false));
+                }}
+                className="flex-shrink-0 w-12 bg-amber-600 hover:bg-amber-500 disabled:bg-slate-700 text-white rounded-2xl font-black text-xs transition-all active:scale-95 disabled:cursor-not-allowed"
+                disabled={!apexInput.trim() || apexLoading}
               >
-                ← 뒤로
+                ↑
               </button>
             </div>
 
-            {difyUrl ? (
-              <iframe
-                src={difyUrl}
-                title="Apex Chat"
-                className="flex-grow w-full rounded-3xl border border-white/10 bg-[#0A0F1E]"
-                allow="microphone"
-              />
-            ) : (
-              <div className="flex-grow flex items-center justify-center rounded-3xl border border-amber-500/30 bg-[#0A0F1E] p-8 text-center">
-                <div>
-                  <p className="text-amber-400 text-sm font-bold mb-3">
-                    Apex 채팅 주소가 아직 연결되지 않았습니다.
-                  </p>
-                  <p className="text-slate-500 text-xs leading-relaxed">
-                    Vercel 환경변수에<br/>
-                    <code className="text-amber-300">REACT_APP_DIFY_EMBED_URL</code><br/>
-                    을 추가하고 재배포하세요.
-                  </p>
-                </div>
-              </div>
-            )}
-
-            <div className="mt-4 p-4 rounded-2xl bg-[#0A0F1E]/80 border border-white/5">
-              <p className="text-[10px] text-slate-500 uppercase tracking-widest font-bold mb-2">
-                대화 종료 후
-              </p>
-              <p className="text-xs text-slate-300 mb-3 leading-relaxed">
-                Apex가 마지막에 준 <span className="text-amber-400 font-bold">[PULSE_DRAFT]</span> 블록을 복사해서 아래로 진행하세요.
-              </p>
+            {/* 하단 안내 */}
+            <div className="mt-3 flex-shrink-0">
               <button
                 onClick={() => setTonightStep("draft")}
-                className="w-full bg-amber-600 hover:bg-amber-500 text-white py-3 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all active:scale-95"
+                className="w-full bg-white/5 hover:bg-white/10 border border-white/10 text-slate-400 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all"
               >
-                오늘의 Pulse 붙여넣기 →
+                대화 마치고 오늘의 Pulse 받기 →
               </button>
             </div>
           </div>
