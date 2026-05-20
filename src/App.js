@@ -386,7 +386,7 @@ useEffect(() => {
 
   // UI 상태
   const [activeLevel, setActiveLevel] = useState(5);
-  const [currentView, setCurrentView] = useState("hub");
+  const [currentView, setCurrentView] = useState("tonight"); // [Tonight v2] 로그인 후 첫 화면
   const [celebration, setCelebration] = useState({ show: false, levelName: "" });
   const [chartData, setChartData] = useState([]);
   const [isAiModalOpen, setIsAiModalOpen] = useState(false);
@@ -1086,7 +1086,12 @@ const handleSealPulse = () => {
   }
 
   setTonightStep("sealed");
-  showToast(`🌙 오늘의 Pulse가 봉인됐습니다. +${currency}${fNum(totalAmount)}`);
+  // [Tonight v2] signedDate 유무에 따라 토스트 분기
+  if (signedDate) {
+    showToast(`🌙 오늘의 Pulse가 봉인됐습니다. +${currency}${fNum(totalAmount)}`);
+  } else {
+    showToast("🌙 오늘의 Pulse가 봉인됐습니다.");
+  }
 };
 
   const archiveVision = (lv) => {
@@ -3462,9 +3467,15 @@ const nowX = getX(dataPoints[dataPoints.length - 1].date); // 📅 가로 위치
                           <span className="text-slate-200">
                             {i+1}. {ev.title} <span className="text-slate-500 text-xs">({formatDuration(ev.durationMinutes)})</span>
                           </span>
-                          <span className="text-amber-400 font-black">
-                            +{currency}{fNum(amt)}
-                          </span>
+                          {signedDate ? (
+                            <span className="text-amber-400 font-black">
+                              +{currency}{fNum(amt)}
+                            </span>
+                          ) : (
+                            <span className="text-slate-600 font-black text-[10px] uppercase tracking-widest">
+                              🔒 검사 후 공개
+                            </span>
+                          )}
                         </li>
                       );
                     })}
@@ -3473,10 +3484,24 @@ const nowX = getX(dataPoints[dataPoints.length - 1].date); // 📅 가로 위치
                     <span className="text-[10px] uppercase tracking-widest text-slate-500 font-bold">
                       오늘 적립 합계
                     </span>
-                    <span className="text-amber-300 font-black text-lg">
-                      +{currency}{fNum(pulseDraft.events.reduce((a, ev) => a + hourlyRate * (ev.durationMinutes / 60), 0))}
-                    </span>
+                    {signedDate ? (
+                      <span className="text-amber-300 font-black text-lg">
+                        +{currency}{fNum(pulseDraft.events.reduce((a, ev) => a + hourlyRate * (ev.durationMinutes / 60), 0))}
+                      </span>
+                    ) : (
+                      <span className="text-slate-500 font-black text-xs uppercase tracking-widest">
+                        🔒 검사 후 공개
+                      </span>
+                    )}
                   </div>
+                  {!signedDate && (
+                    <div className="mb-3 p-3 rounded-2xl bg-amber-500/5 border border-amber-500/20">
+                      <p className="text-[10px] text-amber-300/80 leading-relaxed text-center">
+                        활동은 기록됩니다. 다만 당신의 진짜 가치를 알려면<br/>
+                        정식 검사와 계약이 필요합니다.
+                      </p>
+                    </div>
+                  )}
 
                   {pulseDraft.investment && (
                     <div className="mt-5 pt-4 border-t border-white/10">
@@ -3884,6 +3909,78 @@ const nowX = getX(dataPoints[dataPoints.length - 1].date); // 📅 가로 위치
         userName={userName}
         isLoggedIn={!!user}
       />
+    );
+  }
+
+  // ── [Tonight v2] 로그인 게이트 — 온보딩 완료했지만 로그인 안 된 경우 ──
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-slate-950 text-slate-200 flex items-center justify-center p-6 font-sans selection:bg-amber-500/30">
+        <style>{`@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css'); * { font-family: 'Pretendard', sans-serif; letter-spacing: -0.02em; } .animate-fadeIn { animation: fadeIn 0.8s ease-out; } @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }`}</style>
+        <div className="w-full max-w-sm animate-fadeIn">
+          {/* 로고 */}
+          <div className="text-center mb-10">
+            <h1 className="text-4xl font-black text-white tracking-tighter italic uppercase leading-none mb-2">
+              THE <span className="text-amber-500">PULSE</span>
+            </h1>
+            <p className="text-[10px] text-slate-500 uppercase tracking-[0.4em] font-bold mt-3">
+              Access Point
+            </p>
+          </div>
+
+          {/* 입력 폼 */}
+          <div className="space-y-3">
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              onKeyDown={(e) => { if (e.key === "Enter") handleSignIn(); }}
+              placeholder="이메일"
+              className="w-full bg-[#0A0F1E] border border-white/10 rounded-2xl p-4 text-white text-sm outline-none focus:border-amber-500/50 transition-colors"
+            />
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              onKeyDown={(e) => { if (e.key === "Enter") handleSignIn(); }}
+              placeholder="비밀번호 (6자리 이상)"
+              className="w-full bg-[#0A0F1E] border border-white/10 rounded-2xl p-4 text-white text-sm outline-none focus:border-amber-500/50 transition-colors"
+            />
+
+            <div className="flex gap-2 pt-2">
+              <button
+                onClick={handleSignIn}
+                disabled={loading}
+                className="flex-1 bg-amber-600 hover:bg-amber-500 disabled:bg-slate-700 disabled:cursor-not-allowed text-white font-black text-xs uppercase tracking-widest py-4 rounded-2xl transition-all active:scale-95"
+              >
+                {loading ? "..." : "로그인"}
+              </button>
+              <button
+                onClick={handleSignUp}
+                disabled={loading}
+                className="flex-1 bg-slate-800 hover:bg-slate-700 disabled:cursor-not-allowed text-white font-black text-xs uppercase tracking-widest py-4 rounded-2xl transition-all active:scale-95 border border-white/10"
+              >
+                {loading ? "..." : "회원가입"}
+              </button>
+            </div>
+
+            <div className="text-center pt-4">
+              <button
+                onClick={handleResetPassword}
+                disabled={loading}
+                className="text-[10px] text-slate-500 hover:text-amber-400 transition-colors uppercase tracking-widest font-bold"
+              >
+                비밀번호를 잊으셨나요?
+              </button>
+            </div>
+          </div>
+
+          {/* 푸터 */}
+          <p className="text-center text-[9px] text-slate-700 mt-10 uppercase tracking-[0.3em] font-bold">
+            © 2026 The Pulse
+          </p>
+        </div>
+      </div>
     );
   }
 
