@@ -423,17 +423,8 @@ useEffect(() => {
     return now.toISOString().slice(0, 10);
   };
 
-  // [Tonight v2] localStorage 초기화 — ritual day 기준
-  const [apexMessages, setApexMessages] = useState(() => {
-    try {
-      const today = getRitualDay();
-      const saved = localStorage.getItem("apex_messages");
-      if (!saved) return [];
-      const parsed = JSON.parse(saved);
-      if (parsed.date === today) return parsed.messages || [];
-      return [];
-    } catch { return []; }
-  });
+  // [Tonight v2] apexMessages — 로그인 후 user.id 기준으로 localStorage에서 복원 (아래 useEffect 참고)
+  const [apexMessages, setApexMessages] = useState([]);
   const [apexInput, setApexInput] = useState("");
   const [apexLoading, setApexLoading] = useState(false);
 
@@ -539,13 +530,34 @@ useEffect(() => {
     return () => subscription.unsubscribe();
   }, []);
 
-    // [Tonight v2] apexMessages localStorage 자동 저장
+  // [Tonight v2] user 변경 시 메모리 초기화 후 해당 사용자의 apexMessages 복원 (user.id 기준)
   useEffect(() => {
+    // 로그아웃 중이거나 user 없음 → 메모리 초기화
+    if (!user) {
+      setApexMessages([]);
+      return;
+    }
     try {
       const today = getRitualDay();
-      localStorage.setItem("apex_messages", JSON.stringify({ date: today, messages: apexMessages }));
+      const key = `apex_messages_${user.id}`;
+      const saved = localStorage.getItem(key);
+      if (!saved) return;
+      const parsed = JSON.parse(saved);
+      if (parsed.date === today && Array.isArray(parsed.messages)) {
+        setApexMessages(parsed.messages);
+      }
+    } catch (e) { console.warn("apex_messages 복원 실패", e); }
+  }, [user]);
+
+  // [Tonight v2] apexMessages 변경 시 localStorage 자동 저장 (user.id 기준)
+  useEffect(() => {
+    if (!user) return;
+    try {
+      const today = getRitualDay();
+      const key = `apex_messages_${user.id}`;
+      localStorage.setItem(key, JSON.stringify({ date: today, messages: apexMessages }));
     } catch (e) { console.warn("apex_messages 저장 실패", e); }
-  }, [apexMessages]);
+  }, [apexMessages, user]);
 
   // [Tonight v2] chat 단계 진입 시 Apex 첫 인사 자동 표시
   useEffect(() => {
@@ -1309,6 +1321,8 @@ const handleSealPulse = () => {
                     <button
                       onClick={() => {
                         localStorage.removeItem("pulse_onboarding_complete");
+                        // [Tonight v2] user.id 기준 대화 메모리 삭제 + 이전 버전과의 호환을 위해 구 키도 삭제
+                        if (user) localStorage.removeItem(`apex_messages_${user.id}`);
                         localStorage.removeItem("apex_messages");
                         supabase.auth.signOut();
                       }}
@@ -3315,7 +3329,10 @@ const nowX = getX(dataPoints[dataPoints.length - 1].date); // 📅 가로 위치
                     if (window.confirm("새 대화를 시작하면 이전 대화 연결이 끊깁니다. 계속할까요?")) {
                       setApexConversationId(null);
                       setApexMessages([]);
-                      try { localStorage.removeItem("apex_messages"); } catch(e) {}
+                      try {
+                        if (user) localStorage.removeItem(`apex_messages_${user.id}`);
+                        localStorage.removeItem("apex_messages");
+                      } catch(e) {}
                     }
                   }}
                   className="text-[9px] font-black text-slate-600 hover:text-slate-400 uppercase tracking-widest"
