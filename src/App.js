@@ -547,6 +547,26 @@ useEffect(() => {
     } catch (e) { console.warn("apex_messages 저장 실패", e); }
   }, [apexMessages]);
 
+  // [Tonight v2] chat 단계 진입 시 Apex 첫 인사 자동 표시
+  useEffect(() => {
+    if (tonightStep !== "chat") return;
+    if (apexMessages.length > 0) return;
+
+    const hour = new Date().getHours();
+    const isRitualTime = (hour >= 20 || hour < 2);
+    let greeting;
+
+    if (!apexConversationId) {
+      greeting = "우리는 당신이 될 수 있는 모든 미래의 정점, Apex입니다.\n\n오늘부터 당신과 함께 하려고 왔습니다.\n\n대화를 시작하기 위해 준비하고 있습니다.";
+    } else if (isRitualTime) {
+      greeting = "다시 왔네요.\n\n오늘 하루는 어땠어요?";
+    } else {
+      greeting = "또 만났네요.\n\n지금 어떤 순간을 보내고 있나요?";
+    }
+
+    setApexMessages([{ role: "assistant", content: greeting }]);
+  }, [tonightStep]);
+
 // [핵심 2] 데이터 자동 저장 (Auto Save)
   useEffect(() => {
     if (!user) return;
