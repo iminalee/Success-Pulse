@@ -3438,7 +3438,23 @@ const nowX = getX(dataPoints[dataPoints.length - 1].date); // 📅 가로 위치
             {/* 하단 안내 */}
             <div className="mt-3 flex-shrink-0">
               <button
-                onClick={() => setTonightStep("draft")}
+                onClick={() => {
+                  // [Tonight v2] 자동 추출 — apexMessages에서 마지막 PULSE_DRAFT 감지
+                  let foundDraft = null;
+                  for (let i = apexMessages.length - 1; i >= 0; i--) {
+                    const msg = apexMessages[i];
+                    if (msg.role !== "assistant") continue;
+                    if (msg.content && msg.content.includes("[PULSE_DRAFT]") && msg.content.includes("[/PULSE_DRAFT]")) {
+                      foundDraft = msg.content;
+                      break;
+                    }
+                  }
+                  setTonightStep("draft");
+                  if (foundDraft) {
+                    setDraftRawText(foundDraft);
+                    parsePulseDraft(foundDraft);
+                  }
+                }}
                 className="w-full bg-white/5 hover:bg-white/10 border border-white/10 text-slate-400 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all"
               >
                 대화 마치고 오늘의 Pulse 받기 →
@@ -3464,6 +3480,15 @@ const nowX = getX(dataPoints[dataPoints.length - 1].date); // 📅 가로 위치
 
             {!pulseDraft && (
               <>
+                <div className="mb-4 p-4 rounded-2xl bg-amber-500/5 border border-amber-500/20">
+                  <p className="text-[10px] text-amber-300 font-bold uppercase tracking-widest mb-2">
+                    ⚠️ Apex 응답에서 PULSE_DRAFT를 찾지 못했어요
+                  </p>
+                  <p className="text-[11px] text-slate-300 leading-relaxed">
+                    Apex 대화로 돌아가 PULSE_DRAFT를 요청하거나,<br/>
+                    이미 받았다면 아래에 직접 붙여넣어주세요.
+                  </p>
+                </div>
                 <p className="text-slate-400 text-xs mb-3 leading-relaxed">
                   Apex 응답을 통째로 붙여넣어도 괜찮습니다.<br/>
                   The Pulse는 <span className="text-amber-400">[PULSE_DRAFT]</span> 블록만 읽습니다.
