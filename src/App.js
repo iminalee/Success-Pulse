@@ -413,7 +413,18 @@ useEffect(() => {
   const [draftRawText, setDraftRawText] = useState("");     // 사용자가 붙여넣은 원본 텍스트 (디버깅용)
   // [Tonight v2] Dify 대화 연속성 — Supabase에 저쥐/불러오기
   const [apexConversationId, setApexConversationId] = useState(null);
-  const [apexMessages, setApexMessages] = useState([]);
+  // [Tonight v2] localStorage 초기화 — 오늘 날짜 것만 복원, 어제 것은 무시
+  const [apexMessages, setApexMessages] = useState(() => {
+    try {
+      const today = new Date().toISOString().slice(0, 10);
+      const saved = localStorage.getItem("apex_messages");
+      if (!saved) return [];
+      const parsed = JSON.parse(saved);
+      // 오늘 날짜 것만 복원
+      if (parsed.date === today) return parsed.messages || [];
+      return [];
+    } catch { return []; }
+  });
   const [apexInput, setApexInput] = useState("");
   const [apexLoading, setApexLoading] = useState(false);
 
@@ -519,7 +530,15 @@ useEffect(() => {
     return () => subscription.unsubscribe();
   }, []);
 
-  // [핵심 2] 데이터 자동 저장 (Auto Save)
+    // [Tonight v2] apexMessages localStorage 자동 저장
+  useEffect(() => {
+    try {
+      const today = new Date().toISOString().slice(0, 10);
+      localStorage.setItem("apex_messages", JSON.stringify({ date: today, messages: apexMessages }));
+    } catch (e) { console.warn("apex_messages 저장 실패", e); }
+  }, [apexMessages]);
+
+// [핵심 2] 데이터 자동 저장 (Auto Save)
   useEffect(() => {
     if (!user) return;
     const timer = setTimeout(async () => {
@@ -3263,6 +3282,7 @@ const nowX = getX(dataPoints[dataPoints.length - 1].date); // 📅 가로 위치
                     if (window.confirm("새 대화를 시작하면 이전 대화 연결이 끊깁니다. 계속할까요?")) {
                       setApexConversationId(null);
                       setApexMessages([]);
+                      try { localStorage.removeItem("apex_messages"); } catch(e) {}
                     }
                   }}
                   className="text-[9px] font-black text-slate-600 hover:text-slate-400 uppercase tracking-widest"
