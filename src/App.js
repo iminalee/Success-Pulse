@@ -413,14 +413,23 @@ useEffect(() => {
   const [draftRawText, setDraftRawText] = useState("");     // 사용자가 붙여넣은 원본 텍스트 (디버깅용)
   // [Tonight v2] Dify 대화 연속성 — Supabase에 저쥐/불러오기
   const [apexConversationId, setApexConversationId] = useState(null);
-  // [Tonight v2] localStorage 초기화 — 오늘 날짜 것만 복원, 어제 것은 무시
+  // [Tonight v2] ritual day 계산 — 새벽 6시 기준 (자정 넘는 ritual 윈도우 보호)
+  // 새벽 5:59까지는 어제 날짜로 간주
+  const getRitualDay = () => {
+    const now = new Date();
+    if (now.getHours() < 6) {
+      now.setDate(now.getDate() - 1);
+    }
+    return now.toISOString().slice(0, 10);
+  };
+
+  // [Tonight v2] localStorage 초기화 — ritual day 기준
   const [apexMessages, setApexMessages] = useState(() => {
     try {
-      const today = new Date().toISOString().slice(0, 10);
+      const today = getRitualDay();
       const saved = localStorage.getItem("apex_messages");
       if (!saved) return [];
       const parsed = JSON.parse(saved);
-      // 오늘 날짜 것만 복원
       if (parsed.date === today) return parsed.messages || [];
       return [];
     } catch { return []; }
@@ -533,7 +542,7 @@ useEffect(() => {
     // [Tonight v2] apexMessages localStorage 자동 저장
   useEffect(() => {
     try {
-      const today = new Date().toISOString().slice(0, 10);
+      const today = getRitualDay();
       localStorage.setItem("apex_messages", JSON.stringify({ date: today, messages: apexMessages }));
     } catch (e) { console.warn("apex_messages 저장 실패", e); }
   }, [apexMessages]);
