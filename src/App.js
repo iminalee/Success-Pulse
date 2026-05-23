@@ -1278,7 +1278,11 @@ const handleSealPulse = () => {
                       </span>
                     </p>
                     <button
-                      onClick={() => supabase.auth.signOut()}
+                      onClick={() => {
+                        localStorage.removeItem("pulse_onboarding_complete");
+                        localStorage.removeItem("apex_messages");
+                        supabase.auth.signOut();
+                      }}
                       className="text-[10px] text-slate-500 hover:text-white underline decoration-slate-700 underline-offset-4"
                     >
                       로그아웃
