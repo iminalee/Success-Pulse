@@ -206,7 +206,7 @@ const App = () => {
         setHasAiAccess(data.has_ai_access || false);
 
         // 기존 가입자 자동 온보딩 완료 처리
-        if (data.signed_date || data.signature) {
+        if (data.signed_date || data.signature || data.contract?.onboarding_agreement?.completed_at) {
           localStorage.setItem("pulse_onboarding_complete", "true");
           setIsOnboardingComplete(true);
         }
@@ -282,10 +282,7 @@ const App = () => {
         },
       }));
     }
-    if (journeyData?.signature) {
-      setSignature(journeyData.signature);
-      setSignedDate(signedDateValue);
-    }
+    if (journeyData?.signature) setSignature(journeyData.signature);
     setIsOnboardingComplete(true);
 
     try {
@@ -337,6 +334,19 @@ const App = () => {
         };
       }
 
+      const existingContract = existingProfile.contract && typeof existingProfile.contract === "object"
+        ? existingProfile.contract
+        : {};
+      const nextOnboardingAgreement = {
+        status: "completed",
+        source: "act1",
+        signature: journeyData?.signature ?? "",
+        completed_at: signedAt,
+        selected_need_level: Number.isInteger(selectedNeedLevel) ? selectedNeedLevel : null,
+        apex_bps_title: bps?.title ?? "",
+        journey_snapshot: journeySnapshot,
+      };
+
       const nextProfile = {
         ...existingProfile,
         user_name: journeyData?.userName ?? existingProfile.user_name ?? "",
@@ -344,18 +354,11 @@ const App = () => {
         vak_profile: normalizedVak,
         selectedNeedLevel: Number.isInteger(selectedNeedLevel) ? selectedNeedLevel : existingProfile.selectedNeedLevel,
         visions: nextVisions,
-        signature: journeyData?.signature ?? existingProfile.signature ?? "",
-        signed_date: signedDateValue,
+        signature: existingProfile.signature ?? "",
+        signed_date: existingProfile.signed_date ?? null,
         contract: {
-          ...(existingProfile.contract && typeof existingProfile.contract === "object" ? existingProfile.contract : {}),
-          status: "signed",
-          signature: journeyData?.signature ?? "",
-          signed_at: signedAt,
-          source: "act1",
-          contract_version: "v1",
-          selected_need_level: Number.isInteger(selectedNeedLevel) ? selectedNeedLevel : null,
-          apex_bps_title: bps?.title ?? "",
-          journey_snapshot: journeySnapshot,
+          ...existingContract,
+          onboarding_agreement: nextOnboardingAgreement,
         },
         ledger: Array.isArray(existingProfile.ledger) ? existingProfile.ledger : [],
       };
@@ -367,8 +370,8 @@ const App = () => {
         vak_profile: nextProfile.vak_profile,
         selectedNeedLevel: nextProfile.selectedNeedLevel,
         visions: nextProfile.visions,
-        signature: nextProfile.signature,
-        signed_date: nextProfile.signed_date,
+        signature: existingProfile.signature ?? "",
+        signed_date: existingProfile.signed_date ?? null,
         contract: nextProfile.contract,
         profile_source: "act1",
         updated_at: signedAt,
@@ -617,7 +620,7 @@ const App = () => {
           });
 
           // 기존 가입자 자동 온보딩 완료 처리
-          if (data.signed_date || data.signature) {
+          if (data.signed_date || data.signature || data.contract?.onboarding_agreement?.completed_at) {
             localStorage.setItem("pulse_onboarding_complete", "true");
             setIsOnboardingComplete(true);
           }
@@ -681,7 +684,7 @@ const App = () => {
             setHasAiAccess(data.has_ai_access || false);
             setApexConversationId(data.apex_conversation_id || null);
             // [복원] 기존 가입자 자동 온보딩 완료 처리
-            if (data.signed_date || data.signature) {
+            if (data.signed_date || data.signature || data.contract?.onboarding_agreement?.completed_at) {
               localStorage.setItem("pulse_onboarding_complete", "true");
               setIsOnboardingComplete(true);
             }
@@ -3160,12 +3163,21 @@ const nowX = getX(dataPoints[dataPoints.length - 1].date); // 📅 가로 위치
       if (!signature.trim()) return showToast("서명란이 비어있습니다.");
       if (signature.trim() !== userName.trim())
         return showToast(`서명 불일치: '${userName}'과 동일해야 합니다.`);
+      const activeVisionTitle = visions?.[activeLevel]?.title?.trim?.() || "";
+      if (!userName?.trim() || Number(annualIncome) <= 0 || !targetDate || !activeVisionTitle) {
+        showToast("본계약 체결 전에 목표 날짜, 기준 연소득, 비전을 먼저 확정해 주세요.");
+        return;
+      }
+      const mentalBankGoalAmount = Number.isFinite(Number(livingAllowance))
+        ? `${currency}${fNum(livingAllowance)}`
+        : "미설정";
+
       if (
         window.confirm(
-          `[${userName}]님의 이름으로 서약을 체결하시겠습니까?\n\n확인 시 계약이 즉시 발효되며, 시작일이 확정됩니다.`
+          `위 변수로 Manifestation 본계약을 체결하시겠습니까?\n\n- 이름: ${userName}\n- 목표 날짜: ${targetDate}\n- 기준 연소득: ${currency}${fNum(annualIncome)}\n- 활성 단계: ${activeLevel} (${levelMap[activeLevel]})\n- 활성 비전: ${activeVisionTitle}\n- Mental Bank 목표액: ${mentalBankGoalAmount}`
         )
       ) {
-        setSignedDate(new Date());
+        setSignedDate(new Date().toISOString().split("T")[0]);
         showToast("계약이 체결되었습니다. 시스템이 활성화됩니다.");
       }
     };

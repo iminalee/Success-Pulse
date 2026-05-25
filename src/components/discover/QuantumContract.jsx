@@ -154,7 +154,7 @@ const ContractPhase = ({
       <p className="text-[9px] text-amber-500/50 font-black tracking-[0.6em] uppercase mb-2">
         Step 6
       </p>
-      <h2 className="text-xl font-black text-white">양자 계약서</h2>
+      <h2 className="text-xl font-black text-white">BPS 프로필 등록 서약</h2>
       <div className="w-12 h-px bg-amber-500/40 mx-auto mt-3" />
     </div>
 
@@ -167,8 +167,8 @@ const ContractPhase = ({
         style={{ wordBreak: "keep-all" }}
       >
         나, <span className="text-amber-300 font-black">{displayName}</span>은(는){"\n"}
-        미래의 최고의 나(Apex BPS)와{"\n"}
-        계약을 체결합니다.
+        Apex BPS 초기 연결을 시작하고{"\n"}
+        첫 BPS 프로필을 계정에 저장합니다.
       </p>
 
       <div className="w-full h-px bg-white/5" />
@@ -188,8 +188,8 @@ const ContractPhase = ({
         className="text-slate-400 text-[0.85rem] leading-[1.9] text-center"
         style={{ wordBreak: "keep-all" }}
       >
-        나는 이 비전의 주인공이 되기 위해{"\n"}
-        매일 작은 행동을 실천할 것을 약속합니다.
+        본 서약은 최종 Manifestation 본계약 이전 단계이며,{"\n"}
+        나는 매일 작은 행동으로 BPS 정체성을 강화할 것을 약속합니다.
       </p>
 
       <div className="w-full h-px bg-white/5" />
