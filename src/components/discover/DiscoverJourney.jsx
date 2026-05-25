@@ -23,7 +23,12 @@ import BpsGenerator        from "./BpsGenerator";
 import QuantumContract     from "./QuantumContract";
 import ResultShareScreen   from "./ResultShareScreen";
 
-const DiscoverJourney = ({ onComplete, userName: appUserName, isLoggedIn }) => {
+const DiscoverJourney = ({
+  onComplete,
+  userName: appUserName,
+  isLoggedIn,
+  onExistingAccount,
+}) => {
   const [step, setStep] = useState(0);
   const [pendingSignature, setPendingSignature] = useState("");
 
@@ -50,7 +55,12 @@ const DiscoverJourney = ({ onComplete, userName: appUserName, isLoggedIn }) => {
   switch (step) {
     // ── 비회원 구간 (Step 0~2) ────────────────────────────
     case 0:
-      return <WelcomeScreen onStart={goNext} />;
+      return (
+        <WelcomeScreen
+          onStart={goNext}
+          onExistingAccount={onExistingAccount}
+        />
+      );
 
     case 1:
       return (

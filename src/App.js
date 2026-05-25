@@ -225,6 +225,19 @@ const App = () => {
     return localStorage.getItem("pulse_onboarding_complete") === "true";
   });
 
+  const handleExistingAccountRoute = () => {
+    localStorage.setItem("pulse_onboarding_complete", "true");
+    setIsOnboardingComplete(true);
+
+    const url = new URL(window.location.href);
+    if (url.searchParams.has("reset")) {
+      url.searchParams.delete("reset");
+      const nextSearch = url.searchParams.toString();
+      const nextUrl = `${url.pathname}${nextSearch ? `?${nextSearch}` : ""}${url.hash}`;
+      window.history.replaceState({}, "", nextUrl);
+    }
+  };
+
   const handleOnboardingComplete = async (journeyData) => {
     const signedAt = new Date().toISOString();
     const signedDateValue = signedAt.split("T")[0];
@@ -4249,6 +4262,7 @@ const nowX = getX(dataPoints[dataPoints.length - 1].date); // 📅 가로 위치
         onComplete={handleOnboardingComplete}
         userName={userName}
         isLoggedIn={!!user}
+        onExistingAccount={handleExistingAccountRoute}
       />
     );
   }

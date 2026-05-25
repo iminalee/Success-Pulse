@@ -157,7 +157,7 @@ const WelcomeScreen = ({ onStart, onExistingAccount }) => {
         }}
         className="absolute bottom-5 text-[10px] text-slate-700 hover:text-slate-400 transition-colors tracking-widest uppercase font-bold"
       >
-        이미 계정이 있다면 로그인 화면으로 이동해 주세요.
+        이미 계정이 있으신가요? 로그인 화면으로 이동하기
       </button>
     </div>
   );
