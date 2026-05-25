@@ -47,8 +47,9 @@ const WelcomeScreen = ({ onStart }) => {
         password: loginPassword,
       });
       if (error) throw error;
-      // App.js의 onAuthStateChange → fetchUserData → 자동 온보딩 완료 처리
-      setLoginLoading(false);
+// [Tonight v2] 로그인 성공 → 온보딩 완료 처리 후 강제 새로고침
+localStorage.setItem("pulse_onboarding_complete", "true");
+window.location.reload();
     } catch (e) {
       setLoginError(e.message || "로그인에 실패했습니다.");
       setLoginLoading(false);
