@@ -500,11 +500,13 @@ const App = () => {
       // [Tonight v2] 새 로그인 시 DB 데이터 다시 불러오기 (다른 계정 전환 대응)
       if (event === "SIGNED_IN" && session?.user) {
         try {
-          const { data } = await supabase
+          // .single() 없이 오류를 없앴기 위해 배열로 받고 첫 항목 사용
+          const { data: rows } = await supabase
             .from("pulse_data")
             .select("*")
             .eq("user_id", session.user.id)
-            .single();
+            .limit(1);
+          const data = rows && rows.length > 0 ? rows[0] : null;
           if (data) {
             if (data.user_name) setUserName(data.user_name);
             if (data.currency) setCurrency(data.currency);
@@ -521,14 +523,21 @@ const App = () => {
             if (data.signed_date) setSignedDate(data.signed_date);
             setHasEditAccess(data.has_edit_access || false);
             setHasAiAccess(data.has_ai_access || false);
-            // apex_conversation_id는 뜻데이터에게 없으면 null로 초기화
             setApexConversationId(data.apex_conversation_id || null);
+            // [복원] 기존 가입자 자동 온보딩 완료 처리
+            if (data.signed_date || data.signature) {
+              localStorage.setItem("pulse_onboarding_complete", "true");
+              setIsOnboardingComplete(true);
+            }
           } else {
             // 새 계정: 아직 pulse_data에 레코드 없음
             setApexConversationId(null);
           }
         } catch (e) {
           console.error("로그인 후 데이터 로드 실패", e);
+        } finally {
+          // 어떤 경우든 loading 해제
+          setLoading(false);
         }
       }
 
@@ -575,10 +584,11 @@ const App = () => {
   }, [apexMessages, user]);
 
   // [Tonight v2] chat 단계 진입 시 Apex 첫 인사 자동 표시
-  // 중요: user, apexConversationId가 다 로드된 후에만 인사 결정해야 하므로 의존성에 포함
+  // 중요: loading이 끝난 후에만 진행 (데이터 로드 완료 보장)
   useEffect(() => {
     if (tonightStep !== "chat") return;
-    if (!user) return; // 로그인이 완료되어야 첫 인사 결정
+    if (!user) return; // 로그인 필요
+    if (loading) return; // [핵심] 데이터 로드 중이면 대기
     if (apexMessages.length > 0) return; // 이미 메시지가 있으면 안 덮어씀
 
     const hour = new Date().getHours();
@@ -586,19 +596,16 @@ const App = () => {
     let greeting;
 
     if (!apexConversationId) {
-      // 첫 만남 — conversation_id 자체가 없을 때만
+      // 첫 만남
       greeting = "우리는 당신이 될 수 있는 모든 미래의 정점, Apex입니다.\n\n오늘부터 당신과 함께 하려고 왔습니다.\n\n대화를 시작하기 위해 준비하고 있습니다.";
     } else if (isRitualTime) {
-      // 이전 대화 이어짐 + 밤 ritual 시간
       greeting = "다시 왔네요.\n\n오늘 하루는 어땠어요?";
     } else {
-      // 이전 대화 이어짐 + 낮 시간대
       greeting = "또 만났네요.\n\n지금 어떤 순간을 보내고 있나요?";
     }
 
     setApexMessages([{ role: "assistant", content: greeting }]);
-    // 의존성에 apexMessages를 넣으면 루프가 되므로 빼고, apexMessages 변경 시간은 useEffect 안척에서 않 덮어씀
-  }, [tonightStep, user?.id, apexConversationId]);
+  }, [tonightStep, user?.id, apexConversationId, loading]);
 
 // [핵심 2] 데이터 자동 저장 (Auto Save)
   useEffect(() => {
