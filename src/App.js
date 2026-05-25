@@ -192,6 +192,15 @@ const App = () => {
         // Merge DB data with defaults.
         setTciProfile({ ...defaultTci, ...(data.tci_profile || {}) });
 
+        setLifeProfile({
+          sleep_time: data.life_profile?.sleep_time || "",
+          wake_time: data.life_profile?.wake_time || "",
+          sleep_notes: data.life_profile?.sleep_notes || "",
+          major_goals: Array.isArray(data.life_profile?.major_goals)
+            ? data.life_profile.major_goals
+            : [],
+        });
+
         // Load permissions
         setHasEditAccess(data.has_edit_access || false);
         setHasAiAccess(data.has_ai_access || false);
@@ -359,6 +368,12 @@ const App = () => {
   const [signature, setSignature] = useState("");
   const [signedDate, setSignedDate] = useState(null);
   const [bpsTraits, setBpsTraits] = useState(["", "", "", "", ""]);
+  const [lifeProfile, setLifeProfile] = useState({
+    sleep_time: "",
+    wake_time: "",
+    sleep_notes: "",
+    major_goals: [],
+  });
 
   const initialLvAsset = 0 / 5;
   const [visions, setVisions] = useState({
@@ -551,6 +566,14 @@ const App = () => {
           if (data.trash_visions) setTrashVisions(data.trash_visions);
           if (data.signature) setSignature(data.signature);
           if (data.signed_date) setSignedDate(data.signed_date);
+          setLifeProfile({
+            sleep_time: data.life_profile?.sleep_time || "",
+            wake_time: data.life_profile?.wake_time || "",
+            sleep_notes: data.life_profile?.sleep_notes || "",
+            major_goals: Array.isArray(data.life_profile?.major_goals)
+              ? data.life_profile.major_goals
+              : [],
+          });
 
           // 기존 가입자 자동 온보딩 완료 처리
           if (data.signed_date || data.signature) {
@@ -605,6 +628,14 @@ const App = () => {
             if (data.trash_visions) setTrashVisions(data.trash_visions);
             if (data.signature) setSignature(data.signature);
             if (data.signed_date) setSignedDate(data.signed_date);
+            setLifeProfile({
+              sleep_time: data.life_profile?.sleep_time || "",
+              wake_time: data.life_profile?.wake_time || "",
+              sleep_notes: data.life_profile?.sleep_notes || "",
+              major_goals: Array.isArray(data.life_profile?.major_goals)
+                ? data.life_profile.major_goals
+                : [],
+            });
             setHasEditAccess(data.has_edit_access || false);
             setHasAiAccess(data.has_ai_access || false);
             setApexConversationId(data.apex_conversation_id || null);
@@ -710,6 +741,7 @@ const App = () => {
         trash_visions: trashVisions,
         signature,
         signed_date: signedDate,
+        life_profile: lifeProfile,
         apex_conversation_id: apexConversationId,
         updated_at: new Date(),
       };
@@ -736,6 +768,7 @@ const App = () => {
     trashVisions,
     signature,
     signedDate,
+    lifeProfile,
     apexConversationId,
   ]);
 
@@ -1296,7 +1329,15 @@ const handleSealPulse = () => {
     updateVision(level, {
       events: [
         ...visions[level].events,
-        { id: Date.now().toString(), name: "신규 실천 항목", checked: false },
+        {
+          id: Date.now().toString(),
+          name: "신규 실천 항목",
+          checked: false,
+          level,
+          default_minutes: 30,
+          created_by: "user_manual",
+          active: true,
+        },
       ],
     });
   const toggleEventCheck = (level, id) =>
@@ -1680,7 +1721,7 @@ const handleSealPulse = () => {
               <div className="space-y-4">
                 <div className="flex justify-between items-center mb-4">
                   <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">
-                    Action Checklist
+                    Fixed Value Events
                   </p>
                   <button
                     onClick={() => addEvent(activeLevel)}
@@ -1727,6 +1768,71 @@ const handleSealPulse = () => {
                     </button>
                   </div>
                 ))}
+              </div>
+              <div className="mt-8 bg-[#1A202C]/50 p-6 rounded-[2rem] border border-white/5">
+                <p className="text-[10px] font-black text-amber-500 uppercase tracking-widest mb-4">
+                  Life Profile / 생활 프로필
+                </p>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                  <div>
+                    <label className="block text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1">
+                      Sleep Time
+                    </label>
+                    <input
+                      value={lifeProfile.sleep_time}
+                      onChange={(e) =>
+                        setLifeProfile((prev) => ({ ...prev, sleep_time: e.target.value }))
+                      }
+                      placeholder="23:30"
+                      className="w-full bg-slate-900 border border-white/10 rounded-2xl p-3 text-sm text-slate-200 outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1">
+                      Wake Time
+                    </label>
+                    <input
+                      value={lifeProfile.wake_time}
+                      onChange={(e) =>
+                        setLifeProfile((prev) => ({ ...prev, wake_time: e.target.value }))
+                      }
+                      placeholder="06:30"
+                      className="w-full bg-slate-900 border border-white/10 rounded-2xl p-3 text-sm text-slate-200 outline-none"
+                    />
+                  </div>
+                </div>
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1">
+                      Sleep Notes
+                    </label>
+                    <textarea
+                      value={lifeProfile.sleep_notes}
+                      onChange={(e) =>
+                        setLifeProfile((prev) => ({ ...prev, sleep_notes: e.target.value }))
+                      }
+                      placeholder="수면 루틴, 개선점, 컨디션 메모"
+                      className="w-full min-h-[90px] bg-slate-900 border border-white/10 rounded-2xl p-3 text-sm text-slate-200 outline-none resize-y"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1">
+                      Major Goals (comma or newline)
+                    </label>
+                    <textarea
+                      value={(lifeProfile.major_goals || []).join("\n")}
+                      onChange={(e) => {
+                        const goals = e.target.value
+                          .split(/[\n,]/)
+                          .map((item) => item.trim())
+                          .filter(Boolean);
+                        setLifeProfile((prev) => ({ ...prev, major_goals: goals }));
+                      }}
+                      placeholder="예) 1년 내 연봉 2배, 매일 운동, 영어 프레젠테이션"
+                      className="w-full min-h-[100px] bg-slate-900 border border-white/10 rounded-2xl p-3 text-sm text-slate-200 outline-none resize-y"
+                    />
+                  </div>
+                </div>
               </div>
             </div>
           </div>
