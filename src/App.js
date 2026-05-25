@@ -39,6 +39,7 @@ import {
 
 import { supabase } from "./supabaseClient";
 import showToast from "./utils/toast";
+import { normalizeTciProfile, normalizeVakProfile } from "./utils/pulseProfile";
 import AutoTextarea from "./components/AutoTextarea";
 import NavBtn from "./components/NavBtn";
 import DiscoverJourney from "./components/discover/DiscoverJourney";
@@ -215,55 +216,138 @@ const App = () => {
     return localStorage.getItem("pulse_onboarding_complete") === "true";
   });
 
-  const handleOnboardingComplete = (journeyData) => {
-    localStorage.setItem("pulse_onboarding_complete", "true");
-    setIsOnboardingComplete(true);
+  const handleOnboardingComplete = async (journeyData) => {
+    const signedAt = new Date().toISOString();
+    const signedDateValue = signedAt.split("T")[0];
 
-    // 이름 반영
-    if (journeyData.userName) {
-      setUserName(journeyData.userName);
-    }
+    const normalizedVak = normalizeVakProfile(journeyData?.vakProfile, "act1", "quick");
+    const quickTci = normalizeTciProfile(journeyData?.tciQuickProfile, "act1", "quick");
+    const selectedNeedLevel = Number(journeyData?.selectedNeedLevel);
+    const bps = journeyData?.generatedBPS || null;
 
-    // VAK 프로파일 반영
-    if (journeyData.vakProfile) {
-      setVakProfile(journeyData.vakProfile);
-    }
+    const journeySnapshot = {
+      userName: journeyData?.userName || "",
+      selectedNeedLevel: Number.isInteger(selectedNeedLevel) ? selectedNeedLevel : null,
+      tciQuickProfile: journeyData?.tciQuickProfile || null,
+      vakProfile: journeyData?.vakProfile || null,
+      generatedBPS: journeyData?.generatedBPS || null,
+      signature: journeyData?.signature || "",
+      signedDate: signedDateValue,
+    };
 
-    // TCI 기질 → 기존 tciProfile 구조로 매핑
-    if (journeyData.tciQuickProfile) {
-      const q = journeyData.tciQuickProfile;
+    // Local state 우선 반영 (저장 실패 시에도 사용자 입력은 유지)
+    if (journeyData?.userName) setUserName(journeyData.userName);
+    if (journeyData?.vakProfile) setVakProfile(normalizedVak);
+    if (journeyData?.tciQuickProfile) {
       setTciProfile((prev) => ({
         ...prev,
-        ns: { score: q.ns },
-        ha: { score: q.ha },
-        rd: { score: q.rd },
-        p:  { score: q.p },
+        ns: quickTci.ns,
+        ha: quickTci.ha,
+        rd: quickTci.rd,
+        p: quickTci.p,
       }));
     }
-
-    // BPS → 선택한 단계의 visions에 저장
-    if (journeyData.generatedBPS && journeyData.selectedNeedLevel) {
-      const bps = journeyData.generatedBPS;
-      const lv  = journeyData.selectedNeedLevel;
+    if (bps && Number.isInteger(selectedNeedLevel)) {
       setVisions((prev) => ({
         ...prev,
-        [lv]: {
-          ...prev[lv],
-          title: bps.title,
-          v: bps.vision_v,
-          a: bps.vision_a,
-          k: bps.vision_k,
-          immersionScript: bps.immersionScript,
+        [selectedNeedLevel]: {
+          ...prev[selectedNeedLevel],
+          title: bps.title ?? prev[selectedNeedLevel]?.title ?? "",
+          v: bps.vision_v ?? bps.v ?? prev[selectedNeedLevel]?.v ?? "",
+          a: bps.vision_a ?? bps.a ?? prev[selectedNeedLevel]?.a ?? "",
+          k: bps.vision_k ?? bps.k ?? prev[selectedNeedLevel]?.k ?? "",
+          immersionScript: bps.immersionScript ?? prev[selectedNeedLevel]?.immersionScript ?? "",
         },
       }));
     }
-
-    // 서명 & 날짜
-    if (journeyData.signature) {
+    if (journeyData?.signature) {
       setSignature(journeyData.signature);
-      setSignedDate(new Date().toISOString().split("T")[0]);
+      setSignedDate(signedDateValue);
     }
-    // 기존 auto-save useEffect가 변경된 상태를 Supabase에 자동 저장함
+    setIsOnboardingComplete(true);
+
+    try {
+      const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+      if (sessionError) throw sessionError;
+
+      const sessionUser = sessionData?.session?.user;
+      if (!sessionUser) {
+        showToast("로그인 세션을 찾지 못했습니다. 다시 로그인 후 저장해 주세요.");
+        return;
+      }
+
+      const { data: existingRow, error: fetchError } = await supabase
+        .from("pulse_data")
+        .select("pulse_data")
+        .eq("user_id", sessionUser.id)
+        .maybeSingle();
+      if (fetchError) throw fetchError;
+
+      const existingProfile = existingRow?.pulse_data && typeof existingRow.pulse_data === "object"
+        ? existingRow.pulse_data
+        : {};
+
+      const existingTci = existingProfile.tci_profile || {};
+      const hasExistingManualTci =
+        existingTci?._meta?.type === "full" ||
+        existingTci?._meta?.source === "manual" ||
+        ["sd", "c", "st", "sd_c"].some((key) => existingTci?.[key]?.score != null);
+
+      const nextTciProfile = hasExistingManualTci
+        ? { ...quickTci, ...existingTci }
+        : quickTci;
+
+      const nextVisions = {
+        ...(existingProfile.visions && typeof existingProfile.visions === "object" ? existingProfile.visions : {}),
+      };
+
+      if (bps && Number.isInteger(selectedNeedLevel)) {
+        nextVisions[selectedNeedLevel] = {
+          ...(nextVisions[selectedNeedLevel] || {}),
+          title: bps.title ?? "",
+          v: bps.vision_v ?? bps.v ?? "",
+          a: bps.vision_a ?? bps.a ?? "",
+          k: bps.vision_k ?? bps.k ?? "",
+          vision_v: bps.vision_v ?? bps.v ?? "",
+          vision_a: bps.vision_a ?? bps.a ?? "",
+          vision_k: bps.vision_k ?? bps.k ?? "",
+          immersionScript: bps.immersionScript ?? "",
+        };
+      }
+
+      const nextProfile = {
+        ...existingProfile,
+        user_name: journeyData?.userName ?? existingProfile.user_name ?? "",
+        tci_profile: nextTciProfile,
+        vak_profile: normalizedVak,
+        selectedNeedLevel: Number.isInteger(selectedNeedLevel) ? selectedNeedLevel : existingProfile.selectedNeedLevel,
+        visions: nextVisions,
+        signature: journeyData?.signature ?? existingProfile.signature ?? "",
+        signed_date: signedDateValue,
+        contract: {
+          ...(existingProfile.contract && typeof existingProfile.contract === "object" ? existingProfile.contract : {}),
+          status: "signed",
+          signature: journeyData?.signature ?? "",
+          signed_at: signedAt,
+          source: "act1",
+          contract_version: "v1",
+          selected_need_level: Number.isInteger(selectedNeedLevel) ? selectedNeedLevel : null,
+          apex_bps_title: bps?.title ?? "",
+          journey_snapshot: journeySnapshot,
+        },
+        ledger: Array.isArray(existingProfile.ledger) ? existingProfile.ledger : [],
+      };
+
+      const { error: upsertError } = await supabase
+        .from("pulse_data")
+        .upsert({ user_id: sessionUser.id, pulse_data: nextProfile }, { onConflict: "user_id" });
+      if (upsertError) throw upsertError;
+    } catch (error) {
+      console.error("Act1 onboarding save error:", error);
+      showToast(`온보딩 결과 저장 중 오류가 발생했습니다: ${error?.message || "잠시 후 다시 시도해 주세요."}`);
+    } finally {
+      localStorage.setItem("pulse_onboarding_complete", "true");
+    }
   };
 
   const [currency, setCurrency] = useState("₩");
