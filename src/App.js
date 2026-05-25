@@ -205,31 +205,6 @@ const App = () => {
       console.error("Error loading data (Auto-recovered):", err);
     }
   };
-  // [추가] 세션 변경 감지 시 데이터 로드 연결
-useEffect(() => {
-    // 1. [추가] 앱 시작 시 저장된 세션을 강제로 불러옴 (안드로이드 새로고침 대응)
-    const initSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session) {
-        setUser(session.user);
-        fetchUserData(session.user.id);
-      }
-    };
-    initSession();
-
-    // 2. 실시간 로그인 상태 변경 감지
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (session && (event === "SIGNED_IN" || event === "INITIAL_SESSION")) {
-        setUser(session.user);
-        fetchUserData(session.user.id);
-      } else if (event === "SIGNED_OUT") {
-        setUser(null);
-      }
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
-
   // ── Act 1 온보딩 완료 여부 (localStorage로 디바이스 캐싱, 추후 Supabase 동기화) ──
   // ?reset 파라미터가 있으면 플래그를 지우고 처음부터 시작
   const [isOnboardingComplete, setIsOnboardingComplete] = useState(() => {
@@ -514,12 +489,53 @@ useEffect(() => {
     // 2. 실시간 상태 감지 (이벤트 리스너)
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((event, session) => {
+    } = supabase.auth.onAuthStateChange(async (event, session) => {
       setUser(session?.user ?? null);
 
       // [중요] Supabase가 알려주는 '복구 모드' 이벤트 감지
       if (event === "PASSWORD_RECOVERY") {
         setIsRecoveryMode(true);
+      }
+
+      // [Tonight v2] 새 로그인 시 DB 데이터 다시 불러오기 (다른 계정 전환 대응)
+      if (event === "SIGNED_IN" && session?.user) {
+        try {
+          const { data } = await supabase
+            .from("pulse_data")
+            .select("*")
+            .eq("user_id", session.user.id)
+            .single();
+          if (data) {
+            if (data.user_name) setUserName(data.user_name);
+            if (data.currency) setCurrency(data.currency);
+            if (data.annual_income) setAnnualIncome(data.annual_income);
+            if (data.target_date) setTargetDate(data.target_date);
+            if (data.ledger) setLedger(data.ledger);
+            if (data.visions) setVisions(data.visions);
+            if (data.bps_traits) setBpsTraits(data.bps_traits);
+            if (data.vak_profile) setVakProfile(data.vak_profile);
+            if (data.tci_profile) setTciProfile(data.tci_profile);
+            if (data.archived_visions) setArchivedVisions(data.archived_visions);
+            if (data.trash_visions) setTrashVisions(data.trash_visions);
+            if (data.signature) setSignature(data.signature);
+            if (data.signed_date) setSignedDate(data.signed_date);
+            setHasEditAccess(data.has_edit_access || false);
+            setHasAiAccess(data.has_ai_access || false);
+            // apex_conversation_id는 뜻데이터에게 없으면 null로 초기화
+            setApexConversationId(data.apex_conversation_id || null);
+          } else {
+            // 새 계정: 아직 pulse_data에 레코드 없음
+            setApexConversationId(null);
+          }
+        } catch (e) {
+          console.error("로그인 후 데이터 로드 실패", e);
+        }
+      }
+
+      // [Tonight v2] 로그아웃 시 apex 관련 상태 초기화
+      if (event === "SIGNED_OUT") {
+        setApexConversationId(null);
+        setApexMessages([]);
       }
 
       if (!session) {
@@ -530,13 +546,12 @@ useEffect(() => {
     return () => subscription.unsubscribe();
   }, []);
 
-  // [Tonight v2] user 변경 시 메모리 초기화 후 해당 사용자의 apexMessages 복원 (user.id 기준)
+  // [Tonight v2] user.id 변경 시 메모리 초기화 + 해당 사용자 apexMessages 복원
+  // 중요: user.id로 추적해야 연솱 로그인 시도에도 정확히 정리됨
   useEffect(() => {
-    // 로그아웃 중이거나 user 없음 → 메모리 초기화
-    if (!user) {
-      setApexMessages([]);
-      return;
-    }
+    // 먼저 메모리 초기화 — 다른 사용자의 대화가 잔존하지 않도록
+    setApexMessages([]);
+    if (!user) return;
     try {
       const today = getRitualDay();
       const key = `apex_messages_${user.id}`;
@@ -547,7 +562,7 @@ useEffect(() => {
         setApexMessages(parsed.messages);
       }
     } catch (e) { console.warn("apex_messages 복원 실패", e); }
-  }, [user]);
+  }, [user?.id]);
 
   // [Tonight v2] apexMessages 변경 시 localStorage 자동 저장 (user.id 기준)
   useEffect(() => {
@@ -560,24 +575,30 @@ useEffect(() => {
   }, [apexMessages, user]);
 
   // [Tonight v2] chat 단계 진입 시 Apex 첫 인사 자동 표시
+  // 중요: user, apexConversationId가 다 로드된 후에만 인사 결정해야 하므로 의존성에 포함
   useEffect(() => {
     if (tonightStep !== "chat") return;
-    if (apexMessages.length > 0) return;
+    if (!user) return; // 로그인이 완료되어야 첫 인사 결정
+    if (apexMessages.length > 0) return; // 이미 메시지가 있으면 안 덮어씀
 
     const hour = new Date().getHours();
     const isRitualTime = (hour >= 20 || hour < 2);
     let greeting;
 
     if (!apexConversationId) {
+      // 첫 만남 — conversation_id 자체가 없을 때만
       greeting = "우리는 당신이 될 수 있는 모든 미래의 정점, Apex입니다.\n\n오늘부터 당신과 함께 하려고 왔습니다.\n\n대화를 시작하기 위해 준비하고 있습니다.";
     } else if (isRitualTime) {
+      // 이전 대화 이어짐 + 밤 ritual 시간
       greeting = "다시 왔네요.\n\n오늘 하루는 어땠어요?";
     } else {
+      // 이전 대화 이어짐 + 낮 시간대
       greeting = "또 만났네요.\n\n지금 어떤 순간을 보내고 있나요?";
     }
 
     setApexMessages([{ role: "assistant", content: greeting }]);
-  }, [tonightStep]);
+    // 의존성에 apexMessages를 넣으면 루프가 되므로 빼고, apexMessages 변경 시간은 useEffect 안척에서 않 덮어씀
+  }, [tonightStep, user?.id, apexConversationId]);
 
 // [핵심 2] 데이터 자동 저장 (Auto Save)
   useEffect(() => {
