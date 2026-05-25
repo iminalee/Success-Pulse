@@ -37,7 +37,7 @@ const AccountGate = ({ tciQuickProfile, vakProfile, onComplete }) => {
     }
 
     if (currentMode === "signup" && (lower.includes("already registered") || lower.includes("already been registered"))) {
-      return "이미 가입된 이메일입니다. 아래에서 '기존 계정 로그인'으로 진행해 주세요.";
+      return "이미 가입된 이메일입니다. 아래 링크로 로그인해 주세요.";
     }
 
     return message || "인증 처리 중 오류가 발생했습니다.";
@@ -169,33 +169,38 @@ const AccountGate = ({ tciQuickProfile, vakProfile, onComplete }) => {
             진단 완료
           </p>
           <h2 className="text-[1.4rem] font-black text-white leading-snug mb-3" style={{ wordBreak: "keep-all" }}>
-            진단 결과를 저장하고,
+            첫 BPS 프로필을 안전하게 저장하려면,
             <br />
-            <span className="text-amber-400">당신만의 미래를 설계합니다.</span>
+            <span className="text-amber-400">처음 사용자 등록이 필요합니다.</span>
           </h2>
           <p className="text-slate-600 text-xs leading-relaxed" style={{ wordBreak: "keep-all" }}>
-            계정 연결 후 다음 단계로 진행됩니다.
+            Act 1 진단 결과를 계정에 연결해 다음 단계로 이어집니다.
           </p>
         </div>
 
-        <div className="grid grid-cols-2 gap-2 mb-5 p-1 rounded-xl bg-slate-900/70 border border-white/5">
-          <button
-            type="button"
-            onClick={() => { setMode("signup"); setError(""); setNotice(""); }}
-            disabled={loading}
-            className={`py-2 rounded-lg text-xs font-bold transition ${isSignupMode ? "bg-amber-500 text-slate-950" : "text-slate-400 hover:text-slate-200"}`}
-          >
-            새 계정 만들기
-          </button>
-          <button
-            type="button"
-            onClick={() => { setMode("login"); setError(""); setNotice(""); }}
-            disabled={loading}
-            className={`py-2 rounded-lg text-xs font-bold transition ${!isSignupMode ? "bg-amber-500 text-slate-950" : "text-slate-400 hover:text-slate-200"}`}
-          >
-            기존 계정 로그인
-          </button>
-        </div>
+        {isSignupMode ? (
+          <div className="mb-5 text-center">
+            <button
+              type="button"
+              onClick={() => { setMode("login"); setError(""); setNotice(""); }}
+              disabled={loading}
+              className="text-[11px] text-slate-400 hover:text-amber-300 underline underline-offset-2 transition"
+            >
+              이미 계정이 있으신가요? 로그인하기
+            </button>
+          </div>
+        ) : (
+          <div className="mb-5 text-left">
+            <button
+              type="button"
+              onClick={() => { setMode("signup"); setError(""); setNotice(""); }}
+              disabled={loading}
+              className="text-[11px] text-slate-400 hover:text-amber-300 underline underline-offset-2 transition"
+            >
+              처음 사용자 등록으로 돌아가기
+            </button>
+          </div>
+        )}
 
         {isSignupMode ? (
           <div className="flex flex-col gap-3 mb-5">
