@@ -73,7 +73,14 @@ const AccountGate = ({ tciQuickProfile, vakProfile, onComplete }) => {
       const user = sessionData?.session?.user;
 
       if (user) {
-        onComplete(trimmedName || user.user_metadata?.user_name || user.user_metadata?.full_name || trimmedEmail.split("@")[0]);
+        try {
+          await onComplete(trimmedName || user.user_metadata?.user_name || user.user_metadata?.full_name || trimmedEmail.split("@")[0]);
+        } catch (completeError) {
+          const message = completeError?.message || "온보딩 저장 단계에서 오류가 발생했습니다.";
+          setError(message);
+          setNotice("계정은 연결되었지만 온보딩 저장에 실패했습니다. 잠시 후 다시 시도해 주세요.");
+          return;
+        }
         return;
       }
 
@@ -116,7 +123,14 @@ const AccountGate = ({ tciQuickProfile, vakProfile, onComplete }) => {
         || user.user_metadata?.full_name
         || trimmedEmail.split("@")[0];
 
-      onComplete(fallbackName);
+      try {
+        await onComplete(fallbackName);
+      } catch (completeError) {
+        const message = completeError?.message || "온보딩 저장 단계에서 오류가 발생했습니다.";
+        setError(message);
+        setNotice("로그인은 성공했지만 온보딩 저장에 실패했습니다. 잠시 후 다시 시도해 주세요.");
+        return;
+      }
     } catch (e) {
       setError(toReadableAuthError(e?.message, "login"));
     } finally {

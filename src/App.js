@@ -287,13 +287,13 @@ const App = () => {
 
       const { data: existingRow, error: fetchError } = await supabase
         .from("pulse_data")
-        .select("pulse_data")
+        .select("*")
         .eq("user_id", sessionUser.id)
         .maybeSingle();
       if (fetchError) throw fetchError;
 
-      const existingProfile = existingRow?.pulse_data && typeof existingRow.pulse_data === "object"
-        ? existingRow.pulse_data
+      const existingProfile = existingRow && typeof existingRow === "object"
+        ? existingRow
         : {};
 
       const existingTci = existingProfile.tci_profile || {};
@@ -347,15 +347,43 @@ const App = () => {
         ledger: Array.isArray(existingProfile.ledger) ? existingProfile.ledger : [],
       };
 
+      const upsertPayload = {
+        user_id: sessionUser.id,
+        user_name: nextProfile.user_name,
+        tci_profile: nextProfile.tci_profile,
+        vak_profile: nextProfile.vak_profile,
+        selectedNeedLevel: nextProfile.selectedNeedLevel,
+        visions: nextProfile.visions,
+        signature: nextProfile.signature,
+        signed_date: nextProfile.signed_date,
+        contract: nextProfile.contract,
+        profile_source: "act1",
+        updated_at: signedAt,
+
+        // Preserve existing direct columns to avoid accidental resets on upsert
+        ledger: Array.isArray(existingProfile.ledger) ? existingProfile.ledger : [],
+        archived_visions: Array.isArray(existingProfile.archived_visions) ? existingProfile.archived_visions : [],
+        trash_visions: Array.isArray(existingProfile.trash_visions) ? existingProfile.trash_visions : [],
+        bps_traits: Array.isArray(existingProfile.bps_traits) ? existingProfile.bps_traits : ["", "", "", "", ""],
+        annual_income: existingProfile.annual_income ?? 0,
+        currency: existingProfile.currency ?? "₩",
+        target_date: existingProfile.target_date ?? "2026-12-31",
+        apex_conversation_id: existingProfile.apex_conversation_id ?? null,
+        has_ai_access: existingProfile.has_ai_access ?? false,
+        has_edit_access: existingProfile.has_edit_access ?? false,
+      };
+
       const { error: upsertError } = await supabase
         .from("pulse_data")
-        .upsert({ user_id: sessionUser.id, pulse_data: nextProfile }, { onConflict: "user_id" });
+        .upsert(upsertPayload, { onConflict: "user_id" });
       if (upsertError) throw upsertError;
+
+      localStorage.setItem("pulse_onboarding_complete", "true");
     } catch (error) {
       console.error("Act1 onboarding save error:", error);
-      showToast(`온보딩 결과 저장 중 오류가 발생했습니다: ${error?.message || "잠시 후 다시 시도해 주세요."}`);
-    } finally {
-      localStorage.setItem("pulse_onboarding_complete", "true");
+      setIsOnboardingComplete(false);
+      showToast(`온보딩 결과 저장 실패: ${error?.message || "Unknown Supabase error"}`);
+      throw error;
     }
   };
 
