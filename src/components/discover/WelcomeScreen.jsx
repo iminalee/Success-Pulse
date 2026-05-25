@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { supabase } from "../../supabaseClient";
 
 const CARDS = [
   {
@@ -28,33 +27,9 @@ const STARS = Array.from({ length: 60 }, (_, i) => ({
   opacity: (Math.random() * 0.35 + 0.08).toFixed(2),
 }));
 
-const WelcomeScreen = ({ onStart }) => {
+const WelcomeScreen = ({ onStart, onExistingAccount }) => {
   const [cardIndex, setCardIndex] = useState(0);
   const [transitioning, setTransitioning] = useState(false);
-  const [showLogin, setShowLogin] = useState(false);
-  const [loginEmail, setLoginEmail] = useState("");
-  const [loginPassword, setLoginPassword] = useState("");
-  const [loginLoading, setLoginLoading] = useState(false);
-  const [loginError, setLoginError] = useState("");
-
-  const handleLogin = async () => {
-    if (!loginEmail.includes("@") || loginPassword.length < 6) return;
-    setLoginLoading(true);
-    setLoginError("");
-    try {
-      const { error } = await supabase.auth.signInWithPassword({
-        email: loginEmail.trim(),
-        password: loginPassword,
-      });
-      if (error) throw error;
-// [Tonight v2] 로그인 성공 → 온보딩 완료 처리 후 강제 새로고침
-localStorage.setItem("pulse_onboarding_complete", "true");
-window.location.reload();
-    } catch (e) {
-      setLoginError(e.message || "로그인에 실패했습니다.");
-      setLoginLoading(false);
-    }
-  };
 
   const card = CARDS[cardIndex];
 
@@ -171,73 +146,19 @@ window.location.reload();
         ))}
       </div>
 
-      {/* ── 기존 계정 로그인 링크 ── */}
+      {/* ── 기존 계정 사용자 안내 링크 ── */}
       <button
-        onClick={(e) => { e.stopPropagation(); setShowLogin(true); }}
+        type="button"
+        onClick={(e) => {
+          e.stopPropagation();
+          if (typeof onExistingAccount === "function") {
+            onExistingAccount();
+          }
+        }}
         className="absolute bottom-5 text-[10px] text-slate-700 hover:text-slate-400 transition-colors tracking-widest uppercase font-bold"
       >
-        이미 계정이 있으신가요?
+        이미 계정이 있다면 로그인 화면으로 이동해 주세요.
       </button>
-
-      {/* ── 로그인 모달 ── */}
-      {showLogin && (
-        <div
-          className="fixed inset-0 z-50 bg-slate-950/95 backdrop-blur-md flex items-center justify-center px-8"
-          onClick={() => setShowLogin(false)}
-        >
-          <div
-            className="w-full max-w-sm bg-slate-900 border border-white/8 rounded-3xl p-8 relative"
-            onClick={(e) => e.stopPropagation()}
-            style={{ animation: "wsCardIn 0.35s ease-out forwards" }}
-          >
-            <button
-              onClick={() => setShowLogin(false)}
-              className="absolute top-5 right-5 text-slate-600 hover:text-white transition-colors text-lg leading-none"
-            >
-              ✕
-            </button>
-
-            <div className="text-center mb-7">
-              <p className="text-[9px] text-amber-500/50 font-black tracking-[0.5em] uppercase mb-3">
-                The Pulse
-              </p>
-              <h3 className="text-lg font-black text-white">기존 계정으로 로그인</h3>
-              <p className="text-xs text-slate-600 mt-1">로그인 후 자동으로 이어서 진행됩니다.</p>
-            </div>
-
-            <div className="flex flex-col gap-3 mb-4">
-              <input
-                type="email"
-                placeholder="이메일"
-                value={loginEmail}
-                onChange={(e) => setLoginEmail(e.target.value)}
-                className="w-full bg-slate-950/60 border border-white/6 focus:border-amber-500/30 rounded-xl px-4 py-3 text-sm text-slate-200 outline-none transition-colors placeholder:text-slate-600"
-                autoFocus
-              />
-              <input
-                type="password"
-                placeholder="비밀번호"
-                value={loginPassword}
-                onChange={(e) => setLoginPassword(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && handleLogin()}
-                className="w-full bg-slate-950/60 border border-white/6 focus:border-amber-500/30 rounded-xl px-4 py-3 text-sm text-slate-200 outline-none transition-colors placeholder:text-slate-600"
-              />
-            </div>
-
-            {loginError && (
-              <p className="text-red-400 text-xs text-center mb-3">{loginError}</p>
-            )}
-
-            <button
-              onClick={handleLogin}
-              disabled={loginLoading || !loginEmail.includes("@") || loginPassword.length < 6}
-              className="w-full bg-amber-500 hover:bg-amber-400 active:scale-[0.98] text-slate-950 font-black py-3.5 rounded-xl text-sm uppercase tracking-widest transition-all disabled:opacity-30 disabled:cursor-not-allowed"
-            >
-              {loginLoading ? "확인 중..." : "로그인하기"}
-            </button>
-          </div>
-        </div>
-      )}
     </div>
   );
 };
