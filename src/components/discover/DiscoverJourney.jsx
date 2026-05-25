@@ -4,7 +4,7 @@
  * Step 0: WelcomeScreen         ✅
  * Step 1: TCI 기질 프로파일링    ✅
  * Step 2: VAK 감각 채널 진단     ✅
- * Step 3: 회원가입 (SignupGate)  ✅  ← NEW
+ * Step 3: 계정 게이트 (AccountGate) ✅
  * Step 4: 욕구 단계 선택         ✅
  * Step 5: 맞춤 질문              ✅
  * Step 6: AI BPS 초안 생성       ✅
@@ -16,7 +16,7 @@ import React, { useState } from "react";
 import WelcomeScreen       from "./WelcomeScreen";
 import TciQuickTest        from "./TciQuickTest";
 import VakTest             from "./VakTest";
-import SignupGate          from "./SignupGate";
+import AccountGate         from "./AccountGate";
 import NeedLevelScreen     from "./NeedLevelScreen";
 import DiscoveryQuestions  from "./DiscoveryQuestions";
 import BpsGenerator        from "./BpsGenerator";
@@ -69,7 +69,7 @@ const DiscoverJourney = ({ onComplete, userName: appUserName, isLoggedIn }) => {
     // ── 가입 게이트 (Step 3) ──────────────────────────────
     case 3:
       return (
-        <SignupGate
+        <AccountGate
           tciQuickProfile={journeyData.tciQuickProfile}
           vakProfile={journeyData.vakProfile}
           onComplete={(name) => {
