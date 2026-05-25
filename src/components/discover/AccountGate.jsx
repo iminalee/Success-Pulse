@@ -169,12 +169,12 @@ const AccountGate = ({ tciQuickProfile, vakProfile, onComplete }) => {
             진단 완료
           </p>
           <h2 className="text-[1.4rem] font-black text-white leading-snug mb-3" style={{ wordBreak: "keep-all" }}>
-            첫 BPS 프로필을 안전하게 저장하려면,
+            Act 1에서 만든 첫 BPS 프로필을 저장하려면,
             <br />
             <span className="text-amber-400">처음 사용자 등록이 필요합니다.</span>
           </h2>
           <p className="text-slate-600 text-xs leading-relaxed" style={{ wordBreak: "keep-all" }}>
-            Act 1 진단 결과를 계정에 연결해 다음 단계로 이어집니다.
+            처음 사용자 등록 후 Act 1 진단 결과를 계정에 연결해 다음 단계로 이어집니다.
           </p>
         </div>
 
@@ -209,9 +209,14 @@ const AccountGate = ({ tciQuickProfile, vakProfile, onComplete }) => {
             <input className="sg-input" placeholder="비밀번호 (6자 이상)" type="password" value={password} onChange={(e) => setPassword(e.target.value)} onKeyDown={(e) => e.key === "Enter" && signupValid && handleSignup()} />
           </div>
         ) : (
-          <div className="flex flex-col gap-3 mb-5">
+          <div className="mb-5">
+            <p className="text-slate-500 text-[11px] leading-relaxed mb-3" style={{ wordBreak: "keep-all" }}>
+              이미 계정을 만든 경우에만 로그인해 이어서 진행해 주세요.
+            </p>
+            <div className="flex flex-col gap-3">
             <input className="sg-input" placeholder="이메일" type="email" value={loginEmail} onChange={(e) => setLoginEmail(e.target.value)} autoFocus />
             <input className="sg-input" placeholder="비밀번호" type="password" value={loginPassword} onChange={(e) => setLoginPassword(e.target.value)} onKeyDown={(e) => e.key === "Enter" && loginValid && handleLogin()} />
+            </div>
           </div>
         )}
 
