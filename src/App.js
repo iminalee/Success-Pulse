@@ -238,6 +238,49 @@ const App = () => {
     }
   };
 
+  const hasMeaningfulTciProfile = (profile) => {
+    if (!profile || typeof profile !== "object") return false;
+
+    const keys = ["ns", "ha", "rd", "p", "sd", "c", "st", "sd_c"];
+    const scoreByKey = Object.fromEntries(
+      keys.map((key) => {
+        const value = profile?.[key];
+        const score = typeof value === "object" && value !== null
+          ? Number(value?.score)
+          : Number(value);
+        return [key, Number.isFinite(score) ? score : null];
+      }),
+    );
+
+    const hasMetaMeaning =
+      profile?._meta?.source === "manual" ||
+      profile?._meta?.type === "full" ||
+      profile?._meta?.type === "manual";
+
+    const hasManualDimensions = ["sd", "c", "st", "sd_c"]
+      .some((key) => scoreByKey[key] !== null);
+
+    const hasNonDefaultQuickScores = ["ns", "ha", "rd", "p"]
+      .some((key) => scoreByKey[key] !== null && scoreByKey[key] !== 50);
+
+    return hasMetaMeaning || hasManualDimensions || hasNonDefaultQuickScores;
+  };
+
+  const hasMeaningfulVakProfile = (profile) => {
+    if (!profile || typeof profile !== "object") return false;
+
+    const v = Number(profile?.vPercent ?? profile?.v);
+    const a = Number(profile?.aPercent ?? profile?.a);
+    const k = Number(profile?.kPercent ?? profile?.k);
+    const hasValidPercents = [v, a, k].every((value) => Number.isFinite(value));
+    const hasNonDefaultPercents = hasValidPercents && !(v === 50 && a === 50 && k === 50);
+    const hasDominant = ["V", "A", "K"].includes(profile?.dominant);
+    const hasOrder = typeof profile?.order === "string" && /V|A|K/.test(profile.order);
+    const hasMetaSource = typeof profile?._meta?.source === "string" && profile._meta.source.trim() !== "";
+
+    return hasNonDefaultPercents || (hasValidPercents && hasDominant && hasOrder) || hasMetaSource;
+  };
+
   const handleOnboardingComplete = async (journeyData) => {
     const signedAt = new Date().toISOString();
     const signedDateValue = signedAt.split("T")[0];
@@ -259,16 +302,6 @@ const App = () => {
 
     // Local state 우선 반영 (저장 실패 시에도 사용자 입력은 유지)
     if (journeyData?.userName) setUserName(journeyData.userName);
-    if (journeyData?.vakProfile) setVakProfile(normalizedVak);
-    if (journeyData?.tciQuickProfile) {
-      setTciProfile((prev) => ({
-        ...prev,
-        ns: quickTci.ns,
-        ha: quickTci.ha,
-        rd: quickTci.rd,
-        p: quickTci.p,
-      }));
-    }
     if (bps && Number.isInteger(selectedNeedLevel)) {
       setVisions((prev) => ({
         ...prev,
@@ -307,14 +340,18 @@ const App = () => {
         : {};
 
       const existingTci = existingProfile.tci_profile || {};
-      const hasExistingManualTci =
-        existingTci?._meta?.type === "full" ||
-        existingTci?._meta?.source === "manual" ||
-        ["sd", "c", "st", "sd_c"].some((key) => existingTci?.[key]?.score != null);
+      const existingVak = existingProfile.vak_profile || {};
+      const hasExistingMeaningfulTci = hasMeaningfulTciProfile(existingTci);
+      const hasExistingMeaningfulVak = hasMeaningfulVakProfile(existingVak);
 
-      const nextTciProfile = hasExistingManualTci
-        ? { ...quickTci, ...existingTci }
+      // Keep existing meaningful manual/full TCI data intact.
+      // Only fill with Act 1 quick profile when existing value is missing/placeholder.
+      const nextTciProfile = hasExistingMeaningfulTci
+        ? existingTci
         : quickTci;
+      const nextVakProfile = hasExistingMeaningfulVak
+        ? existingVak
+        : normalizedVak;
 
       const nextVisions = {
         ...(existingProfile.visions && typeof existingProfile.visions === "object" ? existingProfile.visions : {}),
@@ -351,7 +388,7 @@ const App = () => {
         ...existingProfile,
         user_name: journeyData?.userName ?? existingProfile.user_name ?? "",
         tci_profile: nextTciProfile,
-        vak_profile: normalizedVak,
+        vak_profile: nextVakProfile,
         selectedNeedLevel: Number.isInteger(selectedNeedLevel) ? selectedNeedLevel : existingProfile.selectedNeedLevel,
         visions: nextVisions,
         signature: existingProfile.signature ?? "",
@@ -388,6 +425,13 @@ const App = () => {
         has_ai_access: existingProfile.has_ai_access ?? false,
         has_edit_access: existingProfile.has_edit_access ?? false,
       };
+
+      // Reflect final persisted profile decision in local state.
+      setVakProfile(nextVakProfile);
+      setTciProfile((prev) => ({
+        ...prev,
+        ...nextTciProfile,
+      }));
 
       const { error: upsertError } = await supabase
         .from("pulse_data")
