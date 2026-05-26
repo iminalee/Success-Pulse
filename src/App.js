@@ -746,8 +746,10 @@ const App = () => {
 
       // [Tonight v2] 로그아웃 시 apex 관련 상태 초기화
       if (event === "SIGNED_OUT") {
+        setUser(null);
         setApexConversationId(null);
         setApexMessages([]);
+        setLoading(false);
       }
 
       if (!session) {
@@ -1048,6 +1050,28 @@ const App = () => {
         await supabase.from("pulse_data").delete().eq("user_id", user.id);
       }
       window.location.reload();
+    }
+  };
+
+  const handleSignOut = async () => {
+    try {
+      setLoading(true);
+      const { error } = await supabase.auth.signOut();
+
+      if (error) {
+        showToast("로그아웃 실패: " + error.message);
+        return;
+      }
+
+      setUser(null);
+      setEmail("");
+      setPassword("");
+      setApexMessages([]);
+      setApexConversationId(null);
+    } catch (error) {
+      showToast("로그아웃 실패: " + error.message);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -1560,13 +1584,7 @@ const handleSealPulse = () => {
                       </span>
                     </p>
                     <button
-                      onClick={() => {
-                        localStorage.removeItem("pulse_onboarding_complete");
-                        // [Tonight v2] user.id 기준 대화 메모리 삭제 + 이전 버전과의 호환을 위해 구 키도 삭제
-                        if (user) localStorage.removeItem(`apex_messages_${user.id}`);
-                        localStorage.removeItem("apex_messages");
-                        supabase.auth.signOut();
-                      }}
+                      onClick={handleSignOut}
                       className="text-[10px] text-slate-500 hover:text-white underline decoration-slate-700 underline-offset-4"
                     >
                       로그아웃
