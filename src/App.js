@@ -563,6 +563,7 @@ const App = () => {
 
   // UI 상태
   const [activeLevel, setActiveLevel] = useState(5);
+  const [activeLabZone, setActiveLabZone] = useState("pulse"); // "current" | "pulse" | "future"
   const [currentView, setCurrentView] = useState("tonight"); // [Tonight v2] 로그인 후 첫 화면
   const [celebration, setCelebration] = useState({ show: false, levelName: "" });
   const [chartData, setChartData] = useState([]);
@@ -1596,6 +1597,12 @@ const handleSealPulse = () => {
     const sdCValue =
       tciProfile.sd_c?.score ??
       Number(tciProfile.sd?.score || 0) + Number(tciProfile.c?.score || 0);
+    const zoneWrapClass = (zone) =>
+      `transition-all duration-300 rounded-[2rem] border ${
+        activeLabZone === zone
+          ? "opacity-100 border-amber-500/40 bg-slate-900/45 p-4 md:p-6"
+          : "opacity-80 border-white/10 bg-slate-900/20 p-3 md:p-4"
+      }`;
     return (
       <div className="flex-grow w-full max-w-7xl mx-auto overflow-y-auto no-scrollbar pb-24 px-4 animate-fadeIn font-sans">
         <div className="flex items-center justify-between mb-8">
@@ -1612,19 +1619,22 @@ const handleSealPulse = () => {
             <Trash2 size={12} /> Reset System
           </button>
         </div>
-        <div className="mb-8 bg-[#0F172A]/70 border border-white/10 rounded-[2rem] px-4 py-5 md:px-6 md:py-6 shadow-xl">
-          <div className="flex items-center justify-center gap-2 md:gap-4">
-            <div className="text-[10px] md:text-[11px] font-black text-emerald-400 border border-emerald-500/30 bg-emerald-500/10 px-3 py-2 rounded-xl tracking-wide">
+        <div className="mb-8 bg-[#0F172A]/70 border border-white/10 rounded-[2rem] px-4 py-5 md:px-6 md:py-6 shadow-xl relative overflow-hidden">
+          <svg className="absolute inset-0 w-full h-full opacity-35 pointer-events-none" viewBox="0 0 1200 200" preserveAspectRatio="none">
+            <path d="M 40 155 C 250 20, 470 20, 620 108 S 980 185, 1160 48" stroke="#f59e0b" strokeWidth="2" fill="none" strokeDasharray="5 7" />
+          </svg>
+          <div className="relative flex items-center justify-center gap-2 md:gap-4">
+            <button onClick={() => setActiveLabZone("current")} className={`text-[10px] md:text-[11px] font-black px-3 py-2 rounded-xl tracking-wide transition-all ${activeLabZone === "current" ? "text-emerald-300 border border-emerald-400/60 bg-emerald-500/15" : "text-emerald-500/80 border border-emerald-500/20 bg-emerald-500/5"}`}>
               현재의 나 / Current Self
-            </div>
+            </button>
             <div className="text-amber-400/60 text-xs md:text-sm">→</div>
-            <div className="text-[11px] md:text-[12px] font-black text-amber-300 border border-amber-400/50 bg-amber-500/15 px-4 py-2.5 rounded-2xl tracking-wide scale-105 shadow-[0_0_24px_rgba(245,158,11,0.35)] animate-pulse">
+            <button onClick={() => setActiveLabZone("pulse")} className={`text-[11px] md:text-[12px] font-black px-4 py-2.5 rounded-2xl tracking-wide scale-105 shadow-[0_0_24px_rgba(245,158,11,0.35)] transition-all ${activeLabZone === "pulse" ? "text-amber-300 border border-amber-400/50 bg-amber-500/15 animate-pulse" : "text-amber-400/80 border border-amber-500/30 bg-amber-500/5"}`}>
               ✦ THE PULSE / Bridge Core ✦
-            </div>
+            </button>
             <div className="text-amber-400/60 text-xs md:text-sm">→</div>
-            <div className="text-[10px] md:text-[11px] font-black text-cyan-300 border border-cyan-400/30 bg-cyan-500/10 px-3 py-2 rounded-xl tracking-wide">
+            <button onClick={() => setActiveLabZone("future")} className={`text-[10px] md:text-[11px] font-black px-3 py-2 rounded-xl tracking-wide transition-all ${activeLabZone === "future" ? "text-cyan-200 border border-cyan-400/60 bg-cyan-500/15" : "text-cyan-300/80 border border-cyan-400/20 bg-cyan-500/5"}`}>
               미래의 나 / Apex BPS
-            </div>
+            </button>
           </div>
           <p className="text-center text-[11px] text-slate-400 mt-4">
             현재의 나는 기록되고, 미래의 나는 설계되지만, 변화는 이곳에서 일어납니다.
@@ -1632,6 +1642,7 @@ const handleSealPulse = () => {
         </div>
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           <div className="lg:col-span-8 space-y-8">
+            <section className={zoneWrapClass("current")}>
             <div className="bg-[#111827]/70 border border-emerald-500/20 rounded-[2rem] p-6 shadow-xl">
               <p className="text-[11px] font-black text-emerald-400 uppercase tracking-[0.25em]">
                 현재의 나 / Current Self
@@ -1834,7 +1845,9 @@ const handleSealPulse = () => {
                 </div>
               </div>
             </div>
+            </section>
 
+            <section className={zoneWrapClass("pulse")}>
             <div className="bg-[#111827]/70 border border-amber-500/30 rounded-[2rem] p-6 shadow-xl shadow-[0_0_30px_rgba(245,158,11,0.12)]">
               <p className="text-[11px] font-black text-amber-300 uppercase tracking-[0.25em]">
                 THE PULSE / Bridge Core
@@ -1907,6 +1920,8 @@ const handleSealPulse = () => {
                 </div>
               ))}
             </div>
+            </section>
+            <section className={zoneWrapClass("future")}>
             <div className="bg-[#111827]/70 border border-cyan-500/20 rounded-[2rem] p-6 shadow-xl mt-8">
               <p className="text-[11px] font-black text-cyan-300 uppercase tracking-[0.25em]">
                 미래의 나 / Apex BPS
@@ -2059,8 +2074,10 @@ const handleSealPulse = () => {
                 </div>
               </div>
             </div>
+            </section>
           </div>
           <div className="lg:col-span-4 space-y-6">
+            <section className={zoneWrapClass("current")}>
             <div className="bg-[#2D3748]/40 p-7 rounded-[2.5rem] border border-white/5 shadow-xl">
               <p className="text-[12px] font-black text-amber-500 uppercase tracking-[0.3em] mb-6 flex items-center gap-2">
                 <Coins size={14} /> Financial Core
@@ -2120,6 +2137,8 @@ const handleSealPulse = () => {
                 </div>
               </div>
             </div>
+            </section>
+            <section className={zoneWrapClass("current")}>
             <div className="bg-[#2D3748]/40 p-6 rounded-[2.5rem] border border-white/5 shadow-xl font-sans">
               <p className="text-[12px] font-black text-emerald-500 uppercase tracking-widest mb-6 flex items-center gap-2">
                 <Brain size={12} /> VAK Architecture
@@ -2290,6 +2309,7 @@ const handleSealPulse = () => {
                 </div>
               </div>
             </div>
+            </section>
           </div>
         </div>
       </div>
