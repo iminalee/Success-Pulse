@@ -1603,6 +1603,29 @@ const handleSealPulse = () => {
           ? "opacity-100 border-amber-500/40 bg-slate-900/45 p-4 md:p-6"
           : "opacity-80 border-white/10 bg-slate-900/20 p-3 md:p-4"
       }`;
+    const zonePreview = {
+      current: {
+        icon: User,
+        title: "Current Self",
+        keywords: "Identity · Life · VAK · TCI",
+        summary: "지금의 나를 정확히 기록하고 기준점을 세웁니다.",
+        color: "emerald",
+      },
+      pulse: {
+        icon: Activity,
+        title: "THE PULSE",
+        keywords: "Bridge · Ledger · Contract",
+        summary: "현재와 미래를 연결하는 실행 코어입니다.",
+        color: "amber",
+      },
+      future: {
+        icon: Star,
+        title: "Apex BPS",
+        keywords: "Traits · Vision · Immersion",
+        summary: "미래 정체성을 설계하고 감각적으로 고정합니다.",
+        color: "cyan",
+      },
+    };
     return (
       <div className="flex-grow w-full max-w-7xl mx-auto overflow-y-auto no-scrollbar pb-24 px-4 animate-fadeIn font-sans">
         <div className="flex items-center justify-between mb-8">
@@ -1640,9 +1663,40 @@ const handleSealPulse = () => {
             현재의 나는 기록되고, 미래의 나는 설계되지만, 변화는 이곳에서 일어납니다.
           </p>
         </div>
+        <div className="hidden lg:grid lg:grid-cols-12 gap-4 mb-8 items-stretch">
+          {["current", "pulse", "future"].map((zone) => {
+            const meta = zonePreview[zone];
+            const Icon = meta.icon;
+            const isActive = activeLabZone === zone;
+            const colClass = zone === "pulse" ? "lg:col-span-6" : "lg:col-span-3";
+            return (
+              <button
+                key={zone}
+                onClick={() => setActiveLabZone(zone)}
+                className={`${colClass} text-left rounded-[2rem] border transition-all duration-300 p-5 relative overflow-hidden ${
+                  isActive
+                    ? zone === "pulse"
+                      ? "bg-amber-500/10 border-amber-400/60 shadow-[0_0_40px_rgba(245,158,11,0.35)] scale-[1.02]"
+                      : "bg-slate-900/70 border-white/20 shadow-lg"
+                    : "bg-slate-900/40 border-white/10 opacity-85 hover:opacity-100"
+                }`}
+              >
+                {zone === "pulse" && <div className="absolute inset-0 bg-amber-400/10 blur-2xl animate-pulse pointer-events-none" />}
+                <div className="relative z-10">
+                  <div className="flex items-center gap-3 mb-2">
+                    <Icon size={18} className={zone === "current" ? "text-emerald-300" : zone === "pulse" ? "text-amber-300" : "text-cyan-200"} />
+                    <p className="text-xs font-black text-white uppercase tracking-wider">{meta.title}</p>
+                  </div>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{meta.keywords}</p>
+                  <p className="text-[11px] text-slate-300 mt-2 leading-relaxed">{meta.summary}</p>
+                </div>
+              </button>
+            );
+          })}
+        </div>
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           <div className="lg:col-span-8 space-y-8">
-            <section className={zoneWrapClass("current")}>
+            {activeLabZone === "current" && <section className={zoneWrapClass("current")}>
             <div className="bg-[#111827]/70 border border-emerald-500/20 rounded-[2rem] p-6 shadow-xl">
               <p className="text-[11px] font-black text-emerald-400 uppercase tracking-[0.25em]">
                 현재의 나 / Current Self
@@ -1845,9 +1899,9 @@ const handleSealPulse = () => {
                 </div>
               </div>
             </div>
-            </section>
+            </section>}
 
-            <section className={zoneWrapClass("pulse")}>
+            {activeLabZone === "pulse" && <section className={zoneWrapClass("pulse")}>
             <div className="bg-[#111827]/70 border border-amber-500/30 rounded-[2rem] p-6 shadow-xl shadow-[0_0_30px_rgba(245,158,11,0.12)]">
               <p className="text-[11px] font-black text-amber-300 uppercase tracking-[0.25em]">
                 THE PULSE / Bridge Core
@@ -1920,8 +1974,8 @@ const handleSealPulse = () => {
                 </div>
               ))}
             </div>
-            </section>
-            <section className={zoneWrapClass("future")}>
+            </section>}
+            {activeLabZone === "future" && <section className={zoneWrapClass("future")}>
             <div className="bg-[#111827]/70 border border-cyan-500/20 rounded-[2rem] p-6 shadow-xl mt-8">
               <p className="text-[11px] font-black text-cyan-300 uppercase tracking-[0.25em]">
                 미래의 나 / Apex BPS
@@ -2074,10 +2128,10 @@ const handleSealPulse = () => {
                 </div>
               </div>
             </div>
-            </section>
+            </section>}
           </div>
           <div className="lg:col-span-4 space-y-6">
-            <section className={zoneWrapClass("current")}>
+            {activeLabZone === "current" && <section className={zoneWrapClass("current")}>
             <div className="bg-[#2D3748]/40 p-7 rounded-[2.5rem] border border-white/5 shadow-xl">
               <p className="text-[12px] font-black text-amber-500 uppercase tracking-[0.3em] mb-6 flex items-center gap-2">
                 <Coins size={14} /> Financial Core
@@ -2137,8 +2191,8 @@ const handleSealPulse = () => {
                 </div>
               </div>
             </div>
-            </section>
-            <section className={zoneWrapClass("current")}>
+            </section>}
+            {activeLabZone === "current" && <section className={zoneWrapClass("current")}>
             <div className="bg-[#2D3748]/40 p-6 rounded-[2.5rem] border border-white/5 shadow-xl font-sans">
               <p className="text-[12px] font-black text-emerald-500 uppercase tracking-widest mb-6 flex items-center gap-2">
                 <Brain size={12} /> VAK Architecture
@@ -2309,7 +2363,7 @@ const handleSealPulse = () => {
                 </div>
               </div>
             </div>
-            </section>
+            </section>}
           </div>
         </div>
       </div>
