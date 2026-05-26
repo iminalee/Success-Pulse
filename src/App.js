@@ -1598,8 +1598,34 @@ const handleSealPulse = () => {
             <Trash2 size={12} /> Reset System
           </button>
         </div>
+        <div className="mb-8 bg-[#0F172A]/70 border border-white/10 rounded-[2rem] px-4 py-5 md:px-6 md:py-6 shadow-xl">
+          <div className="flex items-center justify-center gap-2 md:gap-4">
+            <div className="text-[10px] md:text-[11px] font-black text-emerald-400 border border-emerald-500/30 bg-emerald-500/10 px-3 py-2 rounded-xl tracking-wide">
+              현재의 나 / Current Self
+            </div>
+            <div className="text-amber-400/60 text-xs md:text-sm">→</div>
+            <div className="text-[11px] md:text-[12px] font-black text-amber-300 border border-amber-400/50 bg-amber-500/15 px-4 py-2.5 rounded-2xl tracking-wide scale-105 shadow-[0_0_24px_rgba(245,158,11,0.35)] animate-pulse">
+              ✦ THE PULSE / Bridge Core ✦
+            </div>
+            <div className="text-amber-400/60 text-xs md:text-sm">→</div>
+            <div className="text-[10px] md:text-[11px] font-black text-cyan-300 border border-cyan-400/30 bg-cyan-500/10 px-3 py-2 rounded-xl tracking-wide">
+              미래의 나 / Apex BPS
+            </div>
+          </div>
+          <p className="text-center text-[11px] text-slate-400 mt-4">
+            현재의 나는 기록되고, 미래의 나는 설계되지만, 변화는 이곳에서 일어납니다.
+          </p>
+        </div>
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           <div className="lg:col-span-8 space-y-8">
+            <div className="bg-[#111827]/70 border border-emerald-500/20 rounded-[2rem] p-6 shadow-xl">
+              <p className="text-[11px] font-black text-emerald-400 uppercase tracking-[0.25em]">
+                현재의 나 / Current Self
+              </p>
+              <p className="text-[11px] text-slate-400 mt-2">
+                Identity Registration · Life Profile · Financial Core · VAK · TCI
+              </p>
+            </div>
             <div className="bg-[#2D3748]/30 p-8 rounded-[3rem] border border-white/5 shadow-xl border-l-4 border-amber-500 mb-8 flex flex-col md:flex-row items-center gap-8">
               <div className="bg-amber-500/10 p-6 rounded-full border border-amber-500/20 shadow-[0_0_30px_rgba(245,158,11,0.1)]">
                 <User size={32} className="text-amber-500" />
@@ -1729,8 +1755,154 @@ const handleSealPulse = () => {
               </div>
             </div>
 
-            <div className="bg-[#2D3748]/30 p-10 rounded-[3rem] border border-white/5 shadow-xl border-t-4 border-amber-500/50">
-              <p className="text-[12px] font-black text-amber-500 uppercase tracking-[0.4em] mb-4 flex items-center gap-2">
+            <div className="mt-8 bg-[#1A202C]/50 p-6 rounded-[2rem] border border-white/5">
+              <p className="text-[10px] font-black text-amber-500 uppercase tracking-widest mb-4">
+                Life Profile / 생활 프로필
+              </p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <div>
+                  <label className="block text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1">
+                    Sleep Time
+                  </label>
+                  <input
+                    value={lifeProfile.sleep_time}
+                    onChange={(e) =>
+                      setLifeProfile((prev) => ({ ...prev, sleep_time: e.target.value }))
+                    }
+                    placeholder="23:30"
+                    className="w-full bg-slate-900 border border-white/10 rounded-2xl p-3 text-sm text-slate-200 outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1">
+                    Wake Time
+                  </label>
+                  <input
+                    value={lifeProfile.wake_time}
+                    onChange={(e) =>
+                      setLifeProfile((prev) => ({ ...prev, wake_time: e.target.value }))
+                    }
+                    placeholder="06:30"
+                    className="w-full bg-slate-900 border border-white/10 rounded-2xl p-3 text-sm text-slate-200 outline-none"
+                  />
+                </div>
+              </div>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1">
+                    Sleep Notes
+                  </label>
+                  <textarea
+                    value={lifeProfile.sleep_notes}
+                    onChange={(e) =>
+                      setLifeProfile((prev) => ({ ...prev, sleep_notes: e.target.value }))
+                    }
+                    placeholder="수면 루틴, 개선점, 컨디션 메모"
+                    className="w-full min-h-[90px] bg-slate-900 border border-white/10 rounded-2xl p-3 text-sm text-slate-200 outline-none resize-y"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1">
+                    Major Goals (comma or newline)
+                  </label>
+                  <textarea
+                    value={(lifeProfile.major_goals || []).join("\n")}
+                    onChange={(e) => {
+                      const goals = e.target.value
+                        .split(/[\n,]/)
+                        .map((item) => item.trim())
+                        .filter(Boolean);
+                      setLifeProfile((prev) => ({ ...prev, major_goals: goals }));
+                    }}
+                    placeholder="예) 1년 내 연봉 2배, 매일 운동, 영어 프레젠테이션"
+                    className="w-full min-h-[100px] bg-slate-900 border border-white/10 rounded-2xl p-3 text-sm text-slate-200 outline-none resize-y"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-[#111827]/70 border border-amber-500/30 rounded-[2rem] p-6 shadow-xl shadow-[0_0_30px_rgba(245,158,11,0.12)]">
+              <p className="text-[11px] font-black text-amber-300 uppercase tracking-[0.25em]">
+                THE PULSE / Bridge Core
+              </p>
+              <p className="text-[11px] text-slate-400 mt-2">
+                Fixed Value Events · Target Date · Mental Bank Goal · Value Event Award · Contract Link
+              </p>
+            </div>
+            <div className="bg-[#1A202C]/60 p-6 rounded-[2.5rem] border border-amber-500/20 mb-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="bg-slate-900/50 border border-white/10 rounded-2xl p-4">
+                  <p className="text-[9px] text-slate-500 font-black uppercase tracking-widest mb-2">Target Date</p>
+                  <p className="text-sm font-black text-white">{targetDate}</p>
+                </div>
+                <div className="bg-slate-900/50 border border-white/10 rounded-2xl p-4">
+                  <p className="text-[9px] text-slate-500 font-black uppercase tracking-widest mb-2">Contract Status</p>
+                  <button
+                    onClick={() => setCurrentView("contract")}
+                    className="text-[10px] font-black text-amber-400 hover:text-amber-300 uppercase tracking-widest"
+                  >
+                    {signedDate ? "View Contract" : "Go to Contract"}
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div className="space-y-4">
+              <div className="flex justify-between items-center mb-4">
+                <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">
+                  Fixed Value Events
+                </p>
+                <button
+                  onClick={() => addEvent(activeLevel)}
+                  className="bg-emerald-600 text-white px-6 py-2.5 rounded-2xl text-[10px] font-black flex items-center gap-2 uppercase tracking-widest"
+                >
+                  <Plus size={14} /> Add Event
+                </button>
+              </div>
+              {visions[activeLevel]?.events?.map((ev) => (
+                <div
+                  key={ev.id}
+                  className="flex items-center gap-4 bg-[#1A202C]/40 p-5 rounded-2xl border border-white/5"
+                >
+                  <CheckSquare size={18} className="text-slate-600" />
+                  <input
+                    value={ev.name}
+                    onChange={(e) =>
+                      setVisions((prev) => ({
+                        ...prev,
+                        [activeLevel]: {
+                          ...prev[activeLevel],
+                          events: prev[activeLevel].events.map((p) =>
+                            p.id === ev.id ? { ...p, name: e.target.value } : p
+                          ),
+                        },
+                      }))
+                    }
+                    className="bg-transparent border-none text-base text-slate-200 focus:outline-none flex-grow font-semibold"
+                  />
+                  <button
+                    onClick={() =>
+                      updateVision(activeLevel, {
+                        events: visions[activeLevel]?.events?.filter((p) => p.id !== ev.id),
+                      })
+                    }
+                    className="text-rose-500/20 hover:text-rose-500"
+                    aria-label="이벤트 삭제"
+                  >
+                    <Trash2 size={18} />
+                  </button>
+                </div>
+              ))}
+            </div>
+            <div className="bg-[#111827]/70 border border-cyan-500/20 rounded-[2rem] p-6 shadow-xl mt-8">
+              <p className="text-[11px] font-black text-cyan-300 uppercase tracking-[0.25em]">
+                미래의 나 / Apex BPS
+              </p>
+              <p className="text-[11px] text-slate-400 mt-2">
+                BPS Character Forge · Goal Architect · Vision · VAK Vision · Immersion Script
+              </p>
+            </div>
+            <div className="bg-[#2D3748]/30 p-10 rounded-[3rem] border border-white/5 shadow-xl border-t-4 border-cyan-500/30">
+              <p className="text-[12px] font-black text-cyan-300 uppercase tracking-[0.4em] mb-4 flex items-center gap-2">
                 <Star size={16} /> BPS Character Forge
               </p>
               <div className="grid grid-cols-1 md:grid-cols-5 gap-3 mb-6">
@@ -1870,122 +2042,6 @@ const handleSealPulse = () => {
                     className="w-full bg-transparent border-none text-sm text-slate-200 leading-[1.8] font-medium focus:outline-none italic"
                     placeholder="AI가 VAK 기반 시나리오를 설계합니다."
                   />
-                </div>
-              </div>
-              <div className="space-y-4">
-                <div className="flex justify-between items-center mb-4">
-                  <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">
-                    Fixed Value Events
-                  </p>
-                  <button
-                    onClick={() => addEvent(activeLevel)}
-                    className="bg-emerald-600 text-white px-6 py-2.5 rounded-2xl text-[10px] font-black flex items-center gap-2 uppercase tracking-widest"
-                  >
-                    <Plus size={14} /> Add Event
-                  </button>
-                </div>
-                {visions[activeLevel]?.events?.map((ev) => (
-                  <div
-                    key={ev.id}
-                    className="flex items-center gap-4 bg-[#1A202C]/40 p-5 rounded-2xl border border-white/5"
-                  >
-                    <CheckSquare size={18} className="text-slate-600" />
-                    <input
-                      value={ev.name}
-                      onChange={(e) =>
-                        setVisions((prev) => ({
-                          ...prev,
-                          [activeLevel]: {
-                            ...prev[activeLevel],
-                            events: prev[activeLevel].events.map((p) =>
-                              p.id === ev.id
-                                ? { ...p, name: e.target.value }
-                                : p
-                            ),
-                          },
-                        }))
-                      }
-                      className="bg-transparent border-none text-base text-slate-200 focus:outline-none flex-grow font-semibold"
-                    />
-                    <button
-                      onClick={() =>
-                        updateVision(activeLevel, {
-                          events: visions[activeLevel]?.events?.filter(
-                            (p) => p.id !== ev.id
-                          ),
-                        })
-                      }
-                      className="text-rose-500/20 hover:text-rose-500"
-                      aria-label="이벤트 삭제"
-                    >
-                      <Trash2 size={18} />
-                    </button>
-                  </div>
-                ))}
-              </div>
-              <div className="mt-8 bg-[#1A202C]/50 p-6 rounded-[2rem] border border-white/5">
-                <p className="text-[10px] font-black text-amber-500 uppercase tracking-widest mb-4">
-                  Life Profile / 생활 프로필
-                </p>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                  <div>
-                    <label className="block text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1">
-                      Sleep Time
-                    </label>
-                    <input
-                      value={lifeProfile.sleep_time}
-                      onChange={(e) =>
-                        setLifeProfile((prev) => ({ ...prev, sleep_time: e.target.value }))
-                      }
-                      placeholder="23:30"
-                      className="w-full bg-slate-900 border border-white/10 rounded-2xl p-3 text-sm text-slate-200 outline-none"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1">
-                      Wake Time
-                    </label>
-                    <input
-                      value={lifeProfile.wake_time}
-                      onChange={(e) =>
-                        setLifeProfile((prev) => ({ ...prev, wake_time: e.target.value }))
-                      }
-                      placeholder="06:30"
-                      className="w-full bg-slate-900 border border-white/10 rounded-2xl p-3 text-sm text-slate-200 outline-none"
-                    />
-                  </div>
-                </div>
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1">
-                      Sleep Notes
-                    </label>
-                    <textarea
-                      value={lifeProfile.sleep_notes}
-                      onChange={(e) =>
-                        setLifeProfile((prev) => ({ ...prev, sleep_notes: e.target.value }))
-                      }
-                      placeholder="수면 루틴, 개선점, 컨디션 메모"
-                      className="w-full min-h-[90px] bg-slate-900 border border-white/10 rounded-2xl p-3 text-sm text-slate-200 outline-none resize-y"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1">
-                      Major Goals (comma or newline)
-                    </label>
-                    <textarea
-                      value={(lifeProfile.major_goals || []).join("\n")}
-                      onChange={(e) => {
-                        const goals = e.target.value
-                          .split(/[\n,]/)
-                          .map((item) => item.trim())
-                          .filter(Boolean);
-                        setLifeProfile((prev) => ({ ...prev, major_goals: goals }));
-                      }}
-                      placeholder="예) 1년 내 연봉 2배, 매일 운동, 영어 프레젠테이션"
-                      className="w-full min-h-[100px] bg-slate-900 border border-white/10 rounded-2xl p-3 text-sm text-slate-200 outline-none resize-y"
-                    />
-                  </div>
                 </div>
               </div>
             </div>
