@@ -82,6 +82,8 @@ const DiscoverJourney = ({
         <AccountGate
           tciQuickProfile={journeyData.tciQuickProfile}
           vakProfile={journeyData.vakProfile}
+          isLoggedIn={isLoggedIn}
+          currentUserName={appUserName}
           onComplete={(name) => {
             updateJourneyData("userName", name);
             goNext();
