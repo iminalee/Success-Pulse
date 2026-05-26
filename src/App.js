@@ -140,6 +140,7 @@ const App = () => {
   const [user, setUser] = useState(null);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState(""); // 추가
+  const [signupName, setSignupName] = useState("");
   const [loading, setLoading] = useState(false);
   const [customTask, setCustomTask] = useState("");
   const [isRecoveryMode, setIsRecoveryMode] = useState(false);
@@ -949,17 +950,62 @@ const App = () => {
 
   // 1. 메일 보내기 함수 (수정버전)// [수정됨] 이메일 + 비밀번호 회원가입 함수
   const handleSignUp = async () => {
-    if (!email || !password)
+    if (!signupName.trim()) {
+      return showToast("회원가입을 위해 이름 또는 닉네임을 입력해 주세요.");
+    }
+
+    if (!email || !password) {
       return showToast("이메일과 비밀번호를 모두 입력해주세요.");
+    }
+
     setLoading(true);
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: { data: { user_name: userName } },
-    });
-    setLoading(false);
-    if (error) showToast("회원가입 실패: " + error.message);
-    else showToast("회원가입 성공! 이제 로그인을 진행하세요.");
+
+    try {
+      const trimmedSignupName = signupName.trim();
+      const trimmedEmail = email.trim();
+
+      const { error } = await supabase.auth.signUp({
+        email: trimmedEmail,
+        password,
+        options: { data: { user_name: trimmedSignupName } },
+      });
+
+      if (error) {
+        showToast("회원가입 실패: " + error.message);
+        return;
+      }
+
+      const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+
+      if (sessionError) {
+        showToast("회원가입은 성공했지만 세션 확인에 실패했습니다: " + sessionError.message);
+        return;
+      }
+
+      const sessionUser = sessionData?.session?.user;
+
+      if (!sessionUser) {
+        showToast("회원가입이 접수되었습니다. 이메일 인증 후 로그인해 주세요.");
+        return;
+      }
+
+      const { error: upsertError } = await supabase.from("pulse_data").upsert({
+        user_id: sessionUser.id,
+        user_name: trimmedSignupName,
+        profile_source: "direct_signup",
+        updated_at: new Date().toISOString(),
+      }, { onConflict: "user_id" });
+
+      if (upsertError) {
+        showToast("회원가입은 성공했지만 프로필 생성에 실패했습니다: " + upsertError.message);
+        return;
+      }
+
+      setUserName(trimmedSignupName);
+      showToast("회원가입 성공! 이제 로그인을 진행하세요.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   // 2. 인증번호 확인 함수 (새로 추가됨!)// [수정됨] 이메일 + 비밀번호 로그인 함수
@@ -1064,6 +1110,8 @@ const App = () => {
       }
 
       setUser(null);
+      setUserName("");
+      setSignupName("");
       setEmail("");
       setPassword("");
       setApexMessages([]);
@@ -4360,6 +4408,13 @@ const nowX = getX(dataPoints[dataPoints.length - 1].date); // 📅 가로 위치
           {/* 입력 폼 */}
           <div className="space-y-3">
             <input
+              type="text"
+              value={signupName}
+              onChange={(e) => setSignupName(e.target.value)}
+              placeholder="이름 또는 닉네임"
+              className="w-full bg-[#0A0F1E] border border-white/10 rounded-2xl p-4 text-white text-sm outline-none focus:border-amber-500/50 transition-colors"
+            />
+            <input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
@@ -4402,6 +4457,21 @@ const nowX = getX(dataPoints[dataPoints.length - 1].date); // 📅 가로 위치
                 비밀번호를 잊으셨나요?
               </button>
             </div>
+          </div>
+
+          <div className="text-center pt-4">
+            <button
+              onClick={() => {
+                localStorage.removeItem("pulse_onboarding_complete");
+                setIsOnboardingComplete(false);
+                setSignupName("");
+                setEmail("");
+                setPassword("");
+              }}
+              className="text-[11px] text-amber-500/80 hover:text-amber-400 transition-colors"
+            >
+              처음 사용자라면 Act 1으로 BPS 프로필 만들기
+            </button>
           </div>
 
           {/* 푸터 */}
