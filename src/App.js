@@ -138,6 +138,7 @@ const App = () => {
 
   // 상태 관리 (DB 동기화용)
   const [user, setUser] = useState(null);
+  const [authMode, setAuthMode] = useState("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState(""); // 추가
   const [signupName, setSignupName] = useState("");
@@ -1027,7 +1028,7 @@ const App = () => {
     if (!email || !password) return showToast("이메일과 비밀번호를 입력해주세요.");
     setLoading(true);
     const { error } = await supabase.auth.signInWithPassword({
-      email,
+      email: email.trim(),
       password,
     });
     setLoading(false);
@@ -4476,18 +4477,21 @@ const nowX = getX(dataPoints[dataPoints.length - 1].date); // 📅 가로 위치
 
           {/* 입력 폼 */}
           <div className="space-y-3">
-            <input
-              type="text"
-              value={signupName}
-              onChange={(e) => setSignupName(e.target.value)}
-              placeholder="이름 또는 닉네임"
-              className="w-full bg-[#0A0F1E] border border-white/10 rounded-2xl p-4 text-white text-sm outline-none focus:border-amber-500/50 transition-colors"
-            />
+            {authMode === "signup" && (
+              <input
+                type="text"
+                value={signupName}
+                onChange={(e) => setSignupName(e.target.value)}
+                onKeyDown={(e) => { if (e.key === "Enter") handleSignUp(); }}
+                placeholder="이름 또는 닉네임"
+                className="w-full bg-[#0A0F1E] border border-white/10 rounded-2xl p-4 text-white text-sm outline-none focus:border-amber-500/50 transition-colors"
+              />
+            )}
             <input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              onKeyDown={(e) => { if (e.key === "Enter") handleSignIn(); }}
+              onKeyDown={(e) => { if (e.key === "Enter") authMode === "login" ? handleSignIn() : handleSignUp(); }}
               placeholder="이메일"
               className="w-full bg-[#0A0F1E] border border-white/10 rounded-2xl p-4 text-white text-sm outline-none focus:border-amber-500/50 transition-colors"
             />
@@ -4495,26 +4499,43 @@ const nowX = getX(dataPoints[dataPoints.length - 1].date); // 📅 가로 위치
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              onKeyDown={(e) => { if (e.key === "Enter") handleSignIn(); }}
+              onKeyDown={(e) => { if (e.key === "Enter") authMode === "login" ? handleSignIn() : handleSignUp(); }}
               placeholder="비밀번호 (6자리 이상)"
               className="w-full bg-[#0A0F1E] border border-white/10 rounded-2xl p-4 text-white text-sm outline-none focus:border-amber-500/50 transition-colors"
             />
 
-            <div className="flex gap-2 pt-2">
+            <div className="pt-2">
               <button
-                onClick={handleSignIn}
+                onClick={authMode === "login" ? handleSignIn : handleSignUp}
                 disabled={loading}
-                className="flex-1 bg-amber-600 hover:bg-amber-500 disabled:bg-slate-700 disabled:cursor-not-allowed text-white font-black text-xs uppercase tracking-widest py-4 rounded-2xl transition-all active:scale-95"
+                className="w-full bg-amber-600 hover:bg-amber-500 disabled:bg-slate-700 disabled:cursor-not-allowed text-white font-black text-xs uppercase tracking-widest py-4 rounded-2xl transition-all active:scale-95"
               >
-                {loading ? "..." : "로그인"}
+                {loading ? "..." : authMode === "login" ? "로그인" : "회원가입"}
               </button>
-              <button
-                onClick={handleSignUp}
-                disabled={loading}
-                className="flex-1 bg-slate-800 hover:bg-slate-700 disabled:cursor-not-allowed text-white font-black text-xs uppercase tracking-widest py-4 rounded-2xl transition-all active:scale-95 border border-white/10"
-              >
-                {loading ? "..." : "회원가입"}
-              </button>
+            </div>
+
+            <div className="text-center pt-2">
+              {authMode === "login" ? (
+                <button
+                  onClick={() => {
+                    setAuthMode("signup");
+                    setSignupName("");
+                  }}
+                  className="text-[11px] text-slate-400 hover:text-amber-400 transition-colors"
+                >
+                  아직 계정이 없으신가요? 회원가입
+                </button>
+              ) : (
+                <button
+                  onClick={() => {
+                    setAuthMode("login");
+                    setSignupName("");
+                  }}
+                  className="text-[11px] text-slate-400 hover:text-amber-400 transition-colors"
+                >
+                  이미 계정이 있으신가요? 로그인
+                </button>
+              )}
             </div>
 
             <div className="text-center pt-4">
@@ -4529,17 +4550,21 @@ const nowX = getX(dataPoints[dataPoints.length - 1].date); // 📅 가로 위치
           </div>
 
           <div className="text-center pt-4">
+            <p className="text-[11px] text-slate-400 mb-2">
+              처음이라면 간단한 질문을 통해 나의 가능한 최고의 버전 프로필을 먼저 만들어볼 수 있어요.
+            </p>
             <button
               onClick={() => {
                 localStorage.removeItem("pulse_onboarding_complete");
                 setIsOnboardingComplete(false);
+                setAuthMode("login");
                 setSignupName("");
                 setEmail("");
                 setPassword("");
               }}
               className="text-[11px] text-amber-500/80 hover:text-amber-400 transition-colors"
             >
-              처음 사용자라면 Act 1으로 BPS 프로필 만들기
+              나의 가능한 최고의 버전 프로필 만들기
             </button>
           </div>
 
