@@ -226,6 +226,11 @@ const App = () => {
     return localStorage.getItem("pulse_onboarding_complete") === "true";
   });
 
+  const handleRunAct1FromMyLab = () => {
+    localStorage.removeItem("pulse_onboarding_complete");
+    setIsOnboardingComplete(false);
+  };
+
   const handleExistingAccountRoute = () => {
     localStorage.setItem("pulse_onboarding_complete", "true");
     setIsOnboardingComplete(true);
@@ -304,17 +309,22 @@ const App = () => {
     // Local state 우선 반영 (저장 실패 시에도 사용자 입력은 유지)
     if (journeyData?.userName) setUserName(journeyData.userName);
     if (bps && Number.isInteger(selectedNeedLevel)) {
-      setVisions((prev) => ({
-        ...prev,
-        [selectedNeedLevel]: {
-          ...prev[selectedNeedLevel],
-          title: bps.title ?? prev[selectedNeedLevel]?.title ?? "",
-          v: bps.vision_v ?? bps.v ?? prev[selectedNeedLevel]?.v ?? "",
-          a: bps.vision_a ?? bps.a ?? prev[selectedNeedLevel]?.a ?? "",
-          k: bps.vision_k ?? bps.k ?? prev[selectedNeedLevel]?.k ?? "",
-          immersionScript: bps.immersionScript ?? prev[selectedNeedLevel]?.immersionScript ?? "",
-        },
-      }));
+      setVisions((prev) => {
+        const hasExistingTitle = String(prev[selectedNeedLevel]?.title || "").trim() !== "";
+        if (hasExistingTitle) return prev;
+
+        return {
+          ...prev,
+          [selectedNeedLevel]: {
+            ...prev[selectedNeedLevel],
+            title: bps.title ?? "",
+            v: bps.vision_v ?? bps.v ?? "",
+            a: bps.vision_a ?? bps.a ?? "",
+            k: bps.vision_k ?? bps.k ?? "",
+            immersionScript: bps.immersionScript ?? "",
+          },
+        };
+      });
     }
     if (journeyData?.signature) setSignature(journeyData.signature);
     setIsOnboardingComplete(true);
@@ -359,17 +369,20 @@ const App = () => {
       };
 
       if (bps && Number.isInteger(selectedNeedLevel)) {
-        nextVisions[selectedNeedLevel] = {
-          ...(nextVisions[selectedNeedLevel] || {}),
-          title: bps.title ?? "",
-          v: bps.vision_v ?? bps.v ?? "",
-          a: bps.vision_a ?? bps.a ?? "",
-          k: bps.vision_k ?? bps.k ?? "",
-          vision_v: bps.vision_v ?? bps.v ?? "",
-          vision_a: bps.vision_a ?? bps.a ?? "",
-          vision_k: bps.vision_k ?? bps.k ?? "",
-          immersionScript: bps.immersionScript ?? "",
-        };
+        const existingVisionTitle = String(nextVisions[selectedNeedLevel]?.title || "").trim();
+        if (!existingVisionTitle) {
+          nextVisions[selectedNeedLevel] = {
+            ...(nextVisions[selectedNeedLevel] || {}),
+            title: bps.title ?? "",
+            v: bps.vision_v ?? bps.v ?? "",
+            a: bps.vision_a ?? bps.a ?? "",
+            k: bps.vision_k ?? bps.k ?? "",
+            vision_v: bps.vision_v ?? bps.v ?? "",
+            vision_a: bps.vision_a ?? bps.a ?? "",
+            vision_k: bps.vision_k ?? bps.k ?? "",
+            immersionScript: bps.immersionScript ?? "",
+          };
+        }
       }
 
       const existingContract = existingProfile.contract && typeof existingProfile.contract === "object"

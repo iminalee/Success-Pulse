@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from "react";
 import { supabase } from "../../supabaseClient";
 
-const AccountGate = ({ tciQuickProfile, vakProfile, onComplete }) => {
+const AccountGate = ({ tciQuickProfile, vakProfile, onComplete, isLoggedIn = false, currentUserName = "" }) => {
   const [mode, setMode] = useState("signup");
 
   const [name, setName] = useState("");
@@ -41,6 +41,36 @@ const AccountGate = ({ tciQuickProfile, vakProfile, onComplete }) => {
     }
 
     return message || "인증 처리 중 오류가 발생했습니다.";
+  };
+
+  const handleContinueWithCurrentSession = async () => {
+    if (loading) return;
+
+    setLoading(true);
+    setError("");
+    setNotice("");
+
+    try {
+      const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+      if (sessionError) throw sessionError;
+
+      const sessionUser = sessionData?.session?.user;
+      if (!sessionUser) {
+        throw new Error("로그인 세션을 찾지 못했습니다. 다시 로그인 후 시도해 주세요.");
+      }
+
+      const fallbackName = (currentUserName || "").trim()
+        || sessionUser.user_metadata?.user_name
+        || sessionUser.user_metadata?.full_name
+        || sessionUser.email?.split("@")[0]
+        || "";
+
+      await onComplete(fallbackName);
+    } catch (e) {
+      setError(e?.message || "현재 계정 연결 중 오류가 발생했습니다.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleSignup = async () => {
@@ -139,6 +169,34 @@ const AccountGate = ({ tciQuickProfile, vakProfile, onComplete }) => {
   };
 
   const isSignupMode = mode === "signup";
+
+  if (isLoggedIn) {
+    return (
+      <div className="fixed inset-0 bg-slate-950 flex flex-col items-center justify-center px-8">
+        <div className="w-full max-w-sm text-center">
+          <p className="text-[9px] text-amber-500/50 font-black tracking-[0.55em] uppercase mb-5">
+            계정 연결 확인
+          </p>
+          <h2 className="text-[1.35rem] font-black text-white leading-snug mb-3" style={{ wordBreak: "keep-all" }}>
+            현재 로그인된 계정에 Act 1 결과를 연결합니다.
+          </h2>
+          <p className="text-slate-600 text-xs leading-relaxed mb-7" style={{ wordBreak: "keep-all" }}>
+            로그아웃 없이 그대로 이어서 진행됩니다.
+          </p>
+
+          {error && <p className="text-red-400 text-xs mb-3 text-center" style={{ wordBreak: "keep-all" }}>{error}</p>}
+
+          <button
+            onClick={handleContinueWithCurrentSession}
+            disabled={loading}
+            className="w-full bg-amber-500 hover:bg-amber-400 active:scale-[0.98] text-slate-950 font-black py-4 rounded-2xl text-sm uppercase tracking-widest transition-all shadow-[0_0_30px_rgba(245,158,11,0.2)] disabled:opacity-30 disabled:cursor-not-allowed"
+          >
+            {loading ? "연결 중..." : "계속하기"}
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="fixed inset-0 bg-slate-950 flex flex-col items-center justify-center px-8">
