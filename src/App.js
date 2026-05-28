@@ -1663,40 +1663,28 @@ const handleSealPulse = () => {
             현재의 나는 기록되고, 미래의 나는 설계되지만, 변화는 이곳에서 일어납니다.
           </p>
         </div>
-        <div className="hidden lg:grid lg:grid-cols-12 gap-4 mb-8 items-stretch">
-          {["current", "pulse", "future"].map((zone) => {
-            const meta = zonePreview[zone];
-            const Icon = meta.icon;
-            const isActive = activeLabZone === zone;
-            const colClass = zone === "pulse" ? "lg:col-span-6" : "lg:col-span-3";
-            return (
-              <button
-                key={zone}
-                onClick={() => setActiveLabZone(zone)}
-                className={`${colClass} text-left rounded-[2rem] border transition-all duration-300 p-5 relative overflow-hidden ${
-                  isActive
-                    ? zone === "pulse"
-                      ? "bg-amber-500/10 border-amber-400/60 shadow-[0_0_40px_rgba(245,158,11,0.35)] scale-[1.02]"
-                      : "bg-slate-900/70 border-white/20 shadow-lg"
-                    : "bg-slate-900/40 border-white/10 opacity-85 hover:opacity-100"
-                }`}
-              >
-                {zone === "pulse" && <div className="absolute inset-0 bg-amber-400/10 blur-2xl animate-pulse pointer-events-none" />}
-                <div className="relative z-10">
-                  <div className="flex items-center gap-3 mb-2">
-                    <Icon size={18} className={zone === "current" ? "text-emerald-300" : zone === "pulse" ? "text-amber-300" : "text-cyan-200"} />
-                    <p className="text-xs font-black text-white uppercase tracking-wider">{meta.title}</p>
-                  </div>
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{meta.keywords}</p>
-                  <p className="text-[11px] text-slate-300 mt-2 leading-relaxed">{meta.summary}</p>
-                </div>
-              </button>
-            );
-          })}
-        </div>
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-          <div className="lg:col-span-8 space-y-8">
-            {activeLabZone === "current" && <section className={zoneWrapClass("current")}>
+        <div className="flex gap-3 items-stretch" style={{ minHeight: '72vh' }}>
+
+          {/* ── Current Self Panel ── */}
+          <div
+            className={`transition-all duration-500 ease-in-out overflow-hidden rounded-[2rem] border flex flex-col ${
+              activeLabZone === "current"
+                ? "flex-1 min-w-0 border-emerald-500/30 bg-slate-900/30"
+                : "w-14 shrink-0 cursor-pointer border-emerald-500/10 bg-slate-900/20 hover:border-emerald-500/20 hover:bg-emerald-500/5"
+            }`}
+            onClick={() => activeLabZone !== "current" && setActiveLabZone("current")}
+          >
+            {activeLabZone !== "current" ? (
+              <div className="flex-1 flex flex-col items-center justify-center gap-3 py-8 select-none">
+                <User size={16} className="text-emerald-400/60" />
+                <p className="text-[8px] font-black text-emerald-400/60 uppercase tracking-[0.3em]" style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}>Current Self</p>
+                <span className="text-[7px] text-slate-600" style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}>현재의 나</span>
+              </div>
+            ) : (
+              <div className="flex-1 overflow-y-auto no-scrollbar p-4 md:p-6">
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+                  <div className="lg:col-span-8 space-y-6">
+                    <section className={zoneWrapClass("current")}>
             <div className="bg-[#111827]/70 border border-emerald-500/20 rounded-[2rem] p-6 shadow-xl">
               <p className="text-[11px] font-black text-emerald-400 uppercase tracking-[0.25em]">
                 현재의 나 / Current Self
@@ -1899,239 +1887,10 @@ const handleSealPulse = () => {
                 </div>
               </div>
             </div>
-            </section>}
-
-            {activeLabZone === "pulse" && <section className={zoneWrapClass("pulse")}>
-            <div className="bg-[#111827]/70 border border-amber-500/30 rounded-[2rem] p-6 shadow-xl shadow-[0_0_30px_rgba(245,158,11,0.12)]">
-              <p className="text-[11px] font-black text-amber-300 uppercase tracking-[0.25em]">
-                THE PULSE / Bridge Core
-              </p>
-              <p className="text-[11px] text-slate-400 mt-2">
-                Fixed Value Events · Target Date · Mental Bank Goal · Value Event Award · Contract Link
-              </p>
-            </div>
-            <div className="bg-[#1A202C]/60 p-6 rounded-[2.5rem] border border-amber-500/20 mb-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="bg-slate-900/50 border border-white/10 rounded-2xl p-4">
-                  <p className="text-[9px] text-slate-500 font-black uppercase tracking-widest mb-2">Target Date</p>
-                  <p className="text-sm font-black text-white">{targetDate}</p>
-                </div>
-                <div className="bg-slate-900/50 border border-white/10 rounded-2xl p-4">
-                  <p className="text-[9px] text-slate-500 font-black uppercase tracking-widest mb-2">Contract Status</p>
-                  <button
-                    onClick={() => setCurrentView("contract")}
-                    className="text-[10px] font-black text-amber-400 hover:text-amber-300 uppercase tracking-widest"
-                  >
-                    {signedDate ? "View Contract" : "Go to Contract"}
-                  </button>
-                </div>
-              </div>
-            </div>
-            <div className="space-y-4">
-              <div className="flex justify-between items-center mb-4">
-                <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">
-                  Fixed Value Events
-                </p>
-                <button
-                  onClick={() => addEvent(activeLevel)}
-                  className="bg-emerald-600 text-white px-6 py-2.5 rounded-2xl text-[10px] font-black flex items-center gap-2 uppercase tracking-widest"
-                >
-                  <Plus size={14} /> Add Event
-                </button>
-              </div>
-              {visions[activeLevel]?.events?.map((ev) => (
-                <div
-                  key={ev.id}
-                  className="flex items-center gap-4 bg-[#1A202C]/40 p-5 rounded-2xl border border-white/5"
-                >
-                  <CheckSquare size={18} className="text-slate-600" />
-                  <input
-                    value={ev.name}
-                    onChange={(e) =>
-                      setVisions((prev) => ({
-                        ...prev,
-                        [activeLevel]: {
-                          ...prev[activeLevel],
-                          events: prev[activeLevel].events.map((p) =>
-                            p.id === ev.id ? { ...p, name: e.target.value } : p
-                          ),
-                        },
-                      }))
-                    }
-                    className="bg-transparent border-none text-base text-slate-200 focus:outline-none flex-grow font-semibold"
-                  />
-                  <button
-                    onClick={() =>
-                      updateVision(activeLevel, {
-                        events: visions[activeLevel]?.events?.filter((p) => p.id !== ev.id),
-                      })
-                    }
-                    className="text-rose-500/20 hover:text-rose-500"
-                    aria-label="이벤트 삭제"
-                  >
-                    <Trash2 size={18} />
-                  </button>
-                </div>
-              ))}
-            </div>
-            </section>}
-            {activeLabZone === "future" && <section className={zoneWrapClass("future")}>
-            <div className="bg-[#111827]/70 border border-cyan-500/20 rounded-[2rem] p-6 shadow-xl mt-8">
-              <p className="text-[11px] font-black text-cyan-300 uppercase tracking-[0.25em]">
-                미래의 나 / Apex BPS
-              </p>
-              <p className="text-[11px] text-slate-400 mt-2">
-                BPS Character Forge · Goal Architect · Vision · VAK Vision · Immersion Script
-              </p>
-            </div>
-            <div className="bg-[#2D3748]/30 p-10 rounded-[3rem] border border-white/5 shadow-xl border-t-4 border-cyan-500/30">
-              <p className="text-[12px] font-black text-cyan-300 uppercase tracking-[0.4em] mb-4 flex items-center gap-2">
-                <Star size={16} /> BPS Character Forge
-              </p>
-              <div className="grid grid-cols-1 md:grid-cols-5 gap-3 mb-6">
-                {[0, 1, 2, 3, 4].map((idx) => (
-                  <div key={idx} className="space-y-1.5">
-                    <label className="text-[8px] font-black text-slate-600 uppercase ml-2 tracking-widest">
-                      Character {idx + 1}
-                    </label>
-                    <input
-                      value={bpsTraits[idx]}
-                      onChange={(e) => updateBpsTrait(idx, e.target.value)}
-                      placeholder={
-                        ["지혜", "평온", "자비", "용기", "통찰"][idx]
-                      }
-                      className="w-full bg-slate-950/60 border border-white/10 rounded-2xl p-4 text-[13px] text-amber-400 font-black text-center focus:ring-1 focus:ring-amber-500 outline-none transition-all"
-                    />
+            </section>
                   </div>
-                ))}
-              </div>
-            </div>
-            <div className="bg-[#2D3748]/40 p-10 rounded-[3rem] border border-white/5 shadow-xl">
-              <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-10">
-                <div className="space-y-1">
-                  <p className="text-[12px] font-black text-emerald-500 uppercase tracking-widest flex items-center gap-2">
-                    <Zap size={14} /> Goal Architect
-                  </p>
-
-                  {/* 단계 이름과 미션 설명 결합 */}
-                  <div className="flex flex-col gap-1.5">
-                    <p className="text-[12px] font-bold text-amber-500 italic bg-slate-900/50 px-3 py-1 rounded-full border border-white/5 inline-block w-fit">
-                      {activeLevel}단계: {levelMap[activeLevel]}
-                    </p>
-
-                    {/* ▼ [추가] 미션 설명 단락: 텍스트가 Bar 너비에 맞춰 자동 조절되도록 설정 */}
-                    <p className="text-[11px] text-slate-400 font-medium leading-relaxed pl-1 mt-2 animate-fadeIn w-full">
-                      {missionMap[activeLevel]}
-                    </p>
-                  </div>
-                </div>
-                <div className="flex gap-1.5">
-                  {[1, 2, 3, 4, 5].map((lv) => (
-                    <button
-                      key={lv}
-                      onClick={() => setActiveLevel(lv)}
-                      className={`w-11 h-11 rounded-2xl font-black text-sm transition-all duration-300 ${
-                        activeLevel === lv
-                          ? "bg-amber-600 text-white shadow-lg scale-110 border border-amber-400/50"
-                          : "bg-slate-900 text-slate-600 border border-white/5 hover:bg-slate-800"
-                      }`}
-                    >
-                      {lv}
-                    </button>
-                  ))}
-                </div>
-              </div>
-              <div className="space-y-6 mb-10">
-                <div className="flex gap-4">
-                  <input
-                    value={visions[activeLevel]?.emoji || ""}
-                    onChange={(e) =>
-                      updateVision(activeLevel, { emoji: e.target.value })
-                    }
-                    className="w-20 bg-slate-900 border border-white/5 rounded-3xl p-3 text-3xl text-center outline-none shrink-0"
-                    placeholder="🏥"
-                  />
-                  <input
-                    value={visions[activeLevel]?.title}
-                    onChange={(e) =>
-                      updateVision(activeLevel, { title: e.target.value })
-                    }
-                    className="flex-1 min-w-0 bg-slate-900 border border-white/5 rounded-3xl p-4 text-md font-black text-white outline-none"
-                    placeholder="Enter Vision Title"
-                  />
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  {["v", "a", "k"].map((type) => (
-                    <div
-                      key={type}
-                      className="space-y-2 bg-slate-950/40 p-5 rounded-[2rem] border border-white/5"
-                    >
-                      <p
-                        className={`text-[9px] font-black uppercase px-2 tracking-widest ${
-                          type === "v"
-                            ? "text-amber-500"
-                            : type === "a"
-                            ? "text-emerald-500"
-                            : "text-rose-500"
-                        }`}
-                      >
-                        {type === "v"
-                          ? "👁️ Visual"
-                          : type === "a"
-                          ? "🎧 Auditory"
-                          : "⚡ Kinesthetic"}
-                      </p>
-                      <AutoTextarea
-                        value={visions[activeLevel]?.[type]}
-                        onChange={(e) =>
-                          updateVision(activeLevel, { [type]: e.target.value })
-                        }
-                        placeholder="묘사..."
-                        className="w-full bg-transparent p-2 text-xs leading-relaxed text-slate-300 outline-none"
-                      />
-                    </div>
-                  ))}
-                </div>
-                <div className="bg-[#1A202C]/60 p-8 rounded-[2.5rem] border border-amber-500/20 my-10 relative shadow-2xl">
-                  <div className="flex justify-between items-center mb-4">
-                    <p className="text-[10px] font-black text-amber-500 uppercase tracking-widest flex items-center gap-2">
-                      <Brain size={14} /> AI Sensory Immersion Script
-                    </p>
-                    <button
-                      onClick={generateImmersionScript}
-                      // 로딩 중이거나 AI 권한이 없으면 버튼 비활성화
-                      disabled={aiLoading || !hasAiAccess}
-                      // 템플릿 리터럴 `${ }`을 사용하여 조건부 클래스를 정확히 적용
-                      className={`bg-amber-600 hover:bg-amber-500 text-white p-3 rounded-xl active:scale-90 shadow-xl transition-all ${
-                        !hasAiAccess || aiLoading
-                          ? "opacity-50 cursor-not-allowed"
-                          : ""
-                      }`}
-                    >
-                      {aiLoading ? (
-                        <span className="animate-spin inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full" />
-                      ) : (
-                        <Wand2 size={18} />
-                      )}
-                    </button>
-                  </div>
-                  <AutoTextarea
-                    value={visions[activeLevel]?.immersionScript || ""}
-                    onChange={(e) =>
-                      updateVision(activeLevel, {
-                        immersionScript: e.target.value,
-                      })
-                    }
-                    className="w-full bg-transparent border-none text-sm text-slate-200 leading-[1.8] font-medium focus:outline-none italic"
-                    placeholder="AI가 VAK 기반 시나리오를 설계합니다."
-                  />
-                </div>
-              </div>
-            </div>
-            </section>}
-          </div>
-          <div className="lg:col-span-4 space-y-6">
-            {activeLabZone === "current" && <section className={zoneWrapClass("current")}>
+                  <div className="lg:col-span-4 space-y-6">
+                    <section className={zoneWrapClass("current")}>
             <div className="bg-[#2D3748]/40 p-7 rounded-[2.5rem] border border-white/5 shadow-xl">
               <p className="text-[12px] font-black text-amber-500 uppercase tracking-[0.3em] mb-6 flex items-center gap-2">
                 <Coins size={14} /> Financial Core
@@ -2191,8 +1950,8 @@ const handleSealPulse = () => {
                 </div>
               </div>
             </div>
-            </section>}
-            {activeLabZone === "current" && <section className={zoneWrapClass("current")}>
+            </section>
+                    <section className={zoneWrapClass("current")}>
             <div className="bg-[#2D3748]/40 p-6 rounded-[2.5rem] border border-white/5 shadow-xl font-sans">
               <p className="text-[12px] font-black text-emerald-500 uppercase tracking-widest mb-6 flex items-center gap-2">
                 <Brain size={12} /> VAK Architecture
@@ -2363,8 +2122,283 @@ const handleSealPulse = () => {
                 </div>
               </div>
             </div>
-            </section>}
+            </section>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
+
+          {/* ── THE PULSE Panel ── */}
+          <div
+            className={`transition-all duration-500 ease-in-out overflow-hidden rounded-[2rem] border flex flex-col ${
+              activeLabZone === "pulse"
+                ? "flex-1 min-w-0 border-amber-500/40 bg-slate-900/30 shadow-[0_0_50px_rgba(245,158,11,0.12)]"
+                : "w-14 shrink-0 cursor-pointer border-amber-500/20 bg-slate-900/20 hover:border-amber-500/30 hover:bg-amber-500/5"
+            }`}
+            onClick={() => activeLabZone !== "pulse" && setActiveLabZone("pulse")}
+          >
+            {activeLabZone !== "pulse" ? (
+              <div className="flex-1 flex flex-col items-center justify-center gap-3 py-8 select-none">
+                <div className="animate-pulse"><Activity size={16} className="text-amber-400/70" /></div>
+                <p className="text-[8px] font-black text-amber-400/70 uppercase tracking-[0.3em]" style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}>THE PULSE</p>
+                <span className="text-[7px] text-slate-600" style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}>Bridge Core</span>
+              </div>
+            ) : (
+              <div className="flex-1 overflow-y-auto no-scrollbar p-4 md:p-6">
+                <section className={zoneWrapClass("pulse")}>
+            <div className="bg-[#111827]/70 border border-amber-500/30 rounded-[2rem] p-6 shadow-xl shadow-[0_0_30px_rgba(245,158,11,0.12)]">
+              <p className="text-[11px] font-black text-amber-300 uppercase tracking-[0.25em]">
+                THE PULSE / Bridge Core
+              </p>
+              <p className="text-[11px] text-slate-400 mt-2">
+                Fixed Value Events · Target Date · Mental Bank Goal · Value Event Award · Contract Link
+              </p>
+            </div>
+            <div className="bg-[#1A202C]/60 p-6 rounded-[2.5rem] border border-amber-500/20 mb-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="bg-slate-900/50 border border-white/10 rounded-2xl p-4">
+                  <p className="text-[9px] text-slate-500 font-black uppercase tracking-widest mb-2">Target Date</p>
+                  <p className="text-sm font-black text-white">{targetDate}</p>
+                </div>
+                <div className="bg-slate-900/50 border border-white/10 rounded-2xl p-4">
+                  <p className="text-[9px] text-slate-500 font-black uppercase tracking-widest mb-2">Contract Status</p>
+                  <button
+                    onClick={() => setCurrentView("contract")}
+                    className="text-[10px] font-black text-amber-400 hover:text-amber-300 uppercase tracking-widest"
+                  >
+                    {signedDate ? "View Contract" : "Go to Contract"}
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div className="space-y-4">
+              <div className="flex justify-between items-center mb-4">
+                <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">
+                  Fixed Value Events
+                </p>
+                <button
+                  onClick={() => addEvent(activeLevel)}
+                  className="bg-emerald-600 text-white px-6 py-2.5 rounded-2xl text-[10px] font-black flex items-center gap-2 uppercase tracking-widest"
+                >
+                  <Plus size={14} /> Add Event
+                </button>
+              </div>
+              {visions[activeLevel]?.events?.map((ev) => (
+                <div
+                  key={ev.id}
+                  className="flex items-center gap-4 bg-[#1A202C]/40 p-5 rounded-2xl border border-white/5"
+                >
+                  <CheckSquare size={18} className="text-slate-600" />
+                  <input
+                    value={ev.name}
+                    onChange={(e) =>
+                      setVisions((prev) => ({
+                        ...prev,
+                        [activeLevel]: {
+                          ...prev[activeLevel],
+                          events: prev[activeLevel].events.map((p) =>
+                            p.id === ev.id ? { ...p, name: e.target.value } : p
+                          ),
+                        },
+                      }))
+                    }
+                    className="bg-transparent border-none text-base text-slate-200 focus:outline-none flex-grow font-semibold"
+                  />
+                  <button
+                    onClick={() =>
+                      updateVision(activeLevel, {
+                        events: visions[activeLevel]?.events?.filter((p) => p.id !== ev.id),
+                      })
+                    }
+                    className="text-rose-500/20 hover:text-rose-500"
+                    aria-label="이벤트 삭제"
+                  >
+                    <Trash2 size={18} />
+                  </button>
+                </div>
+              ))}
+            </div>
+            </section>
+              </div>
+            )}
+          </div>
+
+          {/* ── Apex BPS Panel ── */}
+          <div
+            className={`transition-all duration-500 ease-in-out overflow-hidden rounded-[2rem] border flex flex-col ${
+              activeLabZone === "future"
+                ? "flex-1 min-w-0 border-cyan-500/30 bg-slate-900/30"
+                : "w-14 shrink-0 cursor-pointer border-cyan-500/10 bg-slate-900/20 hover:border-cyan-500/20 hover:bg-cyan-500/5"
+            }`}
+            onClick={() => activeLabZone !== "future" && setActiveLabZone("future")}
+          >
+            {activeLabZone !== "future" ? (
+              <div className="flex-1 flex flex-col items-center justify-center gap-3 py-8 select-none">
+                <Star size={16} className="text-cyan-400/60" />
+                <p className="text-[8px] font-black text-cyan-400/60 uppercase tracking-[0.3em]" style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}>Apex BPS</p>
+                <span className="text-[7px] text-slate-600" style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}>미래의 나</span>
+              </div>
+            ) : (
+              <div className="flex-1 overflow-y-auto no-scrollbar p-4 md:p-6">
+                <section className={zoneWrapClass("future")}>
+            <div className="bg-[#111827]/70 border border-cyan-500/20 rounded-[2rem] p-6 shadow-xl mt-8">
+              <p className="text-[11px] font-black text-cyan-300 uppercase tracking-[0.25em]">
+                미래의 나 / Apex BPS
+              </p>
+              <p className="text-[11px] text-slate-400 mt-2">
+                BPS Character Forge · Goal Architect · Vision · VAK Vision · Immersion Script
+              </p>
+            </div>
+            <div className="bg-[#2D3748]/30 p-10 rounded-[3rem] border border-white/5 shadow-xl border-t-4 border-cyan-500/30">
+              <p className="text-[12px] font-black text-cyan-300 uppercase tracking-[0.4em] mb-4 flex items-center gap-2">
+                <Star size={16} /> BPS Character Forge
+              </p>
+              <div className="grid grid-cols-1 md:grid-cols-5 gap-3 mb-6">
+                {[0, 1, 2, 3, 4].map((idx) => (
+                  <div key={idx} className="space-y-1.5">
+                    <label className="text-[8px] font-black text-slate-600 uppercase ml-2 tracking-widest">
+                      Character {idx + 1}
+                    </label>
+                    <input
+                      value={bpsTraits[idx]}
+                      onChange={(e) => updateBpsTrait(idx, e.target.value)}
+                      placeholder={
+                        ["지혜", "평온", "자비", "용기", "통찰"][idx]
+                      }
+                      className="w-full bg-slate-950/60 border border-white/10 rounded-2xl p-4 text-[13px] text-amber-400 font-black text-center focus:ring-1 focus:ring-amber-500 outline-none transition-all"
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="bg-[#2D3748]/40 p-10 rounded-[3rem] border border-white/5 shadow-xl">
+              <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-10">
+                <div className="space-y-1">
+                  <p className="text-[12px] font-black text-emerald-500 uppercase tracking-widest flex items-center gap-2">
+                    <Zap size={14} /> Goal Architect
+                  </p>
+
+                  {/* 단계 이름과 미션 설명 결합 */}
+                  <div className="flex flex-col gap-1.5">
+                    <p className="text-[12px] font-bold text-amber-500 italic bg-slate-900/50 px-3 py-1 rounded-full border border-white/5 inline-block w-fit">
+                      {activeLevel}단계: {levelMap[activeLevel]}
+                    </p>
+
+                    {/* ▼ [추가] 미션 설명 단락: 텍스트가 Bar 너비에 맞춰 자동 조절되도록 설정 */}
+                    <p className="text-[11px] text-slate-400 font-medium leading-relaxed pl-1 mt-2 animate-fadeIn w-full">
+                      {missionMap[activeLevel]}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex gap-1.5">
+                  {[1, 2, 3, 4, 5].map((lv) => (
+                    <button
+                      key={lv}
+                      onClick={() => setActiveLevel(lv)}
+                      className={`w-11 h-11 rounded-2xl font-black text-sm transition-all duration-300 ${
+                        activeLevel === lv
+                          ? "bg-amber-600 text-white shadow-lg scale-110 border border-amber-400/50"
+                          : "bg-slate-900 text-slate-600 border border-white/5 hover:bg-slate-800"
+                      }`}
+                    >
+                      {lv}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div className="space-y-6 mb-10">
+                <div className="flex gap-4">
+                  <input
+                    value={visions[activeLevel]?.emoji || ""}
+                    onChange={(e) =>
+                      updateVision(activeLevel, { emoji: e.target.value })
+                    }
+                    className="w-20 bg-slate-900 border border-white/5 rounded-3xl p-3 text-3xl text-center outline-none shrink-0"
+                    placeholder="🏥"
+                  />
+                  <input
+                    value={visions[activeLevel]?.title}
+                    onChange={(e) =>
+                      updateVision(activeLevel, { title: e.target.value })
+                    }
+                    className="flex-1 min-w-0 bg-slate-900 border border-white/5 rounded-3xl p-4 text-md font-black text-white outline-none"
+                    placeholder="Enter Vision Title"
+                  />
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {["v", "a", "k"].map((type) => (
+                    <div
+                      key={type}
+                      className="space-y-2 bg-slate-950/40 p-5 rounded-[2rem] border border-white/5"
+                    >
+                      <p
+                        className={`text-[9px] font-black uppercase px-2 tracking-widest ${
+                          type === "v"
+                            ? "text-amber-500"
+                            : type === "a"
+                            ? "text-emerald-500"
+                            : "text-rose-500"
+                        }`}
+                      >
+                        {type === "v"
+                          ? "👁️ Visual"
+                          : type === "a"
+                          ? "🎧 Auditory"
+                          : "⚡ Kinesthetic"}
+                      </p>
+                      <AutoTextarea
+                        value={visions[activeLevel]?.[type]}
+                        onChange={(e) =>
+                          updateVision(activeLevel, { [type]: e.target.value })
+                        }
+                        placeholder="묘사..."
+                        className="w-full bg-transparent p-2 text-xs leading-relaxed text-slate-300 outline-none"
+                      />
+                    </div>
+                  ))}
+                </div>
+                <div className="bg-[#1A202C]/60 p-8 rounded-[2.5rem] border border-amber-500/20 my-10 relative shadow-2xl">
+                  <div className="flex justify-between items-center mb-4">
+                    <p className="text-[10px] font-black text-amber-500 uppercase tracking-widest flex items-center gap-2">
+                      <Brain size={14} /> AI Sensory Immersion Script
+                    </p>
+                    <button
+                      onClick={generateImmersionScript}
+                      // 로딩 중이거나 AI 권한이 없으면 버튼 비활성화
+                      disabled={aiLoading || !hasAiAccess}
+                      // 템플릿 리터럴 `${ }`을 사용하여 조건부 클래스를 정확히 적용
+                      className={`bg-amber-600 hover:bg-amber-500 text-white p-3 rounded-xl active:scale-90 shadow-xl transition-all ${
+                        !hasAiAccess || aiLoading
+                          ? "opacity-50 cursor-not-allowed"
+                          : ""
+                      }`}
+                    >
+                      {aiLoading ? (
+                        <span className="animate-spin inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full" />
+                      ) : (
+                        <Wand2 size={18} />
+                      )}
+                    </button>
+                  </div>
+                  <AutoTextarea
+                    value={visions[activeLevel]?.immersionScript || ""}
+                    onChange={(e) =>
+                      updateVision(activeLevel, {
+                        immersionScript: e.target.value,
+                      })
+                    }
+                    className="w-full bg-transparent border-none text-sm text-slate-200 leading-[1.8] font-medium focus:outline-none italic"
+                    placeholder="AI가 VAK 기반 시나리오를 설계합니다."
+                  />
+                </div>
+              </div>
+            </div>
+            </section>
+              </div>
+            )}
+          </div>
+
         </div>
       </div>
     );
