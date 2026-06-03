@@ -233,7 +233,7 @@ const App = () => {
   };
 
   const handleExistingAccountRoute = () => {
-    localStorage.setItem("pulse_onboarding_complete", "true");
+    // localStorage는 건드리지 않음 - 로그인 후 SIGNED_IN 핸들러가 DB에서 검증
     setIsOnboardingComplete(true);
 
     const url = new URL(window.location.href);
