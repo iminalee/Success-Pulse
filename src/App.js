@@ -699,6 +699,9 @@ const App = () => {
 
     initSession();
 
+    // 안전망: 8초 안에 로딩이 안 풀리면 강제 해제 (네트워크 hang 대비)
+    const loadingTimeout = setTimeout(() => setLoading(false), 8000);
+
     // 2. 실시간 상태 감지 (이벤트 리스너)
     const {
       data: { subscription },
@@ -775,7 +778,7 @@ const App = () => {
       }
     });
 
-    return () => subscription.unsubscribe();
+    return () => { subscription.unsubscribe(); clearTimeout(loadingTimeout); };
   }, []);
 
   // [Tonight v2] user.id 변경 시 메모리 초기화 + 해당 사용자 apexMessages 복원
