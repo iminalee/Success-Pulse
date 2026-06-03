@@ -620,79 +620,81 @@ const App = () => {
     const initSession = async () => {
       setLoading(true);
 
-      // 1. 먼저 로그인 세션과 유저 정보를 가져옵니다.
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-      const currentUser = session?.user;
-      setUser(currentUser);
+      try {
+        // 1. 먼저 로그인 세션과 유저 정보를 가져옵니다.
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
+        const currentUser = session?.user;
+        setUser(currentUser);
 
-      // 2. 유저가 있다면 DB에서 데이터를 가져옵니다.
-      if (currentUser) {
-        const { data, error } = await supabase
-          .from("pulse_data")
-          .select("*")
-          .eq("user_id", currentUser.id)
-          .single();
+        // 2. 유저가 있다면 DB에서 데이터를 가져옵니다.
+        if (currentUser) {
+          const { data, error } = await supabase
+            .from("pulse_data")
+            .select("*")
+            .eq("user_id", currentUser.id)
+            .single();
 
-        // 3. DB 데이터를 가져온 '이후'에 로직을 실행해야 에러가 안 납니다.
-        if (data) {
-          // ▼▼▼ [이름 동기화 로직 위치] ▼▼▼
-          if (data.user_name) {
-            // DB에 이름이 이미 있으면 그걸 씁니다.
-            setUserName(data.user_name);
-          } else if (currentUser?.user_metadata?.user_name) {
-            // DB는 비어있는데, 가입할 때 쓴 이름이 있다면? -> 화면에 보여주고 DB에 저장!
-            const nameFromMeta = currentUser.user_metadata.user_name;
-            setUserName(nameFromMeta);
+          // 3. DB 데이터를 가져온 '이후'에 로직을 실행해야 에러가 안 납니다.
+          if (data) {
+            // ▼▼▼ [이름 동기화 로직 위치] ▼▼▼
+            if (data.user_name) {
+              setUserName(data.user_name);
+            } else if (currentUser?.user_metadata?.user_name) {
+              const nameFromMeta = currentUser.user_metadata.user_name;
+              setUserName(nameFromMeta);
 
-            supabase
-              .from("pulse_data")
-              .update({ user_name: nameFromMeta })
-              .eq("user_id", currentUser.id)
-              .then(({ error }) => {
-                if (error) console.error("이름 DB 저장 실패:", error);
-                else console.log("이름 DB 동기화 완료:", nameFromMeta);
-              });
+              supabase
+                .from("pulse_data")
+                .update({ user_name: nameFromMeta })
+                .eq("user_id", currentUser.id)
+                .then(({ error }) => {
+                  if (error) console.error("이름 DB 저장 실패:", error);
+                  else console.log("이름 DB 동기화 완료:", nameFromMeta);
+                });
+            }
+            // ▲▲▲ [이름 동기화 끝] ▲▲▲
+
+            // 나머지 데이터 불러오기
+            if (data.currency) setCurrency(data.currency);
+            if (data.annual_income) setAnnualIncome(data.annual_income);
+            if (data.target_date) setTargetDate(data.target_date);
+            if (data.ledger) setLedger(data.ledger);
+            if (data.visions) setVisions(data.visions);
+            if (data.bps_traits) setBpsTraits(data.bps_traits);
+            if (data.vak_profile) setVakProfile(data.vak_profile);
+            if (data.tci_profile) setTciProfile(data.tci_profile);
+            if (data.archived_visions) setArchivedVisions(data.archived_visions);
+            if (data.trash_visions) setTrashVisions(data.trash_visions);
+            if (data.signature) setSignature(data.signature);
+            if (data.signed_date) setSignedDate(data.signed_date);
+            setLifeProfile({
+              sleep_time: data.life_profile?.sleep_time || "",
+              wake_time: data.life_profile?.wake_time || "",
+              sleep_notes: data.life_profile?.sleep_notes || "",
+              major_goals: Array.isArray(data.life_profile?.major_goals)
+                ? data.life_profile.major_goals
+                : [],
+            });
+
+            // 기존 가입자 자동 온보딩 완료 처리
+            if (data.signed_date || data.signature || data.contract?.onboarding_agreement?.completed_at) {
+              localStorage.setItem("pulse_onboarding_complete", "true");
+              setIsOnboardingComplete(true);
+            }
+
+            // 권한 설정 불러오기
+            setHasEditAccess(data.has_edit_access || false);
+            setHasAiAccess(data.has_ai_access || false);
+            if (data.apex_conversation_id) setApexConversationId(data.apex_conversation_id);
           }
-          // ▲▲▲ [이름 동기화 끝] ▲▲▲
-
-          // 나머지 데이터 불러오기
-          if (data.currency) setCurrency(data.currency);
-          if (data.annual_income) setAnnualIncome(data.annual_income);
-          if (data.target_date) setTargetDate(data.target_date);
-          if (data.ledger) setLedger(data.ledger);
-          if (data.visions) setVisions(data.visions);
-          if (data.bps_traits) setBpsTraits(data.bps_traits);
-          if (data.vak_profile) setVakProfile(data.vak_profile);
-          if (data.tci_profile) setTciProfile(data.tci_profile);
-          if (data.archived_visions) setArchivedVisions(data.archived_visions);
-          if (data.trash_visions) setTrashVisions(data.trash_visions);
-          if (data.signature) setSignature(data.signature);
-          if (data.signed_date) setSignedDate(data.signed_date);
-          setLifeProfile({
-            sleep_time: data.life_profile?.sleep_time || "",
-            wake_time: data.life_profile?.wake_time || "",
-            sleep_notes: data.life_profile?.sleep_notes || "",
-            major_goals: Array.isArray(data.life_profile?.major_goals)
-              ? data.life_profile.major_goals
-              : [],
-          });
-
-          // 기존 가입자 자동 온보딩 완료 처리
-          if (data.signed_date || data.signature || data.contract?.onboarding_agreement?.completed_at) {
-            localStorage.setItem("pulse_onboarding_complete", "true");
-            setIsOnboardingComplete(true);
-          }
-
-          // 권한 설정 불러오기
-          setHasEditAccess(data.has_edit_access || false);
-          setHasAiAccess(data.has_ai_access || false);
-          // [Tonight v2] Dify conversation_id 불러오기
-          if (data.apex_conversation_id) setApexConversationId(data.apex_conversation_id);
         }
+      } catch (e) {
+        console.error("세션 초기화 오류:", e);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     };
 
     initSession();
