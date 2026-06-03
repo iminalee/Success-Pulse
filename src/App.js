@@ -142,7 +142,8 @@ const App = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState(""); // 추가
   const [signupName, setSignupName] = useState("");
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [isInitialized, setIsInitialized] = useState(false);
   const [customTask, setCustomTask] = useState("");
   const [isRecoveryMode, setIsRecoveryMode] = useState(false);
 
@@ -694,10 +695,14 @@ const App = () => {
         console.error("세션 초기화 오류:", e);
       } finally {
         setLoading(false);
+        setIsInitialized(true);
       }
     };
 
     initSession();
+
+    // 안전망: 8초 안에 초기화가 안 되면 강제 해제 (네트워크 hang 대비)
+    const loadingTimeout = setTimeout(() => setIsInitialized(true), 8000);
 
     // 2. 실시간 상태 감지 (이벤트 리스너)
     const {
@@ -775,7 +780,7 @@ const App = () => {
       }
     });
 
-    return () => subscription.unsubscribe();
+    return () => { subscription.unsubscribe(); clearTimeout(loadingTimeout); };
   }, []);
 
   // [Tonight v2] user.id 변경 시 메모리 초기화 + 해당 사용자 apexMessages 복원
@@ -4497,7 +4502,7 @@ const nowX = getX(dataPoints[dataPoints.length - 1].date); // 📅 가로 위치
   
 
   // ── 초기 세션 확인 중 (DB 데이터 로드 완료 전까지 표시) ──
-  if (loading) {
+  if (!isInitialized) {
     return (
       <div className="min-h-screen bg-slate-950 flex items-center justify-center">
         <div className="text-center">
