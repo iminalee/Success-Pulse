@@ -1105,15 +1105,6 @@ const App = () => {
     5: "자아실현",
   };
 
-  const handleFactoryReset = async () => {
-    if (window.confirm("초기화하시겠습니까? DB의 모든 데이터가 삭제됩니다.")) {
-      if (user) {
-        await supabase.from("pulse_data").delete().eq("user_id", user.id);
-      }
-      window.location.reload();
-    }
-  };
-
   const handleSignOut = async () => {
     try {
       const { error } = await supabase.auth.signOut();
@@ -1634,12 +1625,6 @@ const handleSealPulse = () => {
               My Lab
             </h2>
           </div>
-          <button
-            onClick={handleFactoryReset}
-            className="text-[10px] font-bold text-slate-600 hover:text-rose-500 flex items-center gap-2 border border-slate-700/50 px-3 py-2 rounded-lg transition-all"
-          >
-            <Trash2 size={12} /> Reset System
-          </button>
         </div>
         <div className="mb-8 bg-[#0F172A]/70 border border-white/10 rounded-[2rem] px-4 py-5 md:px-6 md:py-6 shadow-xl relative overflow-hidden">
           <svg className="absolute inset-0 w-full h-full opacity-35 pointer-events-none" viewBox="0 0 1200 200" preserveAspectRatio="none">
@@ -4732,9 +4717,13 @@ const nowX = getX(dataPoints[dataPoints.length - 1].date); // 📅 가로 위치
                 <span className="text-xl font-black text-amber-500 italic">
                   {(mbGoalAmount > 0 ? (currentAsset / mbGoalAmount) * 100 : 0).toFixed(1)}%
                 </span>
-                <span className="bg-emerald-600/20 text-emerald-400 border border-emerald-500/30 text-[9px] font-bold px-2 py-0.5 rounded text-center uppercase tracking-wider">
+                <button
+                  onClick={handleSignOut}
+                  className="bg-emerald-600/20 text-emerald-400 border border-emerald-500/30 text-[9px] font-bold px-2 py-0.5 rounded text-center uppercase tracking-wider hover:bg-rose-600/20 hover:text-rose-400 hover:border-rose-500/30 transition-colors"
+                  title="클릭하여 로그아웃"
+                >
                   {userName || "USER"} ONLINE
-                </span>
+                </button>
               </div>
 
               {/* 게이지 바 몸통 */}
