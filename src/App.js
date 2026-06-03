@@ -142,7 +142,7 @@ const App = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState(""); // 추가
   const [signupName, setSignupName] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [customTask, setCustomTask] = useState("");
   const [isRecoveryMode, setIsRecoveryMode] = useState(false);
 
@@ -4509,6 +4509,20 @@ const nowX = getX(dataPoints[dataPoints.length - 1].date); // 📅 가로 위치
           
 
   
+
+  // ── 초기 세션 확인 중 (DB 데이터 로드 완료 전까지 표시) ──
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-slate-950 flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-3xl font-black text-white tracking-tighter italic uppercase mb-4">
+            THE <span className="text-amber-500">PULSE</span>
+          </h1>
+          <p className="text-slate-500 text-xs uppercase tracking-widest">확인 중...</p>
+        </div>
+      </div>
+    );
+  }
 
   // ▼▼▼ [추가] 복구 모드일 때 변경창만 보여주기 ▼▼▼
   if (isRecoveryMode) {
