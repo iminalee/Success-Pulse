@@ -1594,35 +1594,123 @@ const handleSealPulse = () => {
     const sdCValue =
       tciProfile.sd_c?.score ??
       Number(tciProfile.sd?.score || 0) + Number(tciProfile.c?.score || 0);
-    const zoneWrapClass = (zone) =>
-      `transition-all duration-300 rounded-[2rem] border ${
-        activeLabZone === zone
-          ? "opacity-100 border-amber-500/40 bg-slate-900/45 p-4 md:p-6"
-          : "opacity-80 border-white/10 bg-slate-900/20 p-3 md:p-4"
-      }`;
-    const zonePreview = {
-      current: {
-        icon: User,
-        title: "Current Self",
+    const labZones = [
+      {
+        zone: "current",
+        label: "현재의 나",
+        sublabel: "Current Self",
         keywords: "Identity · Life · VAK · TCI",
-        summary: "지금의 나를 정확히 기록하고 기준점을 세웁니다.",
-        color: "emerald",
+        summary: "지금의 나를 정확히 기록하고 기준점을 세우는 출발점입니다.",
+        motif: "current",
+        center: 35,
+        glowColor: "rgba(245, 158, 11, 0.62)",
+        textColor: "#fbbf24",
+        subtextColor: "rgba(253, 230, 138, 0.72)",
+        activeBg:
+          "radial-gradient(circle at 50% 18%, rgba(253, 230, 138, 0.24), transparent 34%), linear-gradient(135deg, rgba(69, 41, 12, 0.96), rgba(120, 53, 15, 0.82) 55%, rgba(24, 20, 14, 0.95))",
+        inactiveBg:
+          "linear-gradient(135deg, rgba(69, 41, 12, 0.48), rgba(24, 20, 14, 0.72))",
+        borderActive: "1px solid rgba(251, 191, 36, 0.72)",
+        borderInactive: "1px solid rgba(251, 191, 36, 0.22)",
       },
-      pulse: {
-        icon: Activity,
-        title: "THE PULSE",
+      {
+        zone: "pulse",
+        label: "THE PULSE",
+        sublabel: "Bridge Core",
         keywords: "Bridge · Ledger · Contract",
-        summary: "현재와 미래를 연결하는 실행 코어입니다.",
-        color: "amber",
+        summary: "현재와 미래를 잇는 다리이자 실행 코어입니다.",
+        motif: "bridge",
+        center: 50,
+        glowColor: "rgba(20, 184, 166, 0.58)",
+        textColor: "#5eead4",
+        subtextColor: "rgba(253, 230, 138, 0.68)",
+        activeBg:
+          "radial-gradient(circle at 52% 18%, rgba(251, 191, 36, 0.18), transparent 30%), linear-gradient(135deg, rgba(6, 78, 59, 0.93), rgba(8, 47, 73, 0.86) 56%, rgba(69, 41, 12, 0.78))",
+        inactiveBg:
+          "linear-gradient(135deg, rgba(6, 78, 59, 0.42), rgba(8, 47, 73, 0.48), rgba(69, 41, 12, 0.32))",
+        borderActive: "1px solid rgba(94, 234, 212, 0.68)",
+        borderInactive: "1px solid rgba(94, 234, 212, 0.2)",
       },
-      future: {
-        icon: Star,
-        title: "Apex BPS",
+      {
+        zone: "future",
+        label: "미래의 나",
+        sublabel: "Apex BPS",
         keywords: "Traits · Vision · Immersion",
-        summary: "미래 정체성을 설계하고 감각적으로 고정합니다.",
-        color: "cyan",
+        summary: "더 농축된 황금빛 미래 정체성을 감각적으로 고정합니다.",
+        motif: "future",
+        center: 65,
+        glowColor: "rgba(251, 191, 36, 0.82)",
+        textColor: "#fde68a",
+        subtextColor: "rgba(251, 191, 36, 0.76)",
+        activeBg:
+          "radial-gradient(circle at 50% 17%, rgba(255, 245, 157, 0.32), transparent 34%), linear-gradient(135deg, rgba(146, 64, 14, 0.98), rgba(180, 83, 9, 0.86) 46%, rgba(69, 26, 3, 0.96))",
+        inactiveBg:
+          "linear-gradient(135deg, rgba(146, 64, 14, 0.5), rgba(69, 26, 3, 0.7))",
+        borderActive: "1px solid rgba(253, 230, 138, 0.86)",
+        borderInactive: "1px solid rgba(251, 191, 36, 0.26)",
       },
-    };
+    ];
+    const activeLabZoneIndex = Math.max(
+      0,
+      labZones.findIndex((item) => item.zone === activeLabZone)
+    );
+    const activeLabZoneItem = labZones[activeLabZoneIndex];
+    const renderLabZoneMotif = (type, isActive) => (
+      <div
+        className={`relative mx-auto my-3 flex h-24 w-28 items-center justify-center md:h-28 md:w-36 transition-all duration-500 ${
+          isActive ? "opacity-100 scale-100" : "opacity-65 scale-90"
+        }`}
+      >
+        <div
+          className={`absolute rounded-full blur-2xl ${
+            type === "bridge"
+              ? "inset-1 bg-teal-300/25"
+              : type === "future"
+              ? "inset-0 bg-amber-300/40"
+              : "inset-2 bg-amber-400/20"
+          }`}
+        />
+        <svg viewBox="0 0 180 140" className="relative h-full w-full overflow-visible">
+          <defs>
+            <path
+              id={`lab-human-${type}`}
+              d="M90 13C109 13 121 25 121 44C121 59 113 68 105 72V80C130 85 150 101 150 126H30C30 101 50 85 75 80V72C67 68 59 59 59 44C59 25 71 13 90 13Z"
+            />
+            <linearGradient id={`lab-gold-${type}`} x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stopColor="#fff7ad" />
+              <stop offset="42%" stopColor="#fbbf24" />
+              <stop offset="100%" stopColor="#b45309" />
+            </linearGradient>
+            <linearGradient id={`lab-teal-${type}`} x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="#5eead4" />
+              <stop offset="58%" stopColor="#0ea5e9" />
+              <stop offset="100%" stopColor="#fbbf24" />
+            </linearGradient>
+          </defs>
+          {type === "current" && (
+            <>
+              <circle cx="90" cy="61" r="54" fill="rgba(251,191,36,0.13)" />
+              <use href={`#lab-human-${type}`} fill="#030712" stroke="#fcd34d" strokeWidth="3" className="drop-shadow-[0_0_22px_rgba(251,191,36,0.75)]" />
+              <use href={`#lab-human-${type}`} fill="transparent" stroke="#fff7ad" strokeWidth="1" opacity="0.55" />
+            </>
+          )}
+          {type === "future" && (
+            <>
+              <circle cx="90" cy="61" r="62" fill="rgba(253,230,138,0.18)" />
+              <use href={`#lab-human-${type}`} fill={`url(#lab-gold-${type})`} stroke="#fff7ad" strokeWidth="2.5" className="drop-shadow-[0_0_34px_rgba(251,191,36,0.95)]" />
+              <path d="M90 0V16M90 124V140M20 70H4M176 70H160M35 18L47 30M153 30L165 18" stroke="#fde68a" strokeWidth="3" strokeLinecap="round" opacity="0.72" />
+            </>
+          )}
+          {type === "bridge" && (
+            <>
+              <use href={`#lab-human-${type}`} fill="#030712" stroke="#fbbf24" strokeWidth="2.5" opacity="0.72" transform="translate(-24 0)" className="drop-shadow-[0_0_18px_rgba(251,191,36,0.55)]" />
+              <use href={`#lab-human-${type}`} fill={`url(#lab-teal-${type})`} stroke="#99f6e4" strokeWidth="2.5" opacity="0.86" transform="translate(24 0)" className="drop-shadow-[0_0_24px_rgba(45,212,191,0.72)]" />
+              <path d="M69 68C82 54 99 54 112 68M69 84C82 98 99 98 112 84" fill="none" stroke="#fde68a" strokeWidth="4" strokeLinecap="round" opacity="0.82" />
+            </>
+          )}
+        </svg>
+      </div>
+    );
     return (
       <div className="flex-grow w-full max-w-7xl mx-auto overflow-y-auto no-scrollbar pb-24 px-4 animate-fadeIn font-sans">
         <div className="flex items-center justify-between mb-8">
@@ -1633,79 +1721,100 @@ const handleSealPulse = () => {
             </h2>
           </div>
         </div>
-        {/* 3D Cylindrical Zone Selector */}
-        {(() => {
-          const zones3d = [
-            { zone: "current", label: "현재의 나", sublabel: "Current Self", icon: User, keywords: "Identity · Life · VAK · TCI", summary: "지금의 나를 정확히 기록하고 기준점을 세웁니다.", glowColor: "rgba(16,185,129,0.55)", borderActive: "1px solid rgba(52,211,153,0.75)", borderInactive: "1px solid rgba(16,185,129,0.18)", bgActive: "rgba(6,60,35,0.85)", bgInactive: "rgba(2,20,12,0.45)", textColor: "#6ee7b7", subtextColor: "rgba(110,231,183,0.55)" },
-            { zone: "pulse", label: "✦ THE PULSE", sublabel: "Bridge Core", icon: Activity, keywords: "Bridge · Ledger · Contract", summary: "현재와 미래를 연결하는 실행 코어입니다.", glowColor: "rgba(245,158,11,0.65)", borderActive: "1px solid rgba(251,191,36,0.8)", borderInactive: "1px solid rgba(245,158,11,0.2)", bgActive: "rgba(70,40,0,0.90)", bgInactive: "rgba(25,14,0,0.45)", textColor: "#fcd34d", subtextColor: "rgba(252,211,77,0.55)" },
-            { zone: "future", label: "미래의 나", sublabel: "Apex BPS", icon: Star, keywords: "Traits · Vision · Immersion", summary: "미래 정체성을 설계하고 감각적으로 고정합니다.", glowColor: "rgba(6,182,212,0.55)", borderActive: "1px solid rgba(34,211,238,0.75)", borderInactive: "1px solid rgba(6,182,212,0.18)", bgActive: "rgba(0,40,55,0.85)", bgInactive: "rgba(0,15,22,0.45)", textColor: "#67e8f9", subtextColor: "rgba(103,232,249,0.55)" },
-          ];
-          const activeIdx = zones3d.findIndex(z => z.zone === activeLabZone);
-          return (
-            <div className="mb-8 relative" style={{ perspective: "1400px" }}>
-              {/* Selector track background */}
-              <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 h-[2px] pointer-events-none" style={{ background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.06) 20%, rgba(255,255,255,0.06) 80%, transparent)" }} />
-              <div className="flex items-stretch justify-center gap-3 md:gap-5 px-2 py-4" style={{ transformStyle: "preserve-3d" }}>
-                {zones3d.map((item, idx) => {
-                  const diff = idx - activeIdx;
-                  const isActive = diff === 0;
-                  const rotateY = diff * 20;
-                  const scale = isActive ? 1.06 : 1 - Math.abs(diff) * 0.07;
-                  const opacity = isActive ? 1 : 1 - Math.abs(diff) * 0.28;
-                  const zIdx = isActive ? 20 : 20 - Math.abs(diff) * 5;
-                  const translateZ = isActive ? 30 : -Math.abs(diff) * 20;
-                  const IconComp = item.icon;
-                  return (
-                    <button
-                      key={item.zone}
-                      onClick={() => setActiveLabZone(item.zone)}
-                      style={{
-                        transform: `rotateY(${rotateY}deg) scale(${scale}) translateZ(${translateZ}px)`,
-                        opacity,
-                        zIndex: zIdx,
-                        transition: "transform 620ms cubic-bezier(0.16,1,0.3,1), opacity 450ms cubic-bezier(0.16,1,0.3,1), box-shadow 450ms ease",
-                        transformStyle: "preserve-3d",
-                        background: isActive ? item.bgActive : item.bgInactive,
-                        border: isActive ? item.borderActive : item.borderInactive,
-                        boxShadow: isActive ? `0 0 50px ${item.glowColor}, 0 0 20px ${item.glowColor}, inset 0 1px 0 rgba(255,255,255,0.12)` : "none",
-                        flex: isActive ? "0 0 auto" : "0 0 auto",
-                        cursor: "pointer",
-                        position: "relative",
-                      }}
-                      className="rounded-2xl px-4 py-4 md:px-6 md:py-5 text-left min-w-[110px] md:min-w-[190px] max-w-[220px]"
+        {/* Overlapping Switching Zone Selector */}
+        <div className="relative mb-10 h-[250px] overflow-hidden rounded-[2rem] md:h-[280px]" style={{ perspective: "1200px" }}>
+          <div
+            className="absolute inset-x-0 top-1/2 h-px -translate-y-1/2 pointer-events-none"
+            style={{
+              background:
+                "linear-gradient(90deg, transparent, rgba(251,191,36,0.12), rgba(94,234,212,0.12), rgba(251,191,36,0.12), transparent)",
+            }}
+          />
+          {labZones.map((item, idx) => {
+            const isActive = item.zone === activeLabZone;
+            const distance = idx - activeLabZoneIndex;
+            const overlapCenter = isActive
+              ? item.center
+              : activeLabZoneItem.center + distance * 16;
+            const clampedCenter = Math.max(14, Math.min(86, overlapCenter));
+            const rotate = isActive ? 0 : distance < 0 ? -8 : 8;
+            const scale = isActive ? 1 : 0.78;
+            const opacity = isActive ? 1 : 0.48;
+            const translateY = isActive ? 0 : 12;
+            const zIndex = isActive ? 30 : 20 - Math.abs(distance);
+            return (
+              <button
+                key={item.zone}
+                onClick={() => setActiveLabZone(item.zone)}
+                aria-pressed={isActive}
+                className={`absolute top-4 h-[214px] rounded-[1.75rem] px-5 py-5 text-left outline-none transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] md:top-5 md:h-[238px] md:px-7 md:py-6 ${
+                  isActive ? "cursor-default" : "cursor-pointer hover:opacity-75"
+                }`}
+                style={{
+                  left: `${clampedCenter}%`,
+                  width: "clamp(285px, 70%, 760px)",
+                  transform: `translateX(-50%) translateY(${translateY}px) rotate(${rotate}deg) scale(${scale})`,
+                  transformOrigin: distance < 0 ? "right center" : "left center",
+                  zIndex,
+                  opacity,
+                  background: isActive ? item.activeBg : item.inactiveBg,
+                  border: isActive ? item.borderActive : item.borderInactive,
+                  boxShadow: isActive
+                    ? `0 28px 90px ${item.glowColor}, 0 0 32px ${item.glowColor}, inset 0 1px 0 rgba(255,255,255,0.16)`
+                    : "0 18px 42px rgba(0,0,0,0.34), inset 0 1px 0 rgba(255,255,255,0.06)",
+                  filter: isActive ? "saturate(1.08)" : "saturate(0.72)",
+                }}
+              >
+                <div
+                  className="absolute inset-x-6 top-0 h-px rounded-full"
+                  style={{
+                    background: `linear-gradient(90deg, transparent, ${item.textColor}99, transparent)`,
+                  }}
+                />
+                <div className="relative flex h-full flex-col">
+                  <div className="flex items-start justify-between gap-4">
+                    <div>
+                      <p
+                        className="text-[12px] font-black uppercase tracking-[0.28em] md:text-sm"
+                        style={{ color: item.textColor }}
+                      >
+                        {item.label}
+                      </p>
+                      <p
+                        className="mt-1 text-[10px] font-black uppercase tracking-[0.22em] md:text-[11px]"
+                        style={{ color: item.subtextColor }}
+                      >
+                        {item.sublabel}
+                      </p>
+                    </div>
+                    <span
+                      className="rounded-full border px-3 py-1 text-[9px] font-black uppercase tracking-[0.18em]"
+                      style={{ borderColor: item.textColor + "55", color: item.textColor }}
                     >
-                      {/* Inner top highlight line */}
-                      {isActive && (
-                        <div className="absolute top-0 left-4 right-4 h-px rounded-full pointer-events-none" style={{ background: `linear-gradient(90deg, transparent, ${item.textColor}80, transparent)` }} />
-                      )}
-                      <div className="flex items-center gap-2 mb-1">
-                        <IconComp size={isActive ? 17 : 13} style={{ color: item.textColor }} />
-                        <p style={{ color: item.textColor }} className={`font-black uppercase tracking-wider leading-tight ${isActive ? "text-[12px] md:text-sm" : "text-[10px] md:text-[11px]"}`}>{item.label}</p>
-                      </div>
-                      <p style={{ color: item.subtextColor }} className="text-[9px] md:text-[10px] font-bold uppercase tracking-widest">{item.sublabel}</p>
-                      {isActive && (
-                        <>
-                          <p style={{ color: item.subtextColor, fontSize: "10px" }} className="mt-1 font-semibold uppercase tracking-wider">{item.keywords}</p>
-                          <p style={{ color: item.textColor, opacity: 0.8 }} className="text-[11px] mt-2 leading-relaxed">{item.summary}</p>
-                        </>
-                      )}
-                    </button>
-                  );
-                })}
-              </div>
-              {/* Beam: active tab → content */}
-              <div className="flex justify-center pointer-events-none">
-                <div style={{
-                  width: "2px",
-                  height: "24px",
-                  background: `linear-gradient(to bottom, ${zones3d[activeIdx].glowColor}, transparent)`,
-                  transition: "background 500ms ease",
-                  filter: `drop-shadow(0 0 6px ${zones3d[activeIdx].glowColor})`,
-                }} />
-              </div>
-            </div>
-          );
-        })()}
+                      {idx + 1}/3
+                    </span>
+                  </div>
+                  {renderLabZoneMotif(item.motif, isActive)}
+                  <div className="mt-auto">
+                    <p
+                      className="text-[10px] font-bold uppercase tracking-[0.18em] md:text-[11px]"
+                      style={{ color: item.subtextColor }}
+                    >
+                      {item.keywords}
+                    </p>
+                    <p
+                      className="mt-2 max-w-xl text-[12px] font-semibold leading-relaxed md:text-sm"
+                      style={{ color: item.textColor, opacity: isActive ? 0.88 : 0.58 }}
+                    >
+                      {item.summary}
+                    </p>
+                  </div>
+                </div>
+              </button>
+            );
+          })}
+          <div className="absolute bottom-0 left-1/2 h-7 w-px -translate-x-1/2 pointer-events-none" style={{ background: `linear-gradient(to bottom, ${activeLabZoneItem.glowColor}, transparent)`, filter: `drop-shadow(0 0 8px ${activeLabZoneItem.glowColor})` }} />
+        </div>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
           <div className="border border-emerald-500/20 bg-emerald-950/10 rounded-[2rem] p-4 space-y-6">
             <div className="bg-[#111827]/70 border border-emerald-500/20 rounded-[2rem] p-6 shadow-xl">
