@@ -1633,58 +1633,79 @@ const handleSealPulse = () => {
             </h2>
           </div>
         </div>
-        <div className="mb-8 bg-[#0F172A]/70 border border-white/10 rounded-[2rem] px-4 py-5 md:px-6 md:py-6 shadow-xl relative overflow-hidden">
-          <svg className="absolute inset-0 w-full h-full opacity-35 pointer-events-none" viewBox="0 0 1200 200" preserveAspectRatio="none">
-            <path d="M 40 155 C 250 20, 470 20, 620 108 S 980 185, 1160 48" stroke="#f59e0b" strokeWidth="2" fill="none" strokeDasharray="5 7" />
-          </svg>
-          <div className="relative flex items-center justify-center gap-2 md:gap-4">
-            <button onClick={() => setActiveLabZone("current")} className={`text-[10px] md:text-[11px] font-black px-3 py-2 rounded-xl tracking-wide transition-all ${activeLabZone === "current" ? "text-emerald-300 border border-emerald-400/60 bg-emerald-500/15" : "text-emerald-500/80 border border-emerald-500/20 bg-emerald-500/5"}`}>
-              현재의 나 / Current Self
-            </button>
-            <div className="text-amber-400/60 text-xs md:text-sm">→</div>
-            <button onClick={() => setActiveLabZone("pulse")} className={`text-[11px] md:text-[12px] font-black px-4 py-2.5 rounded-2xl tracking-wide scale-105 shadow-[0_0_24px_rgba(245,158,11,0.35)] transition-all ${activeLabZone === "pulse" ? "text-amber-300 border border-amber-400/50 bg-amber-500/15 animate-pulse" : "text-amber-400/80 border border-amber-500/30 bg-amber-500/5"}`}>
-              ✦ THE PULSE / Bridge Core ✦
-            </button>
-            <div className="text-amber-400/60 text-xs md:text-sm">→</div>
-            <button onClick={() => setActiveLabZone("future")} className={`text-[10px] md:text-[11px] font-black px-3 py-2 rounded-xl tracking-wide transition-all ${activeLabZone === "future" ? "text-cyan-200 border border-cyan-400/60 bg-cyan-500/15" : "text-cyan-300/80 border border-cyan-400/20 bg-cyan-500/5"}`}>
-              미래의 나 / Apex BPS
-            </button>
-          </div>
-          <p className="text-center text-[11px] text-slate-400 mt-4">
-            현재의 나는 기록되고, 미래의 나는 설계되지만, 변화는 이곳에서 일어납니다.
-          </p>
-        </div>
-        <div className="hidden lg:grid lg:grid-cols-12 gap-4 mb-8 items-stretch">
-          {["current", "pulse", "future"].map((zone) => {
-            const meta = zonePreview[zone];
-            const Icon = meta.icon;
-            const isActive = activeLabZone === zone;
-            const colClass = zone === "pulse" ? "lg:col-span-6" : "lg:col-span-3";
-            return (
-              <button
-                key={zone}
-                onClick={() => setActiveLabZone(zone)}
-                className={`${colClass} text-left rounded-[2rem] border transition-all duration-300 p-5 relative overflow-hidden ${
-                  isActive
-                    ? zone === "pulse"
-                      ? "bg-amber-500/10 border-amber-400/60 shadow-[0_0_40px_rgba(245,158,11,0.35)] scale-[1.02]"
-                      : "bg-slate-900/70 border-white/20 shadow-lg"
-                    : "bg-slate-900/40 border-white/10 opacity-85 hover:opacity-100"
-                }`}
-              >
-                {zone === "pulse" && <div className="absolute inset-0 bg-amber-400/10 blur-2xl animate-pulse pointer-events-none" />}
-                <div className="relative z-10">
-                  <div className="flex items-center gap-3 mb-2">
-                    <Icon size={18} className={zone === "current" ? "text-emerald-300" : zone === "pulse" ? "text-amber-300" : "text-cyan-200"} />
-                    <p className="text-xs font-black text-white uppercase tracking-wider">{meta.title}</p>
-                  </div>
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{meta.keywords}</p>
-                  <p className="text-[11px] text-slate-300 mt-2 leading-relaxed">{meta.summary}</p>
-                </div>
-              </button>
-            );
-          })}
-        </div>
+        {/* 3D Cylindrical Zone Selector */}
+        {(() => {
+          const zones3d = [
+            { zone: "current", label: "현재의 나", sublabel: "Current Self", icon: User, keywords: "Identity · Life · VAK · TCI", summary: "지금의 나를 정확히 기록하고 기준점을 세웁니다.", glowColor: "rgba(16,185,129,0.55)", borderActive: "1px solid rgba(52,211,153,0.75)", borderInactive: "1px solid rgba(16,185,129,0.18)", bgActive: "rgba(6,60,35,0.85)", bgInactive: "rgba(2,20,12,0.45)", textColor: "#6ee7b7", subtextColor: "rgba(110,231,183,0.55)" },
+            { zone: "pulse", label: "✦ THE PULSE", sublabel: "Bridge Core", icon: Activity, keywords: "Bridge · Ledger · Contract", summary: "현재와 미래를 연결하는 실행 코어입니다.", glowColor: "rgba(245,158,11,0.65)", borderActive: "1px solid rgba(251,191,36,0.8)", borderInactive: "1px solid rgba(245,158,11,0.2)", bgActive: "rgba(70,40,0,0.90)", bgInactive: "rgba(25,14,0,0.45)", textColor: "#fcd34d", subtextColor: "rgba(252,211,77,0.55)" },
+            { zone: "future", label: "미래의 나", sublabel: "Apex BPS", icon: Star, keywords: "Traits · Vision · Immersion", summary: "미래 정체성을 설계하고 감각적으로 고정합니다.", glowColor: "rgba(6,182,212,0.55)", borderActive: "1px solid rgba(34,211,238,0.75)", borderInactive: "1px solid rgba(6,182,212,0.18)", bgActive: "rgba(0,40,55,0.85)", bgInactive: "rgba(0,15,22,0.45)", textColor: "#67e8f9", subtextColor: "rgba(103,232,249,0.55)" },
+          ];
+          const activeIdx = zones3d.findIndex(z => z.zone === activeLabZone);
+          return (
+            <div className="mb-8 relative" style={{ perspective: "1400px" }}>
+              {/* Selector track background */}
+              <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 h-[2px] pointer-events-none" style={{ background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.06) 20%, rgba(255,255,255,0.06) 80%, transparent)" }} />
+              <div className="flex items-stretch justify-center gap-3 md:gap-5 px-2 py-4" style={{ transformStyle: "preserve-3d" }}>
+                {zones3d.map((item, idx) => {
+                  const diff = idx - activeIdx;
+                  const isActive = diff === 0;
+                  const rotateY = diff * 20;
+                  const scale = isActive ? 1.06 : 1 - Math.abs(diff) * 0.07;
+                  const opacity = isActive ? 1 : 1 - Math.abs(diff) * 0.28;
+                  const zIdx = isActive ? 20 : 20 - Math.abs(diff) * 5;
+                  const translateZ = isActive ? 30 : -Math.abs(diff) * 20;
+                  const IconComp = item.icon;
+                  return (
+                    <button
+                      key={item.zone}
+                      onClick={() => setActiveLabZone(item.zone)}
+                      style={{
+                        transform: `rotateY(${rotateY}deg) scale(${scale}) translateZ(${translateZ}px)`,
+                        opacity,
+                        zIndex: zIdx,
+                        transition: "transform 620ms cubic-bezier(0.16,1,0.3,1), opacity 450ms cubic-bezier(0.16,1,0.3,1), box-shadow 450ms ease",
+                        transformStyle: "preserve-3d",
+                        background: isActive ? item.bgActive : item.bgInactive,
+                        border: isActive ? item.borderActive : item.borderInactive,
+                        boxShadow: isActive ? `0 0 50px ${item.glowColor}, 0 0 20px ${item.glowColor}, inset 0 1px 0 rgba(255,255,255,0.12)` : "none",
+                        flex: isActive ? "0 0 auto" : "0 0 auto",
+                        cursor: "pointer",
+                        position: "relative",
+                      }}
+                      className="rounded-2xl px-4 py-4 md:px-6 md:py-5 text-left min-w-[110px] md:min-w-[190px] max-w-[220px]"
+                    >
+                      {/* Inner top highlight line */}
+                      {isActive && (
+                        <div className="absolute top-0 left-4 right-4 h-px rounded-full pointer-events-none" style={{ background: `linear-gradient(90deg, transparent, ${item.textColor}80, transparent)` }} />
+                      )}
+                      <div className="flex items-center gap-2 mb-1">
+                        <IconComp size={isActive ? 17 : 13} style={{ color: item.textColor }} />
+                        <p style={{ color: item.textColor }} className={`font-black uppercase tracking-wider leading-tight ${isActive ? "text-[12px] md:text-sm" : "text-[10px] md:text-[11px]"}`}>{item.label}</p>
+                      </div>
+                      <p style={{ color: item.subtextColor }} className="text-[9px] md:text-[10px] font-bold uppercase tracking-widest">{item.sublabel}</p>
+                      {isActive && (
+                        <>
+                          <p style={{ color: item.subtextColor, fontSize: "10px" }} className="mt-1 font-semibold uppercase tracking-wider">{item.keywords}</p>
+                          <p style={{ color: item.textColor, opacity: 0.8 }} className="text-[11px] mt-2 leading-relaxed">{item.summary}</p>
+                        </>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+              {/* Beam: active tab → content */}
+              <div className="flex justify-center pointer-events-none">
+                <div style={{
+                  width: "2px",
+                  height: "24px",
+                  background: `linear-gradient(to bottom, ${zones3d[activeIdx].glowColor}, transparent)`,
+                  transition: "background 500ms ease",
+                  filter: `drop-shadow(0 0 6px ${zones3d[activeIdx].glowColor})`,
+                }} />
+              </div>
+            </div>
+          );
+        })()}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
           <div className="border border-emerald-500/20 bg-emerald-950/10 rounded-[2rem] p-4 space-y-6">
             <div className="bg-[#111827]/70 border border-emerald-500/20 rounded-[2rem] p-6 shadow-xl">
