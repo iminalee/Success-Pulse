@@ -1594,33 +1594,39 @@ const handleSealPulse = () => {
     const sdCValue =
       tciProfile.sd_c?.score ??
       Number(tciProfile.sd?.score || 0) + Number(tciProfile.c?.score || 0);
-    const zoneWrapClass = (zone) =>
-      `transition-all duration-300 rounded-[2rem] border ${
-        activeLabZone === zone
-          ? "opacity-100 border-amber-500/40 bg-slate-900/45 p-4 md:p-6"
-          : "opacity-80 border-white/10 bg-slate-900/20 p-3 md:p-4"
-      }`;
-    const zonePreview = {
+    const labZoneMeta = {
       current: {
-        icon: User,
-        title: "Current Self",
+        label: "현재의 나",
+        sublabel: "Current Self",
         keywords: "Identity · Life · VAK · TCI",
-        summary: "지금의 나를 정확히 기록하고 기준점을 세웁니다.",
-        color: "emerald",
+        node: "bg-amber-500",
+        nodeRing: "ring-amber-300/40",
+        text: "text-amber-200",
+        fill: "rgba(120, 53, 15, 0.78)",
+        border: "border-amber-400/30",
+        glow: "rgba(245,158,11,0.36)",
       },
       pulse: {
-        icon: Activity,
-        title: "THE PULSE",
-        keywords: "Bridge · Ledger · Contract",
-        summary: "현재와 미래를 연결하는 실행 코어입니다.",
-        color: "amber",
+        label: "THE PULSE",
+        sublabel: "Bridge Core",
+        keywords: "Fixed Value Events · Target Date · Mental Bank Goal · Contract Link",
+        node: "bg-teal-300",
+        nodeRing: "ring-teal-200/40",
+        text: "text-teal-100",
+        fill: "rgba(92, 58, 13, 0.82)",
+        border: "border-teal-200/25",
+        glow: "rgba(20,184,166,0.34)",
       },
       future: {
-        icon: Star,
-        title: "Apex BPS",
-        keywords: "Traits · Vision · Immersion",
-        summary: "미래 정체성을 설계하고 감각적으로 고정합니다.",
-        color: "cyan",
+        label: "미래의 나",
+        sublabel: "Apex BPS",
+        keywords: "BPS Character Forge · Goal Architect · Vision · VAK Vision · Immersion Script",
+        node: "bg-yellow-300",
+        nodeRing: "ring-yellow-100/50",
+        text: "text-yellow-100",
+        fill: "rgba(146, 64, 14, 0.9)",
+        border: "border-yellow-200/35",
+        glow: "rgba(251,191,36,0.5)",
       },
     };
     const labContentColumns = {
@@ -1634,74 +1640,49 @@ const handleSealPulse = () => {
       return `${baseClass} relative overflow-hidden transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] ${
         isActive
           ? "opacity-100 scale-100 max-h-none"
-          : "opacity-45 scale-[0.94] max-h-[620px] cursor-pointer hover:opacity-65"
+          : "opacity-55 scale-[0.94] max-h-[620px] cursor-pointer hover:opacity-75"
       }`;
     };
     const labContentCardStyle = (zone) => {
       const isActive = activeLabZone === zone;
       const diff = labContentIndex[zone] - labContentIndex[activeLabZone];
+      const meta = labZoneMeta[zone];
       return {
         zIndex: isActive ? 20 : 10 - Math.abs(diff),
         transform: isActive
-          ? "translateY(0) rotate(0deg)"
-          : `translateY(18px) rotate(${diff < 0 ? -3.5 : 3.5}deg)`,
+          ? "translateX(0) translateY(0) scale(1)"
+          : `translateX(${diff < 0 ? -10 : 10}px) translateY(18px) scale(0.94)`,
+        background: isActive
+          ? `linear-gradient(145deg, ${meta.fill}, rgba(15, 23, 42, 0.94))`
+          : `linear-gradient(145deg, ${meta.fill}, rgba(15, 23, 42, 0.82))`,
         boxShadow: isActive
-          ? "0 24px 80px rgba(0,0,0,0.38), 0 0 32px rgba(245,158,11,0.14)"
-          : "0 14px 38px rgba(0,0,0,0.32)",
+          ? `0 24px 80px rgba(0,0,0,0.42), 0 0 34px ${meta.glow}`
+          : "0 14px 38px rgba(0,0,0,0.34)",
       };
     };
-    const renderLabPersonMotif = (type) => (
-      <div className="relative mx-auto mb-5 flex h-32 w-full items-center justify-center overflow-hidden rounded-[2rem] border border-white/5 bg-slate-950/30 md:h-40">
-        <div
-          className={`absolute rounded-full blur-3xl ${
-            type === "bridge"
-              ? "inset-x-12 inset-y-6 bg-teal-300/20"
-              : type === "future"
-              ? "inset-x-10 inset-y-3 bg-amber-300/35"
-              : "inset-x-14 inset-y-7 bg-amber-400/18"
-          }`}
-        />
-        <svg viewBox="0 0 220 160" className="relative h-full w-full max-w-[360px] overflow-visible">
-          <defs>
-            <path
-              id={`mylab-person-${type}`}
-              d="M110 16C132 16 146 30 146 52C146 69 136 80 127 85V95C157 101 181 120 181 150H39C39 120 63 101 93 95V85C84 80 74 69 74 52C74 30 88 16 110 16Z"
-            />
-            <linearGradient id={`mylab-gold-${type}`} x1="0%" y1="0%" x2="0%" y2="100%">
-              <stop offset="0%" stopColor="#fff7ad" />
-              <stop offset="42%" stopColor="#fbbf24" />
-              <stop offset="100%" stopColor="#b45309" />
-            </linearGradient>
-            <linearGradient id={`mylab-bridge-${type}`} x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="#5eead4" />
-              <stop offset="55%" stopColor="#0ea5e9" />
-              <stop offset="100%" stopColor="#fbbf24" />
-            </linearGradient>
-          </defs>
-          {type === "current" && (
-            <>
-              <circle cx="110" cy="76" r="66" fill="rgba(251,191,36,0.1)" />
-              <use href={`#mylab-person-${type}`} fill="#020617" stroke="#fcd34d" strokeWidth="3.5" className="drop-shadow-[0_0_26px_rgba(251,191,36,0.76)]" />
-              <use href={`#mylab-person-${type}`} fill="transparent" stroke="#fff7ad" strokeWidth="1.2" opacity="0.55" />
-            </>
-          )}
-          {type === "bridge" && (
-            <>
-              <use href={`#mylab-person-${type}`} fill="#020617" stroke="#fbbf24" strokeWidth="3" opacity="0.72" transform="translate(-28 0)" className="drop-shadow-[0_0_20px_rgba(251,191,36,0.55)]" />
-              <use href={`#mylab-person-${type}`} fill={`url(#mylab-bridge-${type})`} stroke="#99f6e4" strokeWidth="3" opacity="0.9" transform="translate(28 0)" className="drop-shadow-[0_0_28px_rgba(45,212,191,0.76)]" />
-              <path d="M84 75C100 58 120 58 136 75M84 95C100 112 120 112 136 95" fill="none" stroke="#fde68a" strokeWidth="5" strokeLinecap="round" opacity="0.82" />
-            </>
-          )}
-          {type === "future" && (
-            <>
-              <circle cx="110" cy="76" r="72" fill="rgba(253,230,138,0.18)" />
-              <use href={`#mylab-person-${type}`} fill={`url(#mylab-gold-${type})`} stroke="#fff7ad" strokeWidth="3" className="drop-shadow-[0_0_40px_rgba(251,191,36,0.98)]" />
-              <path d="M110 0V20M110 140V160M24 80H4M216 80H196M42 22L57 37M163 37L178 22" stroke="#fde68a" strokeWidth="4" strokeLinecap="round" opacity="0.76" />
-            </>
-          )}
-        </svg>
-      </div>
-    );
+    const renderLabNodeHeader = (zone, title, details) => {
+      const meta = labZoneMeta[zone];
+      return (
+        <div className="rounded-[2rem] border border-white/10 bg-slate-950/45 p-5 shadow-xl">
+          <div className="flex items-center gap-4">
+            <div className={`relative h-12 w-12 shrink-0 rounded-full ${meta.node} ring-8 ${meta.nodeRing} shadow-[0_0_28px_rgba(245,158,11,0.35)]`}>
+              <div className="absolute inset-2 rounded-full bg-white/20" />
+              {zone === "pulse" && (
+                <div className="absolute left-1/2 top-1/2 h-1 w-14 -translate-x-1/2 -translate-y-1/2 rounded-full bg-cyan-100/80 shadow-[0_0_16px_rgba(34,211,238,0.75)]" />
+              )}
+            </div>
+            <div className="min-w-0">
+              <p className={`text-[11px] font-black uppercase tracking-[0.25em] ${meta.text}`}>
+                {title}
+              </p>
+              <p className="mt-2 text-[11px] leading-relaxed text-slate-300/85">
+                {details}
+              </p>
+            </div>
+          </div>
+        </div>
+      );
+    };
     return (
       <div className="flex-grow w-full max-w-7xl mx-auto overflow-y-auto no-scrollbar pb-24 px-4 animate-fadeIn font-sans">
         <div className="flex items-center justify-between mb-8">
@@ -1712,79 +1693,77 @@ const handleSealPulse = () => {
             </h2>
           </div>
         </div>
-        {/* 3D Cylindrical Zone Selector */}
-        {(() => {
-          const zones3d = [
-            { zone: "current", label: "현재의 나", sublabel: "Current Self", icon: User, keywords: "Identity · Life · VAK · TCI", summary: "지금의 나를 정확히 기록하고 기준점을 세웁니다.", glowColor: "rgba(16,185,129,0.55)", borderActive: "1px solid rgba(52,211,153,0.75)", borderInactive: "1px solid rgba(16,185,129,0.18)", bgActive: "rgba(6,60,35,0.85)", bgInactive: "rgba(2,20,12,0.45)", textColor: "#6ee7b7", subtextColor: "rgba(110,231,183,0.55)" },
-            { zone: "pulse", label: "✦ THE PULSE", sublabel: "Bridge Core", icon: Activity, keywords: "Bridge · Ledger · Contract", summary: "현재와 미래를 연결하는 실행 코어입니다.", glowColor: "rgba(245,158,11,0.65)", borderActive: "1px solid rgba(251,191,36,0.8)", borderInactive: "1px solid rgba(245,158,11,0.2)", bgActive: "rgba(70,40,0,0.90)", bgInactive: "rgba(25,14,0,0.45)", textColor: "#fcd34d", subtextColor: "rgba(252,211,77,0.55)" },
-            { zone: "future", label: "미래의 나", sublabel: "Apex BPS", icon: Star, keywords: "Traits · Vision · Immersion", summary: "미래 정체성을 설계하고 감각적으로 고정합니다.", glowColor: "rgba(6,182,212,0.55)", borderActive: "1px solid rgba(34,211,238,0.75)", borderInactive: "1px solid rgba(6,182,212,0.18)", bgActive: "rgba(0,40,55,0.85)", bgInactive: "rgba(0,15,22,0.45)", textColor: "#67e8f9", subtextColor: "rgba(103,232,249,0.55)" },
-          ];
-          const activeIdx = zones3d.findIndex(z => z.zone === activeLabZone);
-          return (
-            <div className="mb-8 relative" style={{ perspective: "1400px" }}>
-              {/* Selector track background */}
-              <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 h-[2px] pointer-events-none" style={{ background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.06) 20%, rgba(255,255,255,0.06) 80%, transparent)" }} />
-              <div className="flex items-stretch justify-center gap-3 md:gap-5 px-2 py-4" style={{ transformStyle: "preserve-3d" }}>
-                {zones3d.map((item, idx) => {
-                  const diff = idx - activeIdx;
-                  const isActive = diff === 0;
-                  const rotateY = diff * 20;
-                  const scale = isActive ? 1.06 : 1 - Math.abs(diff) * 0.07;
-                  const opacity = isActive ? 1 : 1 - Math.abs(diff) * 0.28;
-                  const zIdx = isActive ? 20 : 20 - Math.abs(diff) * 5;
-                  const translateZ = isActive ? 30 : -Math.abs(diff) * 20;
-                  const IconComp = item.icon;
-                  return (
-                    <button
-                      key={item.zone}
-                      onClick={() => setActiveLabZone(item.zone)}
-                      style={{
-                        transform: `rotateY(${rotateY}deg) scale(${scale}) translateZ(${translateZ}px)`,
-                        opacity,
-                        zIndex: zIdx,
-                        transition: "transform 620ms cubic-bezier(0.16,1,0.3,1), opacity 450ms cubic-bezier(0.16,1,0.3,1), box-shadow 450ms ease",
-                        transformStyle: "preserve-3d",
-                        background: isActive ? item.bgActive : item.bgInactive,
-                        border: isActive ? item.borderActive : item.borderInactive,
-                        boxShadow: isActive ? `0 0 50px ${item.glowColor}, 0 0 20px ${item.glowColor}, inset 0 1px 0 rgba(255,255,255,0.12)` : "none",
-                        flex: isActive ? "0 0 auto" : "0 0 auto",
-                        cursor: "pointer",
-                        position: "relative",
-                      }}
-                      className="rounded-2xl px-4 py-4 md:px-6 md:py-5 text-left min-w-[110px] md:min-w-[190px] max-w-[220px]"
-                    >
-                      {/* Inner top highlight line */}
-                      {isActive && (
-                        <div className="absolute top-0 left-4 right-4 h-px rounded-full pointer-events-none" style={{ background: `linear-gradient(90deg, transparent, ${item.textColor}80, transparent)` }} />
-                      )}
-                      <div className="flex items-center gap-2 mb-1">
-                        <IconComp size={isActive ? 17 : 13} style={{ color: item.textColor }} />
-                        <p style={{ color: item.textColor }} className={`font-black uppercase tracking-wider leading-tight ${isActive ? "text-[12px] md:text-sm" : "text-[10px] md:text-[11px]"}`}>{item.label}</p>
-                      </div>
-                      <p style={{ color: item.subtextColor }} className="text-[9px] md:text-[10px] font-bold uppercase tracking-widest">{item.sublabel}</p>
-                      {isActive && (
-                        <>
-                          <p style={{ color: item.subtextColor, fontSize: "10px" }} className="mt-1 font-semibold uppercase tracking-wider">{item.keywords}</p>
-                          <p style={{ color: item.textColor, opacity: 0.8 }} className="text-[11px] mt-2 leading-relaxed">{item.summary}</p>
-                        </>
-                      )}
-                    </button>
-                  );
-                })}
-              </div>
-              {/* Beam: active tab → content */}
-              <div className="flex justify-center pointer-events-none">
-                <div style={{
-                  width: "2px",
-                  height: "24px",
-                  background: `linear-gradient(to bottom, ${zones3d[activeIdx].glowColor}, transparent)`,
-                  transition: "background 500ms ease",
-                  filter: `drop-shadow(0 0 6px ${zones3d[activeIdx].glowColor})`,
-                }} />
-              </div>
-            </div>
-          );
-        })()}
+        {/* Wave-connected Zone Selector */}
+        <div className="relative mb-8 px-2 pb-8 pt-2">
+          <div className="relative mx-auto h-32 max-w-3xl">
+            <svg className="absolute inset-0 h-full w-full overflow-visible" viewBox="0 0 720 128" preserveAspectRatio="none" aria-hidden="true">
+              <path
+                d="M88 62 C190 8 262 116 360 62 C458 8 530 116 632 62"
+                fill="none"
+                stroke="rgba(251,191,36,0.16)"
+                strokeWidth="12"
+                strokeLinecap="round"
+              />
+              <path
+                d="M88 62 C190 8 262 116 360 62 C458 8 530 116 632 62"
+                fill="none"
+                stroke={activeLabZone === "pulse" ? "rgba(45,212,191,0.92)" : "rgba(245,158,11,0.62)"}
+                strokeWidth="3"
+                strokeLinecap="round"
+                strokeDasharray={activeLabZone === "pulse" ? "10 10" : "1 0"}
+                className="transition-all duration-700"
+              />
+              <line
+                x1={activeLabZone === "current" ? "88" : activeLabZone === "pulse" ? "360" : "632"}
+                y1="80"
+                x2={activeLabZone === "current" ? "88" : activeLabZone === "pulse" ? "360" : "632"}
+                y2="128"
+                stroke={activeLabZone === "pulse" ? "rgba(45,212,191,0.65)" : "rgba(251,191,36,0.72)"}
+                strokeWidth="2"
+                strokeLinecap="round"
+                className="transition-all duration-700"
+              />
+            </svg>
+            {[
+              { zone: "current", x: "12%" },
+              { zone: "pulse", x: "50%" },
+              { zone: "future", x: "88%" },
+            ].map((item) => {
+              const meta = labZoneMeta[item.zone];
+              const isActive = activeLabZone === item.zone;
+              return (
+                <button
+                  key={item.zone}
+                  type="button"
+                  onClick={() => setActiveLabZone(item.zone)}
+                  className="absolute top-1/2 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center gap-2 outline-none"
+                  style={{ left: item.x }}
+                  aria-pressed={isActive}
+                >
+                  <span
+                    className={`relative grid rounded-full transition-all duration-500 ${
+                      isActive ? "h-16 w-16 place-items-center" : "h-12 w-12 place-items-center opacity-75"
+                    } ${meta.node} ring-8 ${meta.nodeRing}`}
+                    style={{
+                      boxShadow: isActive
+                        ? `0 0 38px ${meta.glow}, 0 0 12px rgba(255,255,255,0.18)`
+                        : `0 0 14px ${meta.glow}`,
+                    }}
+                  >
+                    <span className="h-4 w-4 rounded-full bg-white/30" />
+                    {item.zone === "pulse" && (
+                      <span className="absolute h-1 w-20 rounded-full bg-cyan-100/80 shadow-[0_0_18px_rgba(34,211,238,0.9)]" />
+                    )}
+                  </span>
+                  <span className={`rounded-full border px-3 py-1 text-center text-[9px] font-black uppercase tracking-[0.2em] transition-all duration-500 ${isActive ? `${meta.text} border-white/20 bg-slate-950/80` : "border-white/5 bg-slate-950/45 text-slate-500"}`}>
+                    {meta.label}
+                    <span className="block text-[8px] tracking-[0.18em] opacity-70">{meta.sublabel}</span>
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
         <div
           className="grid gap-4 md:gap-6 items-start"
           style={{ gridTemplateColumns: labContentColumns[activeLabZone] }}
@@ -1793,7 +1772,7 @@ const handleSealPulse = () => {
             onClick={() => activeLabZone !== "current" && setActiveLabZone("current")}
             className={labContentCardClass(
               "current",
-              "border border-amber-500/25 bg-amber-950/10 rounded-[2rem] p-4 space-y-6"
+              "border border-amber-400/35 rounded-[2rem] p-4 space-y-6"
             )}
             style={labContentCardStyle("current")}
           >
@@ -1807,18 +1786,14 @@ const handleSealPulse = () => {
                 Current Self
               </button>
             )}
-            {renderLabPersonMotif("current")}
-            <div className="bg-[#111827]/70 border border-amber-500/20 rounded-[2rem] p-6 shadow-xl">
-              <p className="text-[11px] font-black text-amber-300 uppercase tracking-[0.25em]">
-                현재의 나 / Current Self
-              </p>
-              <p className="text-[11px] text-slate-400 mt-2">
-                Identity Registration · Life Profile · Financial Core · VAK · TCI
-              </p>
-            </div>
+            {renderLabNodeHeader(
+              "current",
+              "현재의 나 / Current Self",
+              "Identity Registration · Life Profile · Financial Core · VAK · TCI"
+            )}
             <div className="bg-[#2D3748]/30 p-8 rounded-[3rem] border border-white/5 shadow-xl border-l-4 border-amber-500 mb-8 flex flex-col md:flex-row items-center gap-8">
-              <div className="bg-amber-500/10 p-6 rounded-full border border-amber-500/20 shadow-[0_0_30px_rgba(245,158,11,0.1)]">
-                <User size={32} className="text-amber-500" />
+              <div className="relative h-20 w-20 shrink-0 rounded-full bg-amber-500/80 ring-8 ring-amber-300/15 shadow-[0_0_30px_rgba(245,158,11,0.18)]">
+                <div className="absolute inset-5 rounded-full bg-white/20" />
               </div>
               <div className="flex-grow w-full space-y-4">
                 <div className="flex justify-between items-end">
@@ -2245,7 +2220,7 @@ const handleSealPulse = () => {
             onClick={() => activeLabZone !== "pulse" && setActiveLabZone("pulse")}
             className={labContentCardClass(
               "pulse",
-              "border border-teal-300/20 bg-teal-950/10 rounded-[2rem] p-4 space-y-6"
+              "border border-teal-200/30 rounded-[2rem] p-4 space-y-6"
             )}
             style={labContentCardStyle("pulse")}
           >
@@ -2259,15 +2234,11 @@ const handleSealPulse = () => {
                 Bridge Core
               </button>
             )}
-            {renderLabPersonMotif("bridge")}
-            <div className="bg-[#111827]/70 border border-amber-500/30 rounded-[2rem] p-6 shadow-xl shadow-[0_0_30px_rgba(245,158,11,0.12)]">
-              <p className="text-[11px] font-black text-amber-300 uppercase tracking-[0.25em]">
-                THE PULSE / Bridge Core
-              </p>
-              <p className="text-[11px] text-slate-400 mt-2">
-                Fixed Value Events · Target Date · Mental Bank Goal · Value Event Award · Contract Link
-              </p>
-            </div>
+            {renderLabNodeHeader(
+              "pulse",
+              "THE PULSE / Bridge Core",
+              "Fixed Value Events · Target Date · Mental Bank Goal · Value Event Award · Contract Link"
+            )}
             <div className="bg-[#1A202C]/60 p-6 rounded-[2.5rem] border border-amber-500/20 mb-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="bg-slate-900/50 border border-white/10 rounded-2xl p-4">
@@ -2338,7 +2309,7 @@ const handleSealPulse = () => {
             onClick={() => activeLabZone !== "future" && setActiveLabZone("future")}
             className={labContentCardClass(
               "future",
-              "border border-amber-300/25 bg-amber-950/10 rounded-[2rem] p-4 space-y-6"
+              "border border-yellow-200/40 rounded-[2rem] p-4 space-y-6"
             )}
             style={labContentCardStyle("future")}
           >
@@ -2352,15 +2323,11 @@ const handleSealPulse = () => {
                 Apex BPS
               </button>
             )}
-            {renderLabPersonMotif("future")}
-            <div className="bg-[#111827]/70 border border-amber-300/25 rounded-[2rem] p-6 shadow-xl">
-              <p className="text-[11px] font-black text-amber-200 uppercase tracking-[0.25em]">
-                미래의 나 / Apex BPS
-              </p>
-              <p className="text-[11px] text-slate-400 mt-2">
-                BPS Character Forge · Goal Architect · Vision · VAK Vision · Immersion Script
-              </p>
-            </div>
+            {renderLabNodeHeader(
+              "future",
+              "미래의 나 / Apex BPS",
+              "BPS Character Forge · Goal Architect · Vision · VAK Vision · Immersion Script"
+            )}
             <div className="bg-[#2D3748]/30 p-10 rounded-[3rem] border border-white/5 shadow-xl border-t-4 border-amber-300/40">
               <p className="text-[12px] font-black text-amber-200 uppercase tracking-[0.4em] mb-4 flex items-center gap-2">
                 <Star size={16} /> BPS Character Forge
