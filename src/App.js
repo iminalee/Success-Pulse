@@ -1690,7 +1690,7 @@ const handleSealPulse = () => {
             <div className="absolute inset-x-2 inset-y-3 rounded-full bg-teal-100/12 blur-md" />
             <svg viewBox="0 0 140 64" className="relative h-full w-full overflow-visible">
               <path
-                d="M6 34H27L35 22L45 48L58 14L72 54L83 31H101L110 22L119 34H134"
+                d="M6 34H32C38 34 40 28 44 23C49 17 54 19 58 31C62 45 67 53 74 53C82 53 86 24 94 18C101 12 108 25 112 34C116 43 121 34 134 34"
                 fill="none"
                 stroke="rgba(20,184,166,0.35)"
                 strokeWidth="12"
@@ -1698,7 +1698,7 @@ const handleSealPulse = () => {
                 strokeLinejoin="round"
               />
               <path
-                d="M6 34H27L35 22L45 48L58 14L72 54L83 31H101L110 22L119 34H134"
+                d="M6 34H32C38 34 40 28 44 23C49 17 54 19 58 31C62 45 67 53 74 53C82 53 86 24 94 18C101 12 108 25 112 34C116 43 121 34 134 34"
                 fill="none"
                 stroke="rgba(204,251,241,0.96)"
                 strokeWidth="5"
@@ -1774,7 +1774,7 @@ const handleSealPulse = () => {
           <div className="relative mx-auto h-32 max-w-3xl">
             <svg className="absolute inset-0 h-full w-full overflow-visible" viewBox="0 0 720 128" preserveAspectRatio="none" aria-hidden="true">
               <path
-                d="M72 64H122L139 49L156 85L178 20L205 64H286L303 53L321 77L340 64H380L400 36L422 94L448 64H526L544 48L562 82L584 64H648"
+                d="M72 64H284C292 64 298 60 303 53C309 41 316 40 322 55C328 71 335 81 343 74C351 67 358 42 368 28C378 14 390 24 398 46C406 68 414 90 424 92C434 94 442 71 452 64H648"
                 fill="none"
                 stroke="rgba(251,191,36,0.16)"
                 strokeWidth="16"
@@ -1783,7 +1783,7 @@ const handleSealPulse = () => {
                 className="lab-wave-breathe"
               />
               <path
-                d="M72 64H122L139 49L156 85L178 20L205 64H286L303 53L321 77L340 64H380L400 36L422 94L448 64H526L544 48L562 82L584 64H648"
+                d="M72 64H284C292 64 298 60 303 53C309 41 316 40 322 55C328 71 335 81 343 74C351 67 358 42 368 28C378 14 390 24 398 46C406 68 414 90 424 92C434 94 442 71 452 64H648"
                 fill="none"
                 stroke={activeLabZone === "pulse" ? "rgba(153,246,228,0.92)" : "rgba(245,158,11,0.72)"}
                 strokeWidth="4"
@@ -1792,7 +1792,7 @@ const handleSealPulse = () => {
                 className="transition-all duration-700 lab-wave-breathe"
               />
               <path
-                d="M72 64H122L139 49L156 85L178 20L205 64H286L303 53L321 77L340 64H380L400 36L422 94L448 64H526L544 48L562 82L584 64H648"
+                d="M72 64H284C292 64 298 60 303 53C309 41 316 40 322 55C328 71 335 81 343 74C351 67 358 42 368 28C378 14 390 24 398 46C406 68 414 90 424 92C434 94 442 71 452 64H648"
                 fill="none"
                 stroke={activeLabZone === "pulse" ? "rgba(204,251,241,1)" : "rgba(253,230,138,0.95)"}
                 strokeWidth="6"
@@ -1800,7 +1800,7 @@ const handleSealPulse = () => {
                 strokeLinejoin="round"
                 strokeDasharray="84 700"
                 className="lab-wave-flow transition-all duration-700"
-                style={{ animationDirection: activeLabZone === "current" ? "reverse" : "normal" }}
+                style={{ animationDirection: activeLabZone === "future" ? "reverse" : "normal" }}
               />
               <line
                 x1={activeLabZone === "current" ? "88" : activeLabZone === "pulse" ? "360" : "632"}
@@ -1872,7 +1872,6 @@ const handleSealPulse = () => {
               "Identity Registration · Life Profile · Financial Core · VAK · TCI"
             )}
             <div className="bg-[#2D3748]/30 p-8 rounded-[3rem] border border-white/5 shadow-xl border-l-4 border-amber-500 mb-8 flex flex-col md:flex-row items-center gap-8">
-              {renderLabZoneSymbol("current", "mini", activeLabZone === "current")}
               <div className="flex-grow w-full space-y-4">
                 <div className="flex justify-between items-end">
                   <p className="text-[10px] font-black text-amber-500 uppercase tracking-[0.3em] flex items-center gap-2">
@@ -4853,7 +4852,7 @@ const nowX = getX(dataPoints[dataPoints.length - 1].date); // 📅 가로 위치
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-200 p-4 md:p-10 font-sans overflow-hidden flex flex-col selection:bg-amber-500/30">
-      <style>{`@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css'); * { font-family: 'Pretendard', sans-serif; letter-spacing: -0.02em; } .animate-fadeIn { animation: fadeIn 0.8s ease-out; } .animate-spin-slow { animation: spin 20s linear infinite; } .lab-wave-breathe { animation: labWaveBreathe 4.8s ease-in-out infinite; } .lab-wave-flow { animation: labWaveFlow 5.6s linear infinite; } .lab-zone-node { animation: labNodePulse 4.2s ease-in-out infinite; } .lab-zone-node-active { animation: labNodeActive 2.8s ease-in-out infinite; } .lab-pulse-signal { animation: labPulseSignal 2.6s ease-in-out infinite; } .lab-ecg-signal { animation: labEcgSignal 2.8s ease-in-out infinite; } @keyframes labWaveBreathe { 0%, 100% { opacity: 0.42; filter: drop-shadow(0 0 4px rgba(245,158,11,0.22)); } 50% { opacity: 0.82; filter: drop-shadow(0 0 14px rgba(245,158,11,0.45)); } } @keyframes labWaveFlow { from { stroke-dashoffset: 720; } to { stroke-dashoffset: 0; } } @keyframes labNodePulse { 0%, 100% { transform: scale(1); filter: brightness(0.92); } 50% { transform: scale(1.06); filter: brightness(1.18); } } @keyframes labNodeActive { 0%, 100% { transform: scale(1); filter: brightness(1.08); } 50% { transform: scale(1.12); filter: brightness(1.34); } } @keyframes labPulseSignal { 0%, 100% { opacity: 0.58; transform: translateX(-50%) translateY(-50%) scaleX(0.72); } 50% { opacity: 1; transform: translateX(-50%) translateY(-50%) scaleX(1.08); } } @keyframes labEcgSignal { 0%, 100% { opacity: 0.62; filter: drop-shadow(0 0 4px rgba(204,251,241,0.45)); } 50% { opacity: 1; filter: drop-shadow(0 0 14px rgba(45,212,191,0.95)); } } @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } } @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }`}</style>
+      <style>{`@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css'); * { font-family: 'Pretendard', sans-serif; letter-spacing: -0.02em; } .animate-fadeIn { animation: fadeIn 0.8s ease-out; } .animate-spin-slow { animation: spin 20s linear infinite; } .lab-wave-breathe { animation: labWaveBreathe 4.8s ease-in-out infinite; } .lab-wave-flow { animation: labWaveFlow 5.6s linear infinite; } .lab-zone-node { animation: labNodePulse 4.2s ease-in-out infinite; } .lab-zone-node-active { animation: labNodeActive 2.8s ease-in-out infinite; } .lab-pulse-signal { animation: labPulseSignal 2.6s ease-in-out infinite; } .lab-ecg-signal { animation: labEcgSignal 2.8s ease-in-out infinite; } @keyframes labWaveBreathe { 0%, 100% { opacity: 0.42; filter: drop-shadow(0 0 4px rgba(245,158,11,0.22)); } 50% { opacity: 0.82; filter: drop-shadow(0 0 14px rgba(245,158,11,0.45)); } } @keyframes labWaveFlow { from { stroke-dashoffset: 720; } to { stroke-dashoffset: 0; } } @keyframes labNodePulse { 0%, 100% { filter: brightness(0.9) drop-shadow(0 0 10px rgba(245,158,11,0.18)); } 50% { filter: brightness(1.18) drop-shadow(0 0 22px rgba(245,158,11,0.46)); } } @keyframes labNodeActive { 0%, 100% { filter: brightness(1.08) drop-shadow(0 0 16px rgba(251,191,36,0.45)); } 50% { filter: brightness(1.34) drop-shadow(0 0 34px rgba(251,191,36,0.78)); } } @keyframes labPulseSignal { 0%, 100% { opacity: 0.58; transform: translateX(-50%) translateY(-50%) scaleX(0.72); } 50% { opacity: 1; transform: translateX(-50%) translateY(-50%) scaleX(1.08); } } @keyframes labEcgSignal { 0%, 100% { opacity: 0.62; filter: drop-shadow(0 0 4px rgba(204,251,241,0.45)); } 50% { opacity: 1; filter: drop-shadow(0 0 14px rgba(45,212,191,0.95)); } } @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } } @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }`}</style>
     
   
       {/* 헤더 */}
@@ -4893,7 +4892,7 @@ const nowX = getX(dataPoints[dataPoints.length - 1].date); // 📅 가로 위치
         </div>
 
 
-      {currentView !== "philosophy" && (
+      {currentView !== "philosophy" && currentView !== "lab" && (
           /* [우측 상단] 자산 대시보드 (반응형 수정 완료) */
           /* md:items-end -> PC에서는 우측 정렬, 모바일에서는 items-center(중앙 정렬) */
           /* mt-2 md:mt-0 -> 모바일에서는 로고와 간격을 위해 위쪽 여백 추가 */
@@ -5082,8 +5081,8 @@ const nowX = getX(dataPoints[dataPoints.length - 1].date); // 📅 가로 위치
 
       {/* 하단 네비게이션 (Floating 적용 완료) */}
       {/* 하단 네비게이션 (Ledger를 맨 앞으로 이동!) */}
-      <footer className="fixed bottom-6 left-0 right-0 z-[1000] px-4 animate-fadeIn">
-        <nav className="max-w-xl mx-auto flex justify-between md:justify-around items-center bg-[#0A0F1E]/90 backdrop-blur-xl rounded-full py-3 px-3 border border-white/10 shadow-[0_10px_40px_rgba(0,0,0,0.8)] mb-1 overflow-x-auto no-scrollbar gap-1">
+      <footer className="fixed bottom-3 left-0 right-0 z-[1000] px-2 animate-fadeIn">
+        <nav className="max-w-[520px] mx-auto flex justify-between md:justify-around items-center bg-[#0A0F1E]/82 backdrop-blur-xl rounded-full py-2 px-2 border border-white/10 shadow-[0_8px_28px_rgba(0,0,0,0.55)] mb-1 overflow-x-auto no-scrollbar gap-0.5 opacity-80 hover:opacity-100 focus-within:opacity-100 transition-all duration-300 scale-95 hover:scale-100 origin-bottom">
           {/* 0. Tonight — 매일 밤의 단일 진입점 */}
           <NavBtn
             active={currentView === "tonight"}
