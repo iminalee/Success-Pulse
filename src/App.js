@@ -1720,9 +1720,22 @@ const handleSealPulse = () => {
           style={{ filter: `drop-shadow(0 0 ${isFuture ? 34 : 24}px ${meta.glow})` }}
         >
           <div className={`absolute inset-0 rounded-full blur-xl ${isFuture ? "bg-yellow-300/70" : "bg-amber-300/45"}`} />
-          <svg viewBox="0 0 100 100" className="relative h-[86%] w-[86%] overflow-visible">
-            <circle cx="50" cy="30" r="21" fill={isFuture ? "#facc15" : "#030712"} stroke={isFuture ? "#fef3c7" : "#fbbf24"} strokeWidth="2.5" />
-            <path d="M50 50 L22 88 H78 Z" fill={isFuture ? "#f59e0b" : "#030712"} stroke={isFuture ? "#fef3c7" : "#fbbf24"} strokeWidth="2.5" strokeLinejoin="round" />
+          <svg viewBox="0 0 120 100" className="relative h-[88%] w-[88%] overflow-visible">
+            <path
+              d="M60 9C77 9 88 21 88 39C88 50 83 59 74 64V69C96 74 111 88 112 99H8C9 88 24 74 46 69V64C37 59 32 50 32 39C32 21 43 9 60 9Z"
+              fill={isFuture ? "rgba(245,158,11,0.92)" : "rgba(2,6,23,0.82)"}
+              stroke={isFuture ? "#fcd34d" : "rgba(148,163,184,0.38)"}
+              strokeWidth={isFuture ? "4" : "2.5"}
+              strokeDasharray={isFuture ? "8 5" : "0"}
+              strokeLinejoin="round"
+              className={isFuture ? "lab-ecg-signal" : ""}
+            />
+            <path
+              d="M8 99H112"
+              stroke={isFuture ? "#fef3c7" : "rgba(148,163,184,0.35)"}
+              strokeWidth="3"
+              strokeLinecap="round"
+            />
           </svg>
         </div>
       );
@@ -1761,28 +1774,31 @@ const handleSealPulse = () => {
           <div className="relative mx-auto h-32 max-w-3xl">
             <svg className="absolute inset-0 h-full w-full overflow-visible" viewBox="0 0 720 128" preserveAspectRatio="none" aria-hidden="true">
               <path
-                d="M88 62 C190 8 262 116 360 62 C458 8 530 116 632 62"
+                d="M72 64H122L139 49L156 85L178 20L205 64H286L303 53L321 77L340 64H380L400 36L422 94L448 64H526L544 48L562 82L584 64H648"
                 fill="none"
-                stroke="rgba(251,191,36,0.18)"
-                strokeWidth="14"
+                stroke="rgba(251,191,36,0.16)"
+                strokeWidth="16"
                 strokeLinecap="round"
+                strokeLinejoin="round"
                 className="lab-wave-breathe"
               />
               <path
-                d="M88 62 C190 8 262 116 360 62 C458 8 530 116 632 62"
+                d="M72 64H122L139 49L156 85L178 20L205 64H286L303 53L321 77L340 64H380L400 36L422 94L448 64H526L544 48L562 82L584 64H648"
                 fill="none"
-                stroke={activeLabZone === "pulse" ? "rgba(45,212,191,0.92)" : "rgba(245,158,11,0.68)"}
-                strokeWidth="3"
+                stroke={activeLabZone === "pulse" ? "rgba(153,246,228,0.92)" : "rgba(245,158,11,0.72)"}
+                strokeWidth="4"
                 strokeLinecap="round"
+                strokeLinejoin="round"
                 className="transition-all duration-700 lab-wave-breathe"
               />
               <path
-                d="M88 62 C190 8 262 116 360 62 C458 8 530 116 632 62"
+                d="M72 64H122L139 49L156 85L178 20L205 64H286L303 53L321 77L340 64H380L400 36L422 94L448 64H526L544 48L562 82L584 64H648"
                 fill="none"
-                stroke={activeLabZone === "pulse" ? "rgba(153,246,228,0.95)" : "rgba(253,230,138,0.9)"}
-                strokeWidth="5"
+                stroke={activeLabZone === "pulse" ? "rgba(204,251,241,1)" : "rgba(253,230,138,0.95)"}
+                strokeWidth="6"
                 strokeLinecap="round"
-                strokeDasharray="72 648"
+                strokeLinejoin="round"
+                strokeDasharray="84 700"
                 className="lab-wave-flow transition-all duration-700"
                 style={{ animationDirection: activeLabZone === "current" ? "reverse" : "normal" }}
               />
