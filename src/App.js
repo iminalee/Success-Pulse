@@ -1624,9 +1624,9 @@ const handleSealPulse = () => {
         node: "bg-yellow-300",
         nodeRing: "ring-yellow-100/60",
         text: "text-yellow-50",
-        fill: "rgba(190, 92, 13, 0.94)",
-        border: "border-yellow-100/50",
-        glow: "rgba(251,191,36,0.68)",
+        fill: "rgba(219, 104, 12, 0.98)",
+        border: "border-yellow-100/60",
+        glow: "rgba(251,191,36,0.82)",
       },
     };
     const labContentColumns = {
@@ -1680,27 +1680,41 @@ const handleSealPulse = () => {
           : "h-20 w-20";
 
       if (zone === "pulse") {
+        if (variant === "selector") {
+          return (
+            <div
+              className={`relative grid shrink-0 place-items-center rounded-full ${isActive ? "h-10 w-10" : "h-8 w-8"} lab-zone-node ${
+                isActive ? "lab-zone-node-active" : ""
+              }`}
+              style={{ filter: `drop-shadow(0 0 16px ${meta.glow})` }}
+            >
+              <span className="absolute inset-0 rounded-full bg-teal-200/20 blur-md" />
+              <span className="relative h-3 w-3 rounded-full bg-teal-100 shadow-[0_0_18px_rgba(153,246,228,0.95)]" />
+            </div>
+          );
+        }
+
         return (
           <div
-            className={`relative grid shrink-0 place-items-center rounded-full ${sizeClass} lab-zone-node ${
+            className={`relative grid shrink-0 place-items-center ${variant === "card" ? "h-20 w-full max-w-md" : sizeClass} lab-zone-node ${
               isActive ? "lab-zone-node-active" : ""
             }`}
             style={{ filter: `drop-shadow(0 0 18px ${meta.glow})` }}
           >
-            <div className="absolute inset-x-2 inset-y-3 rounded-full bg-teal-100/12 blur-md" />
-            <svg viewBox="0 0 140 64" className="relative h-full w-full overflow-visible">
+            <div className="absolute inset-x-6 top-1/2 h-px -translate-y-1/2 bg-gradient-to-r from-transparent via-teal-100/50 to-transparent" />
+            <svg viewBox="0 0 420 84" className="relative h-full w-full overflow-visible">
               <path
-                d="M6 34H32C38 34 40 28 44 23C49 17 54 19 58 31C62 45 67 53 74 53C82 53 86 24 94 18C101 12 108 25 112 34C116 43 121 34 134 34"
+                d="M14 42H120C135 42 141 35 148 29C156 22 166 25 172 40C180 60 190 68 202 66C214 64 222 31 236 20C250 9 264 29 272 43C281 59 290 48 304 42H406"
                 fill="none"
-                stroke="rgba(20,184,166,0.35)"
-                strokeWidth="12"
+                stroke="rgba(20,184,166,0.28)"
+                strokeWidth="14"
                 strokeLinecap="round"
                 strokeLinejoin="round"
               />
               <path
-                d="M6 34H32C38 34 40 28 44 23C49 17 54 19 58 31C62 45 67 53 74 53C82 53 86 24 94 18C101 12 108 25 112 34C116 43 121 34 134 34"
+                d="M14 42H120C135 42 141 35 148 29C156 22 166 25 172 40C180 60 190 68 202 66C214 64 222 31 236 20C250 9 264 29 272 43C281 59 290 48 304 42H406"
                 fill="none"
-                stroke="rgba(204,251,241,0.96)"
+                stroke="rgba(204,251,241,0.98)"
                 strokeWidth="5"
                 strokeLinecap="round"
                 strokeLinejoin="round"
@@ -2405,8 +2419,8 @@ const handleSealPulse = () => {
               "미래의 나 / Apex BPS",
               "BPS Character Forge · Goal Architect · Vision · VAK Vision · Immersion Script"
             )}
-            <div className="bg-[#2D3748]/30 p-10 rounded-[3rem] border border-white/5 shadow-xl border-t-4 border-amber-300/40">
-              <p className="text-[12px] font-black text-amber-200 uppercase tracking-[0.4em] mb-4 flex items-center gap-2">
+            <div className="bg-amber-500/25 p-10 rounded-[3rem] border border-amber-200/25 shadow-xl shadow-amber-500/10 border-t-4 border-amber-200/55">
+              <p className="text-[12px] font-black text-amber-100 uppercase tracking-[0.4em] mb-4 flex items-center gap-2">
                 <Star size={16} /> BPS Character Forge
               </p>
               <div className="grid grid-cols-1 md:grid-cols-5 gap-3 mb-6">
@@ -2427,7 +2441,7 @@ const handleSealPulse = () => {
                 ))}
               </div>
             </div>
-            <div className="bg-[#2D3748]/40 p-10 rounded-[3rem] border border-white/5 shadow-xl">
+            <div className="bg-amber-600/18 p-10 rounded-[3rem] border border-amber-200/20 shadow-xl shadow-amber-500/10">
               <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-10">
                 <div className="space-y-1">
                   <p className="text-[12px] font-black text-emerald-500 uppercase tracking-widest flex items-center gap-2">
