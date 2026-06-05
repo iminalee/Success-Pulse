@@ -1700,18 +1700,28 @@ const handleSealPulse = () => {
               <path
                 d="M88 62 C190 8 262 116 360 62 C458 8 530 116 632 62"
                 fill="none"
-                stroke="rgba(251,191,36,0.16)"
-                strokeWidth="12"
+                stroke="rgba(251,191,36,0.18)"
+                strokeWidth="14"
                 strokeLinecap="round"
+                className="lab-wave-breathe"
               />
               <path
                 d="M88 62 C190 8 262 116 360 62 C458 8 530 116 632 62"
                 fill="none"
-                stroke={activeLabZone === "pulse" ? "rgba(45,212,191,0.92)" : "rgba(245,158,11,0.62)"}
+                stroke={activeLabZone === "pulse" ? "rgba(45,212,191,0.92)" : "rgba(245,158,11,0.68)"}
                 strokeWidth="3"
                 strokeLinecap="round"
-                strokeDasharray={activeLabZone === "pulse" ? "10 10" : "1 0"}
-                className="transition-all duration-700"
+                className="transition-all duration-700 lab-wave-breathe"
+              />
+              <path
+                d="M88 62 C190 8 262 116 360 62 C458 8 530 116 632 62"
+                fill="none"
+                stroke={activeLabZone === "pulse" ? "rgba(153,246,228,0.95)" : "rgba(253,230,138,0.9)"}
+                strokeWidth="5"
+                strokeLinecap="round"
+                strokeDasharray="72 648"
+                className="lab-wave-flow transition-all duration-700"
+                style={{ animationDirection: activeLabZone === "current" ? "reverse" : "normal" }}
               />
               <line
                 x1={activeLabZone === "current" ? "88" : activeLabZone === "pulse" ? "360" : "632"}
@@ -1721,7 +1731,7 @@ const handleSealPulse = () => {
                 stroke={activeLabZone === "pulse" ? "rgba(45,212,191,0.65)" : "rgba(251,191,36,0.72)"}
                 strokeWidth="2"
                 strokeLinecap="round"
-                className="transition-all duration-700"
+                className="transition-all duration-700 lab-wave-breathe"
               />
             </svg>
             {[
@@ -1742,9 +1752,10 @@ const handleSealPulse = () => {
                 >
                   <span
                     className={`relative grid rounded-full transition-all duration-500 ${
-                      isActive ? "h-16 w-16 place-items-center" : "h-12 w-12 place-items-center opacity-75"
+                      isActive ? "h-16 w-16 place-items-center lab-zone-node-active" : "h-12 w-12 place-items-center opacity-75 lab-zone-node"
                     } ${meta.node} ring-8 ${meta.nodeRing}`}
                     style={{
+                      animationDelay: item.zone === "pulse" ? "0.5s" : item.zone === "future" ? "1s" : "0s",
                       boxShadow: isActive
                         ? `0 0 38px ${meta.glow}, 0 0 12px rgba(255,255,255,0.18)`
                         : `0 0 14px ${meta.glow}`,
@@ -1752,7 +1763,7 @@ const handleSealPulse = () => {
                   >
                     <span className="h-4 w-4 rounded-full bg-white/30" />
                     {item.zone === "pulse" && (
-                      <span className="absolute h-1 w-20 rounded-full bg-cyan-100/80 shadow-[0_0_18px_rgba(34,211,238,0.9)]" />
+                      <span className="absolute left-1/2 top-1/2 h-1 w-20 rounded-full bg-cyan-100/80 shadow-[0_0_18px_rgba(34,211,238,0.9)] lab-pulse-signal" />
                     )}
                   </span>
                   <span className={`rounded-full border px-3 py-1 text-center text-[9px] font-black uppercase tracking-[0.2em] transition-all duration-500 ${isActive ? `${meta.text} border-white/20 bg-slate-950/80` : "border-white/5 bg-slate-950/45 text-slate-500"}`}>
@@ -4775,7 +4786,7 @@ const nowX = getX(dataPoints[dataPoints.length - 1].date); // 📅 가로 위치
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-200 p-4 md:p-10 font-sans overflow-hidden flex flex-col selection:bg-amber-500/30">
-      <style>{`@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css'); * { font-family: 'Pretendard', sans-serif; letter-spacing: -0.02em; } .animate-fadeIn { animation: fadeIn 0.8s ease-out; } .animate-spin-slow { animation: spin 20s linear infinite; } @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } } @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }`}</style>
+      <style>{`@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css'); * { font-family: 'Pretendard', sans-serif; letter-spacing: -0.02em; } .animate-fadeIn { animation: fadeIn 0.8s ease-out; } .animate-spin-slow { animation: spin 20s linear infinite; } .lab-wave-breathe { animation: labWaveBreathe 4.8s ease-in-out infinite; } .lab-wave-flow { animation: labWaveFlow 5.6s linear infinite; } .lab-zone-node { animation: labNodePulse 4.2s ease-in-out infinite; } .lab-zone-node-active { animation: labNodeActive 2.8s ease-in-out infinite; } .lab-pulse-signal { animation: labPulseSignal 2.6s ease-in-out infinite; } @keyframes labWaveBreathe { 0%, 100% { opacity: 0.42; filter: drop-shadow(0 0 4px rgba(245,158,11,0.22)); } 50% { opacity: 0.82; filter: drop-shadow(0 0 14px rgba(245,158,11,0.45)); } } @keyframes labWaveFlow { from { stroke-dashoffset: 720; } to { stroke-dashoffset: 0; } } @keyframes labNodePulse { 0%, 100% { transform: scale(1); filter: brightness(0.92); } 50% { transform: scale(1.06); filter: brightness(1.18); } } @keyframes labNodeActive { 0%, 100% { transform: scale(1); filter: brightness(1.08); } 50% { transform: scale(1.12); filter: brightness(1.34); } } @keyframes labPulseSignal { 0%, 100% { opacity: 0.58; transform: translateX(-50%) translateY(-50%) scaleX(0.72); } 50% { opacity: 1; transform: translateX(-50%) translateY(-50%) scaleX(1.08); } } @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } } @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }`}</style>
     
   
       {/* 헤더 */}
