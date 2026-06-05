@@ -1599,34 +1599,34 @@ const handleSealPulse = () => {
         label: "현재의 나",
         sublabel: "Current Self",
         keywords: "Identity · Life · VAK · TCI",
-        node: "bg-amber-500",
-        nodeRing: "ring-amber-300/40",
-        text: "text-amber-200",
-        fill: "rgba(120, 53, 15, 0.78)",
-        border: "border-amber-400/30",
-        glow: "rgba(245,158,11,0.36)",
+        node: "bg-amber-400",
+        nodeRing: "ring-emerald-300/30",
+        text: "text-amber-100",
+        fill: "rgba(34, 80, 52, 0.86)",
+        border: "border-emerald-300/35",
+        glow: "rgba(251,191,36,0.42)",
       },
       pulse: {
         label: "THE PULSE",
         sublabel: "Bridge Core",
         keywords: "Fixed Value Events · Target Date · Mental Bank Goal · Contract Link",
-        node: "bg-teal-300",
-        nodeRing: "ring-teal-200/40",
-        text: "text-teal-100",
-        fill: "rgba(92, 58, 13, 0.82)",
-        border: "border-teal-200/25",
-        glow: "rgba(20,184,166,0.34)",
+        node: "bg-teal-200",
+        nodeRing: "ring-teal-100/45",
+        text: "text-teal-50",
+        fill: "rgba(27, 99, 91, 0.88)",
+        border: "border-teal-100/35",
+        glow: "rgba(45,212,191,0.46)",
       },
       future: {
         label: "미래의 나",
         sublabel: "Apex BPS",
         keywords: "BPS Character Forge · Goal Architect · Vision · VAK Vision · Immersion Script",
         node: "bg-yellow-300",
-        nodeRing: "ring-yellow-100/50",
-        text: "text-yellow-100",
-        fill: "rgba(146, 64, 14, 0.9)",
-        border: "border-yellow-200/35",
-        glow: "rgba(251,191,36,0.5)",
+        nodeRing: "ring-yellow-100/60",
+        text: "text-yellow-50",
+        fill: "rgba(190, 92, 13, 0.94)",
+        border: "border-yellow-100/50",
+        glow: "rgba(251,191,36,0.68)",
       },
     };
     const labContentColumns = {
@@ -1660,22 +1660,85 @@ const handleSealPulse = () => {
           : "0 14px 38px rgba(0,0,0,0.34)",
       };
     };
+    const renderLabZoneSymbol = (zone, variant = "card", isActive = false) => {
+      const meta = labZoneMeta[zone];
+      const sizeClass =
+        variant === "selector"
+          ? zone === "pulse"
+            ? isActive
+              ? "h-16 w-28"
+              : "h-12 w-24"
+            : isActive
+            ? "h-16 w-16"
+            : "h-12 w-12"
+          : variant === "mini"
+          ? "h-20 w-20"
+          : zone === "future"
+          ? "h-24 w-24"
+          : zone === "pulse"
+          ? "h-20 w-32"
+          : "h-20 w-20";
+
+      if (zone === "pulse") {
+        return (
+          <div
+            className={`relative grid shrink-0 place-items-center rounded-full ${sizeClass} lab-zone-node ${
+              isActive ? "lab-zone-node-active" : ""
+            }`}
+            style={{ filter: `drop-shadow(0 0 18px ${meta.glow})` }}
+          >
+            <div className="absolute inset-x-2 inset-y-3 rounded-full bg-teal-100/12 blur-md" />
+            <svg viewBox="0 0 140 64" className="relative h-full w-full overflow-visible">
+              <path
+                d="M6 34H27L35 22L45 48L58 14L72 54L83 31H101L110 22L119 34H134"
+                fill="none"
+                stroke="rgba(20,184,166,0.35)"
+                strokeWidth="12"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+              <path
+                d="M6 34H27L35 22L45 48L58 14L72 54L83 31H101L110 22L119 34H134"
+                fill="none"
+                stroke="rgba(204,251,241,0.96)"
+                strokeWidth="5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="lab-ecg-signal"
+              />
+            </svg>
+          </div>
+        );
+      }
+
+      const isFuture = zone === "future";
+      return (
+        <div
+          className={`relative grid shrink-0 place-items-center rounded-full ${sizeClass} ${
+            isActive ? "lab-zone-node-active" : "lab-zone-node"
+          }`}
+          style={{ filter: `drop-shadow(0 0 ${isFuture ? 34 : 24}px ${meta.glow})` }}
+        >
+          <div className={`absolute inset-0 rounded-full blur-xl ${isFuture ? "bg-yellow-300/70" : "bg-amber-300/45"}`} />
+          <svg viewBox="0 0 100 100" className="relative h-[86%] w-[86%] overflow-visible">
+            <circle cx="50" cy="30" r="21" fill={isFuture ? "#facc15" : "#030712"} stroke={isFuture ? "#fef3c7" : "#fbbf24"} strokeWidth="2.5" />
+            <path d="M50 50 L22 88 H78 Z" fill={isFuture ? "#f59e0b" : "#030712"} stroke={isFuture ? "#fef3c7" : "#fbbf24"} strokeWidth="2.5" strokeLinejoin="round" />
+          </svg>
+        </div>
+      );
+    };
+
     const renderLabNodeHeader = (zone, title, details) => {
       const meta = labZoneMeta[zone];
       return (
-        <div className="rounded-[2rem] border border-white/10 bg-slate-950/45 p-5 shadow-xl">
-          <div className="flex items-center gap-4">
-            <div className={`relative h-12 w-12 shrink-0 rounded-full ${meta.node} ring-8 ${meta.nodeRing} shadow-[0_0_28px_rgba(245,158,11,0.35)]`}>
-              <div className="absolute inset-2 rounded-full bg-white/20" />
-              {zone === "pulse" && (
-                <div className="absolute left-1/2 top-1/2 h-1 w-14 -translate-x-1/2 -translate-y-1/2 rounded-full bg-cyan-100/80 shadow-[0_0_16px_rgba(34,211,238,0.75)]" />
-              )}
-            </div>
+        <div className="rounded-[2rem] border border-white/10 bg-slate-950/38 p-5 shadow-xl">
+          <div className="flex flex-col items-center gap-3 text-center">
+            {renderLabZoneSymbol(zone, "card", activeLabZone === zone)}
             <div className="min-w-0">
               <p className={`text-[11px] font-black uppercase tracking-[0.25em] ${meta.text}`}>
                 {title}
               </p>
-              <p className="mt-2 text-[11px] leading-relaxed text-slate-300/85">
+              <p className="mt-2 text-[11px] leading-relaxed text-slate-200/85">
                 {details}
               </p>
             </div>
@@ -1751,20 +1814,10 @@ const handleSealPulse = () => {
                   aria-pressed={isActive}
                 >
                   <span
-                    className={`relative grid rounded-full transition-all duration-500 ${
-                      isActive ? "h-16 w-16 place-items-center lab-zone-node-active" : "h-12 w-12 place-items-center opacity-75 lab-zone-node"
-                    } ${meta.node} ring-8 ${meta.nodeRing}`}
-                    style={{
-                      animationDelay: item.zone === "pulse" ? "0.5s" : item.zone === "future" ? "1s" : "0s",
-                      boxShadow: isActive
-                        ? `0 0 38px ${meta.glow}, 0 0 12px rgba(255,255,255,0.18)`
-                        : `0 0 14px ${meta.glow}`,
-                    }}
+                    className="transition-all duration-500"
+                    style={{ animationDelay: item.zone === "pulse" ? "0.5s" : item.zone === "future" ? "1s" : "0s" }}
                   >
-                    <span className="h-4 w-4 rounded-full bg-white/30" />
-                    {item.zone === "pulse" && (
-                      <span className="absolute left-1/2 top-1/2 h-1 w-20 rounded-full bg-cyan-100/80 shadow-[0_0_18px_rgba(34,211,238,0.9)] lab-pulse-signal" />
-                    )}
+                    {renderLabZoneSymbol(item.zone, "selector", isActive)}
                   </span>
                   <span className={`rounded-full border px-3 py-1 text-center text-[9px] font-black uppercase tracking-[0.2em] transition-all duration-500 ${isActive ? `${meta.text} border-white/20 bg-slate-950/80` : "border-white/5 bg-slate-950/45 text-slate-500"}`}>
                     {meta.label}
@@ -1783,7 +1836,7 @@ const handleSealPulse = () => {
             onClick={() => activeLabZone !== "current" && setActiveLabZone("current")}
             className={labContentCardClass(
               "current",
-              "border border-amber-400/35 rounded-[2rem] p-4 space-y-6"
+              "border border-emerald-200/30 rounded-[2rem] p-4 space-y-6"
             )}
             style={labContentCardStyle("current")}
           >
@@ -1803,9 +1856,7 @@ const handleSealPulse = () => {
               "Identity Registration · Life Profile · Financial Core · VAK · TCI"
             )}
             <div className="bg-[#2D3748]/30 p-8 rounded-[3rem] border border-white/5 shadow-xl border-l-4 border-amber-500 mb-8 flex flex-col md:flex-row items-center gap-8">
-              <div className="relative h-20 w-20 shrink-0 rounded-full bg-amber-500/80 ring-8 ring-amber-300/15 shadow-[0_0_30px_rgba(245,158,11,0.18)]">
-                <div className="absolute inset-5 rounded-full bg-white/20" />
-              </div>
+              {renderLabZoneSymbol("current", "mini", activeLabZone === "current")}
               <div className="flex-grow w-full space-y-4">
                 <div className="flex justify-between items-end">
                   <p className="text-[10px] font-black text-amber-500 uppercase tracking-[0.3em] flex items-center gap-2">
@@ -4786,7 +4837,7 @@ const nowX = getX(dataPoints[dataPoints.length - 1].date); // 📅 가로 위치
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-200 p-4 md:p-10 font-sans overflow-hidden flex flex-col selection:bg-amber-500/30">
-      <style>{`@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css'); * { font-family: 'Pretendard', sans-serif; letter-spacing: -0.02em; } .animate-fadeIn { animation: fadeIn 0.8s ease-out; } .animate-spin-slow { animation: spin 20s linear infinite; } .lab-wave-breathe { animation: labWaveBreathe 4.8s ease-in-out infinite; } .lab-wave-flow { animation: labWaveFlow 5.6s linear infinite; } .lab-zone-node { animation: labNodePulse 4.2s ease-in-out infinite; } .lab-zone-node-active { animation: labNodeActive 2.8s ease-in-out infinite; } .lab-pulse-signal { animation: labPulseSignal 2.6s ease-in-out infinite; } @keyframes labWaveBreathe { 0%, 100% { opacity: 0.42; filter: drop-shadow(0 0 4px rgba(245,158,11,0.22)); } 50% { opacity: 0.82; filter: drop-shadow(0 0 14px rgba(245,158,11,0.45)); } } @keyframes labWaveFlow { from { stroke-dashoffset: 720; } to { stroke-dashoffset: 0; } } @keyframes labNodePulse { 0%, 100% { transform: scale(1); filter: brightness(0.92); } 50% { transform: scale(1.06); filter: brightness(1.18); } } @keyframes labNodeActive { 0%, 100% { transform: scale(1); filter: brightness(1.08); } 50% { transform: scale(1.12); filter: brightness(1.34); } } @keyframes labPulseSignal { 0%, 100% { opacity: 0.58; transform: translateX(-50%) translateY(-50%) scaleX(0.72); } 50% { opacity: 1; transform: translateX(-50%) translateY(-50%) scaleX(1.08); } } @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } } @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }`}</style>
+      <style>{`@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css'); * { font-family: 'Pretendard', sans-serif; letter-spacing: -0.02em; } .animate-fadeIn { animation: fadeIn 0.8s ease-out; } .animate-spin-slow { animation: spin 20s linear infinite; } .lab-wave-breathe { animation: labWaveBreathe 4.8s ease-in-out infinite; } .lab-wave-flow { animation: labWaveFlow 5.6s linear infinite; } .lab-zone-node { animation: labNodePulse 4.2s ease-in-out infinite; } .lab-zone-node-active { animation: labNodeActive 2.8s ease-in-out infinite; } .lab-pulse-signal { animation: labPulseSignal 2.6s ease-in-out infinite; } .lab-ecg-signal { animation: labEcgSignal 2.8s ease-in-out infinite; } @keyframes labWaveBreathe { 0%, 100% { opacity: 0.42; filter: drop-shadow(0 0 4px rgba(245,158,11,0.22)); } 50% { opacity: 0.82; filter: drop-shadow(0 0 14px rgba(245,158,11,0.45)); } } @keyframes labWaveFlow { from { stroke-dashoffset: 720; } to { stroke-dashoffset: 0; } } @keyframes labNodePulse { 0%, 100% { transform: scale(1); filter: brightness(0.92); } 50% { transform: scale(1.06); filter: brightness(1.18); } } @keyframes labNodeActive { 0%, 100% { transform: scale(1); filter: brightness(1.08); } 50% { transform: scale(1.12); filter: brightness(1.34); } } @keyframes labPulseSignal { 0%, 100% { opacity: 0.58; transform: translateX(-50%) translateY(-50%) scaleX(0.72); } 50% { opacity: 1; transform: translateX(-50%) translateY(-50%) scaleX(1.08); } } @keyframes labEcgSignal { 0%, 100% { opacity: 0.62; filter: drop-shadow(0 0 4px rgba(204,251,241,0.45)); } 50% { opacity: 1; filter: drop-shadow(0 0 14px rgba(45,212,191,0.95)); } } @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } } @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }`}</style>
     
   
       {/* 헤더 */}
