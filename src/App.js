@@ -4873,7 +4873,7 @@ const nowX = getX(dataPoints[dataPoints.length - 1].date); // 📅 가로 위치
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-200 p-4 md:p-10 font-sans overflow-hidden flex flex-col selection:bg-amber-500/30">
-      <style>{`@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css'); * { font-family: 'Pretendard', sans-serif; letter-spacing: -0.02em; } .animate-fadeIn { animation: fadeIn 0.8s ease-out; } .animate-spin-slow { animation: spin 20s linear infinite; } .lab-wave-breathe { animation: labWaveBreathe 4.8s ease-in-out infinite; } .lab-wave-flow { animation: labWaveFlow 5.6s linear infinite; } .lab-zone-node { animation: labNodePulse 4.2s ease-in-out infinite; } .lab-zone-node-active { animation: labNodeActive 2.8s ease-in-out infinite; } .lab-pulse-signal { animation: labPulseSignal 2.6s ease-in-out infinite; } .lab-ecg-wrap { animation: labEcgWrap 2.8s ease-in-out infinite; transform-origin: center; } .lab-ecg-signal { animation: labEcgSignal 2.8s ease-in-out infinite; } @keyframes labWaveBreathe { 0%, 100% { opacity: 0.42; filter: drop-shadow(0 0 4px rgba(245,158,11,0.22)); } 50% { opacity: 0.82; filter: drop-shadow(0 0 14px rgba(245,158,11,0.45)); } } @keyframes labWaveFlow { from { stroke-dashoffset: 720; } to { stroke-dashoffset: 0; } } @keyframes labNodePulse { 0%, 100% { filter: brightness(0.9) drop-shadow(0 0 10px rgba(245,158,11,0.18)); } 50% { filter: brightness(1.18) drop-shadow(0 0 22px rgba(245,158,11,0.46)); } } @keyframes labNodeActive { 0%, 100% { filter: brightness(1.08) drop-shadow(0 0 16px rgba(251,191,36,0.45)); } 50% { filter: brightness(1.34) drop-shadow(0 0 34px rgba(251,191,36,0.78)); } } @keyframes labPulseSignal { 0%, 100% { opacity: 0.58; transform: translateX(-50%) translateY(-50%) scaleX(0.72); } 50% { opacity: 1; transform: translateX(-50%) translateY(-50%) scaleX(1.08); } } @keyframes labEcgWrap { 0%, 100% { transform: scaleX(0.86) scaleY(1); } 50% { transform: scaleX(1) scaleY(1.2); } } @keyframes labEcgSignal { 0%, 100% { opacity: 0.72; filter: drop-shadow(0 0 12px rgba(204,251,241,0.75)); } 50% { opacity: 1; filter: drop-shadow(0 0 40px rgba(45,212,191,1)) drop-shadow(0 0 72px rgba(153,246,228,0.95)); } } @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } } @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }`}</style>
+      <style>{`@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css'); * { font-family: 'Pretendard', sans-serif; letter-spacing: -0.02em; } .animate-fadeIn { animation: fadeIn 0.8s ease-out; } .animate-spin-slow { animation: spin 20s linear infinite; } .lab-wave-breathe { animation: labWaveBreathe 4.8s ease-in-out infinite; } .lab-wave-flow { animation: labWaveFlow 5.6s linear infinite; } .lab-zone-node { animation: labNodePulse 4.2s ease-in-out infinite; } .lab-zone-node-active { animation: labNodeActive 2.8s ease-in-out infinite; } .lab-pulse-signal { animation: labPulseSignal 2.6s ease-in-out infinite; } .lab-ecg-wrap { animation: labEcgWrap 2.8s ease-in-out infinite; transform-origin: center; } .lab-ecg-signal { animation: labEcgSignal 2.8s ease-in-out infinite; } .chamber-light-flood { animation: chamberLightFlood 1.15s cubic-bezier(0.16, 1, 0.3, 1) forwards; } .chamber-shockwave { animation: chamberShockwave 1.05s ease-out forwards; } @keyframes labWaveBreathe { 0%, 100% { opacity: 0.42; filter: drop-shadow(0 0 4px rgba(245,158,11,0.22)); } 50% { opacity: 0.82; filter: drop-shadow(0 0 14px rgba(245,158,11,0.45)); } } @keyframes labWaveFlow { from { stroke-dashoffset: 720; } to { stroke-dashoffset: 0; } } @keyframes labNodePulse { 0%, 100% { filter: brightness(0.9) drop-shadow(0 0 10px rgba(245,158,11,0.18)); } 50% { filter: brightness(1.18) drop-shadow(0 0 22px rgba(245,158,11,0.46)); } } @keyframes labNodeActive { 0%, 100% { filter: brightness(1.08) drop-shadow(0 0 16px rgba(251,191,36,0.45)); } 50% { filter: brightness(1.34) drop-shadow(0 0 34px rgba(251,191,36,0.78)); } } @keyframes labPulseSignal { 0%, 100% { opacity: 0.58; transform: translateX(-50%) translateY(-50%) scaleX(0.72); } 50% { opacity: 1; transform: translateX(-50%) translateY(-50%) scaleX(1.08); } } @keyframes labEcgWrap { 0%, 100% { transform: scaleX(0.86) scaleY(1); } 50% { transform: scaleX(1) scaleY(1.2); } } @keyframes labEcgSignal { 0%, 100% { opacity: 0.72; filter: drop-shadow(0 0 12px rgba(204,251,241,0.75)); } 50% { opacity: 1; filter: drop-shadow(0 0 40px rgba(45,212,191,1)) drop-shadow(0 0 72px rgba(153,246,228,0.95)); } } @keyframes chamberLightFlood { 0% { opacity: 0; transform: scale(0.55); filter: blur(70px); } 8% { opacity: 1; transform: scale(1.08); filter: blur(18px); } 28% { opacity: 0.96; transform: scale(1.35); filter: blur(4px); } 100% { opacity: 0; transform: scale(2.25); filter: blur(90px); } } @keyframes chamberShockwave { 0% { opacity: 0; transform: scale(0.45); } 12% { opacity: 0.9; } 100% { opacity: 0; transform: scale(3.4); } } @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } } @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }`}</style>
     
   
       {/* 헤더 */}
@@ -5168,7 +5168,8 @@ const nowX = getX(dataPoints[dataPoints.length - 1].date); // 📅 가로 위치
           <div className="max-w-3xl w-full text-center flex flex-col h-full gap-4">
             {/* 1. 헤더 */}
             <div className="space-y-1">
-              <h2 className="text-3xl md:text-4xl font-black text-white italic tracking-tighter uppercase drop-shadow-[0_0_20px_rgba(245,158,11,0.6)]">Identity Sync Chamber</h2>
+              <p className="text-[10px] text-amber-500/50 font-bold uppercase tracking-[0.4em]">Identity Sync Chamber</p>
+              <h2 className="text-3xl md:text-4xl font-black text-white italic tracking-tighter uppercase drop-shadow-[0_0_20px_rgba(245,158,11,0.6)]">정체성 동기화 챔버</h2>
               <p className="text-[10px] text-amber-500/50 font-bold uppercase tracking-[0.4em]">정체성 주파수 동기화 리추얼</p>
             </div>
 
@@ -5184,13 +5185,19 @@ const nowX = getX(dataPoints[dataPoints.length - 1].date); // 📅 가로 위치
                <p className={`text-[11px] font-bold uppercase tracking-[0.3em] mb-12 transition-all duration-500 ${
                  ritualProgress === 100 ? "text-amber-400 scale-110" : "text-amber-700/40 animate-pulse"
                }`}>
-                  {ritualProgress === 100 ? "✨ IDENTITY MERGED : YOU ARE THE APEX ✨" : "황금빛 정체성이 합쳐질 때까지 화면을 꾹 누르세요"}
+                  {ritualProgress === 100 ? "✨ 정체성 통합 완료 : 미래의 내가 현실을 밝힙니다 ✨" : "두 자아가 하나로 합쳐질 때까지 화면을 꾹 누르세요"}
                </p>
 
-               <div className="relative w-full flex items-center justify-center h-64">
+               <div className="relative w-full max-w-[640px] mx-auto flex items-center justify-center h-64">
                   <svg className="absolute w-0 h-0">
                     <defs>
                       <path id="human-pro-final" d="M70,8 C86,8 96,18 96,35 C96,48 89,55 83,58 L83,64 C104,67 128,80 128,110 L12,110 C12,80 36,67 57,64 L57,58 C51,55 44,48 44,35 C44,18 54,8 70,8 Z" />
+                      {/* [합체 전] Current Self 내부를 어둡게 유지할 역광 그라데이션 */}
+                      <radialGradient id="current-backlit-fill" cx="50%" cy="38%" r="70%">
+                        <stop offset="0%" stopColor="#06130f" stopOpacity="0.98" />
+                        <stop offset="58%" stopColor="#020617" stopOpacity="0.94" />
+                        <stop offset="100%" stopColor="#000000" stopOpacity="0.9" />
+                      </radialGradient>
                       {/* [합체 전] Apex 내부를 채울 반투명 앰버 그라데이션 */}
                       <linearGradient id="apex-pre-fill" x1="0%" y1="0%" x2="0%" y2="100%">
                         <stop offset="0%" stopColor="#FBBF24" stopOpacity="0.7" />
@@ -5205,21 +5212,24 @@ const nowX = getX(dataPoints[dataPoints.length - 1].date); // 📅 가로 위치
                     </defs>
                   </svg>
 
-                  {/* A. Current Self (투명한 빈 그릇) */}
+                  {/* A. Current Self (My Lab과 동일한 어두운 내부 + 초록 외곽 아우라) */}
                   <div className="absolute transition-all duration-100 ease-linear"
                        style={{ 
-                         transform: `translateX(-${(100 - ritualProgress) * 1.2}px) scale(${1 + (ritualProgress/250)})`, 
-                         opacity: ritualProgress === 100 ? 0 : 0.4 
+                         transform: `translateX(-${(100 - ritualProgress) * 1.05}px) scale(${1 + (ritualProgress/250)})`, 
+                         opacity: ritualProgress === 100 ? 0 : 0.82 
                        }}>
-                    <svg width="240" height="210" viewBox="0 0 140 120">
-                      <use href="#human-pro-final" className="fill-transparent stroke-slate-600" strokeWidth="1" />
+                    <div className="absolute inset-0 bg-emerald-300/25 blur-3xl rounded-full scale-125 animate-pulse"></div>
+                    <div className="absolute inset-0 bg-lime-200/10 blur-[70px] rounded-full scale-150"></div>
+                    <svg width="240" height="210" viewBox="0 0 140 120" className="relative drop-shadow-[0_0_34px_rgba(16,185,129,0.58)]">
+                      <use href="#human-pro-final" fill="url(#current-backlit-fill)" className="stroke-emerald-300/60" strokeWidth="2.5" />
+                      <use href="#human-pro-final" fill="transparent" className="stroke-lime-200/35" strokeWidth="5" />
                     </svg>
                   </div>
 
                   {/* B. Apex BPS (안쪽이 앰버색으로 채워진 주도적 형상) */}
                   <div className="absolute transition-all duration-100 ease-linear"
                        style={{ 
-                         transform: `translateX(${(100 - ritualProgress) * 1.2}px) scale(${1 + (ritualProgress/250)})`, 
+                         transform: `translateX(${(100 - ritualProgress) * 1.05}px) scale(${1 + (ritualProgress/250)})`, 
                          opacity: ritualProgress === 100 ? 0 : 1 
                        }}>
                     <div className="absolute inset-0 bg-amber-500/40 blur-3xl rounded-full scale-125 animate-pulse"></div>
@@ -5236,11 +5246,13 @@ const nowX = getX(dataPoints[dataPoints.length - 1].date); // 📅 가로 위치
                     {/* (1) [핵심] 전체 화면 화이트 플래시 (파파팍!) */}
                     {ritualProgress === 100 && (
                       <>
-                        {/* 화면 전체를 덮는 가장 강력한 플래시 레이어 */}
-                        <div className="fixed inset-0 bg-white animate-flash z-[99999] pointer-events-none"></div>
+                        {/* 합쳐지는 순간 주변 전체가 갑자기 환해지는 라이트 플러드 */}
+                        <div className="fixed inset-0 bg-white chamber-light-flood z-[99999] pointer-events-none"></div>
+                        <div className="fixed inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,1)_0%,rgba(254,243,199,0.95)_32%,rgba(16,185,129,0.38)_58%,transparent_76%)] chamber-light-flood z-[99999] pointer-events-none"></div>
                         
-                        {/* 형상 중심에서 터지는 추가 폭발 섬광 */}
-                        <div className="absolute -inset-40 bg-white rounded-full blur-[120px] animate-flash opacity-80 z-10"></div>
+                        {/* 형상 중심에서 바깥으로 터지는 초록-황금 충격파 */}
+                        <div className="absolute -inset-52 rounded-full border-[18px] border-white/90 chamber-shockwave z-10"></div>
+                        <div className="absolute -inset-40 bg-white rounded-full blur-[120px] chamber-light-flood opacity-90 z-10"></div>
                       </>
                     )}
 
@@ -5252,6 +5264,33 @@ const nowX = getX(dataPoints[dataPoints.length - 1].date); // 📅 가로 위치
                     <svg width="240" height="210" viewBox="0 0 140 120" className="drop-shadow-[0_0_150px_rgba(251,191,36,1)] z-20 relative">
                       <use href="#human-pro-final" fill="url(#divine-gold-final)" fillOpacity="1" className="stroke-white animate-pulse" strokeWidth="3" />
                     </svg>
+                  </div>
+
+                  {/* D. 리추얼 시나리오 자막: 영화 자막처럼 위로 흐르며 사라짐 */}
+                  <div className="pointer-events-none absolute inset-x-0 bottom-0 z-30 flex justify-center px-3">
+                    <div
+                      className="relative h-28 w-full max-w-2xl overflow-hidden [mask-image:linear-gradient(to_bottom,transparent_0%,black_28%,black_72%,transparent_100%)]"
+                      style={{ opacity: Math.max(0, 1 - Math.max(0, ritualProgress - 86) / 14) }}
+                    >
+                      <div
+                        className="space-y-3 transition-transform duration-75 ease-linear"
+                        style={{ transform: `translateY(${42 - ritualProgress * 1.18}px)` }}
+                      >
+                        {(visions[6]?.immersionScript || "마스터 시나리오를 먼저 생성해주세요.")
+                          .split(/\n+/)
+                          .filter((line) => line.trim())
+                          .slice(0, 4)
+                          .map((line, idx) => (
+                            <p
+                              key={`${idx}-${line.slice(0, 12)}`}
+                              className="mx-auto max-w-xl rounded-2xl border border-amber-300/15 bg-slate-950/55 px-4 py-2 text-center text-[11px] md:text-xs font-black italic leading-relaxed text-amber-200 shadow-[0_0_28px_rgba(0,0,0,0.45)] backdrop-blur-md"
+                              style={{ textShadow: "0 0 16px rgba(251,191,36,0.42)" }}
+                            >
+                              {line}
+                            </p>
+                          ))}
+                      </div>
+                    </div>
                   </div>
                </div>
                
