@@ -1620,7 +1620,7 @@ const handleSealPulse = () => {
       future: {
         label: "미래의 나",
         sublabel: "Apex BPS",
-        keywords: "BPS Character Forge · Goal Architect · Vision · VAK Vision · Immersion Script",
+        keywords: "미래 자아 성격 · 목표 설계 · 비전 · 감각 비전 · 몰입 시나리오",
         node: "bg-yellow-300",
         nodeRing: "ring-yellow-100/60",
         text: "text-amber-100",
@@ -2424,17 +2424,17 @@ const handleSealPulse = () => {
             {renderLabNodeHeader(
               "future",
               "미래의 나 / Apex BPS",
-              "BPS Character Forge · Goal Architect · Vision · VAK Vision · Immersion Script"
+              "미래 자아 성격 · 목표 설계 · 비전 · 감각 비전 · 몰입 시나리오"
             )}
             <div className="bg-[#ead08c]/88 p-10 rounded-[3rem] border border-amber-300/70 shadow-xl shadow-amber-500/25 border-t-4 border-amber-400/70">
-              <p className="text-[12px] font-black text-amber-900 uppercase tracking-[0.4em] mb-4 flex items-center gap-2">
-                <Star size={16} /> BPS Character Forge
+              <p className="text-[12px] font-black text-amber-950 uppercase tracking-[0.35em] mb-4 flex items-center gap-2">
+                <Star size={16} /> 미래 자아 성격 설계
               </p>
               <div className="grid grid-cols-1 md:grid-cols-5 gap-3 mb-6">
                 {[0, 1, 2, 3, 4].map((idx) => (
                   <div key={idx} className="space-y-1.5">
-                    <label className="text-[8px] font-black text-slate-600 uppercase ml-2 tracking-widest">
-                      Character {idx + 1}
+                    <label className="text-[8px] font-black text-amber-950 uppercase ml-2 tracking-widest">
+                      성격 키워드 {idx + 1}
                     </label>
                     <input
                       value={bpsTraits[idx]}
@@ -2442,7 +2442,7 @@ const handleSealPulse = () => {
                       placeholder={
                         ["지혜", "평온", "자비", "용기", "통찰"][idx]
                       }
-                      className="w-full bg-slate-950/60 border border-white/10 rounded-2xl p-4 text-[13px] text-amber-400 font-black text-center focus:ring-1 focus:ring-amber-500 outline-none transition-all"
+                      className="w-full bg-slate-950/85 border border-white/15 rounded-2xl p-4 text-[13px] text-white placeholder:text-amber-100/80 font-black text-center focus:ring-1 focus:ring-amber-500 outline-none transition-all"
                     />
                   </div>
                 ))}
@@ -2451,18 +2451,18 @@ const handleSealPulse = () => {
             <div className="bg-[#e6c36d]/78 p-10 rounded-[3rem] border border-amber-400/55 shadow-xl shadow-amber-500/25">
               <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-10">
                 <div className="space-y-1">
-                  <p className="text-[12px] font-black text-emerald-500 uppercase tracking-widest flex items-center gap-2">
-                    <Zap size={14} /> Goal Architect
+                  <p className="text-[12px] font-black text-emerald-900 uppercase tracking-widest flex items-center gap-2">
+                    <Zap size={14} /> 목표 설계자
                   </p>
 
                   {/* 단계 이름과 미션 설명 결합 */}
                   <div className="flex flex-col gap-1.5">
-                    <p className="text-[12px] font-bold text-amber-500 italic bg-slate-900/50 px-3 py-1 rounded-full border border-white/5 inline-block w-fit">
+                    <p className="text-[12px] font-bold text-white italic bg-slate-950/75 px-3 py-1 rounded-full border border-white/10 inline-block w-fit">
                       {activeLevel}단계: {levelMap[activeLevel]}
                     </p>
 
                     {/* ▼ [추가] 미션 설명 단락: 텍스트가 Bar 너비에 맞춰 자동 조절되도록 설정 */}
-                    <p className="text-[11px] text-slate-400 font-medium leading-relaxed pl-1 mt-2 animate-fadeIn w-full">
+                    <p className="text-[11px] text-amber-950 font-bold leading-relaxed pl-1 mt-2 animate-fadeIn w-full">
                       {missionMap[activeLevel]}
                     </p>
                   </div>
@@ -2475,7 +2475,7 @@ const handleSealPulse = () => {
                       className={`w-11 h-11 rounded-2xl font-black text-sm transition-all duration-300 ${
                         activeLevel === lv
                           ? "bg-amber-600 text-white shadow-lg scale-110 border border-amber-400/50"
-                          : "bg-slate-900 text-slate-600 border border-white/5 hover:bg-slate-800"
+                          : "bg-slate-900 text-white/80 border border-white/10 hover:bg-slate-800"
                       }`}
                     >
                       {lv}
@@ -2490,7 +2490,7 @@ const handleSealPulse = () => {
                     onChange={(e) =>
                       updateVision(activeLevel, { emoji: e.target.value })
                     }
-                    className="w-20 bg-slate-900 border border-white/5 rounded-3xl p-3 text-3xl text-center outline-none shrink-0"
+                    className="w-20 bg-slate-950 border border-white/10 rounded-3xl p-3 text-3xl text-center text-white placeholder:text-white/80 outline-none shrink-0"
                     placeholder="🏥"
                   />
                   <input
@@ -2498,15 +2498,15 @@ const handleSealPulse = () => {
                     onChange={(e) =>
                       updateVision(activeLevel, { title: e.target.value })
                     }
-                    className="flex-1 min-w-0 bg-slate-900 border border-white/5 rounded-3xl p-4 text-md font-black text-white outline-none"
-                    placeholder="Enter Vision Title"
+                    className="flex-1 min-w-0 bg-slate-950 border border-white/10 rounded-3xl p-4 text-md font-black text-white placeholder:text-white/75 outline-none"
+                    placeholder="비전 제목을 입력하세요"
                   />
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   {["v", "a", "k"].map((type) => (
                     <div
                       key={type}
-                      className="space-y-2 bg-slate-950/40 p-5 rounded-[2rem] border border-white/5"
+                      className="space-y-2 bg-slate-950/80 p-5 rounded-[2rem] border border-white/10"
                     >
                       <p
                         className={`text-[9px] font-black uppercase px-2 tracking-widest ${
@@ -2518,26 +2518,26 @@ const handleSealPulse = () => {
                         }`}
                       >
                         {type === "v"
-                          ? "👁️ Visual"
+                          ? "👁️ 시각으로 그리기"
                           : type === "a"
-                          ? "🎧 Auditory"
-                          : "⚡ Kinesthetic"}
+                          ? "🎧 소리로 떠올리기"
+                          : "⚡ 몸으로 느끼기"}
                       </p>
                       <AutoTextarea
                         value={visions[activeLevel]?.[type]}
                         onChange={(e) =>
                           updateVision(activeLevel, { [type]: e.target.value })
                         }
-                        placeholder="묘사..."
-                        className="w-full bg-transparent p-2 text-xs leading-relaxed text-slate-300 outline-none"
+                        placeholder="미래의 장면을 쉽게 적어보세요..."
+                        className="w-full bg-transparent p-2 text-xs leading-relaxed text-white placeholder:text-white/65 outline-none"
                       />
                     </div>
                   ))}
                 </div>
                 <div className="bg-[#1A202C]/60 p-8 rounded-[2.5rem] border border-amber-500/20 my-10 relative shadow-2xl">
                   <div className="flex justify-between items-center mb-4">
-                    <p className="text-[10px] font-black text-amber-500 uppercase tracking-widest flex items-center gap-2">
-                      <Brain size={14} /> AI Sensory Immersion Script
+                    <p className="text-[10px] font-black text-amber-300 uppercase tracking-widest flex items-center gap-2">
+                      <Brain size={14} /> AI 감각 몰입 시나리오
                     </p>
                     <button
                       onClick={generateImmersionScript}
@@ -2564,8 +2564,8 @@ const handleSealPulse = () => {
                         immersionScript: e.target.value,
                       })
                     }
-                    className="w-full bg-transparent border-none text-sm text-slate-200 leading-[1.8] font-medium focus:outline-none italic"
-                    placeholder="AI가 VAK 기반 시나리오를 설계합니다."
+                    className="w-full bg-transparent border-none text-sm text-white leading-[1.8] font-medium focus:outline-none italic placeholder:text-white/65"
+                    placeholder="AI가 시각·소리·몸의 느낌을 담은 시나리오를 설계합니다."
                   />
                 </div>
               </div>
