@@ -1664,6 +1664,53 @@ const handleSealPulse = () => {
           : "0 14px 38px rgba(0,0,0,0.34)",
       };
     };
+    const labPulseWavePath =
+      "M72 64H284C292 64 298 60 303 53C309 41 316 40 322 55C328 71 335 81 343 74C351 67 358 42 368 28C378 14 390 24 398 46C406 68 414 90 424 92C434 94 442 71 452 64H648";
+    const renderLabPulseWave = ({ showAnchor = false } = {}) => (
+      <svg className="absolute inset-0 h-full w-full overflow-visible" viewBox="0 0 720 128" preserveAspectRatio="none" aria-hidden="true">
+        <path
+          d={labPulseWavePath}
+          fill="none"
+          stroke="rgba(251,191,36,0.16)"
+          strokeWidth="16"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          className="lab-wave-breathe"
+        />
+        <path
+          d={labPulseWavePath}
+          fill="none"
+          stroke={activeLabZone === "pulse" ? "rgba(153,246,228,0.92)" : "rgba(245,158,11,0.72)"}
+          strokeWidth="4"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          className="transition-all duration-700 lab-wave-breathe"
+        />
+        <path
+          d={labPulseWavePath}
+          fill="none"
+          stroke={activeLabZone === "pulse" ? "rgba(204,251,241,1)" : "rgba(253,230,138,0.95)"}
+          strokeWidth="6"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeDasharray="84 700"
+          className="lab-wave-flow transition-all duration-700"
+          style={{ animationDirection: activeLabZone === "future" ? "reverse" : "normal" }}
+        />
+        {showAnchor && (
+          <line
+            x1={activeLabZone === "current" ? "88" : activeLabZone === "pulse" ? "360" : "632"}
+            y1="80"
+            x2={activeLabZone === "current" ? "88" : activeLabZone === "pulse" ? "360" : "632"}
+            y2="128"
+            stroke={activeLabZone === "pulse" ? "rgba(45,212,191,0.65)" : "rgba(251,191,36,0.72)"}
+            strokeWidth="2"
+            strokeLinecap="round"
+            className="transition-all duration-700 lab-wave-breathe"
+          />
+        )}
+      </svg>
+    );
     const renderLabZoneSymbol = (zone, variant = "card", isActive = false) => {
       const meta = labZoneMeta[zone];
       const sizeClass =
@@ -1700,31 +1747,12 @@ const handleSealPulse = () => {
 
         return (
           <div
-            className={`relative grid shrink-0 place-items-center ${variant === "card" ? "h-24 w-[90%] max-w-2xl lab-ecg-wrap" : sizeClass} lab-zone-node ${
+            className={`relative shrink-0 ${variant === "card" ? "h-32 w-full max-w-3xl" : sizeClass} lab-zone-node ${
               isActive ? "lab-zone-node-active" : ""
             }`}
             style={{ filter: `drop-shadow(0 0 28px ${meta.glow})` }}
           >
-            <div className="absolute inset-x-0 top-1/2 h-2 -translate-y-1/2 rounded-full bg-gradient-to-r from-transparent via-teal-100/90 to-transparent blur-md shadow-[0_0_56px_rgba(153,246,228,1)]" />
-            <svg viewBox="0 0 420 84" className="relative h-full w-full overflow-visible">
-              <path
-                d="M14 42H120C135 42 141 35 148 29C156 22 166 25 172 40C180 60 190 68 202 66C214 64 222 31 236 20C250 9 264 29 272 43C281 59 290 48 304 42H406"
-                fill="none"
-                stroke="rgba(20,184,166,0.58)"
-                strokeWidth="24"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-              <path
-                d="M14 42H120C135 42 141 35 148 29C156 22 166 25 172 40C180 60 190 68 202 66C214 64 222 31 236 20C250 9 264 29 272 43C281 59 290 48 304 42H406"
-                fill="none"
-                stroke="rgba(220,252,231,1)"
-                strokeWidth="8"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="lab-ecg-signal"
-              />
-            </svg>
+            {renderLabPulseWave()}
           </div>
         );
       }
@@ -1805,47 +1833,7 @@ const handleSealPulse = () => {
         {/* Wave-connected Zone Selector */}
         <div className="relative mb-8 px-2 pb-8 pt-2">
           <div className="relative mx-auto h-32 max-w-3xl">
-            <svg className="absolute inset-0 h-full w-full overflow-visible" viewBox="0 0 720 128" preserveAspectRatio="none" aria-hidden="true">
-              <path
-                d="M72 64H284C292 64 298 60 303 53C309 41 316 40 322 55C328 71 335 81 343 74C351 67 358 42 368 28C378 14 390 24 398 46C406 68 414 90 424 92C434 94 442 71 452 64H648"
-                fill="none"
-                stroke="rgba(251,191,36,0.16)"
-                strokeWidth="16"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="lab-wave-breathe"
-              />
-              <path
-                d="M72 64H284C292 64 298 60 303 53C309 41 316 40 322 55C328 71 335 81 343 74C351 67 358 42 368 28C378 14 390 24 398 46C406 68 414 90 424 92C434 94 442 71 452 64H648"
-                fill="none"
-                stroke={activeLabZone === "pulse" ? "rgba(153,246,228,0.92)" : "rgba(245,158,11,0.72)"}
-                strokeWidth="4"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="transition-all duration-700 lab-wave-breathe"
-              />
-              <path
-                d="M72 64H284C292 64 298 60 303 53C309 41 316 40 322 55C328 71 335 81 343 74C351 67 358 42 368 28C378 14 390 24 398 46C406 68 414 90 424 92C434 94 442 71 452 64H648"
-                fill="none"
-                stroke={activeLabZone === "pulse" ? "rgba(204,251,241,1)" : "rgba(253,230,138,0.95)"}
-                strokeWidth="6"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeDasharray="84 700"
-                className="lab-wave-flow transition-all duration-700"
-                style={{ animationDirection: activeLabZone === "future" ? "reverse" : "normal" }}
-              />
-              <line
-                x1={activeLabZone === "current" ? "88" : activeLabZone === "pulse" ? "360" : "632"}
-                y1="80"
-                x2={activeLabZone === "current" ? "88" : activeLabZone === "pulse" ? "360" : "632"}
-                y2="128"
-                stroke={activeLabZone === "pulse" ? "rgba(45,212,191,0.65)" : "rgba(251,191,36,0.72)"}
-                strokeWidth="2"
-                strokeLinecap="round"
-                className="transition-all duration-700 lab-wave-breathe"
-              />
-            </svg>
+            {renderLabPulseWave({ showAnchor: true })}
             {[
               { zone: "current", x: "12%" },
               { zone: "pulse", x: "50%" },
