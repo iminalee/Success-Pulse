@@ -1594,34 +1594,209 @@ const handleSealPulse = () => {
     const sdCValue =
       tciProfile.sd_c?.score ??
       Number(tciProfile.sd?.score || 0) + Number(tciProfile.c?.score || 0);
-    const zoneWrapClass = (zone) =>
-      `transition-all duration-300 rounded-[2rem] border ${
-        activeLabZone === zone
-          ? "opacity-100 border-amber-500/40 bg-slate-900/45 p-4 md:p-6"
-          : "opacity-80 border-white/10 bg-slate-900/20 p-3 md:p-4"
-      }`;
-    const zonePreview = {
+    const labZoneMeta = {
       current: {
-        icon: User,
-        title: "Current Self",
+        label: "현재의 나",
+        sublabel: "Current Self",
         keywords: "Identity · Life · VAK · TCI",
-        summary: "지금의 나를 정확히 기록하고 기준점을 세웁니다.",
-        color: "emerald",
+        node: "bg-amber-400",
+        nodeRing: "ring-emerald-300/30",
+        text: "text-amber-100",
+        fill: "rgba(34, 80, 52, 0.86)",
+        border: "border-emerald-300/35",
+        glow: "rgba(251,191,36,0.42)",
       },
       pulse: {
-        icon: Activity,
-        title: "THE PULSE",
-        keywords: "Bridge · Ledger · Contract",
-        summary: "현재와 미래를 연결하는 실행 코어입니다.",
-        color: "amber",
+        label: "THE PULSE",
+        sublabel: "Bridge Core",
+        keywords: "Fixed Value Events · Target Date · Mental Bank Goal · Contract Link",
+        node: "bg-teal-200",
+        nodeRing: "ring-teal-100/45",
+        text: "text-teal-50",
+        fill: "rgba(27, 99, 91, 0.88)",
+        border: "border-teal-100/35",
+        glow: "rgba(45,212,191,0.46)",
       },
       future: {
-        icon: Star,
-        title: "Apex BPS",
-        keywords: "Traits · Vision · Immersion",
-        summary: "미래 정체성을 설계하고 감각적으로 고정합니다.",
-        color: "cyan",
+        label: "미래의 나",
+        sublabel: "Apex BPS",
+        keywords: "BPS Character Forge · Goal Architect · Vision · VAK Vision · Immersion Script",
+        node: "bg-yellow-300",
+        nodeRing: "ring-yellow-100/60",
+        text: "text-amber-100",
+        fill: "rgba(244, 224, 170, 0.96)",
+        border: "border-amber-300/65",
+        glow: "rgba(251,191,36,0.78)",
       },
+    };
+    const labContentColumns = {
+      current: "minmax(0, 7fr) minmax(0, 1.5fr) minmax(0, 1.5fr)",
+      pulse: "minmax(0, 1.5fr) minmax(0, 7fr) minmax(0, 1.5fr)",
+      future: "minmax(0, 1.5fr) minmax(0, 1.5fr) minmax(0, 7fr)",
+    };
+    const labContentIndex = { current: 0, pulse: 1, future: 2 };
+    const labContentCardClass = (zone, baseClass) => {
+      const isActive = activeLabZone === zone;
+      return `${baseClass} relative overflow-hidden transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+        isActive
+          ? "opacity-100 scale-100 max-h-none"
+          : "opacity-55 scale-[0.94] max-h-[620px] cursor-pointer hover:opacity-75"
+      }`;
+    };
+    const labContentCardStyle = (zone) => {
+      const isActive = activeLabZone === zone;
+      const diff = labContentIndex[zone] - labContentIndex[activeLabZone];
+      const meta = labZoneMeta[zone];
+      return {
+        zIndex: isActive ? 20 : 10 - Math.abs(diff),
+        transform: isActive
+          ? "translateX(0) translateY(0) scale(1)"
+          : `translateX(${diff < 0 ? -10 : 10}px) translateY(18px) scale(0.94)`,
+        background: zone === "future"
+          ? isActive
+            ? `radial-gradient(circle at 50% 14%, rgba(120,53,15,0.62), rgba(244,224,170,0.92) 30%, rgba(202,138,4,0.58) 62%, rgba(15,23,42,0.78) 100%)`
+            : `linear-gradient(145deg, rgba(244,224,170,0.72), rgba(120,53,15,0.36), rgba(15,23,42,0.78))`
+          : isActive
+          ? `linear-gradient(145deg, ${meta.fill}, rgba(15, 23, 42, 0.94))`
+          : `linear-gradient(145deg, ${meta.fill}, rgba(15, 23, 42, 0.82))`,
+        boxShadow: isActive
+          ? `0 24px 80px rgba(0,0,0,0.42), 0 0 34px ${meta.glow}`
+          : "0 14px 38px rgba(0,0,0,0.34)",
+      };
+    };
+    const renderLabZoneSymbol = (zone, variant = "card", isActive = false) => {
+      const meta = labZoneMeta[zone];
+      const sizeClass =
+        variant === "selector"
+          ? zone === "pulse"
+            ? isActive
+              ? "h-14 w-24"
+              : "h-10 w-16"
+            : isActive
+            ? "h-16 w-16"
+            : "h-12 w-12"
+          : variant === "mini"
+          ? "h-20 w-20"
+          : zone === "future"
+          ? "h-24 w-24"
+          : zone === "pulse"
+          ? "h-20 w-32"
+          : "h-20 w-20";
+
+      if (zone === "pulse") {
+        if (variant === "selector") {
+          return (
+            <div
+              className={`relative grid shrink-0 place-items-center rounded-full ${isActive ? "h-12 w-12" : "h-9 w-9"} lab-zone-node ${
+                isActive ? "lab-zone-node-active" : ""
+              }`}
+              style={{ filter: `drop-shadow(0 0 16px ${meta.glow})` }}
+            >
+              <span className="absolute inset-0 rounded-full bg-teal-200/20 blur-md" />
+              <span className="relative h-3 w-3 rounded-full bg-teal-100 shadow-[0_0_18px_rgba(153,246,228,0.95)]" />
+            </div>
+          );
+        }
+
+        return (
+          <div
+            className={`relative grid shrink-0 place-items-center ${variant === "card" ? "h-10 w-[90%] max-w-2xl" : sizeClass} lab-zone-node ${
+              isActive ? "lab-zone-node-active" : ""
+            }`}
+            style={{ filter: `drop-shadow(0 0 18px ${meta.glow})` }}
+          >
+            <div className="absolute inset-x-4 top-1/2 h-1 -translate-y-1/2 rounded-full bg-gradient-to-r from-transparent via-teal-100/45 to-transparent blur-sm" />
+            <svg viewBox="0 0 420 32" className="relative h-full w-full overflow-visible">
+              <path
+                d="M18 16H402"
+                fill="none"
+                stroke="rgba(20,184,166,0.42)"
+                strokeWidth="6"
+                strokeLinecap="round"
+              />
+              <path
+                d="M18 16H402"
+                fill="none"
+                stroke="rgba(220,252,231,0.92)"
+                strokeWidth="4"
+                strokeLinecap="round"
+              />
+              <path
+                d="M18 16H402"
+                fill="none"
+                stroke="rgba(255,255,255,0.98)"
+                strokeWidth="5"
+                strokeLinecap="round"
+                strokeDasharray="56 430"
+                className="lab-ecg-travel"
+              />
+            </svg>
+          </div>
+        );
+      }
+
+      const isFuture = zone === "future";
+      return (
+        <div
+          className={`relative grid shrink-0 place-items-center rounded-full ${sizeClass} ${
+            isActive ? "lab-zone-node-active" : "lab-zone-node"
+          }`}
+          style={{ filter: `drop-shadow(0 0 ${isFuture ? 34 : 24}px ${meta.glow})` }}
+        >
+          <div className={`absolute inset-0 rounded-full blur-xl ${isFuture ? "bg-yellow-300/70" : "bg-amber-300/45"}`} />
+          <svg viewBox="0 0 120 100" className="relative h-[88%] w-[88%] overflow-visible">
+            <path
+              d="M60 9C77 9 88 21 88 39C88 50 83 59 74 64V69C96 74 111 88 112 99H8C9 88 24 74 46 69V64C37 59 32 50 32 39C32 21 43 9 60 9Z"
+              fill={isFuture ? "rgba(245,158,11,0.92)" : "rgba(2,6,23,0.82)"}
+              stroke={isFuture ? "#fcd34d" : "rgba(148,163,184,0.38)"}
+              strokeWidth={isFuture ? "4" : "2.5"}
+              strokeDasharray={isFuture ? "8 5" : "0"}
+              strokeLinejoin="round"
+              className={isFuture ? "lab-ecg-signal" : ""}
+            />
+            <path
+              d="M8 99H112"
+              stroke={isFuture ? "#fef3c7" : "rgba(148,163,184,0.35)"}
+              strokeWidth="3"
+              strokeLinecap="round"
+            />
+          </svg>
+        </div>
+      );
+    };
+
+    const renderLabNodeHeader = (zone, title, details) => {
+      const meta = labZoneMeta[zone];
+      const isFutureHeader = zone === "future";
+      return (
+        <div
+          className={`rounded-[2rem] border p-5 shadow-xl ${
+            isFutureHeader
+              ? "border-amber-300/55 bg-[#f4e0aa]/82 shadow-amber-500/30"
+              : "border-white/10 bg-slate-950/38"
+          }`}
+          style={
+            isFutureHeader
+              ? {
+                  background:
+                    "radial-gradient(circle at 50% 32%, rgba(92,47,9,0.68) 0%, rgba(180,83,9,0.42) 24%, rgba(244,224,170,0.88) 56%, rgba(120,53,15,0.5) 100%)",
+                }
+              : undefined
+          }
+        >
+          <div className="flex flex-col items-center gap-3 text-center">
+            {renderLabZoneSymbol(zone, "card", activeLabZone === zone)}
+            <div className="min-w-0">
+              <p className={`text-[11px] font-black uppercase tracking-[0.25em] ${isFutureHeader ? "text-amber-50 drop-shadow-[0_1px_8px_rgba(0,0,0,0.75)]" : meta.text}`}>
+                {title}
+              </p>
+              <p className={`mt-2 text-[11px] leading-relaxed ${isFutureHeader ? "text-amber-50/90 drop-shadow-[0_1px_6px_rgba(0,0,0,0.65)]" : "text-slate-200/85"}`}>
+                {details}
+              </p>
+            </div>
+          </div>
+        </div>
+      );
     };
     return (
       <div className="flex-grow w-full max-w-7xl mx-auto overflow-y-auto no-scrollbar pb-24 px-4 animate-fadeIn font-sans">
@@ -1633,93 +1808,109 @@ const handleSealPulse = () => {
             </h2>
           </div>
         </div>
-        {/* 3D Cylindrical Zone Selector */}
-        {(() => {
-          const zones3d = [
-            { zone: "current", label: "현재의 나", sublabel: "Current Self", icon: User, keywords: "Identity · Life · VAK · TCI", summary: "지금의 나를 정확히 기록하고 기준점을 세웁니다.", glowColor: "rgba(16,185,129,0.55)", borderActive: "1px solid rgba(52,211,153,0.75)", borderInactive: "1px solid rgba(16,185,129,0.18)", bgActive: "rgba(6,60,35,0.85)", bgInactive: "rgba(2,20,12,0.45)", textColor: "#6ee7b7", subtextColor: "rgba(110,231,183,0.55)" },
-            { zone: "pulse", label: "✦ THE PULSE", sublabel: "Bridge Core", icon: Activity, keywords: "Bridge · Ledger · Contract", summary: "현재와 미래를 연결하는 실행 코어입니다.", glowColor: "rgba(245,158,11,0.65)", borderActive: "1px solid rgba(251,191,36,0.8)", borderInactive: "1px solid rgba(245,158,11,0.2)", bgActive: "rgba(70,40,0,0.90)", bgInactive: "rgba(25,14,0,0.45)", textColor: "#fcd34d", subtextColor: "rgba(252,211,77,0.55)" },
-            { zone: "future", label: "미래의 나", sublabel: "Apex BPS", icon: Star, keywords: "Traits · Vision · Immersion", summary: "미래 정체성을 설계하고 감각적으로 고정합니다.", glowColor: "rgba(6,182,212,0.55)", borderActive: "1px solid rgba(34,211,238,0.75)", borderInactive: "1px solid rgba(6,182,212,0.18)", bgActive: "rgba(0,40,55,0.85)", bgInactive: "rgba(0,15,22,0.45)", textColor: "#67e8f9", subtextColor: "rgba(103,232,249,0.55)" },
-          ];
-          const activeIdx = zones3d.findIndex(z => z.zone === activeLabZone);
-          return (
-            <div className="mb-8 relative" style={{ perspective: "1400px" }}>
-              {/* Selector track background */}
-              <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 h-[2px] pointer-events-none" style={{ background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.06) 20%, rgba(255,255,255,0.06) 80%, transparent)" }} />
-              <div className="flex items-stretch justify-center gap-3 md:gap-5 px-2 py-4" style={{ transformStyle: "preserve-3d" }}>
-                {zones3d.map((item, idx) => {
-                  const diff = idx - activeIdx;
-                  const isActive = diff === 0;
-                  const rotateY = diff * 20;
-                  const scale = isActive ? 1.06 : 1 - Math.abs(diff) * 0.07;
-                  const opacity = isActive ? 1 : 1 - Math.abs(diff) * 0.28;
-                  const zIdx = isActive ? 20 : 20 - Math.abs(diff) * 5;
-                  const translateZ = isActive ? 30 : -Math.abs(diff) * 20;
-                  const IconComp = item.icon;
-                  return (
-                    <button
-                      key={item.zone}
-                      onClick={() => setActiveLabZone(item.zone)}
-                      style={{
-                        transform: `rotateY(${rotateY}deg) scale(${scale}) translateZ(${translateZ}px)`,
-                        opacity,
-                        zIndex: zIdx,
-                        transition: "transform 620ms cubic-bezier(0.16,1,0.3,1), opacity 450ms cubic-bezier(0.16,1,0.3,1), box-shadow 450ms ease",
-                        transformStyle: "preserve-3d",
-                        background: isActive ? item.bgActive : item.bgInactive,
-                        border: isActive ? item.borderActive : item.borderInactive,
-                        boxShadow: isActive ? `0 0 50px ${item.glowColor}, 0 0 20px ${item.glowColor}, inset 0 1px 0 rgba(255,255,255,0.12)` : "none",
-                        flex: isActive ? "0 0 auto" : "0 0 auto",
-                        cursor: "pointer",
-                        position: "relative",
-                      }}
-                      className="rounded-2xl px-4 py-4 md:px-6 md:py-5 text-left min-w-[110px] md:min-w-[190px] max-w-[220px]"
-                    >
-                      {/* Inner top highlight line */}
-                      {isActive && (
-                        <div className="absolute top-0 left-4 right-4 h-px rounded-full pointer-events-none" style={{ background: `linear-gradient(90deg, transparent, ${item.textColor}80, transparent)` }} />
-                      )}
-                      <div className="flex items-center gap-2 mb-1">
-                        <IconComp size={isActive ? 17 : 13} style={{ color: item.textColor }} />
-                        <p style={{ color: item.textColor }} className={`font-black uppercase tracking-wider leading-tight ${isActive ? "text-[12px] md:text-sm" : "text-[10px] md:text-[11px]"}`}>{item.label}</p>
-                      </div>
-                      <p style={{ color: item.subtextColor }} className="text-[9px] md:text-[10px] font-bold uppercase tracking-widest">{item.sublabel}</p>
-                      {isActive && (
-                        <>
-                          <p style={{ color: item.subtextColor, fontSize: "10px" }} className="mt-1 font-semibold uppercase tracking-wider">{item.keywords}</p>
-                          <p style={{ color: item.textColor, opacity: 0.8 }} className="text-[11px] mt-2 leading-relaxed">{item.summary}</p>
-                        </>
-                      )}
-                    </button>
-                  );
-                })}
-              </div>
-              {/* Beam: active tab → content */}
-              <div className="flex justify-center pointer-events-none">
-                <div style={{
-                  width: "2px",
-                  height: "24px",
-                  background: `linear-gradient(to bottom, ${zones3d[activeIdx].glowColor}, transparent)`,
-                  transition: "background 500ms ease",
-                  filter: `drop-shadow(0 0 6px ${zones3d[activeIdx].glowColor})`,
-                }} />
-              </div>
-            </div>
-          );
-        })()}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
-          <div className="border border-emerald-500/20 bg-emerald-950/10 rounded-[2rem] p-4 space-y-6">
-            <div className="bg-[#111827]/70 border border-emerald-500/20 rounded-[2rem] p-6 shadow-xl">
-              <p className="text-[11px] font-black text-emerald-400 uppercase tracking-[0.25em]">
-                현재의 나 / Current Self
-              </p>
-              <p className="text-[11px] text-slate-400 mt-2">
-                Identity Registration · Life Profile · Financial Core · VAK · TCI
-              </p>
-            </div>
+        {/* Wave-connected Zone Selector */}
+        <div className="relative mb-8 px-2 pb-8 pt-2">
+          <div className="relative mx-auto h-32 max-w-3xl">
+            <svg className="absolute inset-0 h-full w-full overflow-visible" viewBox="0 0 720 128" preserveAspectRatio="none" aria-hidden="true">
+              <path
+                d="M72 64H284C292 64 298 60 303 53C309 41 316 40 322 55C328 71 335 81 343 74C351 67 358 42 368 28C378 14 390 24 398 46C406 68 414 90 424 92C434 94 442 71 452 64H648"
+                fill="none"
+                stroke="rgba(251,191,36,0.16)"
+                strokeWidth="16"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="lab-wave-breathe"
+              />
+              <path
+                d="M72 64H284C292 64 298 60 303 53C309 41 316 40 322 55C328 71 335 81 343 74C351 67 358 42 368 28C378 14 390 24 398 46C406 68 414 90 424 92C434 94 442 71 452 64H648"
+                fill="none"
+                stroke={activeLabZone === "pulse" ? "rgba(153,246,228,0.92)" : "rgba(245,158,11,0.72)"}
+                strokeWidth="4"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="transition-all duration-700 lab-wave-breathe"
+              />
+              <path
+                d="M72 64H284C292 64 298 60 303 53C309 41 316 40 322 55C328 71 335 81 343 74C351 67 358 42 368 28C378 14 390 24 398 46C406 68 414 90 424 92C434 94 442 71 452 64H648"
+                fill="none"
+                stroke={activeLabZone === "pulse" ? "rgba(204,251,241,1)" : "rgba(253,230,138,0.95)"}
+                strokeWidth="6"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeDasharray="84 700"
+                className="lab-wave-flow transition-all duration-700"
+                style={{ animationDirection: activeLabZone === "future" ? "reverse" : "normal" }}
+              />
+              <line
+                x1={activeLabZone === "current" ? "88" : activeLabZone === "pulse" ? "360" : "632"}
+                y1="80"
+                x2={activeLabZone === "current" ? "88" : activeLabZone === "pulse" ? "360" : "632"}
+                y2="128"
+                stroke={activeLabZone === "pulse" ? "rgba(45,212,191,0.65)" : "rgba(251,191,36,0.72)"}
+                strokeWidth="2"
+                strokeLinecap="round"
+                className="transition-all duration-700 lab-wave-breathe"
+              />
+            </svg>
+            {[
+              { zone: "current", x: "12%" },
+              { zone: "pulse", x: "50%" },
+              { zone: "future", x: "88%" },
+            ].map((item) => {
+              const meta = labZoneMeta[item.zone];
+              const isActive = activeLabZone === item.zone;
+              return (
+                <button
+                  key={item.zone}
+                  type="button"
+                  onClick={() => setActiveLabZone(item.zone)}
+                  className="absolute top-1/2 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center gap-2 outline-none"
+                  style={{ left: item.x }}
+                  aria-pressed={isActive}
+                >
+                  <span
+                    className="transition-all duration-500"
+                    style={{ animationDelay: item.zone === "pulse" ? "0.5s" : item.zone === "future" ? "1s" : "0s" }}
+                  >
+                    {renderLabZoneSymbol(item.zone, "selector", isActive)}
+                  </span>
+                  <span className={`rounded-full border px-3 py-1 text-center text-[9px] font-black uppercase tracking-[0.2em] transition-all duration-500 ${isActive ? `${meta.text} border-white/20 bg-slate-950/80` : "border-white/5 bg-slate-950/45 text-slate-500"}`}>
+                    {meta.label}
+                    <span className="block text-[8px] tracking-[0.18em] opacity-70">{meta.sublabel}</span>
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+        <div
+          className="grid gap-4 md:gap-6 items-start"
+          style={{ gridTemplateColumns: labContentColumns[activeLabZone] }}
+        >
+          <div
+            onClick={() => activeLabZone !== "current" && setActiveLabZone("current")}
+            className={labContentCardClass(
+              "current",
+              "border border-emerald-200/30 rounded-[2rem] p-4 space-y-6"
+            )}
+            style={labContentCardStyle("current")}
+          >
+            {activeLabZone !== "current" && (
+              <button
+                type="button"
+                onClick={() => setActiveLabZone("current")}
+                className="absolute inset-0 z-30 flex items-start justify-center bg-slate-950/10 pt-8 text-[10px] font-black uppercase tracking-[0.24em] text-amber-200/70"
+                aria-label="Current Self 카드 열기"
+              >
+                Current Self
+              </button>
+            )}
+            {renderLabNodeHeader(
+              "current",
+              "현재의 나 / Current Self",
+              "Identity Registration · Life Profile · Financial Core · VAK · TCI"
+            )}
             <div className="bg-[#2D3748]/30 p-8 rounded-[3rem] border border-white/5 shadow-xl border-l-4 border-amber-500 mb-8 flex flex-col md:flex-row items-center gap-8">
-              <div className="bg-amber-500/10 p-6 rounded-full border border-amber-500/20 shadow-[0_0_30px_rgba(245,158,11,0.1)]">
-                <User size={32} className="text-amber-500" />
-              </div>
               <div className="flex-grow w-full space-y-4">
                 <div className="flex justify-between items-end">
                   <p className="text-[10px] font-black text-amber-500 uppercase tracking-[0.3em] flex items-center gap-2">
@@ -2141,15 +2332,29 @@ const handleSealPulse = () => {
             </div>
           </div>
 
-          <div className="border border-amber-500/20 bg-amber-950/10 rounded-[2rem] p-4 space-y-6">
-            <div className="bg-[#111827]/70 border border-amber-500/30 rounded-[2rem] p-6 shadow-xl shadow-[0_0_30px_rgba(245,158,11,0.12)]">
-              <p className="text-[11px] font-black text-amber-300 uppercase tracking-[0.25em]">
-                THE PULSE / Bridge Core
-              </p>
-              <p className="text-[11px] text-slate-400 mt-2">
-                Fixed Value Events · Target Date · Mental Bank Goal · Value Event Award · Contract Link
-              </p>
-            </div>
+          <div
+            onClick={() => activeLabZone !== "pulse" && setActiveLabZone("pulse")}
+            className={labContentCardClass(
+              "pulse",
+              "border border-teal-200/30 rounded-[2rem] p-4 space-y-6"
+            )}
+            style={labContentCardStyle("pulse")}
+          >
+            {activeLabZone !== "pulse" && (
+              <button
+                type="button"
+                onClick={() => setActiveLabZone("pulse")}
+                className="absolute inset-0 z-30 flex items-start justify-center bg-slate-950/10 pt-8 text-[10px] font-black uppercase tracking-[0.24em] text-teal-100/70"
+                aria-label="Bridge Core 카드 열기"
+              >
+                Bridge Core
+              </button>
+            )}
+            {renderLabNodeHeader(
+              "pulse",
+              "THE PULSE / Bridge Core",
+              "Fixed Value Events · Target Date · Mental Bank Goal · Value Event Award · Contract Link"
+            )}
             <div className="bg-[#1A202C]/60 p-6 rounded-[2.5rem] border border-amber-500/20 mb-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="bg-slate-900/50 border border-white/10 rounded-2xl p-4">
@@ -2216,17 +2421,31 @@ const handleSealPulse = () => {
             </div>
           </div>
 
-          <div className="border border-cyan-500/20 bg-cyan-950/10 rounded-[2rem] p-4 space-y-6">
-            <div className="bg-[#111827]/70 border border-cyan-500/20 rounded-[2rem] p-6 shadow-xl mt-8">
-              <p className="text-[11px] font-black text-cyan-300 uppercase tracking-[0.25em]">
-                미래의 나 / Apex BPS
-              </p>
-              <p className="text-[11px] text-slate-400 mt-2">
-                BPS Character Forge · Goal Architect · Vision · VAK Vision · Immersion Script
-              </p>
-            </div>
-            <div className="bg-[#2D3748]/30 p-10 rounded-[3rem] border border-white/5 shadow-xl border-t-4 border-cyan-500/30">
-              <p className="text-[12px] font-black text-cyan-300 uppercase tracking-[0.4em] mb-4 flex items-center gap-2">
+          <div
+            onClick={() => activeLabZone !== "future" && setActiveLabZone("future")}
+            className={labContentCardClass(
+              "future",
+              "border border-yellow-200/40 rounded-[2rem] p-4 space-y-6"
+            )}
+            style={labContentCardStyle("future")}
+          >
+            {activeLabZone !== "future" && (
+              <button
+                type="button"
+                onClick={() => setActiveLabZone("future")}
+                className="absolute inset-0 z-30 flex items-start justify-center bg-slate-950/10 pt-8 text-[10px] font-black uppercase tracking-[0.24em] text-amber-100/75"
+                aria-label="Apex BPS 카드 열기"
+              >
+                Apex BPS
+              </button>
+            )}
+            {renderLabNodeHeader(
+              "future",
+              "미래의 나 / Apex BPS",
+              "BPS Character Forge · Goal Architect · Vision · VAK Vision · Immersion Script"
+            )}
+            <div className="bg-[#ead08c]/88 p-10 rounded-[3rem] border border-amber-300/70 shadow-xl shadow-amber-500/25 border-t-4 border-amber-400/70">
+              <p className="text-[12px] font-black text-amber-900 uppercase tracking-[0.4em] mb-4 flex items-center gap-2">
                 <Star size={16} /> BPS Character Forge
               </p>
               <div className="grid grid-cols-1 md:grid-cols-5 gap-3 mb-6">
@@ -2247,7 +2466,7 @@ const handleSealPulse = () => {
                 ))}
               </div>
             </div>
-            <div className="bg-[#2D3748]/40 p-10 rounded-[3rem] border border-white/5 shadow-xl">
+            <div className="bg-[#e6c36d]/78 p-10 rounded-[3rem] border border-amber-400/55 shadow-xl shadow-amber-500/25">
               <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-10">
                 <div className="space-y-1">
                   <p className="text-[12px] font-black text-emerald-500 uppercase tracking-widest flex items-center gap-2">
@@ -4672,12 +4891,12 @@ const nowX = getX(dataPoints[dataPoints.length - 1].date); // 📅 가로 위치
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-200 p-4 md:p-10 font-sans overflow-hidden flex flex-col selection:bg-amber-500/30">
-      <style>{`@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css'); * { font-family: 'Pretendard', sans-serif; letter-spacing: -0.02em; } .animate-fadeIn { animation: fadeIn 0.8s ease-out; } .animate-spin-slow { animation: spin 20s linear infinite; } @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } } @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }`}</style>
+      <style>{`@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css'); * { font-family: 'Pretendard', sans-serif; letter-spacing: -0.02em; } .animate-fadeIn { animation: fadeIn 0.8s ease-out; } .animate-spin-slow { animation: spin 20s linear infinite; } .lab-wave-breathe { animation: labWaveBreathe 4.8s ease-in-out infinite; } .lab-wave-flow { animation: labWaveFlow 5.6s linear infinite; } .lab-zone-node { animation: labNodePulse 4.2s ease-in-out infinite; } .lab-zone-node-active { animation: labNodeActive 2.8s ease-in-out infinite; } .lab-pulse-signal { animation: labPulseSignal 2.6s ease-in-out infinite; } .lab-ecg-wrap { animation: labEcgWrap 2.8s ease-in-out infinite; transform-origin: center; } .lab-ecg-signal { animation: labEcgSignal 2.8s ease-in-out infinite; } .lab-ecg-travel { animation: labEcgTravel 2.4s ease-in-out infinite alternate; filter: drop-shadow(0 0 14px rgba(204,251,241,0.95)) drop-shadow(0 0 26px rgba(45,212,191,0.72)); } @keyframes labWaveBreathe { 0%, 100% { opacity: 0.42; filter: drop-shadow(0 0 4px rgba(245,158,11,0.22)); } 50% { opacity: 0.82; filter: drop-shadow(0 0 14px rgba(245,158,11,0.45)); } } @keyframes labWaveFlow { from { stroke-dashoffset: 720; } to { stroke-dashoffset: 0; } } @keyframes labNodePulse { 0%, 100% { filter: brightness(0.9) drop-shadow(0 0 10px rgba(245,158,11,0.18)); } 50% { filter: brightness(1.18) drop-shadow(0 0 22px rgba(245,158,11,0.46)); } } @keyframes labNodeActive { 0%, 100% { filter: brightness(1.08) drop-shadow(0 0 16px rgba(251,191,36,0.45)); } 50% { filter: brightness(1.34) drop-shadow(0 0 34px rgba(251,191,36,0.78)); } } @keyframes labPulseSignal { 0%, 100% { opacity: 0.58; transform: translateX(-50%) translateY(-50%) scaleX(0.72); } 50% { opacity: 1; transform: translateX(-50%) translateY(-50%) scaleX(1.08); } } @keyframes labEcgWrap { 0%, 100% { transform: scaleX(0.86) scaleY(1); } 50% { transform: scaleX(1) scaleY(1.2); } } @keyframes labEcgSignal { 0%, 100% { opacity: 0.72; filter: drop-shadow(0 0 12px rgba(204,251,241,0.75)); } 50% { opacity: 1; filter: drop-shadow(0 0 40px rgba(45,212,191,1)) drop-shadow(0 0 72px rgba(153,246,228,0.95)); } } @keyframes labEcgTravel { from { stroke-dashoffset: 430; } to { stroke-dashoffset: 0; } } @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } } @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }`}</style>
     
   
       {/* 헤더 */}
     
-      <header className="sticky top-0 z-50 w-full flex flex-col md:flex-row justify-between items-center px-6 py-4 bg-slate-950/90 backdrop-blur-md border-b border-white/5 h-auto transition-all duration-300">
+      <header className="sticky top-0 z-50 w-full relative flex flex-col md:flex-row justify-between items-center px-6 py-4 bg-slate-950/90 backdrop-blur-md border-b border-white/5 h-auto transition-all duration-300">
         {/* ▼▼▼ 여기를 수정했습니다 (클릭하면 홈으로 이동) ▼▼▼ */}
         <div
           onClick={() => setCurrentView("hub")}
@@ -4698,7 +4917,7 @@ const nowX = getX(dataPoints[dataPoints.length - 1].date); // 📅 가로 위치
             setShowSyncChamber(true);
             setRitualProgress(0); // 열 때마다 초기화
           }}
-          className="relative w-16 h-10 flex items-center justify-center cursor-pointer group hover:scale-110 transition-transform z-[60]"
+          className="absolute left-1/2 top-1/2 z-[60] flex h-10 w-[52px] -translate-x-1/2 -translate-y-1/2 cursor-pointer items-center justify-center transition-transform hover:scale-110"
         >
           {/* 현재 달성률만큼 겹쳐진 두 원 */}
           <div className="absolute w-7 h-7 rounded-full border border-emerald-500/50 bg-slate-900 left-0 shadow-[0_0_10px_rgba(16,185,129,0.2)]" />
@@ -4712,7 +4931,7 @@ const nowX = getX(dataPoints[dataPoints.length - 1].date); // 📅 가로 위치
         </div>
 
 
-      {currentView !== "philosophy" && (
+      {currentView !== "philosophy" && currentView !== "lab" && (
           /* [우측 상단] 자산 대시보드 (반응형 수정 완료) */
           /* md:items-end -> PC에서는 우측 정렬, 모바일에서는 items-center(중앙 정렬) */
           /* mt-2 md:mt-0 -> 모바일에서는 로고와 간격을 위해 위쪽 여백 추가 */
@@ -4901,8 +5120,8 @@ const nowX = getX(dataPoints[dataPoints.length - 1].date); // 📅 가로 위치
 
       {/* 하단 네비게이션 (Floating 적용 완료) */}
       {/* 하단 네비게이션 (Ledger를 맨 앞으로 이동!) */}
-      <footer className="fixed bottom-6 left-0 right-0 z-[1000] px-4 animate-fadeIn">
-        <nav className="max-w-xl mx-auto flex justify-between md:justify-around items-center bg-[#0A0F1E]/90 backdrop-blur-xl rounded-full py-3 px-3 border border-white/10 shadow-[0_10px_40px_rgba(0,0,0,0.8)] mb-1 overflow-x-auto no-scrollbar gap-1">
+      <footer className="fixed bottom-3 left-0 right-0 z-[1000] px-2 animate-fadeIn">
+        <nav className="max-w-[520px] mx-auto flex justify-between md:justify-around items-center bg-[#0A0F1E]/82 backdrop-blur-xl rounded-full py-2 px-2 border border-white/10 shadow-[0_8px_28px_rgba(0,0,0,0.55)] mb-1 overflow-x-auto no-scrollbar gap-0.5 opacity-80 hover:opacity-100 focus-within:opacity-100 transition-all duration-300 scale-95 hover:scale-100 origin-bottom">
           {/* 0. Tonight — 매일 밤의 단일 진입점 */}
           <NavBtn
             active={currentView === "tonight"}
@@ -4937,13 +5156,6 @@ const nowX = getX(dataPoints[dataPoints.length - 1].date); // 📅 가로 위치
             onClick={() => setCurrentView("analysis")}
             icon={<BarChart2 size={20} className="md:w-6 md:h-6" />}
             label="Stream"
-          />
-          {/* 5. Milestone */}
-          <NavBtn
-            active={currentView === "archive"}
-            onClick={() => setCurrentView("archive")}
-            icon={<Trophy size={20} className="md:w-6 md:h-6" />}
-            label="Milestone"
           />
           {/* 6. Philosophy */}
           <NavBtn
