@@ -5188,7 +5188,7 @@ const nowX = getX(dataPoints[dataPoints.length - 1].date); // 📅 가로 위치
                   {ritualProgress === 100 ? "✨ 정체성 통합 완료 : 미래의 내가 현실을 밝힙니다 ✨" : "두 자아가 하나로 합쳐질 때까지 화면을 꾹 누르세요"}
                </p>
 
-               <div className="relative w-full flex items-center justify-center h-64">
+               <div className="relative w-full max-w-[640px] mx-auto flex items-center justify-center h-64">
                   <svg className="absolute w-0 h-0">
                     <defs>
                       <path id="human-pro-final" d="M70,8 C86,8 96,18 96,35 C96,48 89,55 83,58 L83,64 C104,67 128,80 128,110 L12,110 C12,80 36,67 57,64 L57,58 C51,55 44,48 44,35 C44,18 54,8 70,8 Z" />
@@ -5215,7 +5215,7 @@ const nowX = getX(dataPoints[dataPoints.length - 1].date); // 📅 가로 위치
                   {/* A. Current Self (My Lab과 동일한 어두운 내부 + 초록 외곽 아우라) */}
                   <div className="absolute transition-all duration-100 ease-linear"
                        style={{ 
-                         transform: `translateX(-${(100 - ritualProgress) * 1.2}px) scale(${1 + (ritualProgress/250)})`, 
+                         transform: `translateX(-${(100 - ritualProgress) * 1.05}px) scale(${1 + (ritualProgress/250)})`, 
                          opacity: ritualProgress === 100 ? 0 : 0.82 
                        }}>
                     <div className="absolute inset-0 bg-emerald-300/25 blur-3xl rounded-full scale-125 animate-pulse"></div>
@@ -5229,7 +5229,7 @@ const nowX = getX(dataPoints[dataPoints.length - 1].date); // 📅 가로 위치
                   {/* B. Apex BPS (안쪽이 앰버색으로 채워진 주도적 형상) */}
                   <div className="absolute transition-all duration-100 ease-linear"
                        style={{ 
-                         transform: `translateX(${(100 - ritualProgress) * 1.2}px) scale(${1 + (ritualProgress/250)})`, 
+                         transform: `translateX(${(100 - ritualProgress) * 1.05}px) scale(${1 + (ritualProgress/250)})`, 
                          opacity: ritualProgress === 100 ? 0 : 1 
                        }}>
                     <div className="absolute inset-0 bg-amber-500/40 blur-3xl rounded-full scale-125 animate-pulse"></div>
@@ -5264,6 +5264,33 @@ const nowX = getX(dataPoints[dataPoints.length - 1].date); // 📅 가로 위치
                     <svg width="240" height="210" viewBox="0 0 140 120" className="drop-shadow-[0_0_150px_rgba(251,191,36,1)] z-20 relative">
                       <use href="#human-pro-final" fill="url(#divine-gold-final)" fillOpacity="1" className="stroke-white animate-pulse" strokeWidth="3" />
                     </svg>
+                  </div>
+
+                  {/* D. 리추얼 시나리오 자막: 영화 자막처럼 위로 흐르며 사라짐 */}
+                  <div className="pointer-events-none absolute inset-x-0 bottom-0 z-30 flex justify-center px-3">
+                    <div
+                      className="relative h-28 w-full max-w-2xl overflow-hidden [mask-image:linear-gradient(to_bottom,transparent_0%,black_28%,black_72%,transparent_100%)]"
+                      style={{ opacity: Math.max(0, 1 - Math.max(0, ritualProgress - 86) / 14) }}
+                    >
+                      <div
+                        className="space-y-3 transition-transform duration-75 ease-linear"
+                        style={{ transform: `translateY(${42 - ritualProgress * 1.18}px)` }}
+                      >
+                        {(visions[6]?.immersionScript || "마스터 시나리오를 먼저 생성해주세요.")
+                          .split(/\n+/)
+                          .filter((line) => line.trim())
+                          .slice(0, 4)
+                          .map((line, idx) => (
+                            <p
+                              key={`${idx}-${line.slice(0, 12)}`}
+                              className="mx-auto max-w-xl rounded-2xl border border-amber-300/15 bg-slate-950/55 px-4 py-2 text-center text-[11px] md:text-xs font-black italic leading-relaxed text-amber-200 shadow-[0_0_28px_rgba(0,0,0,0.45)] backdrop-blur-md"
+                              style={{ textShadow: "0 0 16px rgba(251,191,36,0.42)" }}
+                            >
+                              {line}
+                            </p>
+                          ))}
+                      </div>
+                    </div>
                   </div>
                </div>
                
