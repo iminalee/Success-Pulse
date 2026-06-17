@@ -1640,7 +1640,7 @@ const handleSealPulse = () => {
       return `${baseClass} relative overflow-hidden transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] ${
         isActive
           ? "opacity-100 scale-100 max-h-none"
-          : "lab-inactive-card opacity-55 scale-[0.94] max-h-[620px] cursor-pointer hover:opacity-75"
+          : "lab-inactive-card opacity-55 scale-[0.94] max-h-[280px] cursor-pointer hover:opacity-75"
       }`;
     };
     const labContentCardStyle = (zone) => {
