@@ -262,16 +262,15 @@ const App = () => {
 
     const hasMetaMeaning =
       profile?._meta?.source === "manual" ||
+      profile?._meta?.source === "act1" ||
       profile?._meta?.type === "full" ||
-      profile?._meta?.type === "manual";
+      profile?._meta?.type === "manual" ||
+      profile?._meta?.type === "quick";
 
-    const hasManualDimensions = ["sd", "c", "st", "sd_c"]
-      .some((key) => scoreByKey[key] !== null);
-
-    const hasNonDefaultQuickScores = ["ns", "ha", "rd", "p"]
+    const hasNonDefaultScores = keys
       .some((key) => scoreByKey[key] !== null && scoreByKey[key] !== 50);
 
-    return hasMetaMeaning || hasManualDimensions || hasNonDefaultQuickScores;
+    return hasMetaMeaning || hasNonDefaultScores;
   };
 
   const hasMeaningfulVakProfile = (profile) => {
@@ -284,9 +283,14 @@ const App = () => {
     const hasNonDefaultPercents = hasValidPercents && !(v === 50 && a === 50 && k === 50);
     const hasDominant = ["V", "A", "K"].includes(profile?.dominant);
     const hasOrder = typeof profile?.order === "string" && /V|A|K/.test(profile.order);
-    const hasMetaSource = typeof profile?._meta?.source === "string" && profile._meta.source.trim() !== "";
+    const hasMetaMeaning =
+      profile?._meta?.source === "manual" ||
+      profile?._meta?.source === "act1" ||
+      profile?._meta?.type === "full" ||
+      profile?._meta?.type === "manual" ||
+      profile?._meta?.type === "quick";
 
-    return hasNonDefaultPercents || (hasValidPercents && hasDominant && hasOrder) || hasMetaSource;
+    return hasNonDefaultPercents || (hasValidPercents && hasDominant && hasOrder && hasMetaMeaning);
   };
 
   const handleOnboardingComplete = async (journeyData) => {
@@ -438,8 +442,6 @@ const App = () => {
         currency: existingProfile.currency ?? "₩",
         target_date: existingProfile.target_date ?? "2026-12-31",
         apex_conversation_id: existingProfile.apex_conversation_id ?? null,
-        has_ai_access: existingProfile.has_ai_access ?? false,
-        has_edit_access: existingProfile.has_edit_access ?? false,
       };
 
       // Reflect final persisted profile decision in local state.
