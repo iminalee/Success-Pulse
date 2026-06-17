@@ -754,8 +754,11 @@ const App = () => {
             setApexConversationId(data.apex_conversation_id || null);
             // [복원] 기존 가입자 자동 온보딩 완료 처리
             if (data.signed_date || data.signature || data.contract?.onboarding_agreement?.completed_at) {
-              localStorage.setItem("pulse_onboarding_complete", "true");
-              setIsOnboardingComplete(true);
+              const alreadyCompletedOnThisDevice =
+                localStorage.getItem("pulse_onboarding_complete") === "true";
+              if (alreadyCompletedOnThisDevice) {
+                setIsOnboardingComplete(true);
+              }
             }
           } else {
             // 새 계정: 아직 pulse_data에 레코드 없음

@@ -124,17 +124,14 @@ const AccountGate = ({ tciQuickProfile, vakProfile, onComplete, isLoggedIn = fal
     try {
       const trimmedEmail = loginEmail.trim();
 
-      const { error: loginError } = await supabase.auth.signInWithPassword({
+      const { data: loginData, error: loginError } = await supabase.auth.signInWithPassword({
         email: trimmedEmail,
         password: loginPassword,
       });
 
       if (loginError) throw loginError;
 
-      const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
-      if (sessionError) throw sessionError;
-
-      const user = sessionData?.session?.user;
+      const user = loginData?.user;
       if (!user) {
         throw new Error("로그인 세션을 확인하지 못했습니다. 잠시 후 다시 시도해 주세요.");
       }
