@@ -1630,28 +1630,24 @@ const handleSealPulse = () => {
       },
     };
     const labContentColumns = {
-      current: "minmax(0, 7fr) minmax(0, 1.5fr) minmax(0, 1.5fr)",
-      pulse: "minmax(0, 1.5fr) minmax(0, 7fr) minmax(0, 1.5fr)",
-      future: "minmax(0, 1.5fr) minmax(0, 1.5fr) minmax(0, 7fr)",
+      current: "1fr 52px 52px",
+      pulse: "52px 1fr 52px",
+      future: "52px 52px 1fr",
     };
     const labContentIndex = { current: 0, pulse: 1, future: 2 };
     const labContentCardClass = (zone, baseClass) => {
       const isActive = activeLabZone === zone;
       return `${baseClass} relative overflow-hidden transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] ${
         isActive
-          ? "opacity-100 scale-100 max-h-none"
-          : "opacity-55 scale-[0.94] max-h-[620px] cursor-pointer hover:opacity-75"
+          ? "opacity-100"
+          : "opacity-70 cursor-pointer hover:opacity-90"
       }`;
     };
     const labContentCardStyle = (zone) => {
       const isActive = activeLabZone === zone;
-      const diff = labContentIndex[zone] - labContentIndex[activeLabZone];
       const meta = labZoneMeta[zone];
       return {
-        zIndex: isActive ? 20 : 10 - Math.abs(diff),
-        transform: isActive
-          ? "translateX(0) translateY(0) scale(1)"
-          : `translateX(${diff < 0 ? -10 : 10}px) translateY(18px) scale(0.94)`,
+        zIndex: isActive ? 20 : 10,
         background: zone === "future"
           ? isActive
             ? `radial-gradient(circle at 50% 14%, rgba(120,53,15,0.62), rgba(244,224,170,0.92) 30%, rgba(202,138,4,0.58) 62%, rgba(15,23,42,0.78) 100%)`
@@ -1881,10 +1877,15 @@ const handleSealPulse = () => {
               <button
                 type="button"
                 onClick={() => setActiveLabZone("current")}
-                className="absolute inset-0 z-30 flex items-start justify-center bg-slate-950/10 pt-8 text-[10px] font-black uppercase tracking-[0.24em] text-amber-200/70"
+                className="absolute inset-0 z-30 flex items-center justify-center"
                 aria-label="Current Self 카드 열기"
               >
-                Current Self
+                <span
+                  className="text-[9px] font-black uppercase tracking-[0.18em] text-amber-200/80"
+                  style={{ writingMode: "vertical-rl", transform: "rotate(180deg)" }}
+                >
+                  현재의 나
+                </span>
               </button>
             )}
             {renderLabNodeHeader(
@@ -2326,10 +2327,15 @@ const handleSealPulse = () => {
               <button
                 type="button"
                 onClick={() => setActiveLabZone("pulse")}
-                className="absolute inset-0 z-30 flex items-start justify-center bg-slate-950/10 pt-8 text-[10px] font-black uppercase tracking-[0.24em] text-teal-100/70"
+                className="absolute inset-0 z-30 flex items-center justify-center"
                 aria-label="Bridge Core 카드 열기"
               >
-                Bridge Core
+                <span
+                  className="text-[9px] font-black uppercase tracking-[0.18em] text-teal-100/80"
+                  style={{ writingMode: "vertical-rl", transform: "rotate(180deg)" }}
+                >
+                  THE PULSE
+                </span>
               </button>
             )}
             {renderLabNodeHeader(
@@ -2415,10 +2421,15 @@ const handleSealPulse = () => {
               <button
                 type="button"
                 onClick={() => setActiveLabZone("future")}
-                className="absolute inset-0 z-30 flex items-start justify-center bg-slate-950/10 pt-8 text-[10px] font-black uppercase tracking-[0.24em] text-amber-100/75"
+                className="absolute inset-0 z-30 flex items-center justify-center"
                 aria-label="Apex BPS 카드 열기"
               >
-                Apex BPS
+                <span
+                  className="text-[9px] font-black uppercase tracking-[0.18em] text-amber-100/80"
+                  style={{ writingMode: "vertical-rl", transform: "rotate(180deg)" }}
+                >
+                  미래의 나
+                </span>
               </button>
             )}
             {renderLabNodeHeader(
