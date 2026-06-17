@@ -51,21 +51,11 @@ const AccountGate = ({ tciQuickProfile, vakProfile, onComplete, isLoggedIn = fal
     setNotice("");
 
     try {
-      const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
-      if (sessionError) throw sessionError;
-
-      const sessionUser = sessionData?.session?.user;
-      if (!sessionUser) {
-        throw new Error("로그인 세션을 찾지 못했습니다. 다시 로그인 후 시도해 주세요.");
-      }
-
-      const fallbackName = (currentUserName || "").trim()
-        || sessionUser.user_metadata?.user_name
-        || sessionUser.user_metadata?.full_name
-        || sessionUser.email?.split("@")[0]
-        || "";
-
-      await onComplete(fallbackName);
+      // The parent App already verified that a user session exists before
+      // rendering this branch. Avoid an extra getSession() round-trip here:
+      // if Supabase session refresh hangs, the onboarding gate can get stuck
+      // on "연결 중..." even though the account is already connected.
+      await onComplete((currentUserName || "").trim());
     } catch (e) {
       setError(e?.message || "현재 계정 연결 중 오류가 발생했습니다.");
     } finally {
@@ -134,17 +124,14 @@ const AccountGate = ({ tciQuickProfile, vakProfile, onComplete, isLoggedIn = fal
     try {
       const trimmedEmail = loginEmail.trim();
 
-      const { error: loginError } = await supabase.auth.signInWithPassword({
+      const { data: loginData, error: loginError } = await supabase.auth.signInWithPassword({
         email: trimmedEmail,
         password: loginPassword,
       });
 
       if (loginError) throw loginError;
 
-      const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
-      if (sessionError) throw sessionError;
-
-      const user = sessionData?.session?.user;
+      const user = loginData?.user;
       if (!user) {
         throw new Error("로그인 세션을 확인하지 못했습니다. 잠시 후 다시 시도해 주세요.");
       }
