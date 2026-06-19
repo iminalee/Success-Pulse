@@ -774,9 +774,8 @@ const App = () => {
 
       // [Tonight v2] 로그아웃 시 apex 관련 상태 초기화
       if (event === "SIGNED_OUT") {
-        setUser(null);
-        setApexConversationId(null);
-        setApexMessages([]);
+        resetAuthenticatedSessionState();
+        setAuthMode("login");
         setLoading(false);
       }
 
@@ -1117,24 +1116,38 @@ const App = () => {
     5: "자아실현",
   };
 
+  const resetAuthenticatedSessionState = () => {
+    setUser(null);
+    setUserName("");
+    setSignupName("");
+    setEmail("");
+    setPassword("");
+    setApexMessages([]);
+    setApexConversationId(null);
+    setHasEditAccess(false);
+    setHasAiAccess(false);
+  };
+
   const handleSignOut = async () => {
+    setLoading(true);
+
     try {
       const { error } = await supabase.auth.signOut();
 
       if (error) {
-        showToast("로그아웃 실패: " + error.message);
-        return;
+        console.warn("Global sign-out failed; clearing local session instead.", error);
+        const { error: localSignOutError } = await supabase.auth.signOut({ scope: "local" });
+
+        if (localSignOutError) {
+          throw localSignOutError;
+        }
       }
 
-      setUser(null);
-      setUserName("");
-      setSignupName("");
-      setEmail("");
-      setPassword("");
-      setApexMessages([]);
-      setApexConversationId(null);
+      resetAuthenticatedSessionState();
+      setAuthMode("login");
+      showToast("로그아웃되었습니다.");
     } catch (error) {
-      showToast("로그아웃 실패: " + error.message);
+      showToast("로그아웃 실패: " + (error?.message || "Unknown error"));
     } finally {
       setLoading(false);
     }
@@ -4917,6 +4930,23 @@ const nowX = getX(dataPoints[dataPoints.length - 1].date); // 📅 가로 위치
           <Sparkles size={10} className="absolute -top-1 -right-1 text-amber-500 animate-pulse" />
         </div>
 
+        {user && (currentView === "philosophy" || currentView === "lab") && (
+          <div className="z-50 mt-4 md:mt-0 flex flex-col items-center md:items-end gap-2 animate-fadeIn">
+            <p className="text-[10px] font-black text-amber-500/80 uppercase tracking-widest">
+              Account Session
+            </p>
+            <button
+              type="button"
+              onClick={handleSignOut}
+              disabled={loading}
+              className="bg-emerald-600/20 text-emerald-400 border border-emerald-500/30 text-[9px] font-bold px-3 py-1 rounded uppercase tracking-wider hover:bg-rose-600/20 hover:text-rose-400 hover:border-rose-500/30 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              title="로그아웃"
+            >
+              {loading ? "..." : `${userName || "USER"} · 로그아웃`}
+            </button>
+          </div>
+        )}
+
 
       {currentView !== "philosophy" && currentView !== "lab" && (
           /* [우측 상단] 자산 대시보드 (반응형 수정 완료) */
@@ -4947,9 +4977,10 @@ const nowX = getX(dataPoints[dataPoints.length - 1].date); // 📅 가로 위치
                 <button
                   onClick={handleSignOut}
                   className="bg-emerald-600/20 text-emerald-400 border border-emerald-500/30 text-[9px] font-bold px-2 py-0.5 rounded text-center uppercase tracking-wider hover:bg-rose-600/20 hover:text-rose-400 hover:border-rose-500/30 transition-colors"
-                  title="클릭하여 로그아웃"
+                  title="로그아웃"
+                  disabled={loading}
                 >
-                  {userName || "USER"} ONLINE
+                  {loading ? "..." : `${userName || "USER"} · 로그아웃`}
                 </button>
               </div>
 
