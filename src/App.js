@@ -1848,6 +1848,30 @@ const handleSealPulse = () => {
             </h2>
           </div>
         </div>
+        {/* [Setup Journey] 계약 전 안내 배너 — 현재의 나 → 미래의 나 → THE PULSE → 계약 */}
+        {user && !signedDate && (
+          <div className="mb-8 bg-slate-950/60 border border-amber-500/20 rounded-2xl px-4 py-3 flex flex-wrap items-center justify-center gap-2">
+            {[
+              { zone: "current", label: "1. 현재의 나 — 기본 정보" },
+              { zone: "future", label: "2. 미래의 나 — 비전" },
+              { zone: "pulse", label: "3. THE PULSE — 집중 단계" },
+              { zone: null, label: "4. 계약 서명" },
+            ].map((step, idx) => (
+              <React.Fragment key={step.label}>
+                {idx > 0 && <span className="text-slate-700 text-[10px]">→</span>}
+                <span
+                  className={`text-[9px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full border ${
+                    step.zone === activeLabZone
+                      ? "text-amber-400 border-amber-500/50 bg-amber-500/10"
+                      : "text-slate-500 border-white/5 bg-slate-900/40"
+                  }`}
+                >
+                  {step.label}
+                </span>
+              </React.Fragment>
+            ))}
+          </div>
+        )}
         {/* Wave-connected Zone Selector */}
         <div className="relative mb-8 px-2 pb-8 pt-2">
           <div className="relative mx-auto h-32 max-w-3xl">
@@ -2129,6 +2153,20 @@ const handleSealPulse = () => {
                     />
                   </div>
                 </div>
+                <div>
+                  <label className="block text-[8px] text-slate-500 mb-1 font-black uppercase text-left tracking-widest">
+                    Target Date / 목표 날짜
+                  </label>
+                  <input
+                    type="date"
+                    value={targetDate}
+                    disabled={!!signedDate}
+                    onChange={(e) => setTargetDate(e.target.value)}
+                    className={`w-full bg-[#1A202C]/80 border border-white/10 rounded-xl p-3 font-mono font-bold outline-none ${
+                      signedDate ? "text-emerald-400 cursor-not-allowed" : "text-white"
+                    }`}
+                  />
+                </div>
                 <div className="space-y-3 mt-6">
                   <div className="flex justify-between items-center p-4 bg-slate-900/60 rounded-2xl border border-white/5 shadow-inner">
                     <p className="text-[9px] text-slate-500 font-bold uppercase">
@@ -2163,6 +2201,9 @@ const handleSealPulse = () => {
             <div className="bg-[#2D3748]/40 p-6 rounded-[2.5rem] border border-white/5 shadow-xl font-sans">
               <p className="text-[12px] font-black text-emerald-500 uppercase tracking-widest mb-6 flex items-center gap-2">
                 <Brain size={12} /> VAK Architecture
+                <span className="text-[9px] font-bold text-slate-500 normal-case tracking-normal">
+                  (선택 입력 — 건너뛰어도 됩니다)
+                </span>
               </p>
               <div className="space-y-4">
                 <div className="bg-slate-900/80 p-4 rounded-xl text-center border border-white/5 shadow-inner mb-6">
@@ -2237,7 +2278,10 @@ const handleSealPulse = () => {
               <div className="mb-6 flex items-center gap-2">
                 <ClipboardList size={12} className="text-rose-500" />
                 <p className="text-[12px] font-black text-rose-500 uppercase tracking-widest">
-                  TCI Intelligence
+                  TCI Intelligence{" "}
+                  <span className="text-[9px] font-bold text-slate-500 normal-case tracking-normal">
+                    (선택 입력 — 건너뛰어도 됩니다)
+                  </span>
                 </p>
               </div>
               <div className="flex w-full mb-2">
@@ -2330,6 +2374,39 @@ const handleSealPulse = () => {
                 </div>
               </div>
             </div>
+            {/* [Setup Journey 1/3] 계약 전 가이드 — 기본 정보 확인 후 미래의 나로 이동 */}
+            {user && !signedDate && activeLabZone === "current" && (
+              <div className="bg-slate-950/70 border border-amber-500/25 rounded-[2rem] p-6 text-center space-y-3">
+                <p className="text-[10px] font-black text-amber-500 uppercase tracking-[0.25em]">
+                  Setup 1 / 3 — 현재의 나
+                </p>
+                <p className="text-[11px] text-slate-300 leading-relaxed">
+                  기준 연소득과 목표 날짜를 입력하면 다음 단계로 넘어갈 수 있습니다.
+                  <br />
+                  <span className="text-slate-500">
+                    VAK · TCI는 선택 입력입니다. 지금 건너뛰고 나중에 채워도 됩니다.
+                  </span>
+                </p>
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (!(Number(annualIncome) > 0)) {
+                      showToast("기준 연소득(Annual Income)을 먼저 입력해주세요.");
+                      return;
+                    }
+                    if (!targetDate) {
+                      showToast("목표 날짜(Target Date)를 먼저 선택해주세요.");
+                      return;
+                    }
+                    setActiveLabZone("future");
+                  }}
+                  className="bg-amber-600 hover:bg-amber-500 text-white px-8 py-3.5 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all active:scale-95 shadow-lg"
+                >
+                  다음 — 미래의 나 설계 →
+                </button>
+              </div>
+            )}
           </div>
 
           <div
@@ -2355,6 +2432,85 @@ const handleSealPulse = () => {
               "THE PULSE / Bridge Core",
               "Fixed Value Events · Target Date · Mental Bank Goal · Value Event Award · Contract Link"
             )}
+            {/* [Pulse Focus 피라미드] Ledger(hub) 피라미드 디자인 재사용 —
+                '미래의 나' 1~5단계 비전 제목을 매슬로우 단계에 매칭.
+                클릭으로 지금 집중할 단계를 선택/해제 (visions[lv].focus, 최소 1개) */}
+            <div className="bg-[#1A202C]/60 p-6 rounded-[2.5rem] border border-teal-200/20 mb-6">
+              <div className="flex justify-between items-center mb-4">
+                <p className="text-[10px] font-black text-teal-200 uppercase tracking-widest">
+                  Pulse Focus — 지금 집중할 단계 선택
+                </p>
+                <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">
+                  클릭해서 선택 / 해제 (최소 1개)
+                </span>
+              </div>
+              <div className="flex flex-col items-center">
+                {/* 삼각형 (hub 피라미드와 동일 디자인) */}
+                <div className="flex justify-center mb-1 animate-pulse">
+                  <div className="w-0 h-0 border-l-[30px] border-l-transparent border-r-[30px] border-r-transparent border-b-[40px] border-b-amber-500/80"></div>
+                </div>
+                {(() => {
+                  const pyramidWidthMap = {
+                    5: "w-[130px]",
+                    4: "w-[170px]",
+                    3: "w-[210px]",
+                    2: "w-[260px]",
+                    1: "w-[320px]",
+                  };
+                  return [5, 4, 3, 2, 1].map((lv) => {
+                    const visionTitle = String(visions[lv]?.title || "").trim();
+                    const isConfigured = visionTitle !== "";
+                    const isFocused = !!visions[lv]?.focus;
+                    const barBackground = isConfigured
+                      ? isFocused
+                        ? "bg-gradient-to-r from-amber-600 via-yellow-400 to-amber-600"
+                        : "bg-gradient-to-r from-emerald-600 via-teal-400 to-emerald-600"
+                      : "bg-slate-700/50";
+                    const containerStyle = isFocused
+                      ? "border-amber-400 ring-2 ring-amber-500/50 shadow-[0_0_30px_rgba(245,158,11,0.6)] z-10 scale-105 brightness-110"
+                      : isConfigured
+                      ? "border-amber-600/30 opacity-90 hover:brightness-110"
+                      : "border-slate-700/50 opacity-60 hover:opacity-80";
+                    return (
+                      <div
+                        key={lv}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (!isConfigured) {
+                            showToast(
+                              `${lv}단계(${levelMap[lv]}) 비전 제목을 '미래의 나'에서 먼저 입력해주세요.`
+                            );
+                            setActiveLevel(lv);
+                            setActiveLabZone("future");
+                            return;
+                          }
+                          setActiveLevel(lv);
+                          updateVision(lv, { focus: !isFocused });
+                        }}
+                        className={`cursor-pointer relative flex items-center justify-center h-[50px] rounded-2xl mb-2 overflow-hidden transition-all duration-300 border ${pyramidWidthMap[lv]} ${containerStyle}`}
+                      >
+                        <div
+                          className={`absolute left-0 top-0 h-full transition-all duration-1000 ${barBackground}`}
+                          style={{ width: isFocused ? "100%" : isConfigured ? "50%" : "0%" }}
+                        />
+                        <div className="relative z-10 flex flex-col items-center justify-center leading-none px-2 max-w-full">
+                          <span className="font-black uppercase text-sm tracking-tight text-white drop-shadow-md flex items-center gap-2">
+                            {isConfigured && (
+                              <span className="text-xs emoji-shadow">{visions[lv].emoji}</span>
+                            )}
+                            {levelMap[lv]}
+                            {isFocused && <span className="text-xs">✓</span>}
+                          </span>
+                          <span className="text-[10px] font-bold mt-0.5 text-white/90 drop-shadow-md truncate max-w-full">
+                            {isConfigured ? visionTitle : "비전 미설정"}
+                          </span>
+                        </div>
+                      </div>
+                    );
+                  });
+                })()}
+              </div>
+            </div>
             <div className="bg-[#1A202C]/60 p-6 rounded-[2.5rem] border border-amber-500/20 mb-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="bg-slate-900/50 border border-white/10 rounded-2xl p-4">
@@ -2376,6 +2532,11 @@ const handleSealPulse = () => {
               <div className="flex justify-between items-center mb-4">
                 <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">
                   Fixed Value Events
+                  {levelMap[activeLevel] && (
+                    <span className="text-teal-200/80 ml-2">
+                      — {activeLevel}단계 {levelMap[activeLevel]}
+                    </span>
+                  )}
                 </p>
                 <button
                   onClick={() => addEvent(activeLevel)}
@@ -2384,6 +2545,12 @@ const handleSealPulse = () => {
                   <Plus size={14} /> Add Event
                 </button>
               </div>
+              {(!visions[activeLevel]?.events || visions[activeLevel].events.length === 0) && (
+                <p className="text-[10px] text-slate-500 leading-relaxed text-center py-3">
+                  피라미드에서 단계를 클릭한 뒤, <span className="text-emerald-400 font-bold">+ Add Event</span>로
+                  그 단계의 목표를 이룰 실천 행동을 적어주세요. (선택한 단계마다 최소 1개)
+                </p>
+              )}
               {visions[activeLevel]?.events?.map((ev) => (
                 <div
                   key={ev.id}
@@ -2419,6 +2586,50 @@ const handleSealPulse = () => {
                 </div>
               ))}
             </div>
+            {/* [Setup Journey 3/3] 계약 전 가이드 — 집중 단계 + Value Event 확인 후 계약으로 이동 */}
+            {user && !signedDate && activeLabZone === "pulse" && (() => {
+              const focusLevels = [1, 2, 3, 4, 5].filter((lv) => visions[lv]?.focus);
+              const hasWrittenEvent = (lv) =>
+                (visions[lv]?.events || []).some((ev) => {
+                  const name = String(ev?.name || "").trim();
+                  return name !== "" && name !== "신규 실천 항목";
+                });
+              const levelsMissingEvents = focusLevels.filter((lv) => !hasWrittenEvent(lv));
+              const isReady = focusLevels.length > 0 && levelsMissingEvents.length === 0;
+              return (
+                <div className="bg-slate-950/70 border border-amber-500/25 rounded-[2rem] p-6 text-center space-y-3">
+                  <p className="text-[10px] font-black text-teal-200 uppercase tracking-[0.25em]">
+                    Setup 3 / 3 — THE PULSE
+                  </p>
+                  <p className="text-[11px] text-slate-300 leading-relaxed">
+                    {focusLevels.length === 0
+                      ? "피라미드에서 지금 당장 집중할 단계를 최소 1개 선택하세요."
+                      : levelsMissingEvents.length > 0
+                      ? `${levelsMissingEvents
+                          .map((lv) => `${lv}단계(${levelMap[lv]})`)
+                          .join(", ")}에 Value Event를 1개 이상 직접 적어주세요.`
+                      : "준비 완료! 이제 계약서에 서명하면 시스템이 활성화됩니다."}
+                  </p>
+                  <button
+                    type="button"
+                    disabled={!isReady}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setCurrentView("contract");
+                    }}
+                    className={`px-8 py-3.5 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all shadow-lg ${
+                      isReady
+                        ? "bg-amber-600 hover:bg-amber-500 text-white active:scale-95"
+                        : "bg-slate-800 text-slate-500 cursor-not-allowed"
+                    }`}
+                  >
+                    <span className="flex items-center gap-2">
+                      <PenTool size={14} /> 계약서 서명하러 가기 →
+                    </span>
+                  </button>
+                </div>
+              );
+            })()}
           </div>
 
           <div
@@ -2588,6 +2799,36 @@ const handleSealPulse = () => {
                 </div>
               </div>
             </div>
+            {/* [Setup Journey 2/3] 계약 전 가이드 — 비전 1개 이상 입력 후 THE PULSE로 이동 */}
+            {user && !signedDate && activeLabZone === "future" && (
+              <div className="bg-slate-950/70 border border-amber-500/25 rounded-[2rem] p-6 text-center space-y-3">
+                <p className="text-[10px] font-black text-amber-400 uppercase tracking-[0.25em]">
+                  Setup 2 / 3 — 미래의 나
+                </p>
+                <p className="text-[11px] text-slate-300 leading-relaxed">
+                  1~5단계 중 이루고 싶은 단계의 비전 제목을 최소 1개 입력한 뒤,
+                  <br />
+                  THE PULSE에서 지금 집중할 단계를 선택하게 됩니다.
+                </p>
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    const hasVision = [1, 2, 3, 4, 5].some(
+                      (lv) => String(visions[lv]?.title || "").trim() !== ""
+                    );
+                    if (!hasVision) {
+                      showToast("비전 제목을 최소 1개 이상 입력해주세요.");
+                      return;
+                    }
+                    setActiveLabZone("pulse");
+                  }}
+                  className="bg-amber-600 hover:bg-amber-500 text-white px-8 py-3.5 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all active:scale-95 shadow-lg"
+                >
+                  다음 — THE PULSE 연결 →
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -2666,30 +2907,40 @@ const handleSealPulse = () => {
                 <h3 className="text-xl font-black text-white uppercase italic mb-2 tracking-tighter">
                   시스템 활성화 필요
                 </h3>
-                <div className="flex items-center justify-center gap-3 mb-4">
+                <div className="flex items-center justify-center gap-2 mb-4">
                   <div className="flex flex-col items-center gap-1">
                     <div className="w-7 h-7 rounded-full bg-emerald-500 flex items-center justify-center text-white font-black text-xs">✓</div>
                     <span className="text-[9px] text-emerald-400 font-bold uppercase tracking-widest">로그인</span>
                   </div>
-                  <div className="w-8 h-px bg-amber-500/50" />
+                  <div className="w-6 h-px bg-amber-500/50" />
                   <div className="flex flex-col items-center gap-1">
                     <div className="w-7 h-7 rounded-full border-2 border-amber-500 flex items-center justify-center text-amber-500 font-black text-xs">2</div>
-                    <span className="text-[9px] text-amber-400 font-bold uppercase tracking-widest">계약</span>
+                    <span className="text-[9px] text-amber-400 font-bold uppercase tracking-widest">기본 정보</span>
                   </div>
-                  <div className="w-8 h-px bg-slate-700" />
+                  <div className="w-6 h-px bg-slate-700" />
                   <div className="flex flex-col items-center gap-1">
                     <div className="w-7 h-7 rounded-full border border-slate-600 flex items-center justify-center text-slate-600 font-black text-xs">3</div>
+                    <span className="text-[9px] text-slate-600 font-bold uppercase tracking-widest">계약</span>
+                  </div>
+                  <div className="w-6 h-px bg-slate-700" />
+                  <div className="flex flex-col items-center gap-1">
+                    <div className="w-7 h-7 rounded-full border border-slate-600 flex items-center justify-center text-slate-600 font-black text-xs">4</div>
                     <span className="text-[9px] text-slate-600 font-bold uppercase tracking-widest">활성화</span>
                   </div>
                 </div>
                 <p className="text-slate-400 text-[11px] mb-6 leading-relaxed">
-                  계약서에 서명하면 모든 기능이 즉시 활성화됩니다.
+                  My Lab에서 기준 연소득과 목표 날짜 등 기본 정보를 입력하면
+                  <br />
+                  계약서 서명으로 자연스럽게 이어집니다.
                 </p>
                 <button
-                  onClick={() => setCurrentView("contract")}
+                  onClick={() => {
+                    setActiveLabZone("current");
+                    setCurrentView("lab");
+                  }}
                   className="bg-amber-600 hover:bg-amber-500 text-white px-8 py-4 rounded-2xl font-black text-[10px] uppercase flex items-center gap-3 mx-auto transition-all active:scale-95 shadow-lg"
                 >
-                  <PenTool size={14} /> 계약서 서명하기
+                  <Flag size={14} /> 기본 정보 입력하기
                 </button>
               </>
             )}
