@@ -1,12 +1,12 @@
 import React, { useState, useRef } from "react";
 import html2canvas from "html2canvas";
 
-const LEVEL_NAMES = {
+export const LEVEL_NAMES = {
   1: "건강과 활력", 2: "안전과 안정", 3: "사랑과 소속",
   4: "인정과 성취", 5: "나다움 실현",
 };
 
-const VAK_TITLES = {
+export const VAK_TITLES = {
   V: "시각적 건축가", A: "청각적 작곡가", K: "감각적 조각가",
 };
 
@@ -17,7 +17,7 @@ const TCI_TYPES = {
   p:  { high: "마라토너", low: "스프린터" },
 };
 
-const getDominantType = (tci) => {
+export const getDominantType = (tci) => {
   const dims = Object.entries(TCI_TYPES).map(([k, v]) => ({
     score: tci[k], high: v.high, low: v.low,
   }));

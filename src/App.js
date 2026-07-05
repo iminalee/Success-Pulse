@@ -42,6 +42,7 @@ import showToast from "./utils/toast";
 import { normalizeTciProfile, normalizeVakProfile } from "./utils/pulseProfile";
 import AutoTextarea from "./components/AutoTextarea";
 import NavBtn from "./components/NavBtn";
+import ProfileResultCard from "./components/ProfileResultCard";
 import DiscoverJourney from "./components/discover/DiscoverJourney";
 import SensoryItem from "./components/SensoryItem";
 import ResetPasswordUI from "./components/ResetPasswordUI";
@@ -456,6 +457,9 @@ const App = () => {
         .upsert(upsertPayload, { onConflict: "user_id" });
       if (upsertError) throw upsertError;
 
+      // Apex Profile 카드에 즉시 반영
+      setDiscoverResult(journeySnapshot);
+
       localStorage.setItem("pulse_onboarding_complete", "true");
     } catch (error) {
       console.error("Act1 onboarding save error:", error);
@@ -588,6 +592,12 @@ const App = () => {
   const [hasEditAccess, setHasEditAccess] = useState(false);
   const [hasAiAccess, setHasAiAccess] = useState(false);
 
+  // [Discover 결과] Act 1 journey snapshot (contract.onboarding_agreement.journey_snapshot)
+  // — My Lab '현재의 나'의 Apex Profile 카드에 표시
+  const [discoverResult, setDiscoverResult] = useState(null);
+  // VAK/TCI 상세 수치 카드 접기/펼치기 (기본: 접힘 — Apex Profile 카드가 대표 표시)
+  const [showProfileDetails, setShowProfileDetails] = useState(false);
+
   // [Tonight v2] Tonight 흐름 전용 state — 기존 state 절대 수정 금지
   const [tonightStep, setTonightStep] = useState("intro"); // "intro" | "chat" | "draft" | "sealed"
   const [pulseDraft, setPulseDraft] = useState(null);       // { date, events, affirmation, daily_affirmation, investment, note, source } | null
@@ -691,6 +701,7 @@ const App = () => {
             setHasEditAccess(data.has_edit_access || false);
             setHasAiAccess(data.has_ai_access || false);
             if (data.apex_conversation_id) setApexConversationId(data.apex_conversation_id);
+            setDiscoverResult(data.contract?.onboarding_agreement?.journey_snapshot || null);
           }
         }
       } catch (e) {
@@ -752,6 +763,7 @@ const App = () => {
             setHasEditAccess(data.has_edit_access || false);
             setHasAiAccess(data.has_ai_access || false);
             setApexConversationId(data.apex_conversation_id || null);
+            setDiscoverResult(data.contract?.onboarding_agreement?.journey_snapshot || null);
             // [복원] 기존 가입자 자동 온보딩 완료 처리
             if (data.signed_date || data.signature || data.contract?.onboarding_agreement?.completed_at) {
               const alreadyCompletedOnThisDevice =
@@ -1126,6 +1138,8 @@ const App = () => {
     setApexConversationId(null);
     setHasEditAccess(false);
     setHasAiAccess(false);
+    setDiscoverResult(null);
+    setShowProfileDetails(false);
   };
 
   const handleSignOut = async () => {
@@ -2092,38 +2106,8 @@ const handleSealPulse = () => {
                   />
                 </div>
               </div>
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1">
-                    Sleep Notes
-                  </label>
-                  <textarea
-                    value={lifeProfile.sleep_notes}
-                    onChange={(e) =>
-                      setLifeProfile((prev) => ({ ...prev, sleep_notes: e.target.value }))
-                    }
-                    placeholder="수면 루틴, 개선점, 컨디션 메모"
-                    className="w-full min-h-[90px] bg-slate-900 border border-white/10 rounded-2xl p-3 text-sm text-slate-200 outline-none resize-y"
-                  />
-                </div>
-                <div>
-                  <label className="block text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1">
-                    Major Goals (comma or newline)
-                  </label>
-                  <textarea
-                    value={(lifeProfile.major_goals || []).join("\n")}
-                    onChange={(e) => {
-                      const goals = e.target.value
-                        .split(/[\n,]/)
-                        .map((item) => item.trim())
-                        .filter(Boolean);
-                      setLifeProfile((prev) => ({ ...prev, major_goals: goals }));
-                    }}
-                    placeholder="예) 1년 내 연봉 2배, 매일 운동, 영어 프레젠테이션"
-                    className="w-full min-h-[100px] bg-slate-900 border border-white/10 rounded-2xl p-3 text-sm text-slate-200 outline-none resize-y"
-                  />
-                </div>
-              </div>
+              {/* Sleep Notes / Major Goals 입력 UI 제거 (2026-07 피드백)
+                  — lifeProfile.sleep_notes / major_goals 데이터 필드는 하위 호환을 위해 유지 */}
             </div>
             <div className="bg-[#2D3748]/40 p-7 rounded-[2.5rem] border border-white/5 shadow-xl">
               <p className="text-[12px] font-black text-amber-500 uppercase tracking-[0.3em] mb-6 flex items-center gap-2">
@@ -2167,21 +2151,28 @@ const handleSealPulse = () => {
                     }`}
                   />
                 </div>
-                <div className="space-y-3 mt-6">
-                  <div className="flex justify-between items-center p-4 bg-slate-900/60 rounded-2xl border border-white/5 shadow-inner">
-                    <p className="text-[9px] text-slate-500 font-bold uppercase">
+                <div className="space-y-2 mt-6">
+                  {/* 자동 계산 값 — 입력칸과 구분되는 디자인 (점선 테두리 + AUTO 배지) */}
+                  <div className="flex justify-between items-center px-4 py-2.5 rounded-2xl border border-dashed border-teal-400/25 bg-transparent">
+                    <p className="text-[9px] text-slate-500 font-bold uppercase flex items-center gap-2">
                       MB 목표액
+                      <span className="text-[7px] font-black text-teal-400/70 border border-teal-400/30 rounded-full px-1.5 py-0.5 tracking-widest">
+                        자동 계산
+                      </span>
                     </p>
-                    <p className="text-sm font-black text-white">
+                    <p className="text-sm font-black text-teal-200/90 font-mono">
                       {currency}
                       {fNum(mbGoalAmount)}
                     </p>
                   </div>
-                  <div className="flex justify-between items-center p-4 bg-slate-900/60 rounded-2xl border border-white/5 shadow-inner">
-                    <p className="text-[9px] text-slate-500 font-bold uppercase">
+                  <div className="flex justify-between items-center px-4 py-2.5 rounded-2xl border border-dashed border-teal-400/25 bg-transparent">
+                    <p className="text-[9px] text-slate-500 font-bold uppercase flex items-center gap-2">
                       MB 잔액
+                      <span className="text-[7px] font-black text-teal-400/70 border border-teal-400/30 rounded-full px-1.5 py-0.5 tracking-widest">
+                        자동 계산
+                      </span>
                     </p>
-                    <p className="text-sm font-black text-white">
+                    <p className="text-sm font-black text-teal-200/90 font-mono">
                       {currency}
                       {fNum(mbBalance)}
                     </p>
@@ -2198,6 +2189,27 @@ const handleSealPulse = () => {
                 </div>
               </div>
             </div>
+            {/* [Apex Profile] Act 1(Discover) 결과 표시 — 결과 없으면 설문 안내 탭 */}
+            <ProfileResultCard
+              snapshot={discoverResult}
+              userName={userName}
+              onRunSurvey={handleRunAct1FromMyLab}
+            />
+            {/* VAK/TCI 상세 수치는 접이식으로 유지 (수동 입력 경로 보존) */}
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowProfileDetails((prev) => !prev);
+              }}
+              className="w-full bg-slate-950/40 hover:bg-slate-950/60 border border-white/5 text-slate-500 hover:text-slate-300 py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all"
+            >
+              {showProfileDetails
+                ? "▲ VAK · TCI 상세 수치 접기"
+                : "▼ VAK · TCI 상세 수치 보기 / 수정 (선택)"}
+            </button>
+            {showProfileDetails && (
+            <>
             <div className="bg-[#2D3748]/40 p-6 rounded-[2.5rem] border border-white/5 shadow-xl font-sans">
               <p className="text-[12px] font-black text-emerald-500 uppercase tracking-widest mb-6 flex items-center gap-2">
                 <Brain size={12} /> VAK Architecture
@@ -2374,6 +2386,8 @@ const handleSealPulse = () => {
                 </div>
               </div>
             </div>
+            </>
+            )}
             {/* [Setup Journey 1/3] 계약 전 가이드 — 기본 정보 확인 후 미래의 나로 이동 */}
             {user && !signedDate && activeLabZone === "current" && (
               <div className="bg-slate-950/70 border border-amber-500/25 rounded-[2rem] p-6 text-center space-y-3">
