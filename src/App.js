@@ -674,7 +674,9 @@ const App = () => {
             if (data.annual_income) setAnnualIncome(data.annual_income);
             if (data.target_date) setTargetDate(data.target_date);
             if (data.ledger) setLedger(data.ledger);
-            if (data.visions) setVisions(data.visions);
+            // [수정] 통째로 교체하지 않고 기본 구조와 병합 — 레벨 누락 시 입력창이
+            // uncontrolled로 바뀌어 이전 레벨 값이 화면에 남는 버그 방지
+            if (data.visions) setVisions((prev) => ({ ...prev, ...data.visions }));
             if (data.bps_traits) setBpsTraits(data.bps_traits);
             if (data.vak_profile) setVakProfile(data.vak_profile);
             if (data.tci_profile) setTciProfile(data.tci_profile);
@@ -744,7 +746,9 @@ const App = () => {
             if (data.annual_income) setAnnualIncome(data.annual_income);
             if (data.target_date) setTargetDate(data.target_date);
             if (data.ledger) setLedger(data.ledger);
-            if (data.visions) setVisions(data.visions);
+            // [수정] 통째로 교체하지 않고 기본 구조와 병합 — 레벨 누락 시 입력창이
+            // uncontrolled로 바뀌어 이전 레벨 값이 화면에 남는 버그 방지
+            if (data.visions) setVisions((prev) => ({ ...prev, ...data.visions }));
             if (data.bps_traits) setBpsTraits(data.bps_traits);
             if (data.vak_profile) setVakProfile(data.vak_profile);
             if (data.tci_profile) setTciProfile(data.tci_profile);
@@ -2692,52 +2696,89 @@ const handleSealPulse = () => {
               </div>
             </div>
             <div className="bg-[#e6c36d]/78 p-10 rounded-[3rem] border border-amber-400/55 shadow-xl shadow-amber-500/25">
-              <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-10">
-                <div className="space-y-1">
-                  <p className="text-[12px] font-black text-emerald-900 uppercase tracking-widest flex items-center gap-2">
-                    <Zap size={14} /> 목표 설계자
-                  </p>
+              <div className="mb-10">
+                <p className="text-[12px] font-black text-emerald-900 uppercase tracking-widest flex items-center gap-2 mb-4">
+                  <Zap size={14} /> 목표 설계자
+                </p>
 
-                  {/* 단계 이름과 미션 설명 결합 */}
-                  <div className="flex flex-col gap-1.5">
-                    <p className="text-[12px] font-bold text-white italic bg-slate-950/75 px-3 py-1 rounded-full border border-white/10 inline-block w-fit">
-                      {activeLevel}단계: {levelMap[activeLevel]}
+                {/* [수정] 미니 피라미드(단계 선택) + 우측 단계 설명
+                    — 다른 탭의 피라미드 디자인을 축소해 사용, 클릭으로 단계 전환 */}
+                <div className="flex flex-col sm:flex-row items-center sm:items-stretch gap-5">
+                  <div className="flex flex-col items-center justify-end shrink-0">
+                    <div className="w-0 h-0 border-l-[14px] border-l-transparent border-r-[14px] border-r-transparent border-b-[18px] border-b-amber-500/80 mb-1"></div>
+                    {(() => {
+                      const miniWidths = {
+                        5: "w-[76px]",
+                        4: "w-[100px]",
+                        3: "w-[124px]",
+                        2: "w-[148px]",
+                        1: "w-[172px]",
+                      };
+                      return [5, 4, 3, 2, 1].map((lv) => {
+                        const isConfigured =
+                          String(visions[lv]?.title || "").trim() !== "";
+                        const isActive = activeLevel === lv;
+                        return (
+                          <button
+                            key={lv}
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setActiveLevel(lv);
+                            }}
+                            className={`relative flex items-center justify-center h-[26px] rounded-lg mb-1 overflow-hidden border transition-all duration-300 ${miniWidths[lv]} ${
+                              isActive
+                                ? "border-amber-400 ring-2 ring-amber-500/50 shadow-[0_0_16px_rgba(245,158,11,0.55)] scale-105 z-10"
+                                : isConfigured
+                                ? "border-amber-600/40 hover:brightness-110"
+                                : "border-slate-700/60 opacity-70 hover:opacity-90"
+                            }`}
+                          >
+                            <div
+                              className={`absolute inset-0 ${
+                                isActive
+                                  ? "bg-gradient-to-r from-amber-600 via-yellow-400 to-amber-600"
+                                  : isConfigured
+                                  ? "bg-gradient-to-r from-emerald-700 via-teal-500 to-emerald-700"
+                                  : "bg-slate-800/80"
+                              }`}
+                            />
+                            <span className="relative z-10 text-[9px] font-black text-white drop-shadow-md tracking-tight whitespace-nowrap">
+                              {lv} {levelMap[lv]}
+                            </span>
+                          </button>
+                        );
+                      });
+                    })()}
+                  </div>
+
+                  {/* 단계 설명 — 피라미드 높이만큼의 옆 공간 활용, 가독성을 위해 글자 확대 */}
+                  <div className="flex-1 min-w-0 flex flex-col justify-center">
+                    <p className="text-[13px] font-bold text-white italic bg-slate-950/75 px-3 py-1 rounded-full border border-white/10 inline-block w-fit mb-2">
+                      {activeLevel}단계: {levelMap[activeLevel] || "Apex"}
                     </p>
-
-                    {/* ▼ [추가] 미션 설명 단락: 텍스트가 Bar 너비에 맞춰 자동 조절되도록 설정 */}
-                    <p className="text-[11px] text-amber-950 font-bold leading-relaxed pl-1 mt-2 animate-fadeIn w-full">
-                      {missionMap[activeLevel]}
+                    <p
+                      className="text-[13px] text-amber-950 font-bold leading-relaxed animate-fadeIn"
+                      style={{ wordBreak: "keep-all" }}
+                    >
+                      {missionMap[activeLevel] || "피라미드에서 단계를 선택하세요."}
                     </p>
                   </div>
-                </div>
-                <div className="flex gap-1.5">
-                  {[1, 2, 3, 4, 5].map((lv) => (
-                    <button
-                      key={lv}
-                      onClick={() => setActiveLevel(lv)}
-                      className={`w-11 h-11 rounded-2xl font-black text-sm transition-all duration-300 ${
-                        activeLevel === lv
-                          ? "bg-amber-600 text-white shadow-lg scale-110 border border-amber-400/50"
-                          : "bg-slate-900 text-white/80 border border-white/10 hover:bg-slate-800"
-                      }`}
-                    >
-                      {lv}
-                    </button>
-                  ))}
                 </div>
               </div>
               <div className="space-y-6 mb-10">
                 <div className="flex gap-4">
+                  {/* [수정] 이모지 입력칸 → 현재 레벨 숫자 배지로 대체 */}
+                  <div className="w-20 shrink-0 bg-slate-950 border border-amber-500/40 rounded-3xl flex flex-col items-center justify-center py-2 text-center">
+                    <span className="text-2xl font-black text-amber-400 leading-none">
+                      {activeLevel}
+                    </span>
+                    <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest mt-1">
+                      Level
+                    </span>
+                  </div>
                   <input
-                    value={visions[activeLevel]?.emoji || ""}
-                    onChange={(e) =>
-                      updateVision(activeLevel, { emoji: e.target.value })
-                    }
-                    className="w-20 bg-slate-950 border border-white/10 rounded-3xl p-3 text-3xl text-center text-white placeholder:text-white/80 outline-none shrink-0"
-                    placeholder="🏥"
-                  />
-                  <input
-                    value={visions[activeLevel]?.title}
+                    value={visions[activeLevel]?.title || ""}
                     onChange={(e) =>
                       updateVision(activeLevel, { title: e.target.value })
                     }
@@ -2745,7 +2786,7 @@ const handleSealPulse = () => {
                     placeholder="비전 제목을 입력하세요"
                   />
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-start">
                   {["v", "a", "k"].map((type) => (
                     <div
                       key={type}
@@ -2767,7 +2808,7 @@ const handleSealPulse = () => {
                           : "⚡ 몸으로 느끼기"}
                       </p>
                       <AutoTextarea
-                        value={visions[activeLevel]?.[type]}
+                        value={visions[activeLevel]?.[type] || ""}
                         onChange={(e) =>
                           updateVision(activeLevel, { [type]: e.target.value })
                         }
