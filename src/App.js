@@ -1665,41 +1665,22 @@ const handleSealPulse = () => {
         glow: "rgba(251,191,36,0.78)",
       },
     };
-    const labContentColumns = {
-      current: "minmax(0, 7fr) minmax(0, 1.5fr) minmax(0, 1.5fr)",
-      pulse: "minmax(0, 1.5fr) minmax(0, 7fr) minmax(0, 1.5fr)",
-      future: "minmax(0, 1.5fr) minmax(0, 1.5fr) minmax(0, 7fr)",
-    };
-    const labContentIndex = { current: 0, pulse: 1, future: 2 };
-    const labContentCardClass = (zone, baseClass) => {
-      const isActive = activeLabZone === zone;
-      return `${baseClass} relative overflow-hidden transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] ${
-        isActive
-          ? "opacity-100 scale-100 max-h-none"
-          : "lab-inactive-card opacity-55 scale-[0.94] max-h-[280px] cursor-pointer hover:opacity-75"
-      }`;
-    };
+    // [개편] 비활성 카드 축소 표시 제거 — 활성 존 카드 하나만 전체 폭으로 렌더링.
+    // 상단 셀렉터 노드에서 카드로 이어지는 스포트라이트 빔이 연결감을 담당.
+    const labContentCardClass = (zone, baseClass) =>
+      `${baseClass} relative overflow-hidden w-full lab-zone-reveal`;
     const labContentCardStyle = (zone) => {
-      const isActive = activeLabZone === zone;
-      const diff = labContentIndex[zone] - labContentIndex[activeLabZone];
       const meta = labZoneMeta[zone];
       return {
-        zIndex: isActive ? 20 : 10 - Math.abs(diff),
-        transform: isActive
-          ? "translateX(0) translateY(0) scale(1)"
-          : `translateX(${diff < 0 ? -10 : 10}px) translateY(18px) scale(0.94)`,
         background: zone === "future"
-          ? isActive
-            ? `radial-gradient(circle at 50% 14%, rgba(120,53,15,0.62), rgba(244,224,170,0.92) 30%, rgba(202,138,4,0.58) 62%, rgba(15,23,42,0.78) 100%)`
-            : `linear-gradient(145deg, rgba(244,224,170,0.72), rgba(120,53,15,0.36), rgba(15,23,42,0.78))`
-          : isActive
-          ? `linear-gradient(145deg, ${meta.fill}, rgba(15, 23, 42, 0.94))`
-          : `linear-gradient(145deg, ${meta.fill}, rgba(15, 23, 42, 0.82))`,
-        boxShadow: isActive
-          ? `0 24px 80px rgba(0,0,0,0.42), 0 0 34px ${meta.glow}`
-          : "0 14px 38px rgba(0,0,0,0.34)",
+          ? `radial-gradient(circle at 50% 14%, rgba(120,53,15,0.62), rgba(244,224,170,0.92) 30%, rgba(202,138,4,0.58) 62%, rgba(15,23,42,0.78) 100%)`
+          : `linear-gradient(145deg, ${meta.fill}, rgba(15, 23, 42, 0.94))`,
+        // 위에서 빛을 받은 느낌의 상단 글로우 포함
+        boxShadow: `0 24px 80px rgba(0,0,0,0.42), 0 0 34px ${meta.glow}, 0 -20px 60px -24px ${meta.glow}`,
       };
     };
+    // 셀렉터 wave(viewBox 720 기준)의 노드 x좌표 — 빔의 시작점
+    const labBeamX = { current: 88, pulse: 360, future: 632 };
     const labPulseWavePath =
       "M72 64H284C292 64 298 60 303 53C309 41 316 40 322 55C328 71 335 81 343 74C351 67 358 42 368 28C378 14 390 24 398 46C406 68 414 90 424 92C434 94 442 71 452 64H648";
     const renderLabPulseWave = ({ showAnchor = false } = {}) => (
@@ -1925,28 +1906,49 @@ const handleSealPulse = () => {
             })}
           </div>
         </div>
+        {/* [스포트라이트 빔] 선택된 노드에서 아래 카드로 빛이 퍼지며 연결 */}
         <div
-          className="lab-grid grid gap-4 md:gap-6 items-start"
-          style={{ gridTemplateColumns: labContentColumns[activeLabZone] }}
+          className="relative mx-auto max-w-3xl h-20 -mt-8 mb-1 pointer-events-none"
+          aria-hidden="true"
         >
+          <svg
+            key={activeLabZone}
+            className="lab-beam absolute inset-0 h-full w-full overflow-visible"
+            viewBox="0 0 720 80"
+            preserveAspectRatio="none"
+          >
+            <defs>
+              <linearGradient id="labBeamGrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor={labZoneMeta[activeLabZone].glow} stopOpacity="0.85" />
+                <stop offset="55%" stopColor={labZoneMeta[activeLabZone].glow} stopOpacity="0.28" />
+                <stop offset="100%" stopColor={labZoneMeta[activeLabZone].glow} stopOpacity="0.08" />
+              </linearGradient>
+            </defs>
+            {/* 노드 바로 아래에서 시작해 카드 폭으로 퍼지는 빛 원뿔 */}
+            <polygon
+              points={`${labBeamX[activeLabZone] - 16},0 ${labBeamX[activeLabZone] + 16},0 780,80 -60,80`}
+              fill="url(#labBeamGrad)"
+            />
+            <line
+              x1={labBeamX[activeLabZone]}
+              y1="0"
+              x2={labBeamX[activeLabZone]}
+              y2="80"
+              stroke={labZoneMeta[activeLabZone].glow}
+              strokeWidth="2"
+              className="lab-wave-breathe"
+            />
+          </svg>
+        </div>
+        <div className="w-full">
+          {activeLabZone === "current" && (
           <div
-            onClick={() => activeLabZone !== "current" && setActiveLabZone("current")}
             className={labContentCardClass(
               "current",
               "border border-emerald-200/30 rounded-[2rem] p-4 space-y-6"
             )}
             style={labContentCardStyle("current")}
           >
-            {activeLabZone !== "current" && (
-              <button
-                type="button"
-                onClick={() => setActiveLabZone("current")}
-                className="absolute inset-0 z-30 flex items-start justify-center bg-slate-950/10 pt-8 text-[10px] font-black uppercase tracking-[0.24em] text-amber-200/70"
-                aria-label="Current Self 카드 열기"
-              >
-                Current Self
-              </button>
-            )}
             {renderLabNodeHeader(
               "current",
               "현재의 나 / Current Self",
@@ -2426,25 +2428,16 @@ const handleSealPulse = () => {
               </div>
             )}
           </div>
+          )}
 
+          {activeLabZone === "pulse" && (
           <div
-            onClick={() => activeLabZone !== "pulse" && setActiveLabZone("pulse")}
             className={labContentCardClass(
               "pulse",
               "border border-teal-200/30 rounded-[2rem] p-4 space-y-6"
             )}
             style={labContentCardStyle("pulse")}
           >
-            {activeLabZone !== "pulse" && (
-              <button
-                type="button"
-                onClick={() => setActiveLabZone("pulse")}
-                className="absolute inset-0 z-30 flex items-start justify-center bg-slate-950/10 pt-8 text-[10px] font-black uppercase tracking-[0.24em] text-teal-100/70"
-                aria-label="Bridge Core 카드 열기"
-              >
-                Bridge Core
-              </button>
-            )}
             {renderLabNodeHeader(
               "pulse",
               "THE PULSE / Bridge Core",
@@ -2649,25 +2642,16 @@ const handleSealPulse = () => {
               );
             })()}
           </div>
+          )}
 
+          {activeLabZone === "future" && (
           <div
-            onClick={() => activeLabZone !== "future" && setActiveLabZone("future")}
             className={labContentCardClass(
               "future",
               "border border-yellow-200/40 rounded-[2rem] p-4 space-y-6"
             )}
             style={labContentCardStyle("future")}
           >
-            {activeLabZone !== "future" && (
-              <button
-                type="button"
-                onClick={() => setActiveLabZone("future")}
-                className="absolute inset-0 z-30 flex items-start justify-center bg-slate-950/10 pt-8 text-[10px] font-black uppercase tracking-[0.24em] text-amber-100/75"
-                aria-label="Apex BPS 카드 열기"
-              >
-                Apex BPS
-              </button>
-            )}
             {renderLabNodeHeader(
               "future",
               "미래의 나 / Apex BPS",
@@ -2885,6 +2869,7 @@ const handleSealPulse = () => {
               </div>
             )}
           </div>
+          )}
         </div>
       </div>
     );
