@@ -1682,11 +1682,11 @@ const handleSealPulse = () => {
     const labContentCardStyle = (zone) => {
       const meta = labZoneMeta[zone];
       return {
-        background: zone === "future"
-          ? `radial-gradient(circle at 50% 14%, rgba(120,53,15,0.62), rgba(244,224,170,0.92) 30%, rgba(202,138,4,0.58) 62%, rgba(15,23,42,0.78) 100%)`
-          : `linear-gradient(145deg, ${meta.fill}, rgba(15, 23, 42, 0.94))`,
-        // 위에서 빛을 받은 느낌의 상단 글로우 포함
-        boxShadow: `0 24px 80px rgba(0,0,0,0.42), 0 0 34px ${meta.glow}, 0 -20px 60px -24px ${meta.glow}`,
+        // [다크 콘솔] 존별 색판 제거 — 전 탭 공통 다크 네이비.
+        // 존 정체성은 테두리·글로우·그라데이션 텍스트 라인으로만 표현
+        background:
+          "linear-gradient(180deg, rgba(13, 20, 38, 0.88), rgba(7, 11, 22, 0.96))",
+        boxShadow: `0 24px 80px rgba(0,0,0,0.45), 0 0 30px ${meta.glow}, 0 -20px 60px -24px ${meta.glow}`,
       };
     };
     // 셀렉터 wave(viewBox 720 기준)의 노드 x좌표 — 빔의 시작점
@@ -1814,56 +1814,26 @@ const handleSealPulse = () => {
       );
     };
 
-    const renderLabNodeHeader = (zone, title, details) => {
-      const meta = labZoneMeta[zone];
-      const isFutureHeader = zone === "future";
-      return (
-        <>
-          {/* [모바일] 박스 없이 제목 한 줄 + 골드 그라데이션 밑줄 — 빔이 제목을 비추는 느낌 */}
-          <div className="md:hidden text-center pt-1">
-            <p
-              className={`text-[14px] font-black uppercase tracking-[0.2em] ${
-                isFutureHeader
-                  ? "text-amber-50 drop-shadow-[0_1px_8px_rgba(0,0,0,0.75)]"
-                  : meta.text
-              }`}
-            >
-              {title}
-            </p>
-            <div className="mx-auto mt-2 h-px w-28 bg-gradient-to-r from-transparent via-amber-300/70 to-transparent" />
-          </div>
-          {/* [PC] 기존 박스 헤더 유지 */}
-          <div
-            className={`hidden md:block rounded-[2rem] border p-5 shadow-xl ${
-              isFutureHeader
-                ? "border-amber-300/55 bg-[#f4e0aa]/82 shadow-amber-500/30"
-                : "border-white/10 bg-slate-950/38"
-            }`}
-            style={
-              isFutureHeader
-                ? {
-                    background:
-                      "radial-gradient(circle at 50% 32%, rgba(92,47,9,0.68) 0%, rgba(180,83,9,0.42) 24%, rgba(244,224,170,0.88) 56%, rgba(120,53,15,0.5) 100%)",
-                  }
-                : undefined
-            }
-          >
-            <div className="flex flex-col items-center gap-3 text-center">
-              {renderLabZoneSymbol(zone, "card", activeLabZone === zone)}
-              <div className="min-w-0">
-                <p className={`text-[11px] font-black uppercase tracking-[0.25em] ${isFutureHeader ? "text-amber-50 drop-shadow-[0_1px_8px_rgba(0,0,0,0.75)]" : meta.text}`}>
-                  {title}
-                </p>
-                <p className={`mt-2 text-[11px] leading-relaxed ${isFutureHeader ? "text-amber-50/90 drop-shadow-[0_1px_6px_rgba(0,0,0,0.65)]" : "text-slate-200/85"}`}>
-                  {details}
-                </p>
-              </div>
-            </div>
-          </div>
-        </>
-      );
+    // [다크 콘솔] 존 헤더 — 박스·아바타 제거, 그라데이션 텍스트 한 줄 + 헤어라인 (전 화면 공통)
+    const labTitleGradient = {
+      current: "linear-gradient(90deg, #d1fae5, #6ee7b7 45%, #34d399)",
+      pulse: "linear-gradient(90deg, #ccfbf1, #5eead4 45%, #2dd4bf)",
+      future: "linear-gradient(90deg, #fff2cf, #fcd34d 45%, #f5b01b)",
     };
-    // [모바일 아코디언 섹션] — 어두운 헤더 바(가독성) + 탭하면 펼침. PC(md+)는 항상 펼침.
+    const renderLabNodeHeader = (zone, title, details) => (
+      <div className="flex items-baseline justify-between gap-4 border-b border-white/10 pb-3 md:pb-4">
+        <p
+          className="text-[15px] md:text-[21px] font-black uppercase tracking-[0.08em] bg-clip-text text-transparent"
+          style={{ backgroundImage: labTitleGradient[zone] }}
+        >
+          {title}
+        </p>
+        <p className="hidden md:block text-[11px] text-slate-500 shrink-0">{details}</p>
+      </div>
+    );
+    // [다크 콘솔 아코디언] — 투명 배경 + 좌측 라이트 바(열림 시 존 색으로 점등) + 헤어라인.
+    // PC(md+)는 항상 펼침.
+    const labAccent = { current: "#34d399", pulse: "#2dd4bf", future: "#fcd34d" }[activeLabZone] || "#fcd34d";
     const renderAccordionSection = (id, { icon, title, filled = false, defaultOpen = false }, content) => {
       const open = openLabSections[id] ?? defaultOpen;
       return (
@@ -1874,23 +1844,112 @@ const handleSealPulse = () => {
               e.stopPropagation();
               setOpenLabSections((prev) => ({ ...prev, [id]: !open }));
             }}
-            className="md:hidden w-full flex items-center gap-2.5 bg-slate-950/70 border border-white/10 rounded-xl px-3.5 py-3 text-left"
+            className="md:hidden w-full flex items-center gap-3 py-4 px-1 text-left border-b border-white/10"
           >
-            <span className="text-amber-400 shrink-0">{icon}</span>
-            <span className="flex-1 text-[15px] font-black text-white tracking-tight">
+            <span
+              className="w-[3px] h-5 rounded-full transition-all duration-300 shrink-0"
+              style={
+                open
+                  ? { background: labAccent, boxShadow: `0 0 10px ${labAccent}` }
+                  : { background: "rgba(148,163,184,0.28)" }
+              }
+            />
+            <span className="flex-1 text-[15px] font-bold text-white tracking-tight">
               {title}
             </span>
-            {filled && <span className="text-[9px] text-emerald-400">●</span>}
+            {filled && (
+              <span
+                className="w-1.5 h-1.5 rounded-full bg-emerald-400"
+                style={{ boxShadow: "0 0 8px rgba(52,211,153,0.9)" }}
+              />
+            )}
             <span
-              className={`text-[11px] text-slate-400 transition-transform duration-300 ${
-                open ? "rotate-180" : ""
+              className={`text-[11px] transition-transform duration-300 ${
+                open ? "rotate-180 text-amber-300" : "text-slate-500"
               }`}
             >
               ▼
             </span>
           </button>
-          <div className={`${open ? "block pt-3" : "hidden"} md:block md:pt-0`}>
+          <div className={`${open ? "block pt-4 pb-5" : "hidden"} md:block md:pt-0 md:pb-0`}>
             {content}
+          </div>
+        </div>
+      );
+    };
+    // [다크 콘솔] PC용 플랫 섹션 라벨 — 2px 액센트 틱 + 제목
+    const renderFlatLabel = (title, sub) => (
+      <p className="hidden md:flex items-center gap-2.5 mb-5">
+        <span className="inline-block w-3.5 h-[2px]" style={{ background: labAccent }} />
+        <span className="text-[15px] font-bold text-white tracking-tight">{title}</span>
+        {sub && <span className="text-[11px] text-slate-500">{sub}</span>}
+      </p>
+    );
+    // [다크 콘솔] 미래의 나 — 피라미드 내비 + 단계 설명 (PC 좌측 고정 칼럼 / 모바일 goal 섹션 안)
+    const renderFutureGoalNav = () => {
+      const miniWidths = {
+        5: "w-[96px]",
+        4: "w-[126px]",
+        3: "w-[156px]",
+        2: "w-[186px]",
+        1: "w-[216px]",
+      };
+      return (
+        <div>
+          <div className="flex flex-col items-center">
+            <div className="w-0 h-0 border-l-[15px] border-l-transparent border-r-[15px] border-r-transparent border-b-[19px] border-b-amber-500/80 mb-1.5"></div>
+            {[5, 4, 3, 2, 1].map((lv) => {
+              const isConfigured = String(visions[lv]?.title || "").trim() !== "";
+              const isActive = activeLevel === lv;
+              return (
+                <button
+                  key={lv}
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setActiveLevel(lv);
+                    setShowFullMission(false);
+                  }}
+                  className={`relative flex items-center justify-center h-[30px] rounded-lg mb-1.5 border transition-all duration-300 ${miniWidths[lv]} ${
+                    isActive
+                      ? "border-amber-300 text-slate-950 bg-gradient-to-r from-amber-500 via-yellow-300 to-amber-500 shadow-[0_0_24px_rgba(245,176,27,0.45)] scale-105 z-10"
+                      : isConfigured
+                      ? "bg-slate-900/90 border-emerald-400/35 text-emerald-100/90 hover:border-emerald-300/60"
+                      : "bg-slate-900/70 border-slate-700/60 text-slate-500 hover:text-slate-300"
+                  }`}
+                >
+                  <span className={`text-[11px] tracking-tight whitespace-nowrap ${isActive ? "font-black" : "font-bold"}`}>
+                    {lv} {levelMap[lv]}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+          <div className="border-l-2 border-amber-500 pl-4 mt-6">
+            <p className="text-[15px] font-bold text-white">
+              <span className="text-amber-300 text-[22px] font-black italic mr-1.5">
+                {activeLevel}
+              </span>
+              {levelMap[activeLevel] || "Apex"}
+            </p>
+            <p
+              className={`mt-2 text-[13px] text-slate-400 leading-relaxed ${
+                showFullMission ? "" : "line-clamp-2"
+              } md:line-clamp-none`}
+              style={{ wordBreak: "keep-all" }}
+            >
+              {missionMap[activeLevel] || "피라미드에서 단계를 선택하세요."}
+            </p>
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowFullMission((prev) => !prev);
+              }}
+              className="md:hidden mt-1 w-fit text-[11px] font-bold text-amber-300/90 underline underline-offset-2"
+            >
+              {showFullMission ? "접기 ▴" : "더 보기 ▾"}
+            </button>
           </div>
         </div>
       );
@@ -2750,34 +2809,31 @@ const handleSealPulse = () => {
               "미래의 나 / Apex BPS",
               "미래 자아 성격 · 목표 설계 · 비전 · 감각 비전 · 몰입 시나리오"
             )}
+            {/* [다크 콘솔] PC 2열 그리드 — 좌: 피라미드 내비(고정), 우: 플랫 섹션 */}
+            <div className="md:grid md:grid-cols-[300px_1fr] md:gap-12 md:items-start">
+              <div className="hidden md:block md:sticky md:top-6">
+                {renderFutureGoalNav()}
+              </div>
+              <div className="md:space-y-10">
             {renderAccordionSection("traits", {
               icon: <Star size={15} />,
-              title: "미래 자아 성격 설계",
+              title: "미래 자아 성격",
               filled: bpsTraits.some((t) => String(t || "").trim() !== ""),
             }, (
-            <div className="bg-transparent p-0 rounded-none border-0 shadow-none md:bg-[#ead08c]/88 md:p-10 md:rounded-[3rem] md:border md:border-amber-300/70 md:shadow-xl md:shadow-amber-500/25 md:border-t-4 md:border-amber-400/70">
-              <p className="hidden md:flex text-[12px] font-black text-amber-950 uppercase tracking-[0.35em] mb-4 items-center gap-2">
-                <Star size={16} /> 미래 자아 성격 설계
-              </p>
-              {/* [모바일 컴팩트] 칩 스타일 2열 (마지막 칩은 가로 전체) / PC는 라벨+5열 유지 */}
-              <div className="grid grid-cols-2 md:grid-cols-5 gap-2 md:gap-3 mb-2 md:mb-6">
+            <div>
+              {renderFlatLabel("미래 자아 성격", "5 키워드")}
+              {/* 캡슐 대신 밑줄 기입 필드 */}
+              <div className="grid grid-cols-2 md:grid-cols-5 gap-x-6 gap-y-4">
                 {[0, 1, 2, 3, 4].map((idx) => (
-                  <div
+                  <input
                     key={idx}
-                    className={`space-y-1.5 ${idx === 4 ? "col-span-2 md:col-span-1" : ""}`}
-                  >
-                    <label className="hidden md:block text-[8px] font-black text-amber-950 uppercase ml-2 tracking-widest">
-                      성격 키워드 {idx + 1}
-                    </label>
-                    <input
-                      value={bpsTraits[idx]}
-                      onChange={(e) => updateBpsTrait(idx, e.target.value)}
-                      placeholder={
-                        ["지혜", "평온", "자비", "용기", "통찰"][idx]
-                      }
-                      className="w-full bg-slate-950/85 border border-white/15 rounded-full p-2.5 text-[12px] md:rounded-2xl md:p-4 md:text-[13px] text-white placeholder:text-amber-100/80 font-black text-center focus:ring-1 focus:ring-amber-500 outline-none transition-all"
-                    />
-                  </div>
+                    value={bpsTraits[idx]}
+                    onChange={(e) => updateBpsTrait(idx, e.target.value)}
+                    placeholder={["지혜", "평온", "자비", "용기", "통찰"][idx]}
+                    className={`w-full bg-transparent border-0 border-b-2 border-amber-500/35 focus:border-amber-400 rounded-none px-1 pb-2.5 pt-1 text-[15px] font-bold text-white placeholder:text-slate-600 text-center outline-none transition-colors ${
+                      idx === 4 ? "col-span-2 md:col-span-1" : ""
+                    }`}
+                  />
                 ))}
               </div>
             </div>
@@ -2789,111 +2845,29 @@ const handleSealPulse = () => {
               filled: String(visions[activeLevel]?.title || "").trim() !== "",
               defaultOpen: true,
             }, (
-            <div className="bg-transparent p-0 rounded-none border-0 shadow-none md:bg-[#e6c36d]/78 md:p-10 md:rounded-[3rem] md:border md:border-amber-400/55 md:shadow-xl md:shadow-amber-500/25">
-              <div className="mb-6 md:mb-10">
-                <p className="hidden md:flex text-[12px] font-black text-emerald-900 uppercase tracking-widest items-center gap-2 mb-4">
-                  <Zap size={14} /> 목표 설계자
-                </p>
-
-                {/* [수정] 미니 피라미드(단계 선택) + 우측 단계 설명
-                    — 다른 탭의 피라미드 디자인을 축소해 사용, 클릭으로 단계 전환 */}
-                <div className="flex flex-col sm:flex-row items-center sm:items-stretch gap-5">
-                  <div className="flex flex-col items-center justify-end shrink-0">
-                    <div className="w-0 h-0 border-l-[14px] border-l-transparent border-r-[14px] border-r-transparent border-b-[18px] border-b-amber-500/80 mb-1"></div>
-                    {(() => {
-                      const miniWidths = {
-                        5: "w-[76px]",
-                        4: "w-[100px]",
-                        3: "w-[124px]",
-                        2: "w-[148px]",
-                        1: "w-[172px]",
-                      };
-                      return [5, 4, 3, 2, 1].map((lv) => {
-                        const isConfigured =
-                          String(visions[lv]?.title || "").trim() !== "";
-                        const isActive = activeLevel === lv;
-                        return (
-                          <button
-                            key={lv}
-                            type="button"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setActiveLevel(lv);
-                              setShowFullMission(false);
-                            }}
-                            className={`relative flex items-center justify-center h-[26px] rounded-lg mb-1 overflow-hidden border transition-all duration-300 ${miniWidths[lv]} ${
-                              isActive
-                                ? "border-amber-400 ring-2 ring-amber-500/50 shadow-[0_0_16px_rgba(245,158,11,0.55)] scale-105 z-10"
-                                : isConfigured
-                                ? "border-amber-600/40 hover:brightness-110"
-                                : "border-slate-700/60 opacity-70 hover:opacity-90"
-                            }`}
-                          >
-                            <div
-                              className={`absolute inset-0 ${
-                                isActive
-                                  ? "bg-gradient-to-r from-amber-600 via-yellow-400 to-amber-600"
-                                  : isConfigured
-                                  ? "bg-gradient-to-r from-emerald-700 via-teal-500 to-emerald-700"
-                                  : "bg-slate-800/80"
-                              }`}
-                            />
-                            <span className="relative z-10 text-[9px] font-black text-white drop-shadow-md tracking-tight whitespace-nowrap">
-                              {lv} {levelMap[lv]}
-                            </span>
-                          </button>
-                        );
-                      });
-                    })()}
-                  </div>
-
-                  {/* 단계 설명 — 모바일은 어두운 반투명 패널로 가독성 확보 (골드 배경 대비) */}
-                  <div className="flex-1 min-w-0 flex flex-col justify-center bg-slate-950/55 rounded-2xl p-3 md:bg-transparent md:rounded-none md:p-0">
-                    <p className="text-[13px] font-bold text-white italic bg-slate-950/75 px-3 py-1 rounded-full border border-white/10 inline-block w-fit mb-2">
-                      {activeLevel}단계: {levelMap[activeLevel] || "Apex"}
-                    </p>
-                    <p
-                      className={`text-[13px] text-amber-100 md:text-amber-950 font-bold leading-relaxed animate-fadeIn ${
-                        showFullMission ? "" : "line-clamp-2"
-                      } md:line-clamp-none`}
-                      style={{ wordBreak: "keep-all" }}
-                    >
-                      {missionMap[activeLevel] || "피라미드에서 단계를 선택하세요."}
-                    </p>
-                    {/* [모바일 컴팩트] 2줄 요약 + 더보기 (PC는 항상 전체 표시) */}
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setShowFullMission((prev) => !prev);
-                      }}
-                      className="md:hidden mt-1 w-fit text-[11px] font-black text-amber-300/90 underline underline-offset-2"
-                    >
-                      {showFullMission ? "접기 ▴" : "더 보기 ▾"}
-                    </button>
-                  </div>
-                </div>
-              </div>
-              <div className="space-y-4 mb-6 md:space-y-6 md:mb-10">
-                <div className="flex gap-4">
-                  {/* [수정] 이모지 입력칸 → 현재 레벨 숫자 배지로 대체 */}
-                  <div className="w-20 shrink-0 bg-slate-950 border border-amber-500/40 rounded-3xl flex flex-col items-center justify-center py-2 text-center">
-                    <span className="text-2xl font-black text-amber-400 leading-none">
-                      {activeLevel}
-                    </span>
-                    <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest mt-1">
-                      Level
-                    </span>
-                  </div>
-                  <input
-                    value={visions[activeLevel]?.title || ""}
-                    onChange={(e) =>
-                      updateVision(activeLevel, { title: e.target.value })
-                    }
-                    className="flex-1 min-w-0 bg-slate-950 border border-white/10 rounded-3xl p-4 text-md font-black text-white placeholder:text-white/75 outline-none"
-                    placeholder="비전 제목을 입력하세요"
-                  />
-                </div>
+            <div>
+              {renderFlatLabel(
+                "비전 제목",
+                `${activeLevel}단계 · ${levelMap[activeLevel] || "Apex"}`
+              )}
+              {/* 모바일: 피라미드 내비 (PC에서는 좌측 고정 칼럼에 표시) */}
+              <div className="md:hidden mb-6">{renderFutureGoalNav()}</div>
+              {/* 고스트 레벨 숫자 + 밑줄 기입 필드 */}
+              <div className="flex items-end gap-4 md:gap-5">
+                <span
+                  className="text-[44px] md:text-[64px] font-black italic leading-[0.8] text-transparent select-none"
+                  style={{ WebkitTextStroke: "1.5px rgba(245,176,27,0.55)" }}
+                >
+                  {activeLevel}
+                </span>
+                <input
+                  value={visions[activeLevel]?.title || ""}
+                  onChange={(e) =>
+                    updateVision(activeLevel, { title: e.target.value })
+                  }
+                  className="flex-1 min-w-0 bg-transparent border-0 border-b-2 border-amber-500 focus:border-amber-300 rounded-none px-1 pb-3 text-[17px] md:text-[21px] font-extrabold text-white placeholder:text-slate-600 outline-none transition-colors"
+                  placeholder="비전 제목을 입력하세요"
+                />
               </div>
             </div>
             ))}
@@ -2905,66 +2879,76 @@ const handleSealPulse = () => {
                 (t) => String(visions[activeLevel]?.[t] || "").trim() !== ""
               ),
             }, (
-            <div className="space-y-3 md:space-y-6 bg-transparent p-0 rounded-none border-0 shadow-none md:bg-[#e6c36d]/78 md:p-10 md:rounded-[3rem] md:border md:border-amber-400/55 md:shadow-xl md:shadow-amber-500/25">
-                {/* [모바일 컴팩트] 감각 탭 — 선택한 감각 1칸만 표시 (PC는 3열 유지) */}
-                <div className="flex md:hidden gap-2">
-                  {["v", "a", "k"].map((type) => {
-                    const filled =
-                      String(visions[activeLevel]?.[type] || "").trim() !== "";
-                    return (
-                      <button
-                        key={type}
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setMobileSensoryTab(type);
-                        }}
-                        className={`flex-1 py-2.5 rounded-xl text-[11px] font-black transition-all border ${
-                          mobileSensoryTab === type
-                            ? "bg-slate-950 text-amber-300 border-amber-500/60"
-                            : "bg-slate-950/40 text-slate-300 border-white/10"
-                        }`}
-                      >
-                        {type === "v" ? "👁️ 시각" : type === "a" ? "🎧 소리" : "⚡ 몸"}
-                        {filled && <span className="text-emerald-400 ml-1">●</span>}
-                      </button>
-                    );
-                  })}
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-start">
-                  {["v", "a", "k"].map((type) => (
-                    <div
+            <div>
+              {renderFlatLabel("감각 비전", "V · A · K")}
+              {/* 모바일 감각 탭 — 밑줄 탭 스타일 */}
+              <div className="flex md:hidden gap-6 border-b border-white/10 mb-4">
+                {["v", "a", "k"].map((type) => {
+                  const filled =
+                    String(visions[activeLevel]?.[type] || "").trim() !== "";
+                  return (
+                    <button
                       key={type}
-                      className={`${
-                        mobileSensoryTab === type ? "" : "hidden md:block"
-                      } space-y-2 bg-slate-950/80 p-4 md:p-5 rounded-[2rem] border border-white/10`}
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setMobileSensoryTab(type);
+                      }}
+                      className={`pb-2.5 -mb-px text-[13px] font-bold transition-colors ${
+                        mobileSensoryTab === type
+                          ? "text-amber-300 border-b-2 border-amber-400"
+                          : "text-slate-500"
+                      }`}
                     >
-                      <p
-                        className={`text-[9px] font-black uppercase px-2 tracking-widest ${
-                          type === "v"
-                            ? "text-amber-500"
-                            : type === "a"
-                            ? "text-emerald-500"
-                            : "text-rose-500"
-                        }`}
-                      >
-                        {type === "v"
-                          ? "👁️ 시각으로 그리기"
+                      {type === "v" ? "👁 시각" : type === "a" ? "🎧 소리" : "⚡ 몸"}
+                      {filled && (
+                        <span className="text-emerald-400 ml-1.5 text-[9px]">●</span>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+              {/* 박스 대신 컬러 상단 룰 컬럼 */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-8 items-start">
+                {["v", "a", "k"].map((type) => (
+                  <div
+                    key={type}
+                    className={`${
+                      mobileSensoryTab === type ? "" : "hidden md:block"
+                    } border-t-2 pt-3 ${
+                      type === "v"
+                        ? "border-amber-400/70"
+                        : type === "a"
+                        ? "border-emerald-400/70"
+                        : "border-rose-400/70"
+                    }`}
+                  >
+                    <p
+                      className={`text-[11px] font-bold tracking-[0.06em] uppercase ${
+                        type === "v"
+                          ? "text-amber-400"
                           : type === "a"
-                          ? "🎧 소리로 떠올리기"
-                          : "⚡ 몸으로 느끼기"}
-                      </p>
-                      <AutoTextarea
-                        value={visions[activeLevel]?.[type] || ""}
-                        onChange={(e) =>
-                          updateVision(activeLevel, { [type]: e.target.value })
-                        }
-                        placeholder="미래의 장면을 쉽게 적어보세요..."
-                        className="w-full bg-transparent p-2 text-xs leading-relaxed text-white placeholder:text-white/65 outline-none"
-                      />
-                    </div>
-                  ))}
-                </div>
+                          ? "text-emerald-400"
+                          : "text-rose-400"
+                      }`}
+                    >
+                      {type === "v"
+                        ? "👁 Visual — 시각으로 그리기"
+                        : type === "a"
+                        ? "🎧 Auditory — 소리로 떠올리기"
+                        : "⚡ Kinesthetic — 몸으로 느끼기"}
+                    </p>
+                    <AutoTextarea
+                      value={visions[activeLevel]?.[type] || ""}
+                      onChange={(e) =>
+                        updateVision(activeLevel, { [type]: e.target.value })
+                      }
+                      placeholder="미래의 장면을 쉽게 적어보세요..."
+                      className="w-full bg-transparent mt-2 text-[13px] leading-relaxed text-slate-200 placeholder:text-slate-600 outline-none"
+                    />
+                  </div>
+                ))}
+              </div>
             </div>
             ))}
 
@@ -2973,41 +2957,41 @@ const handleSealPulse = () => {
               title: "AI 몰입 시나리오",
               filled: String(visions[activeLevel]?.immersionScript || "").trim() !== "",
             }, (
-                <div className="bg-[#1A202C]/60 p-5 rounded-[2rem] md:p-8 md:rounded-[2.5rem] border border-amber-500/20 relative shadow-2xl">
-                  <div className="flex justify-between items-center mb-4">
-                    <p className="text-[10px] font-black text-amber-300 uppercase tracking-widest flex items-center gap-2">
-                      <Brain size={14} /> AI 감각 몰입 시나리오
-                    </p>
-                    <button
-                      onClick={generateImmersionScript}
-                      // 로딩 중이거나 AI 권한이 없으면 버튼 비활성화
-                      disabled={aiLoading || !hasAiAccess}
-                      // 템플릿 리터럴 `${ }`을 사용하여 조건부 클래스를 정확히 적용
-                      className={`bg-amber-600 hover:bg-amber-500 text-white p-3 rounded-xl active:scale-90 shadow-xl transition-all ${
-                        !hasAiAccess || aiLoading
-                          ? "opacity-50 cursor-not-allowed"
-                          : ""
-                      }`}
-                    >
-                      {aiLoading ? (
-                        <span className="animate-spin inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full" />
-                      ) : (
-                        <Wand2 size={18} />
-                      )}
-                    </button>
-                  </div>
-                  <AutoTextarea
-                    value={visions[activeLevel]?.immersionScript || ""}
-                    onChange={(e) =>
-                      updateVision(activeLevel, {
-                        immersionScript: e.target.value,
-                      })
-                    }
-                    className="w-full bg-transparent border-none text-sm text-white leading-[1.8] font-medium focus:outline-none italic placeholder:text-white/65"
-                    placeholder="AI가 시각·소리·몸의 느낌을 담은 시나리오를 설계합니다."
-                  />
-                </div>
+            <div>
+              {renderFlatLabel("AI 몰입 시나리오")}
+              {/* 인용문 스타일 — 좌측 골드 라인 + 우측 생성 버튼 */}
+              <div className="relative border-l-2 border-amber-500 pl-4 pr-14 md:pr-16 min-h-[56px]">
+                <button
+                  onClick={generateImmersionScript}
+                  disabled={aiLoading || !hasAiAccess}
+                  className={`absolute right-0 top-0 w-10 h-10 rounded-xl grid place-items-center bg-gradient-to-br from-amber-500 to-amber-700 text-white shadow-[0_6px_18px_rgba(245,176,27,0.35)] active:scale-90 transition-all ${
+                    !hasAiAccess || aiLoading
+                      ? "opacity-50 cursor-not-allowed"
+                      : "hover:brightness-110"
+                  }`}
+                  aria-label="AI 시나리오 생성"
+                >
+                  {aiLoading ? (
+                    <span className="animate-spin inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full" />
+                  ) : (
+                    <Wand2 size={17} />
+                  )}
+                </button>
+                <AutoTextarea
+                  value={visions[activeLevel]?.immersionScript || ""}
+                  onChange={(e) =>
+                    updateVision(activeLevel, {
+                      immersionScript: e.target.value,
+                    })
+                  }
+                  className="w-full bg-transparent border-none text-sm text-slate-300 leading-[1.9] focus:outline-none italic placeholder:text-slate-600"
+                  placeholder="AI가 시각·소리·몸의 느낌을 담은 시나리오를 설계합니다."
+                />
+              </div>
+            </div>
             ))}
+              </div>
+            </div>
 
             {/* [Setup Journey 2/3] 계약 전 가이드 — 비전 1개 이상 입력 후 THE PULSE로 이동 */}
             {user && !signedDate && activeLabZone === "future" && (
@@ -5237,7 +5221,7 @@ const nowX = getX(dataPoints[dataPoints.length - 1].date); // 📅 가로 위치
   if (!user) {
     return (
       <div className="min-h-screen bg-slate-950 text-slate-200 flex items-center justify-center p-6 font-sans selection:bg-amber-500/30">
-        <style>{`@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css'); * { font-family: 'Pretendard', sans-serif; letter-spacing: -0.02em; } .animate-fadeIn { animation: fadeIn 0.8s ease-out; } @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }`}</style>
+        <style>{`* { font-family: 'Pretendard', sans-serif; letter-spacing: -0.02em; } .animate-fadeIn { animation: fadeIn 0.8s ease-out; } @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }`}</style>
         <div className="w-full max-w-sm animate-fadeIn">
           {/* 로고 */}
           <div className="text-center mb-10">
@@ -5353,7 +5337,7 @@ const nowX = getX(dataPoints[dataPoints.length - 1].date); // 📅 가로 위치
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-200 p-4 md:p-10 font-sans overflow-hidden flex flex-col selection:bg-amber-500/30">
-      <style>{`@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css'); * { font-family: 'Pretendard', sans-serif; letter-spacing: -0.02em; } .animate-fadeIn { animation: fadeIn 0.8s ease-out; } .animate-spin-slow { animation: spin 20s linear infinite; } .lab-wave-breathe { animation: labWaveBreathe 4.8s ease-in-out infinite; } .lab-wave-flow { animation: labWaveFlow 5.6s linear infinite; } .lab-zone-node { animation: labNodePulse 4.2s ease-in-out infinite; } .lab-zone-node-active { animation: labNodeActive 2.8s ease-in-out infinite; } .lab-pulse-signal { animation: labPulseSignal 2.6s ease-in-out infinite; } .lab-ecg-wrap { animation: labEcgWrap 2.8s ease-in-out infinite; transform-origin: center; } .lab-ecg-signal { animation: labEcgSignal 2.8s ease-in-out infinite; } .chamber-light-flood { animation: chamberLightFlood 1.15s cubic-bezier(0.16, 1, 0.3, 1) forwards; } .chamber-shockwave { animation: chamberShockwave 1.05s ease-out forwards; } @keyframes labWaveBreathe { 0%, 100% { opacity: 0.42; filter: drop-shadow(0 0 4px rgba(245,158,11,0.22)); } 50% { opacity: 0.82; filter: drop-shadow(0 0 14px rgba(245,158,11,0.45)); } } @keyframes labWaveFlow { from { stroke-dashoffset: 720; } to { stroke-dashoffset: 0; } } @keyframes labNodePulse { 0%, 100% { filter: brightness(0.9) drop-shadow(0 0 10px rgba(245,158,11,0.18)); } 50% { filter: brightness(1.18) drop-shadow(0 0 22px rgba(245,158,11,0.46)); } } @keyframes labNodeActive { 0%, 100% { filter: brightness(1.08) drop-shadow(0 0 16px rgba(251,191,36,0.45)); } 50% { filter: brightness(1.34) drop-shadow(0 0 34px rgba(251,191,36,0.78)); } } @keyframes labPulseSignal { 0%, 100% { opacity: 0.58; transform: translateX(-50%) translateY(-50%) scaleX(0.72); } 50% { opacity: 1; transform: translateX(-50%) translateY(-50%) scaleX(1.08); } } @keyframes labEcgWrap { 0%, 100% { transform: scaleX(0.86) scaleY(1); } 50% { transform: scaleX(1) scaleY(1.2); } } @keyframes labEcgSignal { 0%, 100% { opacity: 0.72; filter: drop-shadow(0 0 12px rgba(204,251,241,0.75)); } 50% { opacity: 1; filter: drop-shadow(0 0 40px rgba(45,212,191,1)) drop-shadow(0 0 72px rgba(153,246,228,0.95)); } } @keyframes chamberLightFlood { 0% { opacity: 0; transform: scale(0.55); filter: blur(70px); } 8% { opacity: 1; transform: scale(1.08); filter: blur(18px); } 28% { opacity: 0.96; transform: scale(1.35); filter: blur(4px); } 100% { opacity: 0; transform: scale(2.25); filter: blur(90px); } } @keyframes chamberShockwave { 0% { opacity: 0; transform: scale(0.45); } 12% { opacity: 0.9; } 100% { opacity: 0; transform: scale(3.4); } } @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } } @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }`}</style>
+      <style>{`* { font-family: 'Pretendard', sans-serif; letter-spacing: -0.02em; } .animate-fadeIn { animation: fadeIn 0.8s ease-out; } .animate-spin-slow { animation: spin 20s linear infinite; } .lab-wave-breathe { animation: labWaveBreathe 4.8s ease-in-out infinite; } .lab-wave-flow { animation: labWaveFlow 5.6s linear infinite; } .lab-zone-node { animation: labNodePulse 4.2s ease-in-out infinite; } .lab-zone-node-active { animation: labNodeActive 2.8s ease-in-out infinite; } .lab-pulse-signal { animation: labPulseSignal 2.6s ease-in-out infinite; } .lab-ecg-wrap { animation: labEcgWrap 2.8s ease-in-out infinite; transform-origin: center; } .lab-ecg-signal { animation: labEcgSignal 2.8s ease-in-out infinite; } .chamber-light-flood { animation: chamberLightFlood 1.15s cubic-bezier(0.16, 1, 0.3, 1) forwards; } .chamber-shockwave { animation: chamberShockwave 1.05s ease-out forwards; } @keyframes labWaveBreathe { 0%, 100% { opacity: 0.42; filter: drop-shadow(0 0 4px rgba(245,158,11,0.22)); } 50% { opacity: 0.82; filter: drop-shadow(0 0 14px rgba(245,158,11,0.45)); } } @keyframes labWaveFlow { from { stroke-dashoffset: 720; } to { stroke-dashoffset: 0; } } @keyframes labNodePulse { 0%, 100% { filter: brightness(0.9) drop-shadow(0 0 10px rgba(245,158,11,0.18)); } 50% { filter: brightness(1.18) drop-shadow(0 0 22px rgba(245,158,11,0.46)); } } @keyframes labNodeActive { 0%, 100% { filter: brightness(1.08) drop-shadow(0 0 16px rgba(251,191,36,0.45)); } 50% { filter: brightness(1.34) drop-shadow(0 0 34px rgba(251,191,36,0.78)); } } @keyframes labPulseSignal { 0%, 100% { opacity: 0.58; transform: translateX(-50%) translateY(-50%) scaleX(0.72); } 50% { opacity: 1; transform: translateX(-50%) translateY(-50%) scaleX(1.08); } } @keyframes labEcgWrap { 0%, 100% { transform: scaleX(0.86) scaleY(1); } 50% { transform: scaleX(1) scaleY(1.2); } } @keyframes labEcgSignal { 0%, 100% { opacity: 0.72; filter: drop-shadow(0 0 12px rgba(204,251,241,0.75)); } 50% { opacity: 1; filter: drop-shadow(0 0 40px rgba(45,212,191,1)) drop-shadow(0 0 72px rgba(153,246,228,0.95)); } } @keyframes chamberLightFlood { 0% { opacity: 0; transform: scale(0.55); filter: blur(70px); } 8% { opacity: 1; transform: scale(1.08); filter: blur(18px); } 28% { opacity: 0.96; transform: scale(1.35); filter: blur(4px); } 100% { opacity: 0; transform: scale(2.25); filter: blur(90px); } } @keyframes chamberShockwave { 0% { opacity: 0; transform: scale(0.45); } 12% { opacity: 0.9; } 100% { opacity: 0; transform: scale(3.4); } } @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } } @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }`}</style>
     
   
       {/* 헤더 */}

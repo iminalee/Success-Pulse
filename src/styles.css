@@ -3,8 +3,16 @@
 @tailwind utilities;
 
 .App {
-  font-family: sans-serif;
+  font-family: "Pretendard", "Pretendard Variable", -apple-system, BlinkMacSystemFont,
+    system-ui, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
   text-align: center;
+}
+
+/* Tailwind의 .font-sans(시스템 글꼴 목록)가 Pretendard를 덮어쓰지 않도록 강제
+   — Play CDN 런타임 스타일보다 우선해야 하므로 !important 사용 */
+.font-sans {
+  font-family: "Pretendard", "Pretendard Variable", -apple-system, BlinkMacSystemFont,
+    system-ui, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif !important;
 }
 /* 아이콘을 선명하게 만드는 그림자 클래스 */
 .icon-shadow {
