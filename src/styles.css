@@ -21,12 +21,33 @@
   filter: drop-shadow(0px 0px 5px rgba(255, 255, 255, 0.6));
 }
 
-/* MyLab: mobile — active card fills full width, inactive cards hidden */
-@media (max-width: 767px) {
-  .lab-grid {
-    grid-template-columns: 1fr !important;
+/* MyLab: 활성 탭만 전체 폭 표시 — 상단 노드에서 아래로 퍼지는 스포트라이트 빔 */
+.lab-beam {
+  transform-origin: top center;
+  animation: labBeamDown 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+@keyframes labBeamDown {
+  from {
+    transform: scaleY(0);
+    opacity: 0.15;
   }
-  .lab-inactive-card {
-    display: none !important;
+  to {
+    transform: scaleY(1);
+    opacity: 1;
+  }
+}
+
+/* 빛이 내려온 뒤 활성 탭 카드가 위에서부터 밝아지며 나타남 */
+.lab-zone-reveal {
+  animation: labZoneReveal 0.65s cubic-bezier(0.16, 1, 0.3, 1) 0.28s both;
+}
+@keyframes labZoneReveal {
+  from {
+    opacity: 0;
+    transform: translateY(-16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }

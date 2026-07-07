@@ -597,6 +597,9 @@ const App = () => {
   const [discoverResult, setDiscoverResult] = useState(null);
   // VAK/TCI 상세 수치 카드 접기/펼치기 (기본: 접힘 — Apex Profile 카드가 대표 표시)
   const [showProfileDetails, setShowProfileDetails] = useState(false);
+  // [모바일 컴팩트] 감각 비전 탭 (모바일에서 1칸만 표시) / 단계 설명 더보기
+  const [mobileSensoryTab, setMobileSensoryTab] = useState("v");
+  const [showFullMission, setShowFullMission] = useState(false);
 
   // [Tonight v2] Tonight 흐름 전용 state — 기존 state 절대 수정 금지
   const [tonightStep, setTonightStep] = useState("intro"); // "intro" | "chat" | "draft" | "sealed"
@@ -1665,41 +1668,22 @@ const handleSealPulse = () => {
         glow: "rgba(251,191,36,0.78)",
       },
     };
-    const labContentColumns = {
-      current: "minmax(0, 7fr) minmax(0, 1.5fr) minmax(0, 1.5fr)",
-      pulse: "minmax(0, 1.5fr) minmax(0, 7fr) minmax(0, 1.5fr)",
-      future: "minmax(0, 1.5fr) minmax(0, 1.5fr) minmax(0, 7fr)",
-    };
-    const labContentIndex = { current: 0, pulse: 1, future: 2 };
-    const labContentCardClass = (zone, baseClass) => {
-      const isActive = activeLabZone === zone;
-      return `${baseClass} relative overflow-hidden transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] ${
-        isActive
-          ? "opacity-100 scale-100 max-h-none"
-          : "lab-inactive-card opacity-55 scale-[0.94] max-h-[280px] cursor-pointer hover:opacity-75"
-      }`;
-    };
+    // [개편] 비활성 카드 축소 표시 제거 — 활성 존 카드 하나만 전체 폭으로 렌더링.
+    // 상단 셀렉터 노드에서 카드로 이어지는 스포트라이트 빔이 연결감을 담당.
+    const labContentCardClass = (zone, baseClass) =>
+      `${baseClass} relative overflow-hidden w-full lab-zone-reveal`;
     const labContentCardStyle = (zone) => {
-      const isActive = activeLabZone === zone;
-      const diff = labContentIndex[zone] - labContentIndex[activeLabZone];
       const meta = labZoneMeta[zone];
       return {
-        zIndex: isActive ? 20 : 10 - Math.abs(diff),
-        transform: isActive
-          ? "translateX(0) translateY(0) scale(1)"
-          : `translateX(${diff < 0 ? -10 : 10}px) translateY(18px) scale(0.94)`,
         background: zone === "future"
-          ? isActive
-            ? `radial-gradient(circle at 50% 14%, rgba(120,53,15,0.62), rgba(244,224,170,0.92) 30%, rgba(202,138,4,0.58) 62%, rgba(15,23,42,0.78) 100%)`
-            : `linear-gradient(145deg, rgba(244,224,170,0.72), rgba(120,53,15,0.36), rgba(15,23,42,0.78))`
-          : isActive
-          ? `linear-gradient(145deg, ${meta.fill}, rgba(15, 23, 42, 0.94))`
-          : `linear-gradient(145deg, ${meta.fill}, rgba(15, 23, 42, 0.82))`,
-        boxShadow: isActive
-          ? `0 24px 80px rgba(0,0,0,0.42), 0 0 34px ${meta.glow}`
-          : "0 14px 38px rgba(0,0,0,0.34)",
+          ? `radial-gradient(circle at 50% 14%, rgba(120,53,15,0.62), rgba(244,224,170,0.92) 30%, rgba(202,138,4,0.58) 62%, rgba(15,23,42,0.78) 100%)`
+          : `linear-gradient(145deg, ${meta.fill}, rgba(15, 23, 42, 0.94))`,
+        // 위에서 빛을 받은 느낌의 상단 글로우 포함
+        boxShadow: `0 24px 80px rgba(0,0,0,0.42), 0 0 34px ${meta.glow}, 0 -20px 60px -24px ${meta.glow}`,
       };
     };
+    // 셀렉터 wave(viewBox 720 기준)의 노드 x좌표 — 빔의 시작점
+    const labBeamX = { current: 88, pulse: 360, future: 632 };
     const labPulseWavePath =
       "M72 64H284C292 64 298 60 303 53C309 41 316 40 322 55C328 71 335 81 343 74C351 67 358 42 368 28C378 14 390 24 398 46C406 68 414 90 424 92C434 94 442 71 452 64H648";
     const renderLabPulseWave = ({ showAnchor = false } = {}) => (
@@ -1828,7 +1812,7 @@ const handleSealPulse = () => {
       const isFutureHeader = zone === "future";
       return (
         <div
-          className={`rounded-[2rem] border p-5 shadow-xl ${
+          className={`rounded-[2rem] border p-3 md:p-5 shadow-xl ${
             isFutureHeader
               ? "border-amber-300/55 bg-[#f4e0aa]/82 shadow-amber-500/30"
               : "border-white/10 bg-slate-950/38"
@@ -1842,13 +1826,17 @@ const handleSealPulse = () => {
               : undefined
           }
         >
-          <div className="flex flex-col items-center gap-3 text-center">
-            {renderLabZoneSymbol(zone, "card", activeLabZone === zone)}
+          <div className="flex flex-col items-center gap-1 md:gap-3 text-center">
+            {/* [모바일 컴팩트] 아바타 심볼·설명은 PC에서만 — 위 셀렉터 노드와 중복 제거 */}
+            <div className="hidden md:block w-full">
+              {renderLabZoneSymbol(zone, "card", activeLabZone === zone)}
+            </div>
             <div className="min-w-0">
               <p className={`text-[11px] font-black uppercase tracking-[0.25em] ${isFutureHeader ? "text-amber-50 drop-shadow-[0_1px_8px_rgba(0,0,0,0.75)]" : meta.text}`}>
                 {title}
               </p>
-              <p className={`mt-2 text-[11px] leading-relaxed ${isFutureHeader ? "text-amber-50/90 drop-shadow-[0_1px_6px_rgba(0,0,0,0.65)]" : "text-slate-200/85"}`}>
+              <div className={`md:hidden mx-auto mt-1.5 h-px w-12 ${isFutureHeader ? "bg-amber-50/40" : "bg-white/15"}`} />
+              <p className={`hidden md:block mt-2 text-[11px] leading-relaxed ${isFutureHeader ? "text-amber-50/90 drop-shadow-[0_1px_6px_rgba(0,0,0,0.65)]" : "text-slate-200/85"}`}>
                 {details}
               </p>
             </div>
@@ -1858,7 +1846,7 @@ const handleSealPulse = () => {
     };
     return (
       <div className="flex-grow w-full max-w-7xl mx-auto overflow-y-auto no-scrollbar pb-24 px-4 animate-fadeIn font-sans">
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex items-center justify-between mb-4 md:mb-8">
           <div className="flex items-center gap-3">
             <Brain className="text-emerald-500" size={32} />
             <h2 className="text-3xl font-black text-white uppercase italic tracking-tighter">
@@ -1891,8 +1879,8 @@ const handleSealPulse = () => {
           </div>
         )}
         {/* Wave-connected Zone Selector */}
-        <div className="relative mb-8 px-2 pb-8 pt-2">
-          <div className="relative mx-auto h-32 max-w-3xl">
+        <div className="relative mb-4 px-2 pb-4 pt-2 md:mb-8 md:pb-8">
+          <div className="relative mx-auto h-24 md:h-32 max-w-3xl">
             {renderLabPulseWave({ showAnchor: true })}
             {[
               { zone: "current", x: "12%" },
@@ -1925,28 +1913,49 @@ const handleSealPulse = () => {
             })}
           </div>
         </div>
+        {/* [스포트라이트 빔] 선택된 노드에서 아래 카드로 빛이 퍼지며 연결 */}
         <div
-          className="lab-grid grid gap-4 md:gap-6 items-start"
-          style={{ gridTemplateColumns: labContentColumns[activeLabZone] }}
+          className="relative mx-auto max-w-3xl h-12 -mt-4 md:h-20 md:-mt-8 mb-1 pointer-events-none"
+          aria-hidden="true"
         >
+          <svg
+            key={activeLabZone}
+            className="lab-beam absolute inset-0 h-full w-full overflow-visible"
+            viewBox="0 0 720 80"
+            preserveAspectRatio="none"
+          >
+            <defs>
+              <linearGradient id="labBeamGrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor={labZoneMeta[activeLabZone].glow} stopOpacity="0.85" />
+                <stop offset="55%" stopColor={labZoneMeta[activeLabZone].glow} stopOpacity="0.28" />
+                <stop offset="100%" stopColor={labZoneMeta[activeLabZone].glow} stopOpacity="0.08" />
+              </linearGradient>
+            </defs>
+            {/* 노드 바로 아래에서 시작해 카드 폭으로 퍼지는 빛 원뿔 */}
+            <polygon
+              points={`${labBeamX[activeLabZone] - 16},0 ${labBeamX[activeLabZone] + 16},0 780,80 -60,80`}
+              fill="url(#labBeamGrad)"
+            />
+            <line
+              x1={labBeamX[activeLabZone]}
+              y1="0"
+              x2={labBeamX[activeLabZone]}
+              y2="80"
+              stroke={labZoneMeta[activeLabZone].glow}
+              strokeWidth="2"
+              className="lab-wave-breathe"
+            />
+          </svg>
+        </div>
+        <div className="w-full">
+          {activeLabZone === "current" && (
           <div
-            onClick={() => activeLabZone !== "current" && setActiveLabZone("current")}
             className={labContentCardClass(
               "current",
-              "border border-emerald-200/30 rounded-[2rem] p-4 space-y-6"
+              "border border-emerald-200/30 rounded-[2rem] p-3 space-y-4 md:p-4 md:space-y-6"
             )}
             style={labContentCardStyle("current")}
           >
-            {activeLabZone !== "current" && (
-              <button
-                type="button"
-                onClick={() => setActiveLabZone("current")}
-                className="absolute inset-0 z-30 flex items-start justify-center bg-slate-950/10 pt-8 text-[10px] font-black uppercase tracking-[0.24em] text-amber-200/70"
-                aria-label="Current Self 카드 열기"
-              >
-                Current Self
-              </button>
-            )}
             {renderLabNodeHeader(
               "current",
               "현재의 나 / Current Self",
@@ -2426,25 +2435,16 @@ const handleSealPulse = () => {
               </div>
             )}
           </div>
+          )}
 
+          {activeLabZone === "pulse" && (
           <div
-            onClick={() => activeLabZone !== "pulse" && setActiveLabZone("pulse")}
             className={labContentCardClass(
               "pulse",
-              "border border-teal-200/30 rounded-[2rem] p-4 space-y-6"
+              "border border-teal-200/30 rounded-[2rem] p-3 space-y-4 md:p-4 md:space-y-6"
             )}
             style={labContentCardStyle("pulse")}
           >
-            {activeLabZone !== "pulse" && (
-              <button
-                type="button"
-                onClick={() => setActiveLabZone("pulse")}
-                className="absolute inset-0 z-30 flex items-start justify-center bg-slate-950/10 pt-8 text-[10px] font-black uppercase tracking-[0.24em] text-teal-100/70"
-                aria-label="Bridge Core 카드 열기"
-              >
-                Bridge Core
-              </button>
-            )}
             {renderLabNodeHeader(
               "pulse",
               "THE PULSE / Bridge Core",
@@ -2649,38 +2649,33 @@ const handleSealPulse = () => {
               );
             })()}
           </div>
+          )}
 
+          {activeLabZone === "future" && (
           <div
-            onClick={() => activeLabZone !== "future" && setActiveLabZone("future")}
             className={labContentCardClass(
               "future",
-              "border border-yellow-200/40 rounded-[2rem] p-4 space-y-6"
+              "border border-yellow-200/40 rounded-[2rem] p-3 space-y-4 md:p-4 md:space-y-6"
             )}
             style={labContentCardStyle("future")}
           >
-            {activeLabZone !== "future" && (
-              <button
-                type="button"
-                onClick={() => setActiveLabZone("future")}
-                className="absolute inset-0 z-30 flex items-start justify-center bg-slate-950/10 pt-8 text-[10px] font-black uppercase tracking-[0.24em] text-amber-100/75"
-                aria-label="Apex BPS 카드 열기"
-              >
-                Apex BPS
-              </button>
-            )}
             {renderLabNodeHeader(
               "future",
               "미래의 나 / Apex BPS",
               "미래 자아 성격 · 목표 설계 · 비전 · 감각 비전 · 몰입 시나리오"
             )}
-            <div className="bg-[#ead08c]/88 p-10 rounded-[3rem] border border-amber-300/70 shadow-xl shadow-amber-500/25 border-t-4 border-amber-400/70">
+            <div className="bg-[#ead08c]/88 p-5 rounded-[2rem] md:p-10 md:rounded-[3rem] border border-amber-300/70 shadow-xl shadow-amber-500/25 border-t-4 border-amber-400/70">
               <p className="text-[12px] font-black text-amber-950 uppercase tracking-[0.35em] mb-4 flex items-center gap-2">
                 <Star size={16} /> 미래 자아 성격 설계
               </p>
-              <div className="grid grid-cols-1 md:grid-cols-5 gap-3 mb-6">
+              {/* [모바일 컴팩트] 칩 스타일 2열 (마지막 칩은 가로 전체) / PC는 라벨+5열 유지 */}
+              <div className="grid grid-cols-2 md:grid-cols-5 gap-2 md:gap-3 mb-2 md:mb-6">
                 {[0, 1, 2, 3, 4].map((idx) => (
-                  <div key={idx} className="space-y-1.5">
-                    <label className="text-[8px] font-black text-amber-950 uppercase ml-2 tracking-widest">
+                  <div
+                    key={idx}
+                    className={`space-y-1.5 ${idx === 4 ? "col-span-2 md:col-span-1" : ""}`}
+                  >
+                    <label className="hidden md:block text-[8px] font-black text-amber-950 uppercase ml-2 tracking-widest">
                       성격 키워드 {idx + 1}
                     </label>
                     <input
@@ -2689,14 +2684,14 @@ const handleSealPulse = () => {
                       placeholder={
                         ["지혜", "평온", "자비", "용기", "통찰"][idx]
                       }
-                      className="w-full bg-slate-950/85 border border-white/15 rounded-2xl p-4 text-[13px] text-white placeholder:text-amber-100/80 font-black text-center focus:ring-1 focus:ring-amber-500 outline-none transition-all"
+                      className="w-full bg-slate-950/85 border border-white/15 rounded-full p-2.5 text-[12px] md:rounded-2xl md:p-4 md:text-[13px] text-white placeholder:text-amber-100/80 font-black text-center focus:ring-1 focus:ring-amber-500 outline-none transition-all"
                     />
                   </div>
                 ))}
               </div>
             </div>
-            <div className="bg-[#e6c36d]/78 p-10 rounded-[3rem] border border-amber-400/55 shadow-xl shadow-amber-500/25">
-              <div className="mb-10">
+            <div className="bg-[#e6c36d]/78 p-5 rounded-[2rem] md:p-10 md:rounded-[3rem] border border-amber-400/55 shadow-xl shadow-amber-500/25">
+              <div className="mb-6 md:mb-10">
                 <p className="text-[12px] font-black text-emerald-900 uppercase tracking-widest flex items-center gap-2 mb-4">
                   <Zap size={14} /> 목표 설계자
                 </p>
@@ -2725,6 +2720,7 @@ const handleSealPulse = () => {
                             onClick={(e) => {
                               e.stopPropagation();
                               setActiveLevel(lv);
+                              setShowFullMission(false);
                             }}
                             className={`relative flex items-center justify-center h-[26px] rounded-lg mb-1 overflow-hidden border transition-all duration-300 ${miniWidths[lv]} ${
                               isActive
@@ -2758,15 +2754,28 @@ const handleSealPulse = () => {
                       {activeLevel}단계: {levelMap[activeLevel] || "Apex"}
                     </p>
                     <p
-                      className="text-[13px] text-amber-950 font-bold leading-relaxed animate-fadeIn"
+                      className={`text-[13px] text-amber-950 font-bold leading-relaxed animate-fadeIn ${
+                        showFullMission ? "" : "line-clamp-2"
+                      } md:line-clamp-none`}
                       style={{ wordBreak: "keep-all" }}
                     >
                       {missionMap[activeLevel] || "피라미드에서 단계를 선택하세요."}
                     </p>
+                    {/* [모바일 컴팩트] 2줄 요약 + 더보기 (PC는 항상 전체 표시) */}
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setShowFullMission((prev) => !prev);
+                      }}
+                      className="md:hidden mt-1 w-fit text-[11px] font-black text-amber-900/80 underline underline-offset-2"
+                    >
+                      {showFullMission ? "접기 ▴" : "더 보기 ▾"}
+                    </button>
                   </div>
                 </div>
               </div>
-              <div className="space-y-6 mb-10">
+              <div className="space-y-4 mb-6 md:space-y-6 md:mb-10">
                 <div className="flex gap-4">
                   {/* [수정] 이모지 입력칸 → 현재 레벨 숫자 배지로 대체 */}
                   <div className="w-20 shrink-0 bg-slate-950 border border-amber-500/40 rounded-3xl flex flex-col items-center justify-center py-2 text-center">
@@ -2786,11 +2795,38 @@ const handleSealPulse = () => {
                     placeholder="비전 제목을 입력하세요"
                   />
                 </div>
+                {/* [모바일 컴팩트] 감각 탭 — 선택한 감각 1칸만 표시 (PC는 3열 유지) */}
+                <div className="flex md:hidden gap-2">
+                  {["v", "a", "k"].map((type) => {
+                    const filled =
+                      String(visions[activeLevel]?.[type] || "").trim() !== "";
+                    return (
+                      <button
+                        key={type}
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setMobileSensoryTab(type);
+                        }}
+                        className={`flex-1 py-2.5 rounded-xl text-[11px] font-black transition-all border ${
+                          mobileSensoryTab === type
+                            ? "bg-slate-950 text-amber-300 border-amber-500/60"
+                            : "bg-slate-950/40 text-slate-300 border-white/10"
+                        }`}
+                      >
+                        {type === "v" ? "👁️ 시각" : type === "a" ? "🎧 소리" : "⚡ 몸"}
+                        {filled && <span className="text-emerald-400 ml-1">●</span>}
+                      </button>
+                    );
+                  })}
+                </div>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-start">
                   {["v", "a", "k"].map((type) => (
                     <div
                       key={type}
-                      className="space-y-2 bg-slate-950/80 p-5 rounded-[2rem] border border-white/10"
+                      className={`${
+                        mobileSensoryTab === type ? "" : "hidden md:block"
+                      } space-y-2 bg-slate-950/80 p-4 md:p-5 rounded-[2rem] border border-white/10`}
                     >
                       <p
                         className={`text-[9px] font-black uppercase px-2 tracking-widest ${
@@ -2818,7 +2854,7 @@ const handleSealPulse = () => {
                     </div>
                   ))}
                 </div>
-                <div className="bg-[#1A202C]/60 p-8 rounded-[2.5rem] border border-amber-500/20 my-10 relative shadow-2xl">
+                <div className="bg-[#1A202C]/60 p-5 my-5 rounded-[2rem] md:p-8 md:my-10 md:rounded-[2.5rem] border border-amber-500/20 relative shadow-2xl">
                   <div className="flex justify-between items-center mb-4">
                     <p className="text-[10px] font-black text-amber-300 uppercase tracking-widest flex items-center gap-2">
                       <Brain size={14} /> AI 감각 몰입 시나리오
@@ -2885,6 +2921,7 @@ const handleSealPulse = () => {
               </div>
             )}
           </div>
+          )}
         </div>
       </div>
     );
