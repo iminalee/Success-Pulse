@@ -600,6 +600,13 @@ const App = () => {
   // [모바일 컴팩트] 감각 비전 탭 (모바일에서 1칸만 표시) / 단계 설명 더보기
   const [mobileSensoryTab, setMobileSensoryTab] = useState("v");
   const [showFullMission, setShowFullMission] = useState(false);
+  // [모바일 아코디언] My Lab 섹션 펼침 상태 — PC(md+)는 항상 펼침
+  const [openLabSections, setOpenLabSections] = useState({
+    identity: true,
+    financial: true,
+    goal: true,
+    focus: true,
+  });
 
   // [Tonight v2] Tonight 흐름 전용 state — 기존 state 절대 수정 금지
   const [tonightStep, setTonightStep] = useState("intro"); // "intro" | "chat" | "draft" | "sealed"
@@ -1811,35 +1818,79 @@ const handleSealPulse = () => {
       const meta = labZoneMeta[zone];
       const isFutureHeader = zone === "future";
       return (
-        <div
-          className={`rounded-[2rem] border p-3 md:p-5 shadow-xl ${
-            isFutureHeader
-              ? "border-amber-300/55 bg-[#f4e0aa]/82 shadow-amber-500/30"
-              : "border-white/10 bg-slate-950/38"
-          }`}
-          style={
-            isFutureHeader
-              ? {
-                  background:
-                    "radial-gradient(circle at 50% 32%, rgba(92,47,9,0.68) 0%, rgba(180,83,9,0.42) 24%, rgba(244,224,170,0.88) 56%, rgba(120,53,15,0.5) 100%)",
-                }
-              : undefined
-          }
-        >
-          <div className="flex flex-col items-center gap-1 md:gap-3 text-center">
-            {/* [모바일 컴팩트] 아바타 심볼·설명은 PC에서만 — 위 셀렉터 노드와 중복 제거 */}
-            <div className="hidden md:block w-full">
+        <>
+          {/* [모바일] 박스 없이 제목 한 줄 + 골드 그라데이션 밑줄 — 빔이 제목을 비추는 느낌 */}
+          <div className="md:hidden text-center pt-1">
+            <p
+              className={`text-[14px] font-black uppercase tracking-[0.2em] ${
+                isFutureHeader
+                  ? "text-amber-50 drop-shadow-[0_1px_8px_rgba(0,0,0,0.75)]"
+                  : meta.text
+              }`}
+            >
+              {title}
+            </p>
+            <div className="mx-auto mt-2 h-px w-28 bg-gradient-to-r from-transparent via-amber-300/70 to-transparent" />
+          </div>
+          {/* [PC] 기존 박스 헤더 유지 */}
+          <div
+            className={`hidden md:block rounded-[2rem] border p-5 shadow-xl ${
+              isFutureHeader
+                ? "border-amber-300/55 bg-[#f4e0aa]/82 shadow-amber-500/30"
+                : "border-white/10 bg-slate-950/38"
+            }`}
+            style={
+              isFutureHeader
+                ? {
+                    background:
+                      "radial-gradient(circle at 50% 32%, rgba(92,47,9,0.68) 0%, rgba(180,83,9,0.42) 24%, rgba(244,224,170,0.88) 56%, rgba(120,53,15,0.5) 100%)",
+                  }
+                : undefined
+            }
+          >
+            <div className="flex flex-col items-center gap-3 text-center">
               {renderLabZoneSymbol(zone, "card", activeLabZone === zone)}
+              <div className="min-w-0">
+                <p className={`text-[11px] font-black uppercase tracking-[0.25em] ${isFutureHeader ? "text-amber-50 drop-shadow-[0_1px_8px_rgba(0,0,0,0.75)]" : meta.text}`}>
+                  {title}
+                </p>
+                <p className={`mt-2 text-[11px] leading-relaxed ${isFutureHeader ? "text-amber-50/90 drop-shadow-[0_1px_6px_rgba(0,0,0,0.65)]" : "text-slate-200/85"}`}>
+                  {details}
+                </p>
+              </div>
             </div>
-            <div className="min-w-0">
-              <p className={`text-[11px] font-black uppercase tracking-[0.25em] ${isFutureHeader ? "text-amber-50 drop-shadow-[0_1px_8px_rgba(0,0,0,0.75)]" : meta.text}`}>
-                {title}
-              </p>
-              <div className={`md:hidden mx-auto mt-1.5 h-px w-12 ${isFutureHeader ? "bg-amber-50/40" : "bg-white/15"}`} />
-              <p className={`hidden md:block mt-2 text-[11px] leading-relaxed ${isFutureHeader ? "text-amber-50/90 drop-shadow-[0_1px_6px_rgba(0,0,0,0.65)]" : "text-slate-200/85"}`}>
-                {details}
-              </p>
-            </div>
+          </div>
+        </>
+      );
+    };
+    // [모바일 아코디언 섹션] — 어두운 헤더 바(가독성) + 탭하면 펼침. PC(md+)는 항상 펼침.
+    const renderAccordionSection = (id, { icon, title, filled = false, defaultOpen = false }, content) => {
+      const open = openLabSections[id] ?? defaultOpen;
+      return (
+        <div key={id}>
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              setOpenLabSections((prev) => ({ ...prev, [id]: !open }));
+            }}
+            className="md:hidden w-full flex items-center gap-2.5 bg-slate-950/70 border border-white/10 rounded-xl px-3.5 py-3 text-left"
+          >
+            <span className="text-amber-400 shrink-0">{icon}</span>
+            <span className="flex-1 text-[15px] font-black text-white tracking-tight">
+              {title}
+            </span>
+            {filled && <span className="text-[9px] text-emerald-400">●</span>}
+            <span
+              className={`text-[11px] text-slate-400 transition-transform duration-300 ${
+                open ? "rotate-180" : ""
+              }`}
+            >
+              ▼
+            </span>
+          </button>
+          <div className={`${open ? "block pt-3" : "hidden"} md:block md:pt-0`}>
+            {content}
           </div>
         </div>
       );
@@ -1961,9 +2012,15 @@ const handleSealPulse = () => {
               "현재의 나 / Current Self",
               "Identity Registration · Life Profile · Financial Core · VAK · TCI"
             )}
-            <div className="bg-[#2D3748]/30 p-8 rounded-[3rem] border border-white/5 shadow-xl border-l-4 border-amber-500 mb-8 flex flex-col md:flex-row items-center gap-8">
+            {renderAccordionSection("identity", {
+              icon: <Flag size={15} />,
+              title: "계정 / Identity",
+              filled: !!user,
+              defaultOpen: true,
+            }, (
+            <div className="bg-transparent p-0 rounded-none border-0 shadow-none md:bg-[#2D3748]/30 md:p-8 md:rounded-[3rem] md:border md:border-white/5 md:shadow-xl md:border-l-4 md:border-amber-500 md:mb-8 flex flex-col md:flex-row items-center gap-4 md:gap-8">
               <div className="flex-grow w-full space-y-4">
-                <div className="flex justify-between items-end">
+                <div className="hidden md:flex justify-between items-end">
                   <p className="text-[10px] font-black text-amber-500 uppercase tracking-[0.3em] flex items-center gap-2">
                     <Flag size={12} /> Identity Registration
                   </p>
@@ -2086,9 +2143,15 @@ const handleSealPulse = () => {
                 )}
               </div>
             </div>
+            ))}
 
-            <div className="mt-8 bg-[#1A202C]/50 p-6 rounded-[2rem] border border-white/5">
-              <p className="text-[10px] font-black text-amber-500 uppercase tracking-widest mb-4">
+            {renderAccordionSection("life", {
+              icon: <Activity size={15} />,
+              title: "Life Profile · 생활",
+              filled: !!(lifeProfile.sleep_time || lifeProfile.wake_time),
+            }, (
+            <div className="bg-transparent p-0 rounded-none border-0 md:mt-8 md:bg-[#1A202C]/50 md:p-6 md:rounded-[2rem] md:border md:border-white/5">
+              <p className="hidden md:block text-[10px] font-black text-amber-500 uppercase tracking-widest mb-4">
                 Life Profile / 생활 프로필
               </p>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
@@ -2122,8 +2185,16 @@ const handleSealPulse = () => {
               {/* Sleep Notes / Major Goals 입력 UI 제거 (2026-07 피드백)
                   — lifeProfile.sleep_notes / major_goals 데이터 필드는 하위 호환을 위해 유지 */}
             </div>
-            <div className="bg-[#2D3748]/40 p-7 rounded-[2.5rem] border border-white/5 shadow-xl">
-              <p className="text-[12px] font-black text-amber-500 uppercase tracking-[0.3em] mb-6 flex items-center gap-2">
+            ))}
+
+            {renderAccordionSection("financial", {
+              icon: <Coins size={15} />,
+              title: "Financial Core · 재정",
+              filled: Number(annualIncome) > 0 && !!targetDate,
+              defaultOpen: true,
+            }, (
+            <div className="bg-transparent p-0 rounded-none border-0 shadow-none md:bg-[#2D3748]/40 md:p-7 md:rounded-[2.5rem] md:border md:border-white/5 md:shadow-xl">
+              <p className="hidden md:flex text-[12px] font-black text-amber-500 uppercase tracking-[0.3em] mb-6 items-center gap-2">
                 <Coins size={14} /> Financial Core
               </p>
               <div className="space-y-6 text-center">
@@ -2202,12 +2273,20 @@ const handleSealPulse = () => {
                 </div>
               </div>
             </div>
+            ))}
+
             {/* [Apex Profile] Act 1(Discover) 결과 표시 — 결과 없으면 설문 안내 탭 */}
+            {renderAccordionSection("apexProfile", {
+              icon: <Sparkles size={15} />,
+              title: "Apex Profile · 프로파일",
+              filled: !!discoverResult,
+            }, (
             <ProfileResultCard
               snapshot={discoverResult}
               userName={userName}
               onRunSurvey={handleRunAct1FromMyLab}
             />
+            ))}
             {/* VAK/TCI 상세 수치는 접이식으로 유지 (수동 입력 경로 보존) */}
             <button
               type="button"
@@ -2453,12 +2532,18 @@ const handleSealPulse = () => {
             {/* [Pulse Focus 피라미드] Ledger(hub) 피라미드 디자인 재사용 —
                 '미래의 나' 1~5단계 비전 제목을 매슬로우 단계에 매칭.
                 클릭으로 지금 집중할 단계를 선택/해제 (visions[lv].focus, 최소 1개) */}
-            <div className="bg-[#1A202C]/60 p-6 rounded-[2.5rem] border border-teal-200/20 mb-6">
+            {renderAccordionSection("focus", {
+              icon: <TrendingUp size={15} />,
+              title: "Pulse Focus · 집중 단계",
+              filled: [1, 2, 3, 4, 5].some((lv) => visions[lv]?.focus),
+              defaultOpen: true,
+            }, (
+            <div className="bg-transparent p-0 rounded-none border-0 md:bg-[#1A202C]/60 md:p-6 md:rounded-[2.5rem] md:border md:border-teal-200/20 md:mb-6">
               <div className="flex justify-between items-center mb-4">
-                <p className="text-[10px] font-black text-teal-200 uppercase tracking-widest">
+                <p className="hidden md:block text-[10px] font-black text-teal-200 uppercase tracking-widest">
                   Pulse Focus — 지금 집중할 단계 선택
                 </p>
-                <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">
+                <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest mx-auto md:mx-0">
                   클릭해서 선택 / 해제 (최소 1개)
                 </span>
               </div>
@@ -2529,9 +2614,10 @@ const handleSealPulse = () => {
                 })()}
               </div>
             </div>
-            <div className="bg-[#1A202C]/60 p-6 rounded-[2.5rem] border border-amber-500/20 mb-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="bg-slate-900/50 border border-white/10 rounded-2xl p-4">
+            ))}
+            <div className="bg-[#1A202C]/60 p-4 md:p-6 rounded-[2.5rem] border border-amber-500/20 md:mb-6">
+              <div className="grid grid-cols-2 gap-3 md:gap-4">
+                <div className="bg-slate-900/50 border border-white/10 rounded-2xl p-3 md:p-4">
                   <p className="text-[9px] text-slate-500 font-black uppercase tracking-widest mb-2">Target Date</p>
                   <p className="text-sm font-black text-white">{targetDate}</p>
                 </div>
@@ -2664,8 +2750,13 @@ const handleSealPulse = () => {
               "미래의 나 / Apex BPS",
               "미래 자아 성격 · 목표 설계 · 비전 · 감각 비전 · 몰입 시나리오"
             )}
-            <div className="bg-[#ead08c]/88 p-5 rounded-[2rem] md:p-10 md:rounded-[3rem] border border-amber-300/70 shadow-xl shadow-amber-500/25 border-t-4 border-amber-400/70">
-              <p className="text-[12px] font-black text-amber-950 uppercase tracking-[0.35em] mb-4 flex items-center gap-2">
+            {renderAccordionSection("traits", {
+              icon: <Star size={15} />,
+              title: "미래 자아 성격 설계",
+              filled: bpsTraits.some((t) => String(t || "").trim() !== ""),
+            }, (
+            <div className="bg-transparent p-0 rounded-none border-0 shadow-none md:bg-[#ead08c]/88 md:p-10 md:rounded-[3rem] md:border md:border-amber-300/70 md:shadow-xl md:shadow-amber-500/25 md:border-t-4 md:border-amber-400/70">
+              <p className="hidden md:flex text-[12px] font-black text-amber-950 uppercase tracking-[0.35em] mb-4 items-center gap-2">
                 <Star size={16} /> 미래 자아 성격 설계
               </p>
               {/* [모바일 컴팩트] 칩 스타일 2열 (마지막 칩은 가로 전체) / PC는 라벨+5열 유지 */}
@@ -2690,9 +2781,17 @@ const handleSealPulse = () => {
                 ))}
               </div>
             </div>
-            <div className="bg-[#e6c36d]/78 p-5 rounded-[2rem] md:p-10 md:rounded-[3rem] border border-amber-400/55 shadow-xl shadow-amber-500/25">
+            ))}
+
+            {renderAccordionSection("goal", {
+              icon: <Zap size={15} />,
+              title: "목표 설계자 · 비전",
+              filled: String(visions[activeLevel]?.title || "").trim() !== "",
+              defaultOpen: true,
+            }, (
+            <div className="bg-transparent p-0 rounded-none border-0 shadow-none md:bg-[#e6c36d]/78 md:p-10 md:rounded-[3rem] md:border md:border-amber-400/55 md:shadow-xl md:shadow-amber-500/25">
               <div className="mb-6 md:mb-10">
-                <p className="text-[12px] font-black text-emerald-900 uppercase tracking-widest flex items-center gap-2 mb-4">
+                <p className="hidden md:flex text-[12px] font-black text-emerald-900 uppercase tracking-widest items-center gap-2 mb-4">
                   <Zap size={14} /> 목표 설계자
                 </p>
 
@@ -2748,13 +2847,13 @@ const handleSealPulse = () => {
                     })()}
                   </div>
 
-                  {/* 단계 설명 — 피라미드 높이만큼의 옆 공간 활용, 가독성을 위해 글자 확대 */}
-                  <div className="flex-1 min-w-0 flex flex-col justify-center">
+                  {/* 단계 설명 — 모바일은 어두운 반투명 패널로 가독성 확보 (골드 배경 대비) */}
+                  <div className="flex-1 min-w-0 flex flex-col justify-center bg-slate-950/55 rounded-2xl p-3 md:bg-transparent md:rounded-none md:p-0">
                     <p className="text-[13px] font-bold text-white italic bg-slate-950/75 px-3 py-1 rounded-full border border-white/10 inline-block w-fit mb-2">
                       {activeLevel}단계: {levelMap[activeLevel] || "Apex"}
                     </p>
                     <p
-                      className={`text-[13px] text-amber-950 font-bold leading-relaxed animate-fadeIn ${
+                      className={`text-[13px] text-amber-100 md:text-amber-950 font-bold leading-relaxed animate-fadeIn ${
                         showFullMission ? "" : "line-clamp-2"
                       } md:line-clamp-none`}
                       style={{ wordBreak: "keep-all" }}
@@ -2768,7 +2867,7 @@ const handleSealPulse = () => {
                         e.stopPropagation();
                         setShowFullMission((prev) => !prev);
                       }}
-                      className="md:hidden mt-1 w-fit text-[11px] font-black text-amber-900/80 underline underline-offset-2"
+                      className="md:hidden mt-1 w-fit text-[11px] font-black text-amber-300/90 underline underline-offset-2"
                     >
                       {showFullMission ? "접기 ▴" : "더 보기 ▾"}
                     </button>
@@ -2795,6 +2894,18 @@ const handleSealPulse = () => {
                     placeholder="비전 제목을 입력하세요"
                   />
                 </div>
+              </div>
+            </div>
+            ))}
+
+            {renderAccordionSection("sensory", {
+              icon: <Eye size={15} />,
+              title: "감각 비전 (V·A·K)",
+              filled: ["v", "a", "k"].some(
+                (t) => String(visions[activeLevel]?.[t] || "").trim() !== ""
+              ),
+            }, (
+            <div className="space-y-3 md:space-y-6 bg-transparent p-0 rounded-none border-0 shadow-none md:bg-[#e6c36d]/78 md:p-10 md:rounded-[3rem] md:border md:border-amber-400/55 md:shadow-xl md:shadow-amber-500/25">
                 {/* [모바일 컴팩트] 감각 탭 — 선택한 감각 1칸만 표시 (PC는 3열 유지) */}
                 <div className="flex md:hidden gap-2">
                   {["v", "a", "k"].map((type) => {
@@ -2854,7 +2965,15 @@ const handleSealPulse = () => {
                     </div>
                   ))}
                 </div>
-                <div className="bg-[#1A202C]/60 p-5 my-5 rounded-[2rem] md:p-8 md:my-10 md:rounded-[2.5rem] border border-amber-500/20 relative shadow-2xl">
+            </div>
+            ))}
+
+            {renderAccordionSection("immersion", {
+              icon: <Wand2 size={15} />,
+              title: "AI 몰입 시나리오",
+              filled: String(visions[activeLevel]?.immersionScript || "").trim() !== "",
+            }, (
+                <div className="bg-[#1A202C]/60 p-5 rounded-[2rem] md:p-8 md:rounded-[2.5rem] border border-amber-500/20 relative shadow-2xl">
                   <div className="flex justify-between items-center mb-4">
                     <p className="text-[10px] font-black text-amber-300 uppercase tracking-widest flex items-center gap-2">
                       <Brain size={14} /> AI 감각 몰입 시나리오
@@ -2888,8 +3007,8 @@ const handleSealPulse = () => {
                     placeholder="AI가 시각·소리·몸의 느낌을 담은 시나리오를 설계합니다."
                   />
                 </div>
-              </div>
-            </div>
+            ))}
+
             {/* [Setup Journey 2/3] 계약 전 가이드 — 비전 1개 이상 입력 후 THE PULSE로 이동 */}
             {user && !signedDate && activeLabZone === "future" && (
               <div className="bg-slate-950/70 border border-amber-500/25 rounded-[2rem] p-6 text-center space-y-3">
