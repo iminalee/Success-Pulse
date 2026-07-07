@@ -1964,33 +1964,9 @@ const handleSealPulse = () => {
             </h2>
           </div>
         </div>
-        {/* [Setup Journey] 계약 전 안내 배너 — 현재의 나 → 미래의 나 → THE PULSE → 계약 */}
-        {user && !signedDate && (
-          <div className="mb-8 bg-slate-950/60 border border-amber-500/20 rounded-2xl px-4 py-3 flex flex-wrap items-center justify-center gap-2">
-            {[
-              { zone: "current", label: "1. 현재의 나 — 기본 정보" },
-              { zone: "future", label: "2. 미래의 나 — 비전" },
-              { zone: "pulse", label: "3. THE PULSE — 집중 단계" },
-              { zone: null, label: "4. 계약 서명" },
-            ].map((step, idx) => (
-              <React.Fragment key={step.label}>
-                {idx > 0 && <span className="text-slate-700 text-[10px]">→</span>}
-                <span
-                  className={`text-[9px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full border ${
-                    step.zone === activeLabZone
-                      ? "text-amber-400 border-amber-500/50 bg-amber-500/10"
-                      : "text-slate-500 border-white/5 bg-slate-900/40"
-                  }`}
-                >
-                  {step.label}
-                </span>
-              </React.Fragment>
-            ))}
-          </div>
-        )}
-        {/* Wave-connected Zone Selector */}
+        {/* Wave-connected Zone Selector — 카드 폭에 맞춰 반응형으로 늘어남 */}
         <div className="relative mb-4 px-2 pb-4 pt-2 md:mb-8 md:pb-8">
-          <div className="relative mx-auto h-24 md:h-32 max-w-3xl">
+          <div className="relative mx-auto h-24 md:h-32 w-full">
             {renderLabPulseWave({ showAnchor: true })}
             {[
               { zone: "current", x: "12%" },
@@ -2025,7 +2001,7 @@ const handleSealPulse = () => {
         </div>
         {/* [스포트라이트 빔] 선택된 노드에서 아래 카드로 빛이 퍼지며 연결 */}
         <div
-          className="relative mx-auto max-w-3xl h-12 -mt-4 md:h-20 md:-mt-8 mb-1 pointer-events-none"
+          className="relative mx-auto w-full h-12 -mt-4 md:h-20 md:-mt-8 mb-1 pointer-events-none"
           aria-hidden="true"
         >
           <svg
@@ -2071,27 +2047,26 @@ const handleSealPulse = () => {
               "현재의 나 / Current Self",
               "Identity Registration · Life Profile · Financial Core · VAK · TCI"
             )}
+            {/* [다크 콘솔] PC 2열 그리드 — 좌: 계정·생활·재정 / 우: 프로파일·상세 수치 */}
+            <div className="md:grid md:grid-cols-2 md:gap-x-14 md:items-start">
+              <div className="md:space-y-10">
             {renderAccordionSection("identity", {
               icon: <Flag size={15} />,
               title: "계정 / Identity",
               filled: !!user,
               defaultOpen: true,
             }, (
-            <div className="bg-transparent p-0 rounded-none border-0 shadow-none md:bg-[#2D3748]/30 md:p-8 md:rounded-[3rem] md:border md:border-white/5 md:shadow-xl md:border-l-4 md:border-amber-500 md:mb-8 flex flex-col md:flex-row items-center gap-4 md:gap-8">
-              <div className="flex-grow w-full space-y-4">
-                <div className="hidden md:flex justify-between items-end">
-                  <p className="text-[10px] font-black text-amber-500 uppercase tracking-[0.3em] flex items-center gap-2">
-                    <Flag size={12} /> Identity Registration
-                  </p>
-                  <div className="text-right">
-                    <span className="text-[9px] text-slate-500 font-bold uppercase tracking-widest mr-2">
-                      System User
-                    </span>
-                    <span className="text-[9px] font-black text-amber-500">
-                      ver.0
-                    </span>
-                  </div>
-                </div>
+            <div>
+              <div className="hidden md:flex items-center justify-between mb-5">
+                <p className="flex items-center gap-2.5">
+                  <span className="inline-block w-3.5 h-[2px]" style={{ background: labAccent }} />
+                  <span className="text-[15px] font-bold text-white tracking-tight">계정 / Identity</span>
+                </p>
+                <span className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">
+                  System User <span className="text-amber-400">ver.0</span>
+                </span>
+              </div>
+              <div className="w-full space-y-4">
 
                 {user ? (
                   <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-2xl p-6 text-center animate-fadeIn">
@@ -2209,13 +2184,11 @@ const handleSealPulse = () => {
               title: "Life Profile · 생활",
               filled: !!(lifeProfile.sleep_time || lifeProfile.wake_time),
             }, (
-            <div className="bg-transparent p-0 rounded-none border-0 md:mt-8 md:bg-[#1A202C]/50 md:p-6 md:rounded-[2rem] md:border md:border-white/5">
-              <p className="hidden md:block text-[10px] font-black text-amber-500 uppercase tracking-widest mb-4">
-                Life Profile / 생활 프로필
-              </p>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            <div>
+              {renderFlatLabel("Life Profile · 생활", "수면 리듬")}
+              <div className="grid grid-cols-2 gap-x-8">
                 <div>
-                  <label className="block text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1">
+                  <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-[0.12em] mb-1">
                     Sleep Time
                   </label>
                   <input
@@ -2224,11 +2197,11 @@ const handleSealPulse = () => {
                       setLifeProfile((prev) => ({ ...prev, sleep_time: e.target.value }))
                     }
                     placeholder="23:30"
-                    className="w-full bg-slate-900 border border-white/10 rounded-2xl p-3 text-sm text-slate-200 outline-none"
+                    className="w-full bg-transparent border-0 border-b-2 border-emerald-400/30 focus:border-emerald-300 rounded-none px-1 pb-2 text-[15px] font-bold text-white placeholder:text-slate-600 outline-none transition-colors"
                   />
                 </div>
                 <div>
-                  <label className="block text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1">
+                  <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-[0.12em] mb-1">
                     Wake Time
                   </label>
                   <input
@@ -2237,7 +2210,7 @@ const handleSealPulse = () => {
                       setLifeProfile((prev) => ({ ...prev, wake_time: e.target.value }))
                     }
                     placeholder="06:30"
-                    className="w-full bg-slate-900 border border-white/10 rounded-2xl p-3 text-sm text-slate-200 outline-none"
+                    className="w-full bg-transparent border-0 border-b-2 border-emerald-400/30 focus:border-emerald-300 rounded-none px-1 pb-2 text-[15px] font-bold text-white placeholder:text-slate-600 outline-none transition-colors"
                   />
                 </div>
               </div>
@@ -2252,36 +2225,34 @@ const handleSealPulse = () => {
               filled: Number(annualIncome) > 0 && !!targetDate,
               defaultOpen: true,
             }, (
-            <div className="bg-transparent p-0 rounded-none border-0 shadow-none md:bg-[#2D3748]/40 md:p-7 md:rounded-[2.5rem] md:border md:border-white/5 md:shadow-xl">
-              <p className="hidden md:flex text-[12px] font-black text-amber-500 uppercase tracking-[0.3em] mb-6 items-center gap-2">
-                <Coins size={14} /> Financial Core
-              </p>
-              <div className="space-y-6 text-center">
-                <div className="flex gap-3">
-                  <div className="w-16">
-                    <label className="block text-[8px] text-slate-500 mb-1 font-black uppercase tracking-widest">
+            <div>
+              {renderFlatLabel("Financial Core · 재정", "Mental Bank 기준값")}
+              <div className="space-y-6">
+                <div className="flex gap-6">
+                  <div className="w-16 shrink-0">
+                    <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-[0.12em] mb-1">
                       Unit
                     </label>
                     <input
                       value={currency}
                       onChange={(e) => setCurrency(e.target.value)}
-                      className="w-full bg-[#1A202C]/80 border border-white/10 rounded-xl p-3 text-center font-bold text-white outline-none"
+                      className="w-full bg-transparent border-0 border-b-2 border-emerald-400/30 focus:border-emerald-300 rounded-none px-1 pb-2 text-[15px] font-bold text-white text-center outline-none transition-colors"
                     />
                   </div>
                   <div className="flex-grow">
-                    <label className="block text-[8px] text-slate-500 mb-1 font-black uppercase text-left tracking-widest">
+                    <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-[0.12em] mb-1">
                       Annual Income
                     </label>
                     <input
                       type="number"
                       value={annualIncome}
                       onChange={(e) => setAnnualIncome(Number(e.target.value))}
-                      className="w-full bg-[#1A202C]/80 border border-white/10 rounded-xl p-3 font-mono font-bold text-white text-right outline-none"
+                      className="w-full bg-transparent border-0 border-b-2 border-emerald-400/30 focus:border-emerald-300 rounded-none px-1 pb-2 text-[15px] font-mono font-bold text-white text-right outline-none transition-colors"
                     />
                   </div>
                 </div>
                 <div>
-                  <label className="block text-[8px] text-slate-500 mb-1 font-black uppercase text-left tracking-widest">
+                  <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-[0.12em] mb-1">
                     Target Date / 목표 날짜
                   </label>
                   <input
@@ -2289,42 +2260,42 @@ const handleSealPulse = () => {
                     value={targetDate}
                     disabled={!!signedDate}
                     onChange={(e) => setTargetDate(e.target.value)}
-                    className={`w-full bg-[#1A202C]/80 border border-white/10 rounded-xl p-3 font-mono font-bold outline-none ${
+                    className={`w-full bg-transparent border-0 border-b-2 border-emerald-400/30 focus:border-emerald-300 rounded-none px-1 pb-2 text-[15px] font-mono font-bold outline-none transition-colors [color-scheme:dark] ${
                       signedDate ? "text-emerald-400 cursor-not-allowed" : "text-white"
                     }`}
                   />
                 </div>
-                <div className="space-y-2 mt-6">
-                  {/* 자동 계산 값 — 입력칸과 구분되는 디자인 (점선 테두리 + AUTO 배지) */}
-                  <div className="flex justify-between items-center px-4 py-2.5 rounded-2xl border border-dashed border-teal-400/25 bg-transparent">
-                    <p className="text-[9px] text-slate-500 font-bold uppercase flex items-center gap-2">
+                {/* 자동 계산 값 — 헤어라인 행 + AUTO 칩 */}
+                <div className="pt-1">
+                  <div className="flex justify-between items-center py-2.5 border-b border-white/5">
+                    <p className="text-[11px] text-slate-500 font-bold uppercase tracking-wider flex items-center gap-2">
                       MB 목표액
-                      <span className="text-[7px] font-black text-teal-400/70 border border-teal-400/30 rounded-full px-1.5 py-0.5 tracking-widest">
-                        자동 계산
+                      <span className="text-[8px] font-black text-teal-400/70 border border-teal-400/30 rounded-full px-1.5 py-0.5">
+                        자동
                       </span>
                     </p>
-                    <p className="text-sm font-black text-teal-200/90 font-mono">
+                    <p className="text-[15px] font-bold text-teal-200/90 font-mono">
                       {currency}
                       {fNum(mbGoalAmount)}
                     </p>
                   </div>
-                  <div className="flex justify-between items-center px-4 py-2.5 rounded-2xl border border-dashed border-teal-400/25 bg-transparent">
-                    <p className="text-[9px] text-slate-500 font-bold uppercase flex items-center gap-2">
+                  <div className="flex justify-between items-center py-2.5 border-b border-white/5">
+                    <p className="text-[11px] text-slate-500 font-bold uppercase tracking-wider flex items-center gap-2">
                       MB 잔액
-                      <span className="text-[7px] font-black text-teal-400/70 border border-teal-400/30 rounded-full px-1.5 py-0.5 tracking-widest">
-                        자동 계산
+                      <span className="text-[8px] font-black text-teal-400/70 border border-teal-400/30 rounded-full px-1.5 py-0.5">
+                        자동
                       </span>
                     </p>
-                    <p className="text-sm font-black text-teal-200/90 font-mono">
+                    <p className="text-[15px] font-bold text-teal-200/90 font-mono">
                       {currency}
                       {fNum(mbBalance)}
                     </p>
                   </div>
-                  <div className="flex justify-between items-center p-5 bg-amber-500/10 rounded-[1.5rem] border border-amber-500/30 mt-4 shadow-lg">
-                    <p className="text-[12px] text-amber-500 font-black uppercase tracking-widest">
+                  <div className="flex justify-between items-center pt-3.5 mt-1 border-t border-amber-500/30">
+                    <p className="text-[12px] text-amber-400 font-black uppercase tracking-widest">
                       Value Event Award
                     </p>
-                    <p className="text-xl font-black text-amber-400 font-mono tracking-tighter">
+                    <p className="text-xl font-black text-amber-300 font-mono tracking-tight">
                       {currency}
                       {fNum(valueEventAmount)}
                     </p>
@@ -2333,6 +2304,9 @@ const handleSealPulse = () => {
               </div>
             </div>
             ))}
+              </div>
+
+              <div className="md:space-y-10">
 
             {/* [Apex Profile] Act 1(Discover) 결과 표시 — 결과 없으면 설문 안내 탭 */}
             {renderAccordionSection("apexProfile", {
@@ -2353,11 +2327,26 @@ const handleSealPulse = () => {
                 e.stopPropagation();
                 setShowProfileDetails((prev) => !prev);
               }}
-              className="w-full bg-slate-950/40 hover:bg-slate-950/60 border border-white/5 text-slate-500 hover:text-slate-300 py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all"
+              className="w-full flex items-center gap-3 py-3.5 px-1 text-left border-b border-white/10 text-slate-500 hover:text-slate-300 transition-colors"
             >
-              {showProfileDetails
-                ? "▲ VAK · TCI 상세 수치 접기"
-                : "▼ VAK · TCI 상세 수치 보기 / 수정 (선택)"}
+              <span
+                className="w-[3px] h-5 rounded-full shrink-0"
+                style={
+                  showProfileDetails
+                    ? { background: labAccent, boxShadow: `0 0 10px ${labAccent}` }
+                    : { background: "rgba(148,163,184,0.28)" }
+                }
+              />
+              <span className="flex-1 text-[14px] font-bold tracking-tight">
+                VAK · TCI 상세 수치 <span className="text-[11px] text-slate-600">(선택)</span>
+              </span>
+              <span
+                className={`text-[11px] transition-transform duration-300 ${
+                  showProfileDetails ? "rotate-180 text-amber-300" : ""
+                }`}
+              >
+                ▼
+              </span>
             </button>
             {showProfileDetails && (
             <>
@@ -2539,6 +2528,8 @@ const handleSealPulse = () => {
             </div>
             </>
             )}
+              </div>
+            </div>
             {/* [Setup Journey 1/3] 계약 전 가이드 — 기본 정보 확인 후 미래의 나로 이동 */}
             {user && !signedDate && activeLabZone === "current" && (
               <div className="bg-slate-950/70 border border-amber-500/25 rounded-[2rem] p-6 text-center space-y-3">
@@ -2588,54 +2579,35 @@ const handleSealPulse = () => {
               "THE PULSE / Bridge Core",
               "Fixed Value Events · Target Date · Mental Bank Goal · Value Event Award · Contract Link"
             )}
-            {/* [Pulse Focus 피라미드] Ledger(hub) 피라미드 디자인 재사용 —
-                '미래의 나' 1~5단계 비전 제목을 매슬로우 단계에 매칭.
-                클릭으로 지금 집중할 단계를 선택/해제 (visions[lv].focus, 최소 1개) */}
+            {/* [다크 콘솔] PC 2열 — 좌: Pulse Focus 피라미드(고정), 우: 선택 단계의 실천 항목 + 계약 링크 */}
+            <div className="md:grid md:grid-cols-[minmax(300px,360px)_1fr] md:gap-12 md:items-start">
+              <div className="md:sticky md:top-6">
             {renderAccordionSection("focus", {
               icon: <TrendingUp size={15} />,
               title: "Pulse Focus · 집중 단계",
               filled: [1, 2, 3, 4, 5].some((lv) => visions[lv]?.focus),
               defaultOpen: true,
             }, (
-            <div className="bg-transparent p-0 rounded-none border-0 md:bg-[#1A202C]/60 md:p-6 md:rounded-[2.5rem] md:border md:border-teal-200/20 md:mb-6">
-              <div className="flex justify-between items-center mb-4">
-                <p className="hidden md:block text-[10px] font-black text-teal-200 uppercase tracking-widest">
-                  Pulse Focus — 지금 집중할 단계 선택
-                </p>
-                <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest mx-auto md:mx-0">
-                  클릭해서 선택 / 해제 (최소 1개)
-                </span>
-              </div>
+            <div>
+              {renderFlatLabel("Pulse Focus", "지금 집중할 단계 · 최소 1개")}
               <div className="flex flex-col items-center">
-                {/* 삼각형 (hub 피라미드와 동일 디자인) */}
-                <div className="flex justify-center mb-1 animate-pulse">
-                  <div className="w-0 h-0 border-l-[30px] border-l-transparent border-r-[30px] border-r-transparent border-b-[40px] border-b-amber-500/80"></div>
-                </div>
+                <div className="w-0 h-0 border-l-[18px] border-l-transparent border-r-[18px] border-r-transparent border-b-[24px] border-b-amber-500/80 mb-2"></div>
                 {(() => {
                   const pyramidWidthMap = {
-                    5: "w-[130px]",
-                    4: "w-[170px]",
-                    3: "w-[210px]",
-                    2: "w-[260px]",
-                    1: "w-[320px]",
+                    5: "w-[150px]",
+                    4: "w-[190px]",
+                    3: "w-[230px]",
+                    2: "w-[270px]",
+                    1: "w-[310px]",
                   };
                   return [5, 4, 3, 2, 1].map((lv) => {
                     const visionTitle = String(visions[lv]?.title || "").trim();
                     const isConfigured = visionTitle !== "";
                     const isFocused = !!visions[lv]?.focus;
-                    const barBackground = isConfigured
-                      ? isFocused
-                        ? "bg-gradient-to-r from-amber-600 via-yellow-400 to-amber-600"
-                        : "bg-gradient-to-r from-emerald-600 via-teal-400 to-emerald-600"
-                      : "bg-slate-700/50";
-                    const containerStyle = isFocused
-                      ? "border-amber-400 ring-2 ring-amber-500/50 shadow-[0_0_30px_rgba(245,158,11,0.6)] z-10 scale-105 brightness-110"
-                      : isConfigured
-                      ? "border-amber-600/30 opacity-90 hover:brightness-110"
-                      : "border-slate-700/50 opacity-60 hover:opacity-80";
                     return (
-                      <div
+                      <button
                         key={lv}
+                        type="button"
                         onClick={(e) => {
                           e.stopPropagation();
                           if (!isConfigured) {
@@ -2649,67 +2621,83 @@ const handleSealPulse = () => {
                           setActiveLevel(lv);
                           updateVision(lv, { focus: !isFocused });
                         }}
-                        className={`cursor-pointer relative flex items-center justify-center h-[50px] rounded-2xl mb-2 overflow-hidden transition-all duration-300 border ${pyramidWidthMap[lv]} ${containerStyle}`}
+                        className={`relative flex flex-col items-center justify-center h-[52px] rounded-xl mb-1.5 px-3 border transition-all duration-300 ${pyramidWidthMap[lv]} ${
+                          isFocused
+                            ? "border-amber-300 bg-gradient-to-r from-amber-500 via-yellow-300 to-amber-500 shadow-[0_0_26px_rgba(245,176,27,0.45)] scale-[1.04] z-10"
+                            : isConfigured
+                            ? "bg-slate-900/90 border-emerald-400/40 hover:border-emerald-300/70"
+                            : "bg-slate-900/60 border-slate-700/60 opacity-80 hover:opacity-100"
+                        }`}
                       >
-                        <div
-                          className={`absolute left-0 top-0 h-full transition-all duration-1000 ${barBackground}`}
-                          style={{ width: isFocused ? "100%" : isConfigured ? "50%" : "0%" }}
-                        />
-                        <div className="relative z-10 flex flex-col items-center justify-center leading-none px-2 max-w-full">
-                          <span className="font-black uppercase text-sm tracking-tight text-white drop-shadow-md flex items-center gap-2">
-                            {isConfigured && (
-                              <span className="text-xs emoji-shadow">{visions[lv].emoji}</span>
-                            )}
-                            {levelMap[lv]}
-                            {isFocused && <span className="text-xs">✓</span>}
-                          </span>
-                          <span className="text-[10px] font-bold mt-0.5 text-white/90 drop-shadow-md truncate max-w-full">
-                            {isConfigured ? visionTitle : "비전 미설정"}
-                          </span>
-                        </div>
-                      </div>
+                        <span
+                          className={`text-[13px] tracking-tight leading-none flex items-center gap-1.5 ${
+                            isFocused
+                              ? "text-slate-950 font-black"
+                              : isConfigured
+                              ? "text-emerald-100 font-bold"
+                              : "text-slate-400 font-bold"
+                          }`}
+                        >
+                          {lv} {levelMap[lv]}
+                          {isFocused && <span className="text-[11px]">✓</span>}
+                        </span>
+                        <span
+                          className={`text-[10px] mt-1 leading-none truncate max-w-full ${
+                            isFocused
+                              ? "text-amber-950/80 font-bold"
+                              : isConfigured
+                              ? "text-slate-400"
+                              : "text-slate-600"
+                          }`}
+                        >
+                          {isConfigured ? visionTitle : "비전 미설정"}
+                        </span>
+                      </button>
                     );
                   });
                 })()}
+                <p className="text-[10px] text-slate-600 mt-2">
+                  클릭해서 선택 / 해제 — 선택한 단계는 골드로 빛납니다
+                </p>
               </div>
             </div>
             ))}
-            <div className="bg-[#1A202C]/60 p-4 md:p-6 rounded-[2.5rem] border border-amber-500/20 md:mb-6">
-              <div className="grid grid-cols-2 gap-3 md:gap-4">
-                <div className="bg-slate-900/50 border border-white/10 rounded-2xl p-3 md:p-4">
-                  <p className="text-[9px] text-slate-500 font-black uppercase tracking-widest mb-2">Target Date</p>
-                  <p className="text-sm font-black text-white">{targetDate}</p>
-                </div>
-                <div className="bg-slate-900/50 border border-white/10 rounded-2xl p-4">
-                  <p className="text-[9px] text-slate-500 font-black uppercase tracking-widest mb-2">Contract Status</p>
-                  <button
-                    onClick={() => setCurrentView("contract")}
-                    className="text-[10px] font-black text-amber-400 hover:text-amber-300 uppercase tracking-widest"
-                  >
-                    {signedDate ? "View Contract" : "Go to Contract"}
-                  </button>
-                </div>
               </div>
-            </div>
-            <div className="space-y-4">
-              <div className="flex justify-between items-center mb-4">
-                <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">
-                  Fixed Value Events
-                  {levelMap[activeLevel] && (
-                    <span className="text-teal-200/80 ml-2">
-                      — {activeLevel}단계 {levelMap[activeLevel]}
-                    </span>
-                  )}
-                </p>
+
+              <div className="md:space-y-10">
+            {/* [⑤] 실천 항목 — 피라미드 바로 옆(모바일은 바로 아래)에서 기입 */}
+            {renderAccordionSection("events", {
+              icon: <CheckSquare size={15} />,
+              title: "실천 항목 · Value Events",
+              filled: (visions[activeLevel]?.events || []).some(
+                (ev) => String(ev?.name || "").trim() !== ""
+              ),
+              defaultOpen: true,
+            }, (
+            <div>
+              <div className="flex items-center justify-between gap-3 mb-4">
+                <div className="min-w-0">
+                  <p className="hidden md:flex items-center gap-2.5">
+                    <span className="inline-block w-3.5 h-[2px]" style={{ background: labAccent }} />
+                    <span className="text-[15px] font-bold text-white tracking-tight">실천 항목</span>
+                  </p>
+                  <p className="text-[12px] text-slate-400 truncate md:mt-1.5">
+                    <span className="text-amber-300 font-black italic mr-1">{activeLevel}</span>
+                    {levelMap[activeLevel] || "Apex"}
+                    {String(visions[activeLevel]?.title || "").trim() && (
+                      <span className="text-slate-500"> — {visions[activeLevel].title}</span>
+                    )}
+                  </p>
+                </div>
                 <button
                   onClick={() => addEvent(activeLevel)}
-                  className="bg-emerald-600 text-white px-6 py-2.5 rounded-2xl text-[10px] font-black flex items-center gap-2 uppercase tracking-widest"
+                  className="shrink-0 bg-emerald-600 hover:bg-emerald-500 text-white px-5 py-2.5 rounded-xl text-[10px] font-black flex items-center gap-1.5 uppercase tracking-widest transition-colors"
                 >
                   <Plus size={14} /> Add Event
                 </button>
               </div>
               {(!visions[activeLevel]?.events || visions[activeLevel].events.length === 0) && (
-                <p className="text-[10px] text-slate-500 leading-relaxed text-center py-3">
+                <p className="text-[11px] text-slate-500 leading-relaxed py-3 border-b border-white/5">
                   피라미드에서 단계를 클릭한 뒤, <span className="text-emerald-400 font-bold">+ Add Event</span>로
                   그 단계의 목표를 이룰 실천 행동을 적어주세요. (선택한 단계마다 최소 1개)
                 </p>
@@ -2717,9 +2705,9 @@ const handleSealPulse = () => {
               {visions[activeLevel]?.events?.map((ev) => (
                 <div
                   key={ev.id}
-                  className="flex items-center gap-4 bg-[#1A202C]/40 p-5 rounded-2xl border border-white/5"
+                  className="flex items-center gap-3 py-2.5 border-b border-white/10"
                 >
-                  <CheckSquare size={18} className="text-slate-600" />
+                  <CheckSquare size={16} className="text-emerald-500/60 shrink-0" />
                   <input
                     value={ev.name}
                     onChange={(e) =>
@@ -2733,7 +2721,8 @@ const handleSealPulse = () => {
                         },
                       }))
                     }
-                    className="bg-transparent border-none text-base text-slate-200 focus:outline-none flex-grow font-semibold"
+                    className="bg-transparent border-none text-[15px] text-slate-200 focus:outline-none flex-grow font-semibold placeholder:text-slate-600"
+                    placeholder="실천 행동을 적어주세요"
                   />
                   <button
                     onClick={() =>
@@ -2741,13 +2730,34 @@ const handleSealPulse = () => {
                         events: visions[activeLevel]?.events?.filter((p) => p.id !== ev.id),
                       })
                     }
-                    className="text-rose-500/20 hover:text-rose-500"
+                    className="text-rose-500/30 hover:text-rose-500 shrink-0"
                     aria-label="이벤트 삭제"
                   >
-                    <Trash2 size={18} />
+                    <Trash2 size={16} />
                   </button>
                 </div>
               ))}
+            </div>
+            ))}
+
+            {/* 계약 링크 — 플랫 행 */}
+            <div>
+              {renderFlatLabel("계약 링크", "Target Date · Contract")}
+              <div className="flex justify-between items-center py-2.5 border-b border-white/10">
+                <p className="text-[11px] text-slate-500 font-bold uppercase tracking-wider">Target Date</p>
+                <p className="text-[15px] font-bold text-white font-mono">{targetDate}</p>
+              </div>
+              <div className="flex justify-between items-center py-2.5 border-b border-white/10">
+                <p className="text-[11px] text-slate-500 font-bold uppercase tracking-wider">Contract Status</p>
+                <button
+                  onClick={() => setCurrentView("contract")}
+                  className="text-[12px] font-black text-amber-400 hover:text-amber-300 uppercase tracking-widest"
+                >
+                  {signedDate ? "View Contract →" : "Go to Contract →"}
+                </button>
+              </div>
+            </div>
+              </div>
             </div>
             {/* [Setup Journey 3/3] 계약 전 가이드 — 집중 단계 + Value Event 확인 후 계약으로 이동 */}
             {user && !signedDate && activeLabZone === "pulse" && (() => {

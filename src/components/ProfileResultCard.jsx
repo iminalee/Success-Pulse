@@ -34,7 +34,7 @@ const ProfileResultCard = ({ snapshot, userName, onRunSurvey }) => {
   if (!hasResult) {
     // ── 결과 없음: Discover 설문 안내 탭 ──
     return (
-      <div className="bg-[#2D3748]/40 p-8 rounded-[2.5rem] border border-amber-500/20 shadow-xl text-center font-sans">
+      <div className="text-center font-sans py-2">
         <p className="text-[12px] font-black text-amber-500 uppercase tracking-[0.3em] mb-4 flex items-center justify-center gap-2">
           <Sparkles size={14} /> Apex Profile / 나의 프로파일
         </p>
@@ -71,7 +71,7 @@ const ProfileResultCard = ({ snapshot, userName, onRunSurvey }) => {
   const displayName = snapshot.userName || userName || "—";
 
   return (
-    <div className="bg-[#2D3748]/40 p-7 rounded-[2.5rem] border border-amber-500/15 shadow-xl font-sans">
+    <div className="font-sans">
       <p className="text-[12px] font-black text-amber-500 uppercase tracking-[0.3em] mb-6 flex items-center gap-2">
         <Sparkles size={14} /> Apex Profile / 나의 프로파일
       </p>
