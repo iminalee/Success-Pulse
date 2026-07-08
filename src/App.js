@@ -313,7 +313,9 @@ const App = () => {
       signedDate: signedDateValue,
     };
 
-    // Local state 우선 반영 (저장 실패 시에도 사용자 입력은 유지)
+    // [중요] Act1 결과를 네트워크 호출 이전에 즉시 React 상태에 반영한다.
+    // 이렇게 해야 DB upsert가 실패하거나 세션 확인이 어긋나도 결과가 유실되지 않고,
+    // 잘 작동하는 자동저장 경로가 tci_profile/vak_profile/visions를 확실히 저장한다.
     if (journeyData?.userName) setUserName(journeyData.userName);
     if (bps && Number.isInteger(selectedNeedLevel)) {
       setVisions((prev) => {
@@ -334,6 +336,11 @@ const App = () => {
       });
     }
     if (journeyData?.signature) setSignature(journeyData.signature);
+    // TCI·VAK를 최상단에서 즉시 반영 (기존엔 upsert 뒤에 있어 실패 시 유실됐음)
+    setVakProfile(normalizedVak);
+    setTciProfile((prev) => ({ ...prev, ...quickTci }));
+    // Apex Profile 카드에 즉시 반영 (DB 저장 성공 여부와 무관)
+    setDiscoverResult(journeySnapshot);
     setIsOnboardingComplete(true);
 
     try {
@@ -342,7 +349,8 @@ const App = () => {
 
       const sessionUser = sessionData?.session?.user;
       if (!sessionUser) {
-        showToast("로그인 세션을 찾지 못했습니다. 다시 로그인 후 저장해 주세요.");
+        // 결과는 이미 상태에 반영되어 자동저장 대기 중 — 로그인만 복구되면 저장됨
+        showToast("결과를 저장하려면 로그인이 필요합니다. 로그인하면 자동으로 저장됩니다.");
         return;
       }
 
