@@ -841,6 +841,21 @@ const App = () => {
     } catch (e) { console.warn("apex_messages 저장 실패", e); }
   }, [apexMessages, user]);
 
+  // [설정 순서 게이팅] 계약 전에는 현재 → 미래 → 펄스 순서로만 존을 연다.
+  // 잠긴 존에 머물러 있으면 접근 가능한 이전 존으로 되돌린다. (계약 후엔 전체 열람 허용)
+  useEffect(() => {
+    if (!user || signedDate) return;
+    const currentDone = Number(annualIncome) > 0 && !!targetDate;
+    const futureDone = [1, 2, 3, 4, 5].some(
+      (lv) => String(visions[lv]?.title || "").trim() !== ""
+    );
+    if (activeLabZone === "pulse" && !(currentDone && futureDone)) {
+      setActiveLabZone(currentDone ? "future" : "current");
+    } else if (activeLabZone === "future" && !currentDone) {
+      setActiveLabZone("current");
+    }
+  }, [user, signedDate, annualIncome, targetDate, visions, activeLabZone]);
+
   // [Tonight v2] chat 단계 진입 시 Apex 첫 인사 자동 표시
   // 중요: loading이 끝난 후에만 진행 (데이터 로드 완료 보장)
   useEffect(() => {
@@ -1629,6 +1644,17 @@ const handleSealPulse = () => {
   }, [chartData, currentView, annualIncome]);
 
   const renderLab = () => {
+    // [설정 순서 게이팅] 계약 전에는 현재 → 미래 → 펄스 순서로 존을 순차 공개
+    const setupMode = user && !signedDate;
+    const currentSetupDone = Number(annualIncome) > 0 && !!targetDate;
+    const futureSetupDone = [1, 2, 3, 4, 5].some(
+      (lv) => String(visions[lv]?.title || "").trim() !== ""
+    );
+    const zoneUnlocked = {
+      current: true,
+      future: !setupMode || currentSetupDone,
+      pulse: !setupMode || (currentSetupDone && futureSetupDone),
+    };
     const missionMap = {
       1: "신체적 활력은 모든 변화의 엔진입니다. 이 단계에서는 수면의 질, 영양, 규칙적인 운동 등 나의 '생물학적 하드웨어'가 최적화됩니다. '하루 7시간 숙면'이나 '매일 30분 산책'처럼 에너지를 즉각적으로 높여줄 구체적인 행동들입니다",
       2: "불안을 제거하고 심리적 안전 기지를 구축합니다. 재정적 안정과 환경적 쾌적함이 핵심입니다. '비상금 확보'나 '주거 환경 개선'과 같이 외부 충격으로부터 나를 보호하고 평온함을 유지할 수 있는 환경적 토대를 만드는 행동이 효과적입니다.",
@@ -1972,7 +1998,7 @@ const handleSealPulse = () => {
               { zone: "current", x: "12%" },
               { zone: "pulse", x: "50%" },
               { zone: "future", x: "88%" },
-            ].map((item) => {
+            ].filter((item) => zoneUnlocked[item.zone]).map((item) => {
               const meta = labZoneMeta[item.zone];
               const isActive = activeLabZone === item.zone;
               return (
@@ -2069,30 +2095,33 @@ const handleSealPulse = () => {
               <div className="w-full space-y-4">
 
                 {user ? (
-                  <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-2xl p-6 text-center animate-fadeIn">
-                    <p className="text-emerald-500 font-black text-md mb-2">
-                      🎉 Identity Confirmed!
-                    </p>
-                    <p className="text-white text-xl font-bold mb-4">
-                      {userName || "User"}{" "}
-                      <span className="text-emerald-400 text-xs">ver.0</span>{" "}
-                      <span className="text-slate-500 text-xs">
-                        ({user.email})
+                  /* [축소] 큰 박스 대신 헤어라인 한 줄 — 이름·이메일 + 우측 계정 액션 */
+                  <div className="flex items-center justify-between gap-3 py-2.5 border-b border-emerald-500/20 animate-fadeIn">
+                    <div className="min-w-0 flex items-baseline gap-2">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0" style={{ boxShadow: "0 0 8px rgba(52,211,153,0.9)" }} />
+                      <span className="text-[15px] font-bold text-white truncate">
+                        {userName || "User"}
+                        <span className="text-emerald-400 text-[11px] ml-1.5">ver.0</span>
                       </span>
-                    </p>
-                    <button
-                      onClick={handleSignOut}
-                      className="text-[10px] text-slate-500 hover:text-white underline decoration-slate-700 underline-offset-4"
-                    >
-                      로그아웃
-                    </button>
-                    <span className="text-slate-700 text-[10px]">|</span>
-                    <button
-                      onClick={handleDeleteAccount}
-                      className="text-[10px] text-rose-500/60 hover:text-rose-500 underline decoration-rose-900/30 underline-offset-4"
-                    >
-                      회원 탈퇴
-                    </button>
+                      <span className="text-[11px] text-slate-500 truncate hidden sm:inline">
+                        {user.email}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <button
+                        onClick={handleSignOut}
+                        className="text-[10px] text-slate-500 hover:text-white underline decoration-slate-700 underline-offset-4"
+                      >
+                        로그아웃
+                      </button>
+                      <span className="text-slate-700 text-[10px]">|</span>
+                      <button
+                        onClick={handleDeleteAccount}
+                        className="text-[10px] text-rose-500/50 hover:text-rose-500 underline decoration-rose-900/30 underline-offset-4"
+                      >
+                        회원 탈퇴
+                      </button>
+                    </div>
                   </div>
                 ) : (
                   <div className="flex flex-col gap-3 w-full animate-fadeIn">
