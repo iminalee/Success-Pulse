@@ -2341,10 +2341,13 @@ const handleSealPulse = () => {
             {renderAccordionSection("apexProfile", {
               icon: <Sparkles size={15} />,
               title: "Apex Profile · 프로파일",
-              filled: !!discoverResult,
+              filled:
+                !!discoverResult ||
+                [1, 2, 3, 4, 5].some((lv) => String(visions[lv]?.title || "").trim() !== ""),
             }, (
             <ProfileResultCard
               snapshot={discoverResult}
+              live={{ userName, tciProfile, vakProfile, visions }}
               userName={userName}
               onRunSurvey={handleRunAct1FromMyLab}
             />
