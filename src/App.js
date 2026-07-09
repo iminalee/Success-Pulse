@@ -615,6 +615,10 @@ const App = () => {
     goal: true,
     focus: true,
   });
+  // [Facilitator 문의] 정밀 진단 요청 폼 모달
+  const FACILITATOR_EMAIL = "5milestones.today@gmail.com";
+  const [showFacilitatorModal, setShowFacilitatorModal] = useState(false);
+  const [facilitatorMsg, setFacilitatorMsg] = useState("");
 
   // [Tonight v2] Tonight 흐름 전용 state — 기존 state 절대 수정 금지
   const [tonightStep, setTonightStep] = useState("intro"); // "intro" | "chat" | "draft" | "sealed"
@@ -1663,6 +1667,21 @@ const handleSealPulse = () => {
       future: !setupMode || currentSetupDone,
       pulse: !setupMode || (currentSetupDone && futureSetupDone),
     };
+    // [간이 결과 / 미측정] VAK·TCI가 실제로 측정된 값인지 판별 (없으면 회색 처리)
+    const vakHasData = (() => {
+      const v = Number(vakProfile?.vPercent);
+      const a = Number(vakProfile?.aPercent);
+      const k = Number(vakProfile?.kPercent);
+      if ([v, a, k].every(Number.isFinite) && !(v === a && a === k)) return true;
+      return ["V", "A", "K"].includes(vakProfile?.dominant);
+    })();
+    // 점수가 실제 측정값인지 (기본 50/0은 미측정으로 간주)
+    const tciMeasured = (key) => {
+      const s = Number(tciProfile?.[key]?.score);
+      return Number.isFinite(s) && s !== 50 && s !== 0;
+    };
+    // 간이 검사는 기질(NS·HA·RD·P)만 다루고, 성격(SD·C·ST)은 정식 검사 필요
+    const TCI_CHARACTER = ["sd", "c", "st"];
     const missionMap = {
       1: "신체적 활력은 모든 변화의 엔진입니다. 이 단계에서는 수면의 질, 영양, 규칙적인 운동 등 나의 '생물학적 하드웨어'가 최적화됩니다. '하루 7시간 숙면'이나 '매일 30분 산책'처럼 에너지를 즉각적으로 높여줄 구체적인 행동들입니다",
       2: "불안을 제거하고 심리적 안전 기지를 구축합니다. 재정적 안정과 환경적 쾌적함이 핵심입니다. '비상금 확보'나 '주거 환경 개선'과 같이 외부 충격으로부터 나를 보호하고 평온함을 유지할 수 있는 환경적 토대를 만드는 행동이 효과적입니다.",
@@ -2360,6 +2379,25 @@ const handleSealPulse = () => {
               onRunSurvey={handleRunAct1FromMyLab}
             />
             ))}
+            {/* [Facilitator] 정밀 진단 안내 — TCI/VAK 상세 위에 배치 */}
+            <div className="flex items-center justify-between gap-3 py-3 px-1 border-b border-white/10">
+              <p className="text-[11px] text-slate-400 leading-relaxed">
+                아래는 <span className="text-slate-300 font-bold">간이 진단</span> 결과입니다.
+                <span className="hidden sm:inline"> </span>
+                <br className="sm:hidden" />
+                정식 척도·상담 기반의 정밀 진단이 필요하세요?
+              </p>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowFacilitatorModal(true);
+                }}
+                className="shrink-0 text-[11px] font-black text-amber-400 hover:text-amber-300 underline underline-offset-4 decoration-amber-500/40"
+              >
+                Facilitator 문의 →
+              </button>
+            </div>
             {/* VAK/TCI 상세 수치는 접이식으로 유지 (수동 입력 경로 보존) */}
             <button
               type="button"
@@ -2391,19 +2429,26 @@ const handleSealPulse = () => {
             {showProfileDetails && (
             <>
             <div className="bg-[#2D3748]/40 p-6 rounded-[2.5rem] border border-white/5 shadow-xl font-sans">
-              <p className="text-[12px] font-black text-emerald-500 uppercase tracking-widest mb-6 flex items-center gap-2">
-                <Brain size={12} /> VAK Architecture
-                <span className="text-[9px] font-bold text-slate-500 normal-case tracking-normal">
-                  (선택 입력 — 건너뛰어도 됩니다)
-                </span>
+              <p className="text-[12px] font-black uppercase tracking-widest mb-6 flex items-center gap-2 flex-wrap">
+                <Brain size={12} className={vakHasData ? "text-emerald-500" : "text-slate-600"} />
+                <span className={vakHasData ? "text-emerald-500" : "text-slate-600"}>VAK Architecture</span>
+                {vakHasData ? (
+                  <span className="text-[8px] font-black text-emerald-400/80 border border-emerald-400/30 rounded-full px-1.5 py-0.5 normal-case tracking-wider">
+                    간이 결과
+                  </span>
+                ) : (
+                  <span className="text-[8px] font-black text-slate-500 border border-white/10 rounded-full px-1.5 py-0.5 normal-case tracking-wider">
+                    미측정
+                  </span>
+                )}
               </p>
-              <div className="space-y-4">
+              <div className={`space-y-4 ${vakHasData ? "" : "opacity-40"}`}>
                 <div className="bg-slate-900/80 p-4 rounded-xl text-center border border-white/5 shadow-inner mb-6">
                   <p className="text-[8px] text-slate-500 font-bold uppercase mb-1 tracking-widest">
                     Sensory Order
                   </p>
                   <div className="text-xl font-black text-emerald-400 tracking-[0.2em]">
-                    {vakProfile.order}
+                    {vakHasData ? vakProfile.order : "—"}
                   </div>
                 </div>
                 <div className="space-y-6">
@@ -2467,15 +2512,19 @@ const handleSealPulse = () => {
               </div>
             </div>
             <div className="bg-[#2D3748]/40 p-8 rounded-[2.5rem] border border-white/5 shadow-xl font-sans">
-              <div className="mb-6 flex items-center gap-2">
+              <div className="mb-2 flex items-center gap-2 flex-wrap">
                 <ClipboardList size={12} className="text-rose-500" />
                 <p className="text-[12px] font-black text-rose-500 uppercase tracking-widest">
-                  TCI Intelligence{" "}
-                  <span className="text-[9px] font-bold text-slate-500 normal-case tracking-normal">
-                    (선택 입력 — 건너뛰어도 됩니다)
-                  </span>
+                  TCI Intelligence
                 </p>
+                <span className="text-[8px] font-black text-rose-400/80 border border-rose-400/30 rounded-full px-1.5 py-0.5 normal-case tracking-wider">
+                  간이 결과 (기질만)
+                </span>
               </div>
+              <p className="text-[10px] text-slate-500 leading-relaxed mb-6" style={{ wordBreak: "keep-all" }}>
+                간이 검사는 기질(NS·HA·RD·P)만 진단합니다. 성격(SD·C·ST) 영역과 정밀 수치는
+                정식 척도·상담이 필요하며, 위 <span className="text-amber-400 font-bold">Facilitator 문의</span>로 요청할 수 있습니다.
+              </p>
               <div className="flex w-full mb-2">
                 <div className="w-1/4"></div>
                 <div className="w-3/4 relative h-4 text-[9px] text-slate-500 font-bold uppercase tracking-widest text-center">
@@ -2484,19 +2533,28 @@ const handleSealPulse = () => {
               </div>
               <div className="relative z-10 flex flex-col gap-4">
                 {["NS", "HA", "RD", "P", "SD", "C", "ST"].map((key) => {
-                  const score = Number(
-                    tciProfile[key.toLowerCase()]?.score || 0
-                  );
+                  const lk = key.toLowerCase();
+                  const score = Number(tciProfile[lk]?.score || 0);
                   const isPositive = score >= 50;
                   const barWidth = Math.abs(score - 50);
-                  const barColor = greenGroup.includes(key.toLowerCase())
+                  const isCharacter = TCI_CHARACTER.includes(lk);
+                  // 성격 영역이거나 측정값이 없으면 회색(미측정)
+                  const measured = tciMeasured(lk) && !isCharacter;
+                  const barColor = !measured
+                    ? "bg-slate-600"
+                    : greenGroup.includes(lk)
                     ? "bg-emerald-500"
                     : "bg-amber-500";
                   return (
-                    <div key={key} className="flex items-center h-10 w-full">
+                    <div key={key} className={`flex items-center h-10 w-full ${measured ? "" : "opacity-45"}`}>
                       <div className="w-1/4 flex items-center justify-between pr-4 gap-2">
-                        <span className="text-[10px] font-black text-slate-500 uppercase tracking-wider">
+                        <span className="text-[10px] font-black text-slate-500 uppercase tracking-wider flex items-center gap-1">
                           {key}
+                          {isCharacter && (
+                            <span className="text-[7px] font-bold text-slate-600 border border-slate-700 rounded px-1 normal-case tracking-normal">
+                              정식
+                            </span>
+                          )}
                         </span>
                         <input
                           type="number"
@@ -5846,6 +5904,63 @@ const nowX = getX(dataPoints[dataPoints.length - 1].date); // 📅 가로 위치
       )}
 
       {/* ── 야간 입금 루틴 모달 ────────────────────────────────── */}
+      {/* [Facilitator] 정밀 진단 요청 폼 — mailto로 전송 */}
+      {showFacilitatorModal && (
+        <div className="fixed inset-0 z-[100000] bg-[#020406]/95 backdrop-blur-2xl flex items-center justify-center px-6 animate-fadeIn font-sans">
+          <div className="w-full max-w-md bg-[#0A0F1E] border border-amber-500/25 rounded-[2rem] p-8 shadow-[0_0_60px_rgba(245,158,11,0.15)] relative">
+            <button
+              onClick={() => setShowFacilitatorModal(false)}
+              className="absolute top-5 right-5 text-slate-600 hover:text-white transition-colors"
+              aria-label="닫기"
+            >
+              <X size={22} />
+            </button>
+            <p className="text-[9px] font-black text-amber-500/60 uppercase tracking-[0.4em] mb-2">
+              Facilitator
+            </p>
+            <h3 className="text-xl font-black text-white mb-3 tracking-tight">
+              정밀 진단 문의
+            </h3>
+            <p className="text-[12px] text-slate-400 leading-relaxed mb-6" style={{ wordBreak: "keep-all" }}>
+              간이 검사를 넘어 정식 TCI 척도·상담 기반의 정밀 진단이나 성격(SD·C·ST) 영역
+              설정이 필요하시면, 담당 facilitator에게 요청을 남겨주세요.
+            </p>
+            <textarea
+              value={facilitatorMsg}
+              onChange={(e) => setFacilitatorMsg(e.target.value)}
+              rows={4}
+              placeholder="어떤 도움이 필요하신지 간단히 적어주세요. (예: 정식 TCI 검사 안내를 받고 싶어요)"
+              className="w-full bg-slate-900/80 border border-white/10 rounded-2xl p-4 text-sm text-slate-200 placeholder:text-slate-600 outline-none focus:border-amber-500/40 resize-none mb-4"
+            />
+            <button
+              onClick={() => {
+                const subject = encodeURIComponent("[The Pulse] Facilitator 정밀 진단 문의");
+                const bodyLines = [
+                  `사용자: ${userName || "(이름 미입력)"}`,
+                  user?.email ? `이메일: ${user.email}` : "",
+                  "",
+                  facilitatorMsg || "(내용 없음)",
+                ].filter(Boolean);
+                const body = encodeURIComponent(bodyLines.join("\n"));
+                window.location.href = `mailto:${FACILITATOR_EMAIL}?subject=${subject}&body=${body}`;
+                setShowFacilitatorModal(false);
+                setFacilitatorMsg("");
+                showToast("메일 앱에서 문의를 이어서 보내주세요.");
+              }}
+              className="w-full bg-amber-600 hover:bg-amber-500 text-white font-black py-4 rounded-2xl text-[11px] uppercase tracking-widest transition-all active:scale-[0.98] shadow-lg"
+            >
+              메일로 문의 보내기 →
+            </button>
+            <p className="text-[10px] text-slate-600 text-center mt-4">
+              또는 직접 메일:{" "}
+              <a href={`mailto:${FACILITATOR_EMAIL}`} className="text-amber-500/80 underline underline-offset-2">
+                {FACILITATOR_EMAIL}
+              </a>
+            </p>
+          </div>
+        </div>
+      )}
+
       {showNightDeposit && (
         <div className="fixed inset-0 z-[100000] bg-[#020406]/97 backdrop-blur-3xl flex flex-col items-center justify-center px-6 animate-fadeIn font-sans">
           <button

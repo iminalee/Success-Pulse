@@ -97,16 +97,21 @@ const buildResult = (snapshot, live, fallbackName) => {
   return { name, tciType, vakTitle, bpsTitle, immersion, focusLevel, hasAny };
 };
 
-const ResultRow = ({ label, value, highlight }) => (
+const ResultRow = ({ label, value, highlight, tag }) => (
   <div className="flex items-start gap-3">
     <span className="text-[9px] text-slate-600 font-bold tracking-widest uppercase w-16 shrink-0 pt-0.5">
       {label}
     </span>
     <span
-      className={`text-sm font-bold flex-1 ${highlight ? "text-amber-300" : "text-slate-300"}`}
+      className={`text-sm font-bold flex-1 flex items-center gap-2 ${highlight ? "text-amber-300" : "text-slate-300"}`}
       style={{ wordBreak: "keep-all" }}
     >
       {value}
+      {tag && (
+        <span className="text-[8px] font-black text-slate-500 border border-white/10 rounded-full px-1.5 py-0.5 tracking-wider shrink-0">
+          {tag}
+        </span>
+      )}
     </span>
   </div>
 );
@@ -152,8 +157,8 @@ const ProfileResultCard = ({ snapshot, live, userName, onRunSurvey }) => {
         <ResultRow label="이름" value={r.name} highlight />
         <ResultRow label="BPS 비전" value={`"${r.bpsTitle || "—"}"`} highlight />
         <ResultRow label="집중 영역" value={LEVEL_NAMES[r.focusLevel] || "—"} />
-        <ResultRow label="기질 유형" value={r.tciType || "—"} />
-        <ResultRow label="감각 채널" value={r.vakTitle || "—"} />
+        <ResultRow label="기질 유형" value={r.tciType || "—"} tag={r.tciType ? "간이" : null} />
+        <ResultRow label="감각 채널" value={r.vakTitle || "—"} tag={r.vakTitle ? "간이" : null} />
       </div>
 
       {r.immersion && (
