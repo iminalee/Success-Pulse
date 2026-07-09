@@ -615,6 +615,9 @@ const App = () => {
     goal: true,
     focus: true,
   });
+  // [자동저장 가드] 이 user.id의 DB 데이터가 실제로 로드 완료됐을 때만 자동저장 허용.
+  // (로드 전/로그아웃 직후의 빈 상태가 DB를 덮어써 이름·Act1 데이터가 소실되던 버그 방지)
+  const [profileLoadedUserId, setProfileLoadedUserId] = useState(null);
   // [Facilitator 문의] 정밀 진단 요청 폼 모달
   const FACILITATOR_EMAIL = "5milestones.today@gmail.com";
   const [showFacilitatorModal, setShowFacilitatorModal] = useState(false);
@@ -654,6 +657,7 @@ const App = () => {
     // [수정된 initSession 함수]
     const initSession = async () => {
       setLoading(true);
+      let initUserId = null;
 
       try {
         // 1. 먼저 로그인 세션과 유저 정보를 가져옵니다.
@@ -661,6 +665,7 @@ const App = () => {
           data: { session },
         } = await supabase.auth.getSession();
         const currentUser = session?.user;
+        initUserId = currentUser?.id ?? null;
         setUser(currentUser);
 
         // 2. 유저가 있다면 DB에서 데이터를 가져옵니다.
@@ -731,6 +736,8 @@ const App = () => {
       } catch (e) {
         console.error("세션 초기화 오류:", e);
       } finally {
+        // 로드 시도가 끝났으면(데이터 유무 무관) 이 user에 한해 자동저장 허용
+        if (initUserId) setProfileLoadedUserId(initUserId);
         setLoading(false);
         setIsInitialized(true);
       }
@@ -763,7 +770,21 @@ const App = () => {
             .limit(1);
           const data = rows && rows.length > 0 ? rows[0] : null;
           if (data) {
-            if (data.user_name) setUserName(data.user_name);
+            // 이름 복원: DB에 있으면 사용, 없으면(과거 덮어쓰기로 유실 등) 가입 시 메타데이터에서 복구
+            if (data.user_name) {
+              setUserName(data.user_name);
+            } else if (session.user.user_metadata?.user_name || session.user.user_metadata?.full_name) {
+              const nameFromMeta =
+                session.user.user_metadata.user_name || session.user.user_metadata.full_name;
+              setUserName(nameFromMeta);
+              supabase
+                .from("pulse_data")
+                .update({ user_name: nameFromMeta })
+                .eq("user_id", session.user.id)
+                .then(({ error }) => {
+                  if (error) console.error("이름 복구 저장 실패:", error);
+                });
+            }
             if (data.currency) setCurrency(data.currency);
             if (data.annual_income) setAnnualIncome(data.annual_income);
             if (data.target_date) setTargetDate(data.target_date);
@@ -805,6 +826,8 @@ const App = () => {
         } catch (e) {
           console.error("로그인 후 데이터 로드 실패", e);
         } finally {
+          // 로드 시도 완료 → 이 user에 한해 자동저장 허용
+          setProfileLoadedUserId(session.user.id);
           // 어떤 경우든 loading 해제
           setLoading(false);
         }
@@ -895,6 +918,10 @@ const App = () => {
 // [핵심 2] 데이터 자동 저장 (Auto Save)
   useEffect(() => {
     if (!user) return;
+    // [가드] 이 user의 DB 데이터가 로드 완료된 뒤에만 저장 — 로드 전/로그아웃 직후의
+    // 빈 상태가 기존 DB(이름·Act1 등)를 덮어쓰는 것을 방지. user.id가 deps에 있어
+    // 로그아웃 시 effect가 재실행되며 대기 중이던 저장 타이머도 취소된다.
+    if (profileLoadedUserId !== user.id) return;
     const timer = setTimeout(async () => {
       const updates = {
         user_id: user.id,
@@ -924,7 +951,8 @@ const App = () => {
     }, 1000);
     return () => clearTimeout(timer);
   }, [
-    //user,
+    user?.id,
+    profileLoadedUserId,
     userName,
     currency,
     annualIncome,
@@ -1181,6 +1209,7 @@ const App = () => {
     setHasAiAccess(false);
     setDiscoverResult(null);
     setShowProfileDetails(false);
+    setProfileLoadedUserId(null); // 자동저장 잠금 — 로그아웃 후 빈 상태가 DB를 덮어쓰지 않도록
   };
 
   const handleSignOut = async () => {
