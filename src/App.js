@@ -608,6 +608,8 @@ const App = () => {
   // [모바일 컴팩트] 감각 비전 탭 (모바일에서 1칸만 표시) / 단계 설명 더보기
   const [mobileSensoryTab, setMobileSensoryTab] = useState("v");
   const [showFullMission, setShowFullMission] = useState(false);
+  // [비전 저장/수정] 레벨별 편집 모드 (true=편집 중). 미지정이면 제목 유무로 자동 결정.
+  const [visionEditMode, setVisionEditMode] = useState({});
   // [모바일 아코디언] My Lab 섹션 펼침 상태 — PC(md+)는 항상 펼침
   const [openLabSections, setOpenLabSections] = useState({
     identity: true,
@@ -1702,6 +1704,29 @@ const handleSealPulse = () => {
     };
     // 간이 검사는 기질(NS·HA·RD·P)만 다루고, 성격(SD·C·ST)은 정식 검사 필요
     const TCI_CHARACTER = ["sd", "c", "st"];
+    // [비전 완성도] none(없음) / half(제목만) / full(제목+감각). 피라미드 밝기에 사용
+    const visionCompletion = (lv) => {
+      const hasTitle = String(visions[lv]?.title || "").trim() !== "";
+      const hasSensory = ["v", "a", "k"].some(
+        (t) => String(visions[lv]?.[t] || "").trim() !== ""
+      );
+      if (hasTitle && hasSensory) return "full";
+      if (hasTitle) return "half";
+      return "none";
+    };
+    // [비전 저장/수정] 현재 레벨 편집 상태 — 제목이 없으면 기본 편집 모드
+    const activeHasTitle = String(visions[activeLevel]?.title || "").trim() !== "";
+    const isEditingVision = visionEditMode[activeLevel] ?? !activeHasTitle;
+    const saveVision = () => {
+      if (String(visions[activeLevel]?.title || "").trim() === "") {
+        showToast("비전 제목을 먼저 입력해주세요.");
+        return;
+      }
+      setVisionEditMode((prev) => ({ ...prev, [activeLevel]: false }));
+      showToast(`${activeLevel}단계 비전이 저장되었습니다.`);
+    };
+    const editVision = () =>
+      setVisionEditMode((prev) => ({ ...prev, [activeLevel]: true }));
     const missionMap = {
       1: "신체적 활력은 모든 변화의 엔진입니다. 이 단계에서는 수면의 질, 영양, 규칙적인 운동 등 나의 '생물학적 하드웨어'가 최적화됩니다. '하루 7시간 숙면'이나 '매일 30분 산책'처럼 에너지를 즉각적으로 높여줄 구체적인 행동들입니다",
       2: "불안을 제거하고 심리적 안전 기지를 구축합니다. 재정적 안정과 환경적 쾌적함이 핵심입니다. '비상금 확보'나 '주거 환경 개선'과 같이 외부 충격으로부터 나를 보호하고 평온함을 유지할 수 있는 환경적 토대를 만드는 행동이 효과적입니다.",
@@ -1972,8 +1997,19 @@ const handleSealPulse = () => {
           <div className="flex flex-col items-center">
             <div className="w-0 h-0 border-l-[15px] border-l-transparent border-r-[15px] border-r-transparent border-b-[19px] border-b-amber-500/80 mb-1.5"></div>
             {[5, 4, 3, 2, 1].map((lv) => {
-              const isConfigured = String(visions[lv]?.title || "").trim() !== "";
+              const comp = visionCompletion(lv); // none / half / full
               const isActive = activeLevel === lv;
+              // 밝기 = 완성도 (감각까지=풀 밝기 / 제목만=절반 / 없음=어둡게)
+              const fillClass =
+                comp === "full"
+                  ? "bg-gradient-to-r from-emerald-600 via-teal-400 to-emerald-600 text-white shadow-[0_0_16px_rgba(45,212,191,0.4)]"
+                  : comp === "half"
+                  ? "bg-emerald-700/30 text-emerald-100/80"
+                  : "bg-slate-900/70 text-slate-500";
+              // 작업 중인 레벨 = 밝기가 아니라 앰버 링(다른 색)으로 구분
+              const activeClass = isActive
+                ? "ring-2 ring-amber-400 border-amber-300 shadow-[0_0_20px_rgba(245,176,27,0.5)] scale-105 z-10"
+                : "border-white/10 hover:brightness-110";
               return (
                 <button
                   key={lv}
@@ -1983,16 +2019,11 @@ const handleSealPulse = () => {
                     setActiveLevel(lv);
                     setShowFullMission(false);
                   }}
-                  className={`relative flex items-center justify-center h-[30px] rounded-lg mb-1.5 border transition-all duration-300 ${miniWidths[lv]} ${
-                    isActive
-                      ? "border-amber-300 text-slate-950 bg-gradient-to-r from-amber-500 via-yellow-300 to-amber-500 shadow-[0_0_24px_rgba(245,176,27,0.45)] scale-105 z-10"
-                      : isConfigured
-                      ? "bg-slate-900/90 border-emerald-400/35 text-emerald-100/90 hover:border-emerald-300/60"
-                      : "bg-slate-900/70 border-slate-700/60 text-slate-500 hover:text-slate-300"
-                  }`}
+                  className={`relative flex items-center justify-center h-[30px] rounded-lg mb-1.5 border transition-all duration-300 ${miniWidths[lv]} ${fillClass} ${activeClass}`}
                 >
-                  <span className={`text-[11px] tracking-tight whitespace-nowrap ${isActive ? "font-black" : "font-bold"}`}>
+                  <span className={`text-[11px] tracking-tight whitespace-nowrap flex items-center gap-1 ${isActive ? "font-black" : "font-bold"}`}>
                     {lv} {levelMap[lv]}
+                    {comp === "full" && <span className="text-[9px]">✓</span>}
                   </span>
                 </button>
               );
@@ -2979,13 +3010,33 @@ const handleSealPulse = () => {
               defaultOpen: true,
             }, (
             <div>
-              {renderFlatLabel(
-                "비전 제목",
-                `${activeLevel}단계 · ${levelMap[activeLevel] || "Apex"}`
-              )}
+              {/* 라벨 + 저장/수정 버튼 */}
+              <div className="flex items-center gap-2 mb-3 md:mb-5">
+                <span className="hidden md:flex items-center gap-2.5">
+                  <span className="inline-block w-3.5 h-[2px]" style={{ background: labAccent }} />
+                  <span className="text-[15px] font-bold text-white tracking-tight">비전 제목</span>
+                  <span className="text-[11px] text-slate-500">
+                    {activeLevel}단계 · {levelMap[activeLevel] || "Apex"}
+                  </span>
+                </span>
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    isEditingVision ? saveVision() : editVision();
+                  }}
+                  className={`ml-auto px-4 py-1.5 rounded-lg text-[11px] font-black uppercase tracking-widest transition-all active:scale-95 ${
+                    isEditingVision
+                      ? "bg-amber-600 hover:bg-amber-500 text-white shadow-lg"
+                      : "bg-slate-800 hover:bg-slate-700 text-slate-300 border border-white/10"
+                  }`}
+                >
+                  {isEditingVision ? "저장" : "수정"}
+                </button>
+              </div>
               {/* 모바일: 피라미드 내비 (PC에서는 좌측 고정 칼럼에 표시) */}
               <div className="md:hidden mb-6">{renderFutureGoalNav()}</div>
-              {/* 고스트 레벨 숫자 + 밑줄 기입 필드 */}
+              {/* 고스트 레벨 숫자 + 제목 (편집 중이면 입력, 아니면 읽기전용 표시) */}
               <div className="flex items-end gap-4 md:gap-5">
                 <span
                   className="text-[44px] md:text-[64px] font-black italic leading-[0.8] text-transparent select-none"
@@ -2993,14 +3044,23 @@ const handleSealPulse = () => {
                 >
                   {activeLevel}
                 </span>
-                <input
-                  value={visions[activeLevel]?.title || ""}
-                  onChange={(e) =>
-                    updateVision(activeLevel, { title: e.target.value })
-                  }
-                  className="flex-1 min-w-0 bg-transparent border-0 border-b-2 border-amber-500 focus:border-amber-300 rounded-none px-1 pb-3 text-[17px] md:text-[21px] font-extrabold text-white placeholder:text-slate-600 outline-none transition-colors"
-                  placeholder="비전 제목을 입력하세요"
-                />
+                {isEditingVision ? (
+                  <input
+                    value={visions[activeLevel]?.title || ""}
+                    onChange={(e) =>
+                      updateVision(activeLevel, { title: e.target.value })
+                    }
+                    className="flex-1 min-w-0 bg-transparent border-0 border-b-2 border-amber-500 focus:border-amber-300 rounded-none px-1 pb-3 text-[17px] md:text-[21px] font-extrabold text-white placeholder:text-slate-600 outline-none transition-colors"
+                    placeholder="비전 제목을 입력하세요"
+                    autoFocus
+                  />
+                ) : (
+                  <div className="flex-1 min-w-0 border-b-2 border-emerald-400/40 px-1 pb-3 text-[17px] md:text-[21px] font-extrabold text-white">
+                    {visions[activeLevel]?.title || (
+                      <span className="text-slate-600 font-normal">비전 미설정</span>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
             ))}
@@ -3076,8 +3136,11 @@ const handleSealPulse = () => {
                       onChange={(e) =>
                         updateVision(activeLevel, { [type]: e.target.value })
                       }
-                      placeholder="미래의 장면을 쉽게 적어보세요..."
-                      className="w-full bg-transparent mt-2 text-[13px] leading-relaxed text-slate-200 placeholder:text-slate-600 outline-none"
+                      disabled={!isEditingVision}
+                      placeholder={isEditingVision ? "미래의 장면을 쉽게 적어보세요..." : "—"}
+                      className={`w-full bg-transparent mt-2 text-[13px] leading-relaxed placeholder:text-slate-600 outline-none ${
+                        isEditingVision ? "text-slate-200" : "text-slate-400"
+                      }`}
                     />
                   </div>
                 ))}
