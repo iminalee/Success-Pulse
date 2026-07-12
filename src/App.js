@@ -47,6 +47,27 @@ import DiscoverJourney from "./components/discover/DiscoverJourney";
 import SensoryItem from "./components/SensoryItem";
 import ResetPasswordUI from "./components/ResetPasswordUI";
 
+// VIA 6대 덕목 · 강점 (미래 자아 핵심 자질 선택 칩)
+const VIA_STRENGTHS = [
+  { virtue: "지혜", items: ["창의성", "호기심", "판단력", "학구열", "통찰"] },
+  { virtue: "용기", items: ["용감함", "끈기", "정직", "열정"] },
+  { virtue: "인간애", items: ["사랑", "친절", "사회적 지능"] },
+  { virtue: "정의", items: ["협동심", "공정함", "리더십"] },
+  { virtue: "절제", items: ["용서", "겸손", "신중함", "자기조절"] },
+  { virtue: "초월", items: ["심미안", "감사", "희망", "유머", "영성"] },
+];
+
+// 5개짜리 옛 데이터 등 로드 시 항상 6칸으로 맞춤 (에러 방지)
+const padTraits6 = (arr) => {
+  const a = Array.isArray(arr) ? arr.slice(0, 6) : [];
+  while (a.length < 6) a.push("");
+  return a;
+};
+
+// 6개 자질로 정체성 문장 초안 생성
+const buildIdentityDraft = (t) =>
+  `나는 ${t[0]}과 ${t[1]}를 지니고, ${t[2]}와 ${t[3]}로 움직이며, ${t[4]}와 ${t[5]}으로 길을 보는 존재다. 그 내가 지금, 다른 갈래의 현재에 이미 살고 있다.`;
+
 // 메인 앱
 const App = () => {
 // --- [추가] 동기화 챔버 및 통합 리추얼 상태 관리 ---
@@ -178,8 +199,9 @@ const App = () => {
         // 3. Safely fill vision data (Merge with previous state)
         setVisions(prev => ({ ...prev, ...(data.visions || {}) }));
         
-        // 4. Safely fill Traits
-        setBpsTraits(data.bps_traits || ["", "", "", "", ""]);
+        // 4. Safely fill Traits (항상 6칸)
+        setBpsTraits(padTraits6(data.bps_traits));
+        setBpsIdentitySentence(data.apex_bps?.identity_sentence || "");
         
         // 5. Safely fill VAK profile (Set defaults)
         setVakProfile(data.vak_profile || { 
@@ -485,7 +507,9 @@ const App = () => {
   const [ledger, setLedger] = useState([]);
   const [signature, setSignature] = useState("");
   const [signedDate, setSignedDate] = useState(null);
-  const [bpsTraits, setBpsTraits] = useState(["", "", "", "", ""]);
+  const [bpsTraits, setBpsTraits] = useState(["", "", "", "", "", ""]);
+  // [정체성 문장] apex_bps.identity_sentence 로 저장/복원 (새 컬럼 없음)
+  const [bpsIdentitySentence, setBpsIdentitySentence] = useState("");
   const [lifeProfile, setLifeProfile] = useState({
     sleep_time: "",
     wake_time: "",
@@ -708,7 +732,8 @@ const App = () => {
             // [수정] 통째로 교체하지 않고 기본 구조와 병합 — 레벨 누락 시 입력창이
             // uncontrolled로 바뀌어 이전 레벨 값이 화면에 남는 버그 방지
             if (data.visions) setVisions((prev) => ({ ...prev, ...data.visions }));
-            if (data.bps_traits) setBpsTraits(data.bps_traits);
+            if (data.bps_traits) setBpsTraits(padTraits6(data.bps_traits));
+            setBpsIdentitySentence(data.apex_bps?.identity_sentence || "");
             if (data.vak_profile) setVakProfile(data.vak_profile);
             if (data.tci_profile) setTciProfile(data.tci_profile);
             if (data.archived_visions) setArchivedVisions(data.archived_visions);
@@ -796,7 +821,8 @@ const App = () => {
             // [수정] 통째로 교체하지 않고 기본 구조와 병합 — 레벨 누락 시 입력창이
             // uncontrolled로 바뀌어 이전 레벨 값이 화면에 남는 버그 방지
             if (data.visions) setVisions((prev) => ({ ...prev, ...data.visions }));
-            if (data.bps_traits) setBpsTraits(data.bps_traits);
+            if (data.bps_traits) setBpsTraits(padTraits6(data.bps_traits));
+            setBpsIdentitySentence(data.apex_bps?.identity_sentence || "");
             if (data.vak_profile) setVakProfile(data.vak_profile);
             if (data.tci_profile) setTciProfile(data.tci_profile);
             if (data.archived_visions) setArchivedVisions(data.archived_visions);
@@ -928,6 +954,8 @@ const App = () => {
         signature,
         signed_date: signedDate,
         life_profile: lifeProfile,
+        // 정체성 문장은 기존 apex_bps(jsonb) 안에 키로 저장 (새 컬럼 없음)
+        apex_bps: { identity_sentence: bpsIdentitySentence },
         apex_conversation_id: apexConversationId,
         updated_at: new Date(),
       };
@@ -957,7 +985,18 @@ const App = () => {
     signedDate,
     lifeProfile,
     apexConversationId,
+    bpsIdentitySentence,
   ]);
+
+  // [정체성 문장] 6개 자질이 처음 다 차면 초안 자동 생성. 이미 문장이 있으면 건드리지 않음.
+  useEffect(() => {
+    const all6 =
+      bpsTraits.length >= 6 &&
+      bpsTraits.slice(0, 6).every((t) => String(t || "").trim() !== "");
+    if (all6 && String(bpsIdentitySentence || "").trim() === "") {
+      setBpsIdentitySentence(buildIdentityDraft(bpsTraits));
+    }
+  }, [bpsTraits, bpsIdentitySentence]);
 
   // [핵심 3] Gemini API 호출 (VAK 반영)
   // [수리용] 에러 원인을 팝업으로 상세히 알려주는 함수
@@ -1709,11 +1748,11 @@ const handleSealPulse = () => {
     const isTraitsSaved = traitsSaved ?? traitsHaveContent;
     const saveTraits = () => {
       if (!bpsTraits.some((t) => String(t || "").trim() !== "")) {
-        showToast("성격 키워드를 하나 이상 입력해주세요.");
+        showToast("자질을 하나 이상 입력해주세요.");
         return;
       }
       setTraitsSaved(true);
-      showToast("미래 자아 성격이 저장되었습니다. 이제 비전을 설정하세요.");
+      showToast("핵심 자질이 저장되었습니다. 이제 비전을 설정하세요.");
     };
     const editTraits = () => setTraitsSaved(false);
     // [비전 저장/수정] 현재 레벨 편집 상태 — 제목이 없으면 기본 편집 모드
@@ -2985,13 +3024,13 @@ const handleSealPulse = () => {
             {renderLabNodeHeader(
               "future",
               "미래의 나 / Apex BPS",
-              "미래 자아 성격 · 목표 설계 · 비전 · 감각 비전 · 몰입 시나리오"
+              "미래 자아 자질 · 목표 설계 · 비전 · 감각 비전 · 몰입 시나리오"
             )}
             {/* [다크 콘솔] PC 2열 그리드 — 좌: 피라미드 내비(고정), 우: 플랫 섹션 */}
             {/* [1단계] 미래 자아 성격 — 전 가로 폭, 비전보다 먼저 설정 */}
             {renderAccordionSection("traits", {
               icon: <Star size={15} />,
-              title: "미래 자아 성격",
+              title: "미래 자아 자질",
               filled: traitsHaveContent,
               defaultOpen: true,
             }, (
@@ -2999,19 +3038,19 @@ const handleSealPulse = () => {
               {/* 가이드 질문 + 왜 중요한지 */}
               <div className="mb-6 max-w-3xl">
                 <p className="text-[16px] md:text-[19px] font-black text-amber-200 mb-2.5 leading-snug" style={{ wordBreak: "keep-all" }}>
-                  “이 목표를 달성한 당신은 어떤 성격을 가진 사람인가요?”
+                  “당신이 닿을 수 있는 가장 높은 지점의 당신은, 어떤 존재인가요?”
                 </p>
                 <p className="text-[12px] md:text-[13px] text-slate-400 leading-relaxed" style={{ wordBreak: "keep-all" }}>
-                  비전보다 <span className="text-slate-200 font-bold">성격</span>을 먼저 정의합니다. 목표가 ‘무엇을 이룰지’라면, 성격은
-                  ‘어떤 존재가 되어 그것을 이룰지’입니다. 미래의 나를 규정하는 5개의 핵심 성격 키워드를 확정하면,
-                  이후의 모든 비전과 실천이 그 정체성에서 자연스럽게 흘러나옵니다. 그래서 이 성격을 먼저 저장해야 비전 설정이 열립니다.
+                  Apex BPS는 미래의 예측이 아닙니다. 당신이 될 수 있는 가장 정점의 자신 — 그 존재는 다른 갈래의 현재에 이미
+                  살고 있습니다. 그 존재를 규정하는 6개의 핵심 자질을 확정하면, 이후의 모든 비전과 실천은 그 정체성에서
+                  흘러나옵니다. 목표가 ‘무엇을 이룰지’라면, 자질은 ‘어떤 존재로서 그것을 이룰지’입니다.
                 </p>
               </div>
               {/* 라벨 + 저장/수정 */}
               <div className="flex items-center gap-2 mb-4">
                 <span className="hidden md:flex items-center gap-2.5">
                   <span className="inline-block w-3.5 h-[2px]" style={{ background: labAccent }} />
-                  <span className="text-[15px] font-bold text-white tracking-tight">성격 키워드 5</span>
+                  <span className="text-[15px] font-bold text-white tracking-tight">핵심 자질 6</span>
                 </span>
                 <button
                   type="button"
@@ -3028,23 +3067,106 @@ const handleSealPulse = () => {
                   {isTraitsSaved ? "수정" : "저장"}
                 </button>
               </div>
-              {/* 5 키워드 — PC에서 전 가로 5열 */}
-              <div className="grid grid-cols-2 md:grid-cols-5 gap-x-6 gap-y-4">
-                {[0, 1, 2, 3, 4].map((idx) => (
+              {/* 6 자질 — PC에서 3열×2행 */}
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-x-6 gap-y-4">
+                {[0, 1, 2, 3, 4, 5].map((idx) => (
                   <input
                     key={idx}
-                    value={bpsTraits[idx]}
+                    value={bpsTraits[idx] || ""}
                     onChange={(e) => updateBpsTrait(idx, e.target.value)}
                     disabled={isTraitsSaved}
-                    placeholder={["지혜", "평온", "자비", "용기", "통찰"][idx]}
+                    placeholder={["지혜", "평온", "자비", "용기", "통찰", "감사"][idx]}
                     className={`w-full bg-transparent border-0 border-b-2 rounded-none px-1 pb-2.5 pt-1 text-[15px] font-bold text-center outline-none transition-colors ${
                       isTraitsSaved
                         ? "border-emerald-400/40 text-emerald-100/90"
                         : "border-amber-500/35 focus:border-amber-400 text-white"
-                    } placeholder:text-slate-600 ${idx === 4 ? "col-span-2 md:col-span-1" : ""}`}
+                    } placeholder:text-slate-600`}
                   />
                 ))}
               </div>
+
+              {/* [작업1] VIA 강점 선택 칩 — 직접 입력의 보조 수단 */}
+              {!isTraitsSaved && (
+                <div className="mt-7">
+                  <p className="text-[11px] text-slate-500 mb-3">
+                    아래에서 골라도 되고, 나만의 단어를 직접 써도 됩니다.
+                  </p>
+                  <div className="space-y-3">
+                    {VIA_STRENGTHS.map(({ virtue, items }) => (
+                      <div key={virtue} className="flex flex-wrap items-center gap-2">
+                        <span className="text-[11px] font-black text-amber-500/80 w-12 shrink-0">
+                          {virtue}
+                        </span>
+                        {items.map((word) => {
+                          const selected = bpsTraits.includes(word);
+                          return (
+                            <button
+                              key={word}
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                if (selected) {
+                                  // 해제 — 해당 칸 비우기
+                                  const at = bpsTraits.indexOf(word);
+                                  if (at >= 0) updateBpsTrait(at, "");
+                                  return;
+                                }
+                                const empty = bpsTraits.findIndex(
+                                  (t) => String(t || "").trim() === ""
+                                );
+                                if (empty === -1) {
+                                  showToast("칸을 하나 비우고 선택해주세요");
+                                  return;
+                                }
+                                updateBpsTrait(empty, word);
+                              }}
+                              className={`px-3 py-1 rounded-full text-[12px] font-bold border transition-all active:scale-95 ${
+                                selected
+                                  ? "bg-amber-500/20 border-amber-400/60 text-amber-200"
+                                  : "bg-slate-900/60 border-white/10 text-slate-300 hover:border-amber-500/40 hover:text-white"
+                              }`}
+                            >
+                              {word}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* [작업2] 정체성 문장 — 6개 자질이 모두 찼을 때만 */}
+              {bpsTraits.slice(0, 6).every((t) => String(t || "").trim() !== "") && (
+                <div className="mt-8 border-t border-white/10 pt-5">
+                  <div className="flex items-center gap-2 mb-2">
+                    <p className="text-[12px] font-black text-amber-300 flex-1">
+                      정체성 문장
+                    </p>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setBpsIdentitySentence(buildIdentityDraft(bpsTraits));
+                        showToast("새 초안으로 교체했어요");
+                      }}
+                      className="text-[10px] font-bold text-slate-400 hover:text-amber-300 underline underline-offset-2"
+                    >
+                      초안 다시 만들기
+                    </button>
+                  </div>
+                  <p className="text-[11px] text-slate-500 mb-2" style={{ wordBreak: "keep-all" }}>
+                    어색한 부분은 자유롭게 다듬어주세요. 이 문장이 당신의 선언이 됩니다.
+                  </p>
+                  <textarea
+                    value={bpsIdentitySentence}
+                    onChange={(e) => setBpsIdentitySentence(e.target.value)}
+                    rows={3}
+                    className="w-full bg-slate-950/50 border border-amber-500/25 rounded-2xl p-4 text-[14px] leading-relaxed text-amber-50 italic outline-none focus:border-amber-400/50 resize-none"
+                    style={{ wordBreak: "keep-all" }}
+                  />
+                </div>
+              )}
             </div>
             ))}
 
@@ -3053,7 +3175,7 @@ const handleSealPulse = () => {
               {!isTraitsSaved && (
                 <div className="absolute inset-0 z-20 flex items-start justify-center pt-12 md:pt-16 bg-slate-950/55 backdrop-blur-[1px] rounded-2xl">
                   <p className="text-[13px] md:text-[14px] text-slate-200 font-bold text-center px-6 leading-relaxed" style={{ wordBreak: "keep-all" }}>
-                    🔒 먼저 위에서 <span className="text-amber-400">미래 자아 성격</span>을 저장하면
+                    🔒 먼저 위에서 <span className="text-amber-400">핵심 자질</span>을 저장하면
                     <br />
                     비전 설정이 활성화됩니다.
                   </p>
