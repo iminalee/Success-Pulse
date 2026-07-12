@@ -610,6 +610,8 @@ const App = () => {
   const [showFullMission, setShowFullMission] = useState(false);
   // [비전 저장/수정] 레벨별 편집 모드 (true=편집 중). 미지정이면 제목 유무로 자동 결정.
   const [visionEditMode, setVisionEditMode] = useState({});
+  // [미래 자아 성격 저장] 저장 전이면 비전 설정 영역 비활성. null=자동(내용 유무)
+  const [traitsSaved, setTraitsSaved] = useState(null);
   // [모바일 아코디언] My Lab 섹션 펼침 상태 — PC(md+)는 항상 펼침
   const [openLabSections, setOpenLabSections] = useState({
     identity: true,
@@ -878,21 +880,6 @@ const App = () => {
     } catch (e) { console.warn("apex_messages 저장 실패", e); }
   }, [apexMessages, user]);
 
-  // [설정 순서 게이팅] 계약 전에는 현재 → 미래 → 펄스 순서로만 존을 연다.
-  // 잠긴 존에 머물러 있으면 접근 가능한 이전 존으로 되돌린다. (계약 후엔 전체 열람 허용)
-  useEffect(() => {
-    if (!user || signedDate) return;
-    const currentDone = Number(annualIncome) > 0 && !!targetDate;
-    const futureDone = [1, 2, 3, 4, 5].some(
-      (lv) => String(visions[lv]?.title || "").trim() !== ""
-    );
-    if (activeLabZone === "pulse" && !(currentDone && futureDone)) {
-      setActiveLabZone(currentDone ? "future" : "current");
-    } else if (activeLabZone === "future" && !currentDone) {
-      setActiveLabZone("current");
-    }
-  }, [user, signedDate, annualIncome, targetDate, visions, activeLabZone]);
-
   // [Tonight v2] chat 단계 진입 시 Apex 첫 인사 자동 표시
   // 중요: loading이 끝난 후에만 진행 (데이터 로드 완료 보장)
   useEffect(() => {
@@ -1150,6 +1137,19 @@ const App = () => {
   };
 
   const fNum = (n) => Math.floor(n).toLocaleString();
+  // 숫자를 한글 금액으로 (예: 150000000 → "1억 5,000만원")
+  const formatKoreanMoney = (n) => {
+    const num = Math.floor(Number(n));
+    if (!Number.isFinite(num) || num <= 0) return "";
+    const eok = Math.floor(num / 100000000);
+    const man = Math.floor((num % 100000000) / 10000);
+    const won = num % 10000;
+    const parts = [];
+    if (eok > 0) parts.push(`${eok.toLocaleString()}억`);
+    if (man > 0) parts.push(`${man.toLocaleString()}만`);
+    if (won > 0 || parts.length === 0) parts.push(`${won.toLocaleString()}`);
+    return parts.join(" ") + "원";
+  };
   const mbGoalAmount = annualIncome * 2;
   const mbBalance = mbGoalAmount * 4;
   const livingAllowance = mbBalance * 0.25;
@@ -1678,17 +1678,7 @@ const handleSealPulse = () => {
   }, [chartData, currentView, annualIncome]);
 
   const renderLab = () => {
-    // [설정 순서 게이팅] 계약 전에는 현재 → 미래 → 펄스 순서로 존을 순차 공개
-    const setupMode = user && !signedDate;
-    const currentSetupDone = Number(annualIncome) > 0 && !!targetDate;
-    const futureSetupDone = [1, 2, 3, 4, 5].some(
-      (lv) => String(visions[lv]?.title || "").trim() !== ""
-    );
-    const zoneUnlocked = {
-      current: true,
-      future: !setupMode || currentSetupDone,
-      pulse: !setupMode || (currentSetupDone && futureSetupDone),
-    };
+    // 세 존은 항상 열람 가능 (하드 숨김 제거 — 하단 Setup 안내로 순서만 유도)
     // [간이 결과 / 미측정] VAK·TCI가 실제로 측정된 값인지 판별 (없으면 회색 처리)
     const vakHasData = (() => {
       const v = Number(vakProfile?.vPercent);
@@ -1714,6 +1704,18 @@ const handleSealPulse = () => {
       if (hasTitle) return "half";
       return "none";
     };
+    // [미래 자아 성격] 저장 여부 — 저장돼야 비전 설정 영역 활성화, 삼각형 점등
+    const traitsHaveContent = bpsTraits.some((t) => String(t || "").trim() !== "");
+    const isTraitsSaved = traitsSaved ?? traitsHaveContent;
+    const saveTraits = () => {
+      if (!bpsTraits.some((t) => String(t || "").trim() !== "")) {
+        showToast("성격 키워드를 하나 이상 입력해주세요.");
+        return;
+      }
+      setTraitsSaved(true);
+      showToast("미래 자아 성격이 저장되었습니다. 이제 비전을 설정하세요.");
+    };
+    const editTraits = () => setTraitsSaved(false);
     // [비전 저장/수정] 현재 레벨 편집 상태 — 제목이 없으면 기본 편집 모드
     const activeHasTitle = String(visions[activeLevel]?.title || "").trim() !== "";
     const isEditingVision = visionEditMode[activeLevel] ?? !activeHasTitle;
@@ -1995,7 +1997,15 @@ const handleSealPulse = () => {
       return (
         <div>
           <div className="flex flex-col items-center">
-            <div className="w-0 h-0 border-l-[15px] border-l-transparent border-r-[15px] border-r-transparent border-b-[19px] border-b-amber-500/80 mb-1.5"></div>
+            {/* Apex 삼각형 — 미래 자아 성격이 저장돼야 비로소 환하게 점등 */}
+            <div
+              className="w-0 h-0 border-l-[15px] border-l-transparent border-r-[15px] border-r-transparent border-b-[19px] mb-1.5 transition-all duration-500"
+              style={
+                isTraitsSaved
+                  ? { borderBottomColor: "#fcd34d", filter: "drop-shadow(0 0 12px rgba(245,176,27,0.9))" }
+                  : { borderBottomColor: "rgba(120,113,80,0.5)" }
+              }
+            ></div>
             {[5, 4, 3, 2, 1].map((lv) => {
               const comp = visionCompletion(lv); // none / half / full
               const isActive = activeLevel === lv;
@@ -2076,7 +2086,7 @@ const handleSealPulse = () => {
               { zone: "current", x: "12%" },
               { zone: "pulse", x: "50%" },
               { zone: "future", x: "88%" },
-            ].filter((item) => zoneUnlocked[item.zone]).map((item) => {
+            ].map((item) => {
               const meta = labZoneMeta[item.zone];
               const isActive = activeLabZone === item.zone;
               return (
@@ -2304,12 +2314,12 @@ const handleSealPulse = () => {
                     Sleep Time
                   </label>
                   <input
+                    type="time"
                     value={lifeProfile.sleep_time}
                     onChange={(e) =>
                       setLifeProfile((prev) => ({ ...prev, sleep_time: e.target.value }))
                     }
-                    placeholder="23:30"
-                    className="w-full bg-transparent border-0 border-b-2 border-emerald-400/30 focus:border-emerald-300 rounded-none px-1 pb-2 text-[15px] font-bold text-white placeholder:text-slate-600 outline-none transition-colors"
+                    className="w-full bg-transparent border-0 border-b-2 border-emerald-400/30 focus:border-emerald-300 rounded-none px-1 pb-2 text-[15px] font-bold text-white placeholder:text-slate-600 outline-none transition-colors [color-scheme:dark]"
                   />
                 </div>
                 <div>
@@ -2317,12 +2327,12 @@ const handleSealPulse = () => {
                     Wake Time
                   </label>
                   <input
+                    type="time"
                     value={lifeProfile.wake_time}
                     onChange={(e) =>
                       setLifeProfile((prev) => ({ ...prev, wake_time: e.target.value }))
                     }
-                    placeholder="06:30"
-                    className="w-full bg-transparent border-0 border-b-2 border-emerald-400/30 focus:border-emerald-300 rounded-none px-1 pb-2 text-[15px] font-bold text-white placeholder:text-slate-600 outline-none transition-colors"
+                    className="w-full bg-transparent border-0 border-b-2 border-emerald-400/30 focus:border-emerald-300 rounded-none px-1 pb-2 text-[15px] font-bold text-white placeholder:text-slate-600 outline-none transition-colors [color-scheme:dark]"
                   />
                 </div>
               </div>
@@ -2361,6 +2371,10 @@ const handleSealPulse = () => {
                       onChange={(e) => setAnnualIncome(Number(e.target.value))}
                       className="w-full bg-transparent border-0 border-b-2 border-emerald-400/30 focus:border-emerald-300 rounded-none px-1 pb-2 text-[15px] font-mono font-bold text-white text-right outline-none transition-colors"
                     />
+                    {/* 한글 금액 자동 표시 */}
+                    <p className="text-right text-[12px] font-bold text-amber-300/90 mt-1 h-4">
+                      {formatKoreanMoney(annualIncome)}
+                    </p>
                   </div>
                 </div>
                 <div>
@@ -2974,35 +2988,82 @@ const handleSealPulse = () => {
               "미래 자아 성격 · 목표 설계 · 비전 · 감각 비전 · 몰입 시나리오"
             )}
             {/* [다크 콘솔] PC 2열 그리드 — 좌: 피라미드 내비(고정), 우: 플랫 섹션 */}
-            <div className="md:grid md:grid-cols-[300px_1fr] md:gap-12 md:items-start">
-              <div className="hidden md:block md:sticky md:top-6">
-                {renderFutureGoalNav()}
-              </div>
-              <div className="md:space-y-10">
+            {/* [1단계] 미래 자아 성격 — 전 가로 폭, 비전보다 먼저 설정 */}
             {renderAccordionSection("traits", {
               icon: <Star size={15} />,
               title: "미래 자아 성격",
-              filled: bpsTraits.some((t) => String(t || "").trim() !== ""),
+              filled: traitsHaveContent,
+              defaultOpen: true,
             }, (
             <div>
-              {renderFlatLabel("미래 자아 성격", "5 키워드")}
-              {/* 캡슐 대신 밑줄 기입 필드 */}
+              {/* 가이드 질문 + 왜 중요한지 */}
+              <div className="mb-6 max-w-3xl">
+                <p className="text-[16px] md:text-[19px] font-black text-amber-200 mb-2.5 leading-snug" style={{ wordBreak: "keep-all" }}>
+                  “이 목표를 달성한 당신은 어떤 성격을 가진 사람인가요?”
+                </p>
+                <p className="text-[12px] md:text-[13px] text-slate-400 leading-relaxed" style={{ wordBreak: "keep-all" }}>
+                  비전보다 <span className="text-slate-200 font-bold">성격</span>을 먼저 정의합니다. 목표가 ‘무엇을 이룰지’라면, 성격은
+                  ‘어떤 존재가 되어 그것을 이룰지’입니다. 미래의 나를 규정하는 5개의 핵심 성격 키워드를 확정하면,
+                  이후의 모든 비전과 실천이 그 정체성에서 자연스럽게 흘러나옵니다. 그래서 이 성격을 먼저 저장해야 비전 설정이 열립니다.
+                </p>
+              </div>
+              {/* 라벨 + 저장/수정 */}
+              <div className="flex items-center gap-2 mb-4">
+                <span className="hidden md:flex items-center gap-2.5">
+                  <span className="inline-block w-3.5 h-[2px]" style={{ background: labAccent }} />
+                  <span className="text-[15px] font-bold text-white tracking-tight">성격 키워드 5</span>
+                </span>
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    isTraitsSaved ? editTraits() : saveTraits();
+                  }}
+                  className={`ml-auto px-4 py-1.5 rounded-lg text-[11px] font-black uppercase tracking-widest transition-all active:scale-95 ${
+                    isTraitsSaved
+                      ? "bg-slate-800 hover:bg-slate-700 text-slate-300 border border-white/10"
+                      : "bg-amber-600 hover:bg-amber-500 text-white shadow-lg"
+                  }`}
+                >
+                  {isTraitsSaved ? "수정" : "저장"}
+                </button>
+              </div>
+              {/* 5 키워드 — PC에서 전 가로 5열 */}
               <div className="grid grid-cols-2 md:grid-cols-5 gap-x-6 gap-y-4">
                 {[0, 1, 2, 3, 4].map((idx) => (
                   <input
                     key={idx}
                     value={bpsTraits[idx]}
                     onChange={(e) => updateBpsTrait(idx, e.target.value)}
+                    disabled={isTraitsSaved}
                     placeholder={["지혜", "평온", "자비", "용기", "통찰"][idx]}
-                    className={`w-full bg-transparent border-0 border-b-2 border-amber-500/35 focus:border-amber-400 rounded-none px-1 pb-2.5 pt-1 text-[15px] font-bold text-white placeholder:text-slate-600 text-center outline-none transition-colors ${
-                      idx === 4 ? "col-span-2 md:col-span-1" : ""
-                    }`}
+                    className={`w-full bg-transparent border-0 border-b-2 rounded-none px-1 pb-2.5 pt-1 text-[15px] font-bold text-center outline-none transition-colors ${
+                      isTraitsSaved
+                        ? "border-emerald-400/40 text-emerald-100/90"
+                        : "border-amber-500/35 focus:border-amber-400 text-white"
+                    } placeholder:text-slate-600 ${idx === 4 ? "col-span-2 md:col-span-1" : ""}`}
                   />
                 ))}
               </div>
             </div>
             ))}
 
+            {/* [2단계] 비전 설정 영역 — 성격 저장 후 활성화 */}
+            <div className="relative">
+              {!isTraitsSaved && (
+                <div className="absolute inset-0 z-20 flex items-start justify-center pt-12 md:pt-16 bg-slate-950/55 backdrop-blur-[1px] rounded-2xl">
+                  <p className="text-[13px] md:text-[14px] text-slate-200 font-bold text-center px-6 leading-relaxed" style={{ wordBreak: "keep-all" }}>
+                    🔒 먼저 위에서 <span className="text-amber-400">미래 자아 성격</span>을 저장하면
+                    <br />
+                    비전 설정이 활성화됩니다.
+                  </p>
+                </div>
+              )}
+              <div className={`md:grid md:grid-cols-[300px_1fr] md:gap-12 md:items-start transition-opacity duration-300 ${!isTraitsSaved ? "opacity-40 pointer-events-none select-none" : ""}`}>
+              <div className="hidden md:block md:sticky md:top-6">
+                {renderFutureGoalNav()}
+              </div>
+              <div className="md:space-y-10">
             {renderAccordionSection("goal", {
               icon: <Zap size={15} />,
               title: "목표 설계자 · 비전",
@@ -3187,6 +3248,7 @@ const handleSealPulse = () => {
             </div>
             ))}
               </div>
+            </div>
             </div>
 
             {/* [Setup Journey 2/3] 계약 전 가이드 — 비전 1개 이상 입력 후 THE PULSE로 이동 */}
