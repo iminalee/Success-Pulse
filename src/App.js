@@ -1213,27 +1213,18 @@ const App = () => {
   };
 
   const handleSignOut = async () => {
-    setLoading(true);
+    // [중요] UI를 먼저 즉시 로그아웃 처리 — 서버 요청(signOut)이 지연/멈춰도(hang)
+    // 화면이 "..."에 갇히지 않고 바로 로그인 화면으로 전환된다.
+    resetAuthenticatedSessionState();
+    setAuthMode("login");
+    setLoading(false);
+    showToast("로그아웃되었습니다.");
 
+    // 로컬 세션 토큰 정리 (실패/지연해도 무방 — UI는 이미 로그아웃 상태)
     try {
-      const { error } = await supabase.auth.signOut();
-
-      if (error) {
-        console.warn("Global sign-out failed; clearing local session instead.", error);
-        const { error: localSignOutError } = await supabase.auth.signOut({ scope: "local" });
-
-        if (localSignOutError) {
-          throw localSignOutError;
-        }
-      }
-
-      resetAuthenticatedSessionState();
-      setAuthMode("login");
-      showToast("로그아웃되었습니다.");
+      await supabase.auth.signOut({ scope: "local" });
     } catch (error) {
-      showToast("로그아웃 실패: " + (error?.message || "Unknown error"));
-    } finally {
-      setLoading(false);
+      console.warn("세션 토큰 정리 실패(무시):", error);
     }
   };
 
