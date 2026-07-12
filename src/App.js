@@ -2144,12 +2144,17 @@ const handleSealPulse = () => {
                 {user ? (
                   /* [축소] 큰 박스 대신 헤어라인 한 줄 — 이름·이메일 + 우측 계정 액션 */
                   <div className="flex items-center justify-between gap-3 py-2.5 border-b border-emerald-500/20 animate-fadeIn">
-                    <div className="min-w-0 flex items-baseline gap-2">
+                    <div className="min-w-0 flex items-center gap-2">
                       <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0" style={{ boxShadow: "0 0 8px rgba(52,211,153,0.9)" }} />
-                      <span className="text-[15px] font-bold text-white truncate">
-                        {userName || "User"}
-                        <span className="text-emerald-400 text-[11px] ml-1.5">ver.0</span>
-                      </span>
+                      {/* 이름 인라인 편집 — 비어있으면 직접 입력해 복구 가능(입력 시 자동저장) */}
+                      <input
+                        value={userName}
+                        onChange={(e) => setUserName(e.target.value)}
+                        placeholder="이름을 입력하세요"
+                        aria-label="이름"
+                        className="text-[15px] font-bold text-white bg-transparent border-b border-dashed border-white/15 hover:border-white/30 focus:border-emerald-400 outline-none w-28 min-w-0 placeholder:text-slate-500 placeholder:font-normal transition-colors"
+                      />
+                      <span className="text-emerald-400 text-[11px] shrink-0">ver.0</span>
                       <span className="text-[11px] text-slate-500 truncate hidden sm:inline">
                         {user.email}
                       </span>
