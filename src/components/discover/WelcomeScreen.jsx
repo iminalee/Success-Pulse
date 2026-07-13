@@ -1,20 +1,4 @@
-import React, { useState } from "react";
-
-const CARDS = [
-  {
-    line1: "당신의 미래에는 이미",
-    line2: "최고의 버전이 존재합니다.",
-  },
-  {
-    line1: "지금부터 그 사람을 찾아가는",
-    line2: "짧은 여정을 시작합니다.",
-  },
-  {
-    line1: "약 5분이면 충분합니다.",
-    line2: "편안하게 답해주세요.",
-    showButton: true,
-  },
-];
+import React from "react";
 
 // 모듈 로드 시 1회 생성 — 리렌더마다 재계산 방지
 const STARS = Array.from({ length: 60 }, (_, i) => ({
@@ -27,49 +11,24 @@ const STARS = Array.from({ length: 60 }, (_, i) => ({
   opacity: (Math.random() * 0.35 + 0.08).toFixed(2),
 }));
 
+// 첫 화면 — 두 갈래 중 하나 선택 (동등한 크기)
+//  1) 5분 설문 시작 (Act1)  →  onStart
+//  2) 로그인 / 회원가입       →  onExistingAccount
 const WelcomeScreen = ({ onStart, onExistingAccount }) => {
-  const [cardIndex, setCardIndex] = useState(0);
-  const [transitioning, setTransitioning] = useState(false);
-
-  const card = CARDS[cardIndex];
-
-  const advance = () => {
-    if (transitioning || card.showButton) return;
-    setTransitioning(true);
-    setTimeout(() => {
-      setCardIndex((i) => i + 1);
-      setTransitioning(false);
-    }, 380);
-  };
-
   return (
-    <div
-      className="fixed inset-0 bg-slate-950 flex flex-col items-center justify-center cursor-pointer select-none overflow-hidden"
-      onClick={advance}
-    >
+    <div className="fixed inset-0 bg-slate-950 flex flex-col items-center justify-center overflow-hidden px-6 select-none">
       <style>{`
         @keyframes wsTwinkle {
           0%   { opacity: 0.05; transform: scale(1); }
           100% { opacity: 0.65; transform: scale(1.4); }
         }
-        @keyframes wsCardIn {
-          from { opacity: 0; transform: translateY(20px); }
-          to   { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes wsCardOut {
-          from { opacity: 1; transform: translateY(0); }
-          to   { opacity: 0; transform: translateY(-12px); }
-        }
-        .ws-card-in  { animation: wsCardIn  0.45s ease-out forwards; }
-        .ws-card-out { animation: wsCardOut 0.3s ease-in  forwards; }
-        @keyframes wsGlow {
-          0%, 100% { opacity: 0.04; }
-          50%       { opacity: 0.09; }
-        }
+        @keyframes wsGlow { 0%, 100% { opacity: 0.05; } 50% { opacity: 0.11; } }
+        @keyframes wsUp { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
         .ws-glow { animation: wsGlow 4s ease-in-out infinite; }
+        .ws-up { animation: wsUp 0.6s cubic-bezier(0.16,1,0.3,1) forwards; }
       `}</style>
 
-      {/* ── 파티클 레이어 ── */}
+      {/* 파티클 */}
       <div className="absolute inset-0 pointer-events-none">
         {STARS.map((s) => (
           <div
@@ -87,78 +46,66 @@ const WelcomeScreen = ({ onStart, onExistingAccount }) => {
         ))}
       </div>
 
-      {/* ── 앰버 글로우 ── */}
+      {/* 앰버 글로우 */}
       <div className="absolute inset-0 pointer-events-none flex items-center justify-center ws-glow">
-        <div className="w-80 h-80 rounded-full bg-amber-500/10 blur-[80px]" />
+        <div className="w-96 h-96 rounded-full bg-amber-500/10 blur-[90px]" />
       </div>
 
-      {/* ── 카드 ── */}
-      <div
-        key={cardIndex}
-        className={`relative z-10 text-center px-10 max-w-sm w-full ${
-          transitioning ? "ws-card-out" : "ws-card-in"
-        }`}
-      >
-        {/* 진행 표시 */}
-        <p className="text-[9px] text-amber-500/40 font-black tracking-[0.6em] uppercase mb-10">
-          {cardIndex + 1} / {CARDS.length}
-        </p>
-
-        {/* 메인 텍스트 */}
-        <h2 className="text-[1.55rem] font-bold text-slate-200 leading-[1.75] mb-0.5" style={{ wordBreak: "keep-all" }}>
-          {card.line1}
-        </h2>
-        <h2 className="text-[1.55rem] font-bold text-amber-400 leading-[1.75]" style={{ wordBreak: "keep-all" }}>
-          {card.line2}
-        </h2>
-
-        {/* 카드 3: 시작 버튼 */}
-        {card.showButton ? (
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              onStart();
-            }}
-            className="mt-14 w-56 bg-amber-500 hover:bg-amber-400 active:scale-95 text-slate-950 font-black py-4 rounded-2xl text-sm uppercase tracking-widest transition-all duration-200 shadow-[0_0_40px_rgba(245,158,11,0.3)]"
-          >
-            시작하기
-          </button>
-        ) : (
-          <p className="mt-12 text-slate-700 text-[10px] tracking-[0.35em] uppercase">
-            tap to continue
+      {/* 콘텐츠 */}
+      <div className="relative z-10 w-full max-w-3xl ws-up">
+        {/* 브랜드 */}
+        <div className="text-center mb-10 md:mb-14">
+          <h1 className="text-4xl md:text-5xl font-black text-white tracking-tighter italic uppercase leading-none">
+            THE <span className="text-amber-500">PULSE</span>
+          </h1>
+          <p className="text-[13px] md:text-sm text-slate-400 mt-4 leading-relaxed" style={{ wordBreak: "keep-all" }}>
+            미래의 나를 오늘로 데려오는 정체성 코칭
           </p>
-        )}
-      </div>
+          <p className="text-[12px] md:text-[13px] text-slate-500 mt-3 uppercase tracking-[0.35em] font-bold">
+            어떻게 시작할까요?
+          </p>
+        </div>
 
-      {/* ── 하단 도트 인디케이터 ── */}
-      <div className="absolute bottom-14 flex items-center gap-2">
-        {CARDS.map((_, i) => (
-          <div
-            key={i}
-            className="h-1.5 rounded-full transition-all duration-300"
-            style={{
-              width: i === cardIndex ? "20px" : "6px",
-              backgroundColor: i === cardIndex
-                ? "rgba(245,158,11,0.8)"
-                : "rgba(100,116,139,0.4)",
-            }}
-          />
-        ))}
-      </div>
+        {/* 두 갈래 — 동등한 크기 */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-5">
+          {/* 5분 설문 시작 */}
+          <button
+            type="button"
+            onClick={onStart}
+            className="group flex flex-col items-start text-left h-full min-h-[190px] md:min-h-[220px] p-6 md:p-8 rounded-3xl bg-amber-500/10 border border-amber-500/40 hover:border-amber-400 hover:bg-amber-500/15 active:scale-[0.98] transition-all shadow-[0_0_40px_rgba(245,158,11,0.12)]"
+          >
+            <span className="text-3xl md:text-4xl mb-4">✦</span>
+            <span className="text-lg md:text-xl font-black text-white">5분 설문으로 시작</span>
+            <span className="text-[13px] md:text-sm text-slate-300 mt-2 leading-relaxed" style={{ wordBreak: "keep-all" }}>
+              나의 기질·감각을 진단하고 나만의 Apex BPS 정체성을 만듭니다.
+            </span>
+            <span className="mt-auto pt-5 text-[13px] font-black text-amber-400 uppercase tracking-widest flex items-center gap-2 group-hover:gap-3 transition-all">
+              시작하기 →
+            </span>
+          </button>
 
-      {/* ── 기존 계정 사용자 안내 링크 ── */}
-      <button
-        type="button"
-        onClick={(e) => {
-          e.stopPropagation();
-          if (typeof onExistingAccount === "function") {
-            onExistingAccount();
-          }
-        }}
-        className="absolute bottom-5 text-[10px] text-slate-700 hover:text-slate-400 transition-colors tracking-widest uppercase font-bold"
-      >
-        이미 계정이 있으신가요? 로그인 화면으로 이동하기
-      </button>
+          {/* 로그인 / 회원가입 */}
+          <button
+            type="button"
+            onClick={onExistingAccount}
+            className="group flex flex-col items-start text-left h-full min-h-[190px] md:min-h-[220px] p-6 md:p-8 rounded-3xl bg-slate-900/60 border border-white/10 hover:border-white/25 hover:bg-slate-900/80 active:scale-[0.98] transition-all"
+          >
+            <span className="text-3xl md:text-4xl mb-4">👤</span>
+            <span className="text-lg md:text-xl font-black text-white">로그인 / 회원가입</span>
+            <span className="text-[13px] md:text-sm text-slate-300 mt-2 leading-relaxed" style={{ wordBreak: "keep-all" }}>
+              이미 계정이 있으신가요? 바로 로그인해 이어서 진행합니다.
+            </span>
+            <span className="mt-auto pt-5 text-[13px] font-black text-slate-300 uppercase tracking-widest flex items-center gap-2 group-hover:gap-3 transition-all">
+              계정으로 계속 →
+            </span>
+          </button>
+        </div>
+
+        {/* 보조 안내 */}
+        <p className="text-center text-[12px] md:text-[13px] text-slate-500 mt-8 leading-relaxed" style={{ wordBreak: "keep-all" }}>
+          설문은 나중에 <span className="text-slate-400 font-bold">My Lab · 현재의 나</span>에서 언제든 할 수 있어요.
+        </p>
+      </div>
     </div>
   );
 };
