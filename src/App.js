@@ -5608,7 +5608,7 @@ const nowX = getX(dataPoints[dataPoints.length - 1].date); // 📅 가로 위치
             <h1 className="text-4xl font-black text-white tracking-tighter italic uppercase leading-none mb-2">
               THE <span className="text-amber-500">PULSE</span>
             </h1>
-            <p className="text-[10px] text-slate-500 uppercase tracking-[0.4em] font-bold mt-3">
+            <p className="text-[12px] text-slate-500 uppercase tracking-[0.4em] font-bold mt-3">
               Access Point
             </p>
           </div>
@@ -5659,7 +5659,7 @@ const nowX = getX(dataPoints[dataPoints.length - 1].date); // 📅 가로 위치
                     setAuthMode("signup");
                     setSignupName("");
                   }}
-                  className="text-[11px] text-slate-400 hover:text-amber-400 transition-colors"
+                  className="text-[13px] text-slate-400 hover:text-amber-400 transition-colors"
                 >
                   아직 계정이 없으신가요? 회원가입
                 </button>
@@ -5669,7 +5669,7 @@ const nowX = getX(dataPoints[dataPoints.length - 1].date); // 📅 가로 위치
                     setAuthMode("login");
                     setSignupName("");
                   }}
-                  className="text-[11px] text-slate-400 hover:text-amber-400 transition-colors"
+                  className="text-[13px] text-slate-400 hover:text-amber-400 transition-colors"
                 >
                   이미 계정이 있으신가요? 로그인
                 </button>
@@ -5680,7 +5680,7 @@ const nowX = getX(dataPoints[dataPoints.length - 1].date); // 📅 가로 위치
               <button
                 onClick={handleResetPassword}
                 disabled={loading}
-                className="text-[10px] text-slate-500 hover:text-amber-400 transition-colors uppercase tracking-widest font-bold"
+                className="text-[12px] text-slate-500 hover:text-amber-400 transition-colors uppercase tracking-widest font-bold"
               >
                 비밀번호를 잊으셨나요?
               </button>
@@ -5688,7 +5688,7 @@ const nowX = getX(dataPoints[dataPoints.length - 1].date); // 📅 가로 위치
           </div>
 
           <div className="text-center pt-4">
-            <p className="text-[11px] text-slate-400 mb-2">
+            <p className="text-[13px] text-slate-400 mb-2 leading-relaxed" style={{ wordBreak: "keep-all" }}>
               처음이라면 간단한 질문을 통해 나의 가능한 최고의 버전 프로필을 먼저 만들어볼 수 있어요.
             </p>
             <button
@@ -5700,14 +5700,14 @@ const nowX = getX(dataPoints[dataPoints.length - 1].date); // 📅 가로 위치
                 setEmail("");
                 setPassword("");
               }}
-              className="text-[11px] text-amber-500/80 hover:text-amber-400 transition-colors"
+              className="text-[13px] text-amber-500/80 hover:text-amber-400 transition-colors font-bold"
             >
               나의 가능한 최고의 버전 프로필 만들기
             </button>
           </div>
 
           {/* 푸터 */}
-          <p className="text-center text-[9px] text-slate-700 mt-10 uppercase tracking-[0.3em] font-bold">
+          <p className="text-center text-[11px] text-slate-700 mt-10 uppercase tracking-[0.3em] font-bold">
             © 2026 The Pulse
           </p>
         </div>
