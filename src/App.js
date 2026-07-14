@@ -657,6 +657,8 @@ const App = () => {
   const [draftRawText, setDraftRawText] = useState("");     // 사용자가 붙여넣은 원본 텍스트 (디버깅용)
   // [Tonight v2] Dify 대화 연속성 — Supabase에 저쥐/불러오기
   const [apexConversationId, setApexConversationId] = useState(null);
+  // [T3] Apex 장기기억 요약 — pulse_data.recent_summary 로 저장/복원, 채팅 컨텍스트로 주입
+  const [recentSummary, setRecentSummary] = useState("");
   // [Tonight v2] ritual day 계산 — 새벽 6시 기준 (자정 넘는 ritual 윈도우 보호)
   // 새벽 5:59까지는 어제 날짜로 간주
   const getRitualDay = () => {
@@ -759,6 +761,7 @@ const App = () => {
             setHasEditAccess(data.has_edit_access || false);
             setHasAiAccess(data.has_ai_access || false);
             if (data.apex_conversation_id) setApexConversationId(data.apex_conversation_id);
+            setRecentSummary(data.recent_summary || "");
             setDiscoverResult(data.contract?.onboarding_agreement?.journey_snapshot || null);
           }
         }
@@ -840,6 +843,7 @@ const App = () => {
             setHasEditAccess(data.has_edit_access || false);
             setHasAiAccess(data.has_ai_access || false);
             setApexConversationId(data.apex_conversation_id || null);
+            setRecentSummary(data.recent_summary || "");
             setDiscoverResult(data.contract?.onboarding_agreement?.journey_snapshot || null);
             // [복원] 기존 가입자 자동 온보딩 완료 처리
             if (data.signed_date || data.signature || data.contract?.onboarding_agreement?.completed_at) {
@@ -1191,6 +1195,79 @@ const App = () => {
   const hourlyRate = goalAmount / 1000;
   const valueEventAmount = hourlyRate; // 기존 코드 호환 alias — 절대 삭제 금지
   const isPhysioSet = !!visions[1]?.title;
+
+  // ── [T3] Apex 채팅 컨텍스트 주입 ──────────────────────────
+  // 최신 Pulse Profile을 Dify inputs로 전달 → Apex가 프로필을 반영해 응답.
+  const buildApexInputs = () => {
+    const today = new Date().toISOString().slice(0, 10);
+    const todayEntries = (ledger || []).filter(
+      (e) => String(e.date || "").slice(0, 10) === today
+    );
+    const todayLedgerText = todayEntries.length
+      ? todayEntries
+          .map(
+            (e) =>
+              `- ${e.desc || e.name || "활동"} (${e.duration || e.durationMinutes || 0}분)`
+          )
+          .join("\n")
+      : "오늘 기록 없음";
+
+    return {
+      apex_name: userName || "",
+      user_name: userName || "",
+      bedtime: lifeProfile?.sleep_time || "",
+      wake_time: lifeProfile?.wake_time || "",
+      hourly_rate: String(Math.round(hourlyRate || 0)),
+      today_ledger: todayLedgerText,
+      recent_summary: recentSummary || "",
+    };
+  };
+
+  // 두 입력 경로(Enter / 전송 버튼)가 공유하는 단일 전송 함수.
+  const sendApexMessage = (userMsg) => {
+    setApexMessages((prev) => [...prev, { role: "user", content: userMsg }]);
+    setApexLoading(true);
+    fetch("/api/apex-chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        message: userMsg,
+        conversation_id: apexConversationId,
+        inputs: buildApexInputs(),
+      }),
+    })
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.error) {
+          setApexMessages((prev) => [
+            ...prev,
+            { role: "assistant", content: "오류: " + data.error },
+          ]);
+        } else {
+          setApexMessages((prev) => [
+            ...prev,
+            { role: "assistant", content: data.answer },
+          ]);
+          if (data.conversation_id && data.conversation_id !== apexConversationId) {
+            setApexConversationId(data.conversation_id);
+          }
+        }
+        setTimeout(() => {
+          const el = document.getElementById("apex-messages");
+          if (el) el.scrollTop = el.scrollHeight;
+        }, 50);
+      })
+      .catch(() => {
+        setApexMessages((prev) => [
+          ...prev,
+          {
+            role: "assistant",
+            content: "연결 오류가 발생했습니다. 잠시 후 다시 시도해주세요.",
+          },
+        ]);
+      })
+      .finally(() => setApexLoading(false));
+  };
 
   // ── 스트릭 (연속 활동일) 계산 ──────────────────────────────
   const calculateStreak = () => {
@@ -4970,32 +5047,7 @@ const nowX = getX(dataPoints[dataPoints.length - 1].date); // 📅 가로 위치
                     if (!apexInput.trim() || apexLoading) return;
                     const userMsg = apexInput.trim();
                     setApexInput("");
-                    setApexMessages(prev => [...prev, { role: "user", content: userMsg }]);
-                    setApexLoading(true);
-                    fetch("/api/apex-chat", {
-                      method: "POST",
-                      headers: { "Content-Type": "application/json" },
-                      body: JSON.stringify({ message: userMsg, conversation_id: apexConversationId }),
-                    })
-                      .then(r => r.json())
-                      .then(data => {
-                        if (data.error) {
-                          setApexMessages(prev => [...prev, { role: "assistant", content: "오류: " + data.error }]);
-                        } else {
-                          setApexMessages(prev => [...prev, { role: "assistant", content: data.answer }]);
-                          if (data.conversation_id && data.conversation_id !== apexConversationId) {
-                            setApexConversationId(data.conversation_id);
-                          }
-                        }
-                        setTimeout(() => {
-                          const el = document.getElementById("apex-messages");
-                          if (el) el.scrollTop = el.scrollHeight;
-                        }, 50);
-                      })
-                      .catch(() => {
-                        setApexMessages(prev => [...prev, { role: "assistant", content: "연결 오류가 발생했습니다. 잠시 후 다시 시도해주세요." }]);
-                      })
-                      .finally(() => setApexLoading(false));
+                    sendApexMessage(userMsg);
                   }
                 }}
                 placeholder="Apex에게 오늘 하루를 말해보세요... (Enter로 전송, Shift+Enter 줄바꿈)"
@@ -5007,32 +5059,7 @@ const nowX = getX(dataPoints[dataPoints.length - 1].date); // 📅 가로 위치
                   if (!apexInput.trim() || apexLoading) return;
                   const userMsg = apexInput.trim();
                   setApexInput("");
-                  setApexMessages(prev => [...prev, { role: "user", content: userMsg }]);
-                  setApexLoading(true);
-                  fetch("/api/apex-chat", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ message: userMsg, conversation_id: apexConversationId }),
-                  })
-                    .then(r => r.json())
-                    .then(data => {
-                      if (data.error) {
-                        setApexMessages(prev => [...prev, { role: "assistant", content: "오류: " + data.error }]);
-                      } else {
-                        setApexMessages(prev => [...prev, { role: "assistant", content: data.answer }]);
-                        if (data.conversation_id && data.conversation_id !== apexConversationId) {
-                          setApexConversationId(data.conversation_id);
-                        }
-                      }
-                      setTimeout(() => {
-                        const el = document.getElementById("apex-messages");
-                        if (el) el.scrollTop = el.scrollHeight;
-                      }, 50);
-                    })
-                    .catch(() => {
-                      setApexMessages(prev => [...prev, { role: "assistant", content: "연결 오류가 발생했습니다. 잠시 후 다시 시도해주세요." }]);
-                    })
-                    .finally(() => setApexLoading(false));
+                  sendApexMessage(userMsg);
                 }}
                 className="flex-shrink-0 w-12 bg-amber-600 hover:bg-amber-500 disabled:bg-slate-700 text-white rounded-2xl font-black text-xs transition-all active:scale-95 disabled:cursor-not-allowed"
                 disabled={!apexInput.trim() || apexLoading}

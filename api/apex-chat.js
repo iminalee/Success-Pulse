@@ -2,11 +2,13 @@
  * api/apex-chat.js
  * Vercel Serverless Function
  *
- * 역할: Dify API 키를 서버에서만 사용하여 프론트엔드에 노출되지 않게 보호
+ * 역할: Dify API 키를 서버에서만 사용하여 프론트엔드에 노출되지 않게 보호.
+ *       + 사용자의 최신 Pulse Profile 컨텍스트(inputs)를 Dify에 전달해
+ *         Apex가 프로필을 반영하여 응답하도록 함(AGENTS.md 목표 아키텍처 #4).
  * 엔드포인트: POST /api/apex-chat
  *
  * Request body:
- *   { message: string, conversation_id: string | null }
+ *   { message: string, conversation_id: string | null, inputs?: object }
  *
  * Response:
  *   { answer: string, conversation_id: string }
@@ -32,15 +34,29 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: "DIFY_API_KEY가 설정되지 않았습니다." });
   }
 
-  const { message, conversation_id } = req.body;
+  const { message, conversation_id, inputs } = req.body;
 
   if (!message || typeof message !== "string" || message.trim() === "") {
     return res.status(400).json({ error: "message가 비어있습니다." });
   }
 
+  const endpoint = "https://api.dify.ai/v1/chat-messages";
+
+  const callDify = async (requestBody) =>
+    fetch(endpoint, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify(requestBody),
+    });
+
   try {
     const body = {
-      inputs: {},
+      // 최신 Pulse Profile 컨텍스트(이름/취침시간/시급/오늘 원장/요약 등).
+      // Dify 앱의 변수와 매칭됨. 없으면 빈 객체.
+      inputs: inputs && typeof inputs === "object" ? inputs : {},
       query: message.trim(),
       response_mode: "blocking", // 스트리밍 없이 완전한 응답 한 번에 받기
       user: "pulse-user",        // Dify 쪽 사용자 식별자 (고정값 OK)
@@ -51,25 +67,29 @@ export default async function handler(req, res) {
       body.conversation_id = conversation_id.trim();
     }
 
-    const difyRes = await fetch("https://api.dify.ai/v1/chat-messages", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${apiKey}`,
-      },
-      body: JSON.stringify(body),
-    });
+    let difyRes = await callDify(body);
+    let text = await difyRes.text();
+
+    // conversation_id가 만료/삭제된 경우 새 대화로 재시도 (thePulse와 동일 동작)
+    if (
+      difyRes.status === 404 &&
+      text.includes("Conversation Not Exists") &&
+      body.conversation_id
+    ) {
+      delete body.conversation_id;
+      difyRes = await callDify(body);
+      text = await difyRes.text();
+    }
 
     if (!difyRes.ok) {
-      const errText = await difyRes.text();
-      console.error("Dify API 오류:", difyRes.status, errText);
+      console.error("Dify API 오류:", difyRes.status, text.slice(0, 300));
       return res.status(difyRes.status).json({
         error: `Dify API 오류 (${difyRes.status})`,
-        detail: errText,
+        detail: text.slice(0, 300),
       });
     }
 
-    const data = await difyRes.json();
+    const data = JSON.parse(text);
 
     return res.status(200).json({
       answer: data.answer || "",
