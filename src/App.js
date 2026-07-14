@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import Chart from "chart.js/auto";
+import html2canvas from "html2canvas";
+import SealShareCard from "./components/SealShareCard";
 import {
   Sparkles,
   Plus,
@@ -660,6 +662,9 @@ const App = () => {
   const [tonightStep, setTonightStep] = useState("intro"); // "intro" | "chat" | "draft" | "sealed"
   const [pulseDraft, setPulseDraft] = useState(null);       // { date, events, affirmation, daily_affirmation, investment, note, source } | null
   const [draftRawText, setDraftRawText] = useState("");     // 사용자가 붙여넣은 원본 텍스트 (디버깅용)
+  // [T5] 방금 봉인한 Seal 요약 — sealed 화면의 공유 카드 렌더/캡처용
+  const [lastSealSummary, setLastSealSummary] = useState(null); // { entries, total, affirmation } | null
+  const sealCardRef = useRef(null);
   // [Tonight v2] Dify 대화 연속성 — Supabase에 저쥐/불러오기
   const [apexConversationId, setApexConversationId] = useState(null);
   // [T3] Apex 장기기억 요약 — pulse_data.recent_summary 로 저장/복원, 채팅 컨텍스트로 주입
@@ -1678,6 +1683,8 @@ const handleSealPulse = () => {
 
   // visions[activeLevel].progressAsset 업데이트 (Milestone/Stream 정확성 유지)
   const totalAmount = newEntries.reduce((acc, e) => acc + e.amount, 0);
+  // [T5] sealed 화면 공유 카드용 요약 저장
+  setLastSealSummary({ entries: newEntries, total: totalAmount, affirmation: sealAffirmation });
   if (visions[activeLevel]) {
     updateVision(activeLevel, {
       progressAsset: (visions[activeLevel].progressAsset || 0) + totalAmount,
@@ -1692,6 +1699,39 @@ const handleSealPulse = () => {
     showToast("🌙 오늘의 Pulse가 봉인됐습니다.");
   }
 };
+
+  // [T5] Seal 공유 카드 → 이미지 공유(navigator.share 파일) 또는 PNG 다운로드
+  const handleShareSeal = async () => {
+    if (!sealCardRef.current) return;
+    try {
+      const canvas = await html2canvas(sealCardRef.current, {
+        scale: 2,
+        useCORS: true,
+        backgroundColor: "#0F172A",
+        logging: false,
+      });
+      const dateTag = getRitualDay();
+      const blob = await new Promise((resolve) => canvas.toBlob(resolve, "image/png"));
+      if (blob && navigator.canShare) {
+        const file = new File([blob], `pulse-seal-${dateTag}.png`, { type: "image/png" });
+        if (navigator.canShare({ files: [file] })) {
+          try {
+            await navigator.share({ files: [file], title: "The Pulse — 오늘의 Seal" });
+            return;
+          } catch {
+            /* 사용자가 취소 → 다운로드로 폴백 */
+          }
+        }
+      }
+      const link = document.createElement("a");
+      link.download = `pulse-seal-${dateTag}.png`;
+      link.href = canvas.toDataURL("image/png");
+      link.click();
+    } catch (e) {
+      console.error("Seal 공유 오류:", e);
+      showToast("공유 이미지 생성에 실패했습니다.");
+    }
+  };
 
   const archiveVision = (lv) => {
     const lvGoal = mbGoalAmount / 5;
@@ -5368,14 +5408,42 @@ const nowX = getX(dataPoints[dataPoints.length - 1].date); // 📅 가로 위치
             <h2 className="text-4xl md:text-5xl font-black text-white uppercase italic tracking-tighter mb-4">
               오늘의 Pulse가<br/>봉인됐습니다.
             </h2>
-            <p className="text-slate-400 text-sm mb-12 leading-relaxed">
+            <p className="text-slate-400 text-sm mb-8 leading-relaxed">
               이 하루는 이제 당신의<br/>시스템 안에 남았습니다.<br/>바로 쉬어도 됩니다.
             </p>
+
+            {/* [T5] Seal 공유 카드 (오프스크린 캡처용) + 이미지 공유 버튼 */}
+            {lastSealSummary && (
+              <>
+                <SealShareCard
+                  ref={sealCardRef}
+                  userName={userName}
+                  currency={currency}
+                  entries={lastSealSummary.entries}
+                  total={lastSealSummary.total}
+                  streak={currentStreak}
+                  dateStr={new Date().toLocaleDateString("ko-KR", {
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
+                  })}
+                  weekday={new Date().toLocaleDateString("ko-KR", { weekday: "long" })}
+                />
+                <button
+                  onClick={handleShareSeal}
+                  className="mb-4 bg-white/5 hover:bg-white/10 border border-amber-500/30 text-amber-300 px-8 py-4 rounded-2xl font-black text-xs uppercase tracking-widest transition-all active:scale-95"
+                >
+                  ↗ 오늘의 Seal 이미지로 공유
+                </button>
+              </>
+            )}
+
             <button
               onClick={() => {
                 setTonightStep("intro");
                 setPulseDraft(null);
                 setDraftRawText("");
+                setLastSealSummary(null);
               }}
               className="bg-amber-600 hover:bg-amber-500 text-white px-10 py-5 rounded-2xl font-black text-xs uppercase tracking-widest transition-all active:scale-95"
             >
