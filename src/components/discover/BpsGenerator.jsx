@@ -115,13 +115,6 @@ const BpsGenerator = ({
     setPhase("loading");
     setErrorMsg("");
 
-    const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
-    if (!apiKey) {
-      setErrorMsg("API 키가 설정되지 않았습니다. .env.local의 VITE_OPENAI_API_KEY를 확인해주세요.");
-      setPhase("error");
-      return;
-    }
-
     const { systemPrompt, userPrompt } = buildPrompt(
       vakProfile,
       tciQuickProfile,
@@ -131,14 +124,13 @@ const BpsGenerator = ({
     );
 
     try {
-      const res = await fetch("https://api.openai.com/v1/chat/completions", {
+      // OpenAI 키는 서버(api/generate.js)에서만 사용 — 프론트 노출 방지
+      const res = await fetch("/api/generate", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${apiKey}`,
         },
         body: JSON.stringify({
-          model: "gpt-4o-mini",
           temperature: 0.8,
           messages: [
             { role: "system", content: systemPrompt },
@@ -148,12 +140,12 @@ const BpsGenerator = ({
       });
 
       if (!res.ok) {
-        const err = await res.json();
-        throw new Error(err.error?.message || `HTTP ${res.status}`);
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error || `HTTP ${res.status}`);
       }
 
       const data = await res.json();
-      const raw = data.choices?.[0]?.message?.content ?? "";
+      const raw = data.content ?? "";
       const parsed = parseJsonResponse(raw);
 
       setBps({

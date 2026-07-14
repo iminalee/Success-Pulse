@@ -1006,8 +1006,6 @@ const App = () => {
   // [옵션 1] Gemini 무료 (안정적인 gemini-pro 모델 사용)
   // [최종] OpenAI (ChatGPT) 연동 함수 (VAK 최적화 적용)
   const generateImmersionScript = async () => {
-    // 🔴 회원님이 주신 OpenAI 키를 적용했습니다.
-    const OPENAI_API_KEY = import.meta.env.VITE_OPENAI_API_KEY;
     if (!visions[activeLevel]?.title) {
       return showToast("비전 제목이 비어있습니다. 제목을 먼저 입력해주세요.");
     }
@@ -1020,25 +1018,23 @@ const App = () => {
     const k = vakProfile.kPercent;
 
     try {
-      const response = await fetch(
-        "https://api.openai.com/v1/chat/completions",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${OPENAI_API_KEY}`,
-          },
-          body: JSON.stringify({
-            model: "gpt-4o-mini", // 빠르고 저렴하고 똑똑한 최신 모델
-            messages: [
-              {
-                role: "system",
-                content:
-                  "너는 세계 최고의 NLP(신경언어프로그래밍) 전문가이자 동기부여 연설가야. 사용자의 감각 선호도(VAK)에 맞춰 그가 설정한 목표의 정체성에 맞게 생생한 미래 기억을 심어주는 역할을 해.",
-              },
-              {
-                role: "user",
-                content: `
+      // OpenAI 키는 서버(api/generate.js)에서만 사용 — 프론트 노출 방지
+      const response = await fetch("/api/generate", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          temperature: 0.7,
+          messages: [
+            {
+              role: "system",
+              content:
+                "너는 세계 최고의 NLP(신경언어프로그래밍) 전문가이자 동기부여 연설가야. 사용자의 감각 선호도(VAK)에 맞춰 그가 설정한 목표의 정체성에 맞게 생생한 미래 기억을 심어주는 역할을 해.",
+            },
+            {
+              role: "user",
+              content: `
               [목표 정보]
               - 목표: '${visions[activeLevel]?.title}'
               - 단계: '${levelMap[activeLevel]}'
@@ -1056,22 +1052,20 @@ const App = () => {
               2. 목표를 이룬 사람으로서
               3. 반드시 "나는 ~한다", "나는 ~를 느낀다" 처럼 확신에 찬 현재형 문장으로 끝맺을 것.
             `,
-              },
-            ],
-            temperature: 0.7,
-          }),
-        }
-      );
+            },
+          ],
+        }),
+      });
 
       const data = await response.json();
 
       // 에러 처리
       if (data.error) {
-        throw new Error(data.error.message);
+        throw new Error(data.error);
       }
 
-      if (data.choices && data.choices[0]) {
-        const script = data.choices[0].message.content;
+      if (data.content) {
+        const script = data.content;
         updateVision(activeLevel, { immersionScript: script });
         showToast("✨ OpenAI가 VAK 맞춤형 시나리오를 작성했습니다.");
       }
