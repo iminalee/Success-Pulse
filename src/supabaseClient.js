@@ -1,8 +1,16 @@
 import { createClient } from "@supabase/supabase-js";
 
-const supabaseUrl = "https://ihhfgoqpsubjdqlytzvs.supabase.co"; // 이미지에 있던 URL
-const supabaseAnonKey =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImloaGZnb3Fwc3ViamRxbHl0enZzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjcxMDYxMDEsImV4cCI6MjA4MjY4MjEwMX0.1ZtWo4LiiOOJIFyKyvhPNXFwrvUgGeMTKTNp39kz61M"; // 이미지에 있던 Key
+// Vite 환경변수 (VITE_ 접두어 필수).
+// 로컬은 .env.local, 배포는 Vercel 프로젝트 환경변수에 설정.
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+
+if (!supabaseUrl || !supabaseAnonKey) {
+  // env 미설정 시 원인을 명확히 알림 (createClient가 불명확하게 실패하는 것 방지)
+  console.error(
+    "[supabaseClient] VITE_SUPABASE_URL / VITE_SUPABASE_ANON_KEY 환경변수가 없습니다. .env.local(로컬) 또는 Vercel 설정에 추가해주세요."
+  );
+}
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {

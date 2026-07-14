@@ -115,9 +115,9 @@ const BpsGenerator = ({
     setPhase("loading");
     setErrorMsg("");
 
-    const apiKey = process.env.REACT_APP_OPENAI_API_KEY;
+    const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
     if (!apiKey) {
-      setErrorMsg("API 키가 설정되지 않았습니다. .env 파일의 REACT_APP_OPENAI_API_KEY를 확인해주세요.");
+      setErrorMsg("API 키가 설정되지 않았습니다. .env.local의 VITE_OPENAI_API_KEY를 확인해주세요.");
       setPhase("error");
       return;
     }

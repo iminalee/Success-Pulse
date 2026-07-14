@@ -1007,7 +1007,7 @@ const App = () => {
   // [최종] OpenAI (ChatGPT) 연동 함수 (VAK 최적화 적용)
   const generateImmersionScript = async () => {
     // 🔴 회원님이 주신 OpenAI 키를 적용했습니다.
-    const OPENAI_API_KEY = process.env.REACT_APP_OPENAI_API_KEY;
+    const OPENAI_API_KEY = import.meta.env.VITE_OPENAI_API_KEY;
     if (!visions[activeLevel]?.title) {
       return showToast("비전 제목이 비어있습니다. 제목을 먼저 입력해주세요.");
     }
