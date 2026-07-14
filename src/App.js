@@ -40,6 +40,7 @@ import {
 import { supabase } from "./supabaseClient";
 import showToast from "./utils/toast";
 import { normalizeTciProfile, normalizeVakProfile } from "./utils/pulseProfile";
+import { diagnoseTargetDate } from "./utils/mentalBank";
 import AutoTextarea from "./components/AutoTextarea";
 import NavBtn from "./components/NavBtn";
 import ProfileResultCard from "./components/ProfileResultCard";
@@ -503,6 +504,10 @@ const App = () => {
   const [userName, setUserName] = useState("");
   const [targetDate, setTargetDate] = useState("2026-12-31");
   const [annualIncome, setAnnualIncome] = useState(0);
+  // [T4] 실행 페이스 진단 — 하루 시간 × 주 실천일 → 목표일 현실성(A/B/C)
+  const [dailyCommitHours, setDailyCommitHours] = useState(2);
+  const [weeklyCommitDays, setWeeklyCommitDays] = useState(5);
+  const [requiredHours, setRequiredHours] = useState(500);
   const [currentAsset, setCurrentAsset] = useState(0);
   const [ledger, setLedger] = useState([]);
   const [signature, setSignature] = useState("");
@@ -730,6 +735,9 @@ const App = () => {
             if (data.currency) setCurrency(data.currency);
             if (data.annual_income) setAnnualIncome(data.annual_income);
             if (data.target_date) setTargetDate(data.target_date);
+            if (data.daily_commit_hours != null) setDailyCommitHours(data.daily_commit_hours);
+            if (data.weekly_commit_days != null) setWeeklyCommitDays(data.weekly_commit_days);
+            if (data.required_hours != null) setRequiredHours(data.required_hours);
             if (data.ledger) setLedger(data.ledger);
             // [수정] 통째로 교체하지 않고 기본 구조와 병합 — 레벨 누락 시 입력창이
             // uncontrolled로 바뀌어 이전 레벨 값이 화면에 남는 버그 방지
@@ -820,6 +828,9 @@ const App = () => {
             if (data.currency) setCurrency(data.currency);
             if (data.annual_income) setAnnualIncome(data.annual_income);
             if (data.target_date) setTargetDate(data.target_date);
+            if (data.daily_commit_hours != null) setDailyCommitHours(data.daily_commit_hours);
+            if (data.weekly_commit_days != null) setWeeklyCommitDays(data.weekly_commit_days);
+            if (data.required_hours != null) setRequiredHours(data.required_hours);
             if (data.ledger) setLedger(data.ledger);
             // [수정] 통째로 교체하지 않고 기본 구조와 병합 — 레벨 누락 시 입력창이
             // uncontrolled로 바뀌어 이전 레벨 값이 화면에 남는 버그 방지
@@ -948,6 +959,9 @@ const App = () => {
         currency,
         annual_income: annualIncome,
         target_date: targetDate,
+        daily_commit_hours: dailyCommitHours,
+        weekly_commit_days: weeklyCommitDays,
+        required_hours: requiredHours,
         ledger,
         visions,
         bps_traits: bpsTraits,
@@ -978,6 +992,9 @@ const App = () => {
     currency,
     annualIncome,
     targetDate,
+    dailyCommitHours,
+    weeklyCommitDays,
+    requiredHours,
     ledger,
     visions,
     bpsTraits,
@@ -2500,6 +2517,99 @@ const handleSealPulse = () => {
                       signedDate ? "text-emerald-400 cursor-not-allowed" : "text-white"
                     }`}
                   />
+                </div>
+                {/* [T4] 실행 페이스 진단 — 하루 시간 × 주 실천일 → 목표일 현실성(A/B/C) */}
+                <div>
+                  <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-[0.12em] mb-2">
+                    Pace · 실행 페이스 진단
+                  </label>
+                  <div className="flex gap-4">
+                    <div className="flex-1">
+                      <span className="block text-[10px] text-slate-500 mb-1">하루 시간</span>
+                      <input
+                        type="number"
+                        min="0"
+                        step="0.5"
+                        value={dailyCommitHours}
+                        onChange={(e) => setDailyCommitHours(Number(e.target.value))}
+                        className="w-full bg-transparent border-0 border-b-2 border-emerald-400/30 focus:border-emerald-300 rounded-none px-1 pb-2 text-[15px] font-mono font-bold text-white text-right outline-none transition-colors"
+                      />
+                    </div>
+                    <div className="flex-1">
+                      <span className="block text-[10px] text-slate-500 mb-1">주 실천일</span>
+                      <input
+                        type="number"
+                        min="0"
+                        max="7"
+                        value={weeklyCommitDays}
+                        onChange={(e) => setWeeklyCommitDays(Number(e.target.value))}
+                        className="w-full bg-transparent border-0 border-b-2 border-emerald-400/30 focus:border-emerald-300 rounded-none px-1 pb-2 text-[15px] font-mono font-bold text-white text-right outline-none transition-colors"
+                      />
+                    </div>
+                    <div className="flex-1">
+                      <span className="block text-[10px] text-slate-500 mb-1">목표 총 시간</span>
+                      <input
+                        type="number"
+                        min="0"
+                        step="10"
+                        value={requiredHours}
+                        onChange={(e) => setRequiredHours(Number(e.target.value))}
+                        className="w-full bg-transparent border-0 border-b-2 border-emerald-400/30 focus:border-emerald-300 rounded-none px-1 pb-2 text-[15px] font-mono font-bold text-white text-right outline-none transition-colors"
+                      />
+                    </div>
+                  </div>
+                  {(() => {
+                    const dx = diagnoseTargetDate(
+                      requiredHours,
+                      dailyCommitHours,
+                      weeklyCommitDays,
+                      targetDate
+                    );
+                    if (!dx) {
+                      return (
+                        <p className="mt-3 text-[11px] text-slate-500 leading-relaxed">
+                          하루 시간·주 실천일·목표 시간을 입력하면 목표일 현실성을 진단합니다.
+                        </p>
+                      );
+                    }
+                    const estStr = dx.estimatedDate.toISOString().slice(0, 10);
+                    const cfg = {
+                      A: {
+                        label: "적정",
+                        color: "text-emerald-300",
+                        bg: "border-emerald-400/40",
+                        msg: "현재 페이스면 목표일에 맞게 도달합니다.",
+                      },
+                      B: {
+                        label: "빠듯",
+                        color: "text-rose-300",
+                        bg: "border-rose-400/40",
+                        msg: `현재 페이스면 목표일보다 약 ${Math.abs(dx.diffDays)}일 늦습니다. 하루 시간이나 주 실천일을 늘려보세요.`,
+                      },
+                      C: {
+                        label: "여유",
+                        color: "text-amber-300",
+                        bg: "border-amber-400/40",
+                        msg: `현재 페이스면 목표일보다 약 ${Math.abs(dx.diffDays)}일 빨리 도달합니다.`,
+                      },
+                    }[dx.case];
+                    return (
+                      <div className={`mt-3 rounded-xl border ${cfg.bg} bg-white/[0.03] p-3`}>
+                        <div className="flex items-center justify-between">
+                          <span className="text-[11px] text-slate-400 font-bold">예상 완료일</span>
+                          <span className="text-[13px] font-mono font-bold text-white">{estStr}</span>
+                        </div>
+                        <div className="flex items-start gap-2 mt-2">
+                          <span
+                            className={`shrink-0 text-[10px] font-black ${cfg.color} border ${cfg.bg} rounded-full px-2 py-0.5`}
+                          >
+                            {cfg.label}
+                          </span>
+                          <span className="text-[11px] text-slate-300 leading-relaxed">{cfg.msg}</span>
+                        </div>
+                      </div>
+                    );
+                  })()}
                 </div>
                 {/* 자동 계산 값 — 헤어라인 행 + AUTO 칩 */}
                 <div className="pt-1">
